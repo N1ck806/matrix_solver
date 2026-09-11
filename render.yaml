@@ -1,9 +1,3 @@
-databases:
-  - name: matrixlab-db
-    plan: free
-    databaseName: matrixlab
-    user: matrixlab
-
 services:
   - type: web
     plan: free
@@ -12,10 +6,6 @@ services:
     buildCommand: "./build.sh"
     startCommand: "gunicorn config.wsgi:application"
     envVars:
-      - key: DATABASE_URL
-        fromDatabase:
-          name: matrixlab-db
-          property: connectionString
       - key: DJANGO_SECRET_KEY
         generateValue: true
       - key: DJANGO_DEBUG
@@ -24,3 +14,5 @@ services:
         value: "3.11.9"
       - key: WEB_CONCURRENCY
         value: "2"
+      - key: DATABASE_URL
+        sync: false
