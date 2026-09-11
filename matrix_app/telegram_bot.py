@@ -4,6 +4,10 @@ Telegram-бот MatrixLab, встроенный в Django.
 Webhook работает в отдельном фоновом потоке с постоянным event loop —
 это критично, потому что aiogram-сессия привязана к loop'у и не может
 переживать его закрытие.
+
+ВАЖНО: Bot и Dispatcher создаются ВНУТРИ фонового loop'а, а не в
+главном потоке Django. Иначе aiohttp.ClientSession привязывается
+не к тому loop'у и запросы зависают.
 """
 from __future__ import annotations
 
@@ -23,11 +27,23 @@ from django.conf import settings
 
 logger = logging.getLogger("matrix_app.telegram_bot")
 
-_bot: Bot | None = None
-_dp: Dispatcher | None = None
 _loop: asyncio.AbstractEventLoop | None = None
 _thread: threading.Thread | None = None
+_bot: Bot | None = None
+_dp: Dispatcher | None = None
 _lock = threading.Lock()
+
+
+# =============================================================================
+# Фоновый event loop
+# =============================================================================
+
+async def _bootstrap() -> None:
+    """Создаём Bot и Dispatcher внутри фонового loop'а."""
+    global _bot, _dp
+    _bot = Bot(token=settings.BOT_TOKEN)
+    _dp = Dispatcher()
+    _dp.message.register(cmd_start, CommandStart())
 
 
 def _ensure_loop() -> asyncio.AbstractEventLoop:
@@ -42,6 +58,8 @@ def _ensure_loop() -> asyncio.AbstractEventLoop:
 
         def _runner() -> None:
             asyncio.set_event_loop(_loop)
+            # Инициализируем Bot и Dispatcher ВНУТРИ этого loop'а.
+            _loop.run_until_complete(_bootstrap())
             _loop.run_forever()
 
         _thread = threading.Thread(
@@ -55,19 +73,9 @@ def _ensure_loop() -> asyncio.AbstractEventLoop:
         return _loop
 
 
-def _ensure_bot() -> tuple[Bot, Dispatcher]:
-    """Ленивая инициализация бота и диспетчера."""
-    global _bot, _dp
-
-    if _bot is None:
-        _bot = Bot(token=settings.BOT_TOKEN)
-
-    if _dp is None:
-        _dp = Dispatcher()
-        _dp.message.register(cmd_start, CommandStart())
-
-    return _bot, _dp
-
+# =============================================================================
+# Обработчики
+# =============================================================================
 
 async def cmd_start(message: Message) -> None:
     """Обработчик /start — кнопка на сайт."""
@@ -88,33 +96,33 @@ async def cmd_start(message: Message) -> None:
     )
 
 
-async def _setup_webhook_async() -> None:
-    bot, _ = _ensure_bot()
-    url = (
-        f"{settings.SITE_URL.rstrip('/')}"
-        f"/telegram/webhook/{settings.WEBHOOK_SECRET}/"
-    )
-    await bot.set_webhook(url)
-    logger.info("Telegram webhook установлен: %s", url)
-
+# =============================================================================
+# Публичные функции (синхронные обёртки)
+# =============================================================================
 
 def setup_webhook() -> None:
-    """Синхронная обёртка для вызова из apps.py."""
+    """Установить webhook у Telegram."""
     loop = _ensure_loop()
-    future = asyncio.run_coroutine_threadsafe(_setup_webhook_async(), loop)
+
+    async def _set() -> None:
+        url = (
+            f"{settings.SITE_URL.rstrip('/')}"
+            f"/telegram/webhook/{settings.WEBHOOK_SECRET}/"
+        )
+        await _bot.set_webhook(url)
+        logger.info("Telegram webhook установлен: %s", url)
+
+    future = asyncio.run_coroutine_threadsafe(_set(), loop)
     future.result(timeout=15)
-
-
-async def _process_update_async(update_data: dict) -> None:
-    bot, dp = _ensure_bot()
-    update = Update.model_validate(update_data, context={"bot": bot})
-    await dp.feed_update(bot, update)
 
 
 def process_update(update_data: dict) -> None:
-    """Синхронная обёртка для вызова из Django-view."""
+    """Обработать один апдейт от Telegram."""
     loop = _ensure_loop()
-    future = asyncio.run_coroutine_threadsafe(
-        _process_update_async(update_data), loop
-    )
-    future.result(timeout=15)
+
+    async def _process() -> None:
+        update = Update.model_validate(update_data, context={"bot": _bot})
+        await _dp.feed_update(_bot, update)
+
+    future = asyncio.run_coroutine_threadsafe(_process(), loop)
+    future.result(timeout=30)
