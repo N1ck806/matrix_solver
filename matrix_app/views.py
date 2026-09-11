@@ -13,7 +13,6 @@ import json
 import logging
 from typing import Any
 
-from asgiref.sync import async_to_sync
 from django.conf import settings
 from django.contrib import messages
 from django.http import (
@@ -531,6 +530,7 @@ def about(request: HttpRequest) -> HttpResponse:
             "operations_count": len(list_operations()),
         },
     )
+
 
 # =============================================================================
 # Telegram webhook
