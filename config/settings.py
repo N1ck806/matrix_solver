@@ -83,19 +83,14 @@ def env_list(key: str, default: list[str]) -> list[str]:
 # 3. БЕЗОПАСНОСТЬ
 # =============================================================================
 
-# --- SECRET_KEY ---
 SECRET_KEY: str = env_str(
     "DJANGO_SECRET_KEY",
     env_str("SECRET_KEY", "django-insecure-matrixlab-local-dev-key"),
 )
 
-# --- DEBUG ---
-# На Render задаём DJANGO_DEBUG=False
 DEBUG: bool = env_bool("DJANGO_DEBUG", env_bool("DEBUG", default=True))
 
 # --- ALLOWED_HOSTS ---
-# Render автоматически подставляет RENDER_EXTERNAL_HOSTNAME.
-# Если он есть — добавляем в список.
 _extra_hosts: list[str] = []
 _render_host = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
 if _render_host:
@@ -242,18 +237,34 @@ TEMPLATES: list[dict] = [
 # =============================================================================
 # 8. БАЗА ДАННЫХ
 # =============================================================================
-# Render передаёт DATABASE_URL — используем его.
-# Локально без DATABASE_URL — SQLite.
+# Если DATABASE_URL задан (Render + PostgreSQL) — используем его.
+# Иначе — SQLite. Для SQLite sslmode НЕ передаём.
 # =============================================================================
 
-DATABASES: dict = {
-    "default": dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
-        conn_max_age=600,
-        conn_health_checks=True,
-        ssl_require=not DEBUG,
-    )
-}
+_DATABASE_URL: str = os.environ.get("DATABASE_URL", "")
+
+if _DATABASE_URL:
+    # PostgreSQL (Render) или другая СУБД
+    DATABASES: dict = {
+        "default": dj_database_url.parse(
+            _DATABASE_URL,
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
+    }
+else:
+    # SQLite — локально и как fallback
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": str(BASE_DIR / "db.sqlite3"),
+            "OPTIONS": {
+                "timeout": 20,
+            },
+            "ATOMIC_REQUESTS": False,
+            "CONN_MAX_AGE": 60,
+        }
+    }
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -308,7 +319,7 @@ STATICFILES_FINDERS: list[str] = [
 ]
 
 # Хранилище статики:
-# - DEBUG=True  → обычное, файлы читаются из STATICFILES_DIRS
+# - DEBUG=True  → обычное
 # - DEBUG=False → WhiteNoise CompressedManifest (хеши, gzip)
 if DEBUG:
     _static_backend = "django.contrib.staticfiles.storage.StaticFilesStorage"
