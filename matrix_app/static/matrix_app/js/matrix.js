@@ -1,646 +1,968 @@
 /* =============================================================================
    MatrixLab — matrix.js
    =============================================================================
-   Работа с интерактивными сетками ввода матриц и векторов.
+   Полностью переписанная версия.
+
+   Возможности:
+       • MatrixInput — сетка ячеек-кнопок (не <input>!) с кастомной клавиатурой;
+       • VectorInput — вектор-столбец (для СЛАУ);
+       • Цифровая клавиатура: тап по ячейке → popup 0–9, +/-, /, ., sqrt, pi, i;
+       • Тап вне клавиатуры → сохранить и закрыть;
+       • Клавиатура работает на ПК и на мобильном (на мобильном — снизу);
+       • Поддержка обоих стилей size-кнопок: data-size-incr-a-rows и data-size-incr="rows";
+       • Поддержка обоих стилей ручного ввода: data-a-rows и #rows-input;
+       • Динамические матрицы C, D, E… через <template id="matrix-template">;
+       • Работает и на calculator.html, и на operations.html.
 
    Структура:
-       1.  Класс MatrixInput
-       2.  Класс VectorInput
-       3.  Инициализация сеток
-       4.  Chip-кнопки (инструменты матрицы)
-       5.  Размерные контролы +/−
-       6.  Ручной ввод размеров
-       7.  Синхронизация вектора с матрицей
-       8.  Динамическое добавление/удаление матриц (chain)
-       9.  Инициализация модуля
+       1.  Константы
+       2.  Класс MatrixInput
+       3.  Класс VectorInput
+       4.  Цифровая клавиатура (DigitalKeyboard)
+       5.  Инициализация сеток
+       6.  Размерные контролы (+/−)
+       7.  Ручной ввод размеров
+       8.  Chip-кнопки (действия над матрицей)
+       9.  Синхронизация вектора с матрицей
+       10. Динамическое добавление/удаление матриц (chain)
+       11. Утилиты
+       12. Инициализация модуля
    ============================================================================= */
 (function () {
     'use strict';
 
-    const ML = window.MatrixLab;
-    if (!ML) return;
-
-    // =========================================================================
-    // 1. КЛАСС MatrixInput
-    // =========================================================================
-    class MatrixInput {
-        constructor(container, letter) {
-            this.el = container;
-            this.letter = (letter || 'a').toLowerCase();
-            this.rows = parseInt(container.dataset.rows || '3', 10);
-            this.cols = parseInt(container.dataset.cols || '3', 10);
-            this.inputs = [];
-            this._build();
-            this._bindEvents();
-        }
-
-        _build() {
-            this.el.innerHTML = '';
-            this.el.style.gridTemplateColumns = `repeat(${this.cols}, minmax(0, 1fr))`;
-            this.inputs = [];
-
-            for (let r = 0; r < this.rows; r++) {
-                const rowInputs = [];
-                for (let c = 0; c < this.cols; c++) {
-                    const input = document.createElement('input');
-                    input.type = 'text';
-                    input.autocomplete = 'off';
-                    input.spellcheck = false;
-                    input.setAttribute(
-                        'aria-label',
-                        `Элемент ${this.letter.toUpperCase()}${r + 1},${c + 1}`
-                    );
-                    input.dataset.row = String(r);
-                    input.dataset.col = String(c);
-                    this.el.appendChild(input);
-                    rowInputs.push(input);
-                }
-                this.inputs.push(rowInputs);
-            }
-            this._updateBadge();
-        }
-
-        _updateBadge() {
-            const card = this.el.closest('[data-matrix-card]');
-            if (!card) return;
-            const badge = card.querySelector(
-                `[data-matrix-shape-label="${this.letter}"]`
-            );
-            if (badge) badge.textContent = `${this.rows} × ${this.cols}`;
-        }
-
-        _bindEvents() {
-            this.el.addEventListener('keydown', (e) => {
-                const target = e.target;
-                if (!target.matches('input')) return;
-                const r = parseInt(target.dataset.row, 10);
-                const c = parseInt(target.dataset.col, 10);
-
-                let next = null;
-                switch (e.key) {
-                    case 'ArrowUp':    next = this._at(r - 1, c); break;
-                    case 'ArrowDown':  next = this._at(r + 1, c); break;
-                    case 'ArrowLeft':
-                        if (target.selectionStart === 0 && target.selectionEnd === 0)
-                            next = this._at(r, c - 1);
-                        break;
-                    case 'ArrowRight':
-                        if (target.selectionStart === target.value.length
-                            && target.selectionEnd === target.value.length)
-                            next = this._at(r, c + 1);
-                        break;
-                    case 'Enter':
-                        next = this._at(r + 1, c) || this._at(0, c + 1);
-                        e.preventDefault();
-                        break;
-                }
-
-                if (next) {
-                    e.preventDefault();
-                    next.focus();
-                    next.select();
-                }
-            });
-
-            this.el.addEventListener('paste', (e) => {
-                const target = e.target;
-                if (!target.matches('input')) return;
-                const text = (e.clipboardData || window.clipboardData).getData('text');
-                if (!text) return;
-
-                const hasTableChars = text.includes('\t')
-                    || text.includes('\n')
-                    || text.includes(',')
-                    || text.includes(';');
-                if (!hasTableChars) return;
-
-                e.preventDefault();
-                const startRow = parseInt(target.dataset.row, 10);
-                const startCol = parseInt(target.dataset.col, 10);
-                this.pasteMatrix(text, startRow, startCol);
-            });
-        }
-
-        pasteMatrix(text, startRow, startCol) {
-            if (startRow === undefined) startRow = 0;
-            if (startCol === undefined) startCol = 0;
-
-            const rowsRaw = text.replace(/\r/g, '').split('\n').filter(function (x) {
-                return x.trim() !== '';
-            });
-
-            let rowList = rowsRaw;
-            if (rowsRaw.length === 1 && rowsRaw[0].includes(';')) {
-                rowList = rowsRaw[0].split(';');
-            }
-
-            let maxCols = 0;
-            const parsed = rowList.map(function (line) {
-                const cells = line.split(/\t|,|;/).map(function (x) {
-                    return x.trim();
-                });
-                if (cells.length > maxCols) maxCols = cells.length;
-                return cells;
-            });
-
-            const neededRows = Math.max(this.rows, startRow + parsed.length);
-            const neededCols = Math.max(this.cols, startCol + maxCols);
-            if (neededRows !== this.rows || neededCols !== this.cols) {
-                this.setSize(neededRows, neededCols, { preserve: true });
-            }
-
-            const self = this;
-            parsed.forEach(function (row, dr) {
-                row.forEach(function (val, dc) {
-                    const input = self._at(startRow + dr, startCol + dc);
-                    if (input) input.value = val;
-                });
-            });
-        }
-
-        _at(r, c) {
-            if (r < 0 || r >= this.rows) return null;
-            if (c < 0 || c >= this.cols) return null;
-            return this.inputs[r][c];
-        }
-
-        setSize(rows, cols, opts) {
-            opts = opts || {};
-            const preserve = opts.preserve !== false;
-
-            rows = Math.max(1, Math.min(rows, ML.maxRows));
-            cols = Math.max(1, Math.min(cols, ML.maxCols));
-
-            if (rows === this.rows && cols === this.cols) return;
-
-            const oldValues = preserve ? this.read() : null;
-
-            this.rows = rows;
-            this.cols = cols;
-            this.el.dataset.rows = String(rows);
-            this.el.dataset.cols = String(cols);
-            this._build();
-
-            if (oldValues) {
-                const rMax = Math.min(oldValues.length, rows);
-                for (let r = 0; r < rMax; r++) {
-                    const cMax = Math.min(oldValues[r].length, cols);
-                    for (let c = 0; c < cMax; c++) {
-                        this.inputs[r][c].value = oldValues[r][c];
-                    }
-                }
-            }
-            this._syncSizeInputs();
-        }
-
-        _syncSizeInputs() {
-            const card = this.el.closest('[data-matrix-card]');
-            if (!card) return;
-            const L = this.letter;
-
-            const rInp = card.querySelector(`[data-${L}-rows]`);
-            const cInp = card.querySelector(`[data-${L}-cols]`);
-            if (rInp) rInp.value = this.rows;
-            if (cInp && cInp !== rInp) cInp.value = this.cols;
-        }
-
-        makeSquare() {
-            const n = Math.max(this.rows, this.cols);
-            this.setSize(n, n);
-            ML.toast.info(
-                `Матрица ${this.letter.toUpperCase()} приведена к квадратной`,
-                `${n} × ${n}`
-            );
-            return this;
-        }
-
-        read() {
-            return this.inputs.map(function (row) {
-                return row.map(function (input) {
-                    return input.value.trim();
-                });
-            });
-        }
-
-        write(data) {
-            if (!Array.isArray(data)) return;
-            for (let r = 0; r < Math.min(data.length, this.rows); r++) {
-                const rowData = data[r];
-                if (!Array.isArray(rowData)) continue;
-                for (let c = 0; c < Math.min(rowData.length, this.cols); c++) {
-                    const val = rowData[c];
-                    this.inputs[r][c].value =
-                        (val === null || val === undefined) ? '' : String(val);
-                }
-            }
-        }
-
-        clear() {
-            this.inputs.forEach(function (row) {
-                row.forEach(function (inp) {
-                    inp.value = '';
-                    inp.classList.remove('has-error');
-                });
-            });
-        }
-
-        fillZero() {
-            this.inputs.forEach(function (row) {
-                row.forEach(function (inp) {
-                    inp.value = '0';
-                    inp.classList.remove('has-error');
-                });
-            });
-        }
-
-        fillIdentity() {
-            if (this.rows !== this.cols) this.makeSquare();
-            this.inputs.forEach(function (row, r) {
-                row.forEach(function (inp, c) {
-                    inp.value = r === c ? '1' : '0';
-                    inp.classList.remove('has-error');
-                });
-            });
-        }
-
-        fillRandom() {
-            this.inputs.forEach(function (row) {
-                row.forEach(function (inp) {
-                    inp.value = String(Math.floor(Math.random() * 19) - 9);
-                    inp.classList.remove('has-error');
-                });
-            });
-        }
-
-        transposeInPlace() {
-            const data = this.read();
-            const newRows = this.cols;
-            const newCols = this.rows;
-
-            this.rows = newRows;
-            this.cols = newCols;
-            this.el.dataset.rows = String(newRows);
-            this.el.dataset.cols = String(newCols);
-            this._build();
-
-            for (let r = 0; r < newRows; r++) {
-                for (let c = 0; c < newCols; c++) {
-                    this.inputs[r][c].value = data[c][r] || '';
-                }
-            }
-            this._syncSizeInputs();
-        }
-
-        isEmpty() {
-            return this.read().every(function (row) {
-                return row.every(function (v) {
-                    return v === '';
-                });
-            });
-        }
-
-        focusFirst() {
-            if (this.inputs[0] && this.inputs[0][0]) this.inputs[0][0].focus();
-        }
-
-        markError(positions) {
-            this.inputs.forEach(function (row) {
-                row.forEach(function (inp) {
-                    inp.classList.remove('has-error');
-                });
-            });
-            if (!Array.isArray(positions)) return;
-            const self = this;
-            positions.forEach(function (pos) {
-                const inp = self._at(pos[0], pos[1]);
-                if (inp) inp.classList.add('has-error');
-            });
-        }
+    var ML = window.MatrixLab;
+    if (!ML) {
+        console.error('[matrix.js] window.MatrixLab не найден.');
+        return;
     }
+
+    // =========================================================================
+    // 1. КОНСТАНТЫ
+    // =========================================================================
+
+    var LETTERS = 'abcdefghijklmnopqrstuvwxyz'.split('');
+
+    // Клавиши цифровой клавиатуры — в порядке отображения
+    var KEYPAD_KEYS = [
+        { k: '7', t: '7' },
+        { k: '8', t: '8' },
+        { k: '9', t: '9' },
+        { k: '/', t: '/' },
+        { k: '4', t: '4' },
+        { k: '5', t: '5' },
+        { k: '6', t: '6' },
+        { k: '*', t: '×' },
+        { k: '1', t: '1' },
+        { k: '2', t: '2' },
+        { k: '3', t: '3' },
+        { k: '-', t: '−' },
+        { k: '0', t: '0' },
+        { k: '.', t: '.' },
+        { k: 'pi', t: 'π' },
+        { k: '+', t: '+' },
+        { k: 'i', t: 'i' },
+        { k: 'sqrt', t: '√' },
+        { k: '(', t: '(' },
+        { k: ')', t: ')' },
+        { k: 'C', t: 'C', kind: 'danger' },
+        { k: 'back', t: '⌫', kind: 'warning' },
+        { k: 'done', t: 'Готово', kind: 'primary', wide: true }
+    ];
+
+    // =========================================================================
+    // 2. КЛАСС MatrixInput (сетка ячеек-кнопок)
+    // =========================================================================
+
+    function MatrixInput(container, letter) {
+        this.el = container;
+        this.letter = String(letter || 'a').toLowerCase();
+        this.rows = parseInt(container.dataset.rows || '3', 10);
+        this.cols = parseInt(container.dataset.cols || '3', 10);
+
+        // Двумерный массив значений (строк)
+        this.values = [];
+        // Двумерный массив DOM-элементов ячеек
+        this.cells = [];
+
+        this._build();
+        this._bindKeyboardNavigation();
+    }
+
+    MatrixInput.prototype._build = function () {
+        var self = this;
+        this.el.innerHTML = '';
+        this.el.style.gridTemplateColumns = 'repeat(' + this.cols + ', minmax(0, 1fr))';
+        this.el.classList.add('matrix-grid');
+
+        // Сохраняем старые значения, если они есть
+        var old = this.values.length ? this.values : null;
+
+        this.values = [];
+        this.cells = [];
+
+        for (var r = 0; r < this.rows; r++) {
+            var valueRow = [];
+            var cellRow = [];
+            for (var c = 0; c < this.cols; c++) {
+                var cell = document.createElement('button');
+                cell.type = 'button';
+                cell.className = 'matrix-cell';
+                cell.dataset.row = String(r);
+                cell.dataset.col = String(c);
+                cell.setAttribute(
+                    'aria-label',
+                    'Элемент ' + this.letter.toUpperCase() + (r + 1) + ',' + (c + 1)
+                );
+
+                var val = '';
+                if (old && old[r] && old[r][c] !== undefined) {
+                    val = old[r][c];
+                }
+
+                cell.textContent = val;
+                cell.dataset.value = val;
+
+                if (val !== '') cell.classList.add('is-filled');
+
+                this.el.appendChild(cell);
+                valueRow.push(val);
+                cellRow.push(cell);
+            }
+            this.values.push(valueRow);
+            this.cells.push(cellRow);
+        }
+
+        this._updateBadge();
+        this._updateSizeInputs();
+    };
+
+    MatrixInput.prototype._updateBadge = function () {
+        var card = this.el.closest('[data-matrix-card]');
+        if (!card) return;
+        var badge = card.querySelector('[data-matrix-shape-label="' + this.letter + '"]');
+        if (!badge) {
+            badge = card.querySelector('[data-matrix-shape-label]');
+        }
+        if (badge) {
+            badge.textContent = this.rows + ' × ' + this.cols;
+        }
+    };
+
+    MatrixInput.prototype._updateSizeInputs = function () {
+        var card = this.el.closest('[data-matrix-card]');
+        if (!card) return;
+        var L = this.letter;
+
+        // Новый стиль: data-a-rows / data-a-cols
+        var rNew = card.querySelector('[data-' + L + '-rows]');
+        var cNew = card.querySelector('[data-' + L + '-cols]');
+        if (rNew) rNew.value = this.rows;
+        if (cNew) cNew.value = this.cols;
+
+        // Старый стиль: #rows-input / #cols-input
+        if (L === 'a') {
+            var rOld = document.querySelector('#rows-input');
+            var cOld = document.querySelector('#cols-input');
+            if (rOld) rOld.value = this.rows;
+            if (cOld) cOld.value = this.cols;
+        }
+    };
+
+    MatrixInput.prototype._bindKeyboardNavigation = function () {
+        var self = this;
+        this.el.addEventListener('keydown', function (e) {
+            var target = e.target;
+            if (!target.classList.contains('matrix-cell')) return;
+            var r = parseInt(target.dataset.row, 10);
+            var c = parseInt(target.dataset.col, 10);
+            var next = null;
+
+            switch (e.key) {
+                case 'ArrowUp':    next = self._at(r - 1, c); break;
+                case 'ArrowDown':  next = self._at(r + 1, c); break;
+                case 'ArrowLeft':  next = self._at(r, c - 1); break;
+                case 'ArrowRight': next = self._at(r, c + 1); break;
+                case 'Enter':
+                    next = self._at(r + 1, c) || self._at(0, c + 1);
+                    e.preventDefault();
+                    break;
+                case 'Backspace':
+                    self.setValue(r, c, '');
+                    e.preventDefault();
+                    return;
+                case 'Delete':
+                    self.setValue(r, c, '');
+                    e.preventDefault();
+                    return;
+            }
+
+            if (next) {
+                e.preventDefault();
+                ML.digitalKeyboard.openFor(next, self);
+            }
+        });
+    };
+
+    MatrixInput.prototype._at = function (r, c) {
+        if (r < 0 || r >= this.rows) return null;
+        if (c < 0 || c >= this.cols) return null;
+        return this.cells[r][c];
+    };
+
+    MatrixInput.prototype.setValue = function (r, c, value) {
+        if (r < 0 || r >= this.rows) return;
+        if (c < 0 || c >= this.cols) return;
+        var cell = this.cells[r][c];
+        var v = String(value == null ? '' : value);
+        this.values[r][c] = v;
+        cell.dataset.value = v;
+        cell.textContent = v;
+        cell.classList.toggle('is-filled', v !== '');
+        this._dispatchChange();
+    };
+
+    MatrixInput.prototype.getValue = function (r, c) {
+        if (r < 0 || r >= this.rows) return '';
+        if (c < 0 || c >= this.cols) return '';
+        return this.values[r][c];
+    };
+
+    MatrixInput.prototype._dispatchChange = function () {
+        var ev = new CustomEvent('matrix:change', {
+            bubbles: true,
+            detail: { matrix: this }
+        });
+        this.el.dispatchEvent(ev);
+    };
+
+    MatrixInput.prototype.setSize = function (rows, cols, opts) {
+        opts = opts || {};
+        var preserve = opts.preserve !== false;
+
+        rows = Math.max(1, Math.min(rows, ML.maxRows));
+        cols = Math.max(1, Math.min(cols, ML.maxCols));
+
+        if (rows === this.rows && cols === this.cols) return;
+
+        // Сохраняем значения, если нужно
+        var oldValues = this.values.map(function (row) {
+            return row.slice();
+        });
+
+        this.rows = rows;
+        this.cols = cols;
+        this.el.dataset.rows = String(rows);
+        this.el.dataset.cols = String(cols);
+
+        // Принудительно строим новую сетку, значения восстановим вручную
+        var saved = preserve ? oldValues : null;
+        this.values = [];
+        this.cells = [];
+        this._build();
+
+        if (saved) {
+            var rMax = Math.min(saved.length, rows);
+            for (var r = 0; r < rMax; r++) {
+                var cMax = Math.min(saved[r].length, cols);
+                for (var c = 0; c < cMax; c++) {
+                    this.setValue(r, c, saved[r][c]);
+                }
+            }
+        }
+    };
+
+    MatrixInput.prototype.makeSquare = function () {
+        var n = Math.max(this.rows, this.cols);
+        this.setSize(n, n);
+        if (ML.toast) {
+            ML.toast.info(
+                'Матрица ' + this.letter.toUpperCase() + ' приведена к квадратной',
+                n + ' × ' + n
+            );
+        }
+        return this;
+    };
+
+    MatrixInput.prototype.read = function () {
+        return this.values.map(function (row) { return row.slice(); });
+    };
+
+    MatrixInput.prototype.write = function (data) {
+        if (!Array.isArray(data)) return;
+        var rMax = Math.min(data.length, this.rows);
+        for (var r = 0; r < rMax; r++) {
+            if (!Array.isArray(data[r])) continue;
+            var cMax = Math.min(data[r].length, this.cols);
+            for (var c = 0; c < cMax; c++) {
+                var v = data[r][c];
+                this.setValue(r, c, v == null ? '' : String(v));
+            }
+        }
+    };
+
+    MatrixInput.prototype.clear = function () {
+        for (var r = 0; r < this.rows; r++) {
+            for (var c = 0; c < this.cols; c++) {
+                this.setValue(r, c, '');
+            }
+        }
+    };
+
+    MatrixInput.prototype.fillZero = function () {
+        for (var r = 0; r < this.rows; r++) {
+            for (var c = 0; c < this.cols; c++) {
+                this.setValue(r, c, '0');
+            }
+        }
+    };
+
+    MatrixInput.prototype.fillIdentity = function () {
+        if (this.rows !== this.cols) this.makeSquare();
+        for (var r = 0; r < this.rows; r++) {
+            for (var c = 0; c < this.cols; c++) {
+                this.setValue(r, c, r === c ? '1' : '0');
+            }
+        }
+    };
+
+    MatrixInput.prototype.fillRandom = function () {
+        for (var r = 0; r < this.rows; r++) {
+            for (var c = 0; c < this.cols; c++) {
+                this.setValue(r, c, String(Math.floor(Math.random() * 19) - 9));
+            }
+        }
+    };
+
+    MatrixInput.prototype.transposeInPlace = function () {
+        var data = this.read();
+        var newRows = this.cols;
+        var newCols = this.rows;
+
+        this.rows = newRows;
+        this.cols = newCols;
+        this.el.dataset.rows = String(newRows);
+        this.el.dataset.cols = String(newCols);
+        this.values = [];
+        this.cells = [];
+        this._build();
+
+        for (var r = 0; r < newRows; r++) {
+            for (var c = 0; c < newCols; c++) {
+                this.setValue(r, c, (data[c] && data[c][r]) || '');
+            }
+        }
+    };
+
+    MatrixInput.prototype.isEmpty = function () {
+        for (var r = 0; r < this.rows; r++) {
+            for (var c = 0; c < this.cols; c++) {
+                if (this.values[r][c] !== '') return false;
+            }
+        }
+        return true;
+    };
+
+    MatrixInput.prototype.pasteMatrix = function (text, startRow, startCol) {
+        startRow = startRow || 0;
+        startCol = startCol || 0;
+
+        var rowsRaw = String(text).replace(/\r/g, '').split('\n').filter(function (x) {
+            return x.trim() !== '';
+        });
+        if (!rowsRaw.length) return;
+
+        var rowList = rowsRaw;
+        if (rowsRaw.length === 1 && rowsRaw[0].indexOf(';') !== -1) {
+            rowList = rowsRaw[0].split(';');
+        }
+
+        var maxCols = 0;
+        var parsed = rowList.map(function (line) {
+            var cells = line.split(/\t|,|;/).map(function (x) { return x.trim(); });
+            if (cells.length > maxCols) maxCols = cells.length;
+            return cells;
+        });
+
+        var neededRows = Math.max(this.rows, startRow + parsed.length);
+        var neededCols = Math.max(this.cols, startCol + maxCols);
+        if (neededRows !== this.rows || neededCols !== this.cols) {
+            this.setSize(neededRows, neededCols, { preserve: true });
+        }
+
+        for (var dr = 0; dr < parsed.length; dr++) {
+            for (var dc = 0; dc < parsed[dr].length; dc++) {
+                this.setValue(startRow + dr, startCol + dc, parsed[dr][dc]);
+            }
+        }
+    };
 
     ML.MatrixInput = MatrixInput;
     ML.matrixInputs = {};
 
     // =========================================================================
-    // 2. КЛАСС VectorInput
+    // 3. КЛАСС VectorInput
     // =========================================================================
-    class VectorInput {
-        constructor(container) {
-            this.el = container;
-            this.rows = parseInt(container.dataset.rows || '3', 10);
-            this.inputs = [];
-            this._build();
-        }
 
-        _build() {
-            this.el.innerHTML = '';
-            this.inputs = [];
-
-            for (let i = 0; i < this.rows; i++) {
-                const inp = document.createElement('input');
-                inp.type = 'text';
-                inp.autocomplete = 'off';
-                inp.spellcheck = false;
-                inp.setAttribute('aria-label', `b${i + 1}`);
-                inp.dataset.row = String(i);
-                this.el.appendChild(inp);
-                this.inputs.push(inp);
-            }
-            this._updateBadge();
-            this._bindEvents();
-        }
-
-        _updateBadge() {
-            const badge = this.el
-                .closest('.vector-input-card')
-                ?.querySelector('[data-vector-shape-label]');
-            if (badge) badge.textContent = `${this.rows} × 1`;
-        }
-
-        _bindEvents() {
-            this.el.addEventListener('keydown', (e) => {
-                const target = e.target;
-                if (!target.matches('input')) return;
-                const r = parseInt(target.dataset.row, 10);
-
-                if (e.key === 'ArrowDown' || e.key === 'Enter') {
-                    const next = this.inputs[r + 1];
-                    if (next) {
-                        e.preventDefault();
-                        next.focus();
-                        next.select();
-                    }
-                } else if (e.key === 'ArrowUp') {
-                    const prev = this.inputs[r - 1];
-                    if (prev) {
-                        e.preventDefault();
-                        prev.focus();
-                        prev.select();
-                    }
-                }
-            });
-
-            this.el.addEventListener('paste', (e) => {
-                const text = (e.clipboardData || window.clipboardData).getData('text');
-                if (!text) return;
-                const hasSeps = text.includes('\n')
-                    || text.includes('\t')
-                    || text.includes(',')
-                    || text.includes(';');
-                if (!hasSeps) return;
-
-                e.preventDefault();
-                const values = text.split(/[\n\t,;]+/).map(function (x) {
-                    return x.trim();
-                }).filter(function (x) { return x; });
-
-                const self = this;
-                values.forEach(function (v, i) {
-                    if (self.inputs[i]) self.inputs[i].value = v;
-                });
-            });
-        }
-
-        setSize(rows) {
-            rows = Math.max(1, Math.min(rows, ML.maxRows));
-            if (rows === this.rows) return;
-            const old = this.read();
-            this.rows = rows;
-            this.el.dataset.rows = String(rows);
-            this._build();
-            for (let i = 0; i < Math.min(old.length, rows); i++) {
-                this.inputs[i].value = old[i];
-            }
-        }
-
-        read() {
-            return this.inputs.map(function (i) {
-                return i.value.trim();
-            });
-        }
-
-        write(data) {
-            if (!Array.isArray(data)) return;
-            this.setSize(data.length);
-            const self = this;
-            data.forEach(function (v, i) {
-                if (self.inputs[i]) {
-                    self.inputs[i].value =
-                        (v === null || v === undefined) ? '' : String(v);
-                }
-            });
-        }
-
-        clear() {
-            this.inputs.forEach(function (i) {
-                i.value = '';
-            });
-        }
-
-        isEmpty() {
-            return this.read().every(function (v) {
-                return v === '';
-            });
-        }
-
-        focusFirst() {
-            if (this.inputs[0]) this.inputs[0].focus();
-        }
+    function VectorInput(container) {
+        this.el = container;
+        this.rows = parseInt(container.dataset.rows || '3', 10);
+        this.values = [];
+        this.cells = [];
+        this._build();
     }
+
+    VectorInput.prototype._build = function () {
+        this.el.innerHTML = '';
+        this.el.classList.add('vector-grid');
+        var old = this.values.length ? this.values.slice() : null;
+
+        this.values = [];
+        this.cells = [];
+
+        for (var i = 0; i < this.rows; i++) {
+            var cell = document.createElement('button');
+            cell.type = 'button';
+            cell.className = 'matrix-cell';
+            cell.dataset.row = String(i);
+            cell.dataset.col = '0';
+            cell.setAttribute('aria-label', 'b' + (i + 1));
+
+            var val = (old && old[i]) || '';
+            cell.textContent = val;
+            cell.dataset.value = val;
+            if (val !== '') cell.classList.add('is-filled');
+
+            this.el.appendChild(cell);
+            this.values.push(val);
+            this.cells.push(cell);
+        }
+    };
+
+    VectorInput.prototype.setValue = function (i, value) {
+        if (i < 0 || i >= this.rows) return;
+        var v = String(value == null ? '' : value);
+        this.values[i] = v;
+        var cell = this.cells[i];
+        cell.dataset.value = v;
+        cell.textContent = v;
+        cell.classList.toggle('is-filled', v !== '');
+    };
+
+    VectorInput.prototype.setSize = function (rows) {
+        rows = Math.max(1, Math.min(rows, ML.maxRows));
+        if (rows === this.rows) return;
+        var old = this.values.slice();
+        this.rows = rows;
+        this.el.dataset.rows = String(rows);
+        this.values = [];
+        this.cells = [];
+        this._build();
+        for (var i = 0; i < Math.min(old.length, rows); i++) {
+            this.setValue(i, old[i]);
+        }
+    };
+
+    VectorInput.prototype.read = function () {
+        return this.values.slice();
+    };
+
+    VectorInput.prototype.write = function (data) {
+        if (!Array.isArray(data)) return;
+        this.setSize(data.length);
+        for (var i = 0; i < data.length; i++) {
+            this.setValue(i, data[i] == null ? '' : String(data[i]));
+        }
+    };
+
+    VectorInput.prototype.clear = function () {
+        for (var i = 0; i < this.rows; i++) this.setValue(i, '');
+    };
+
+    VectorInput.prototype.isEmpty = function () {
+        return this.values.every(function (v) { return v === ''; });
+    };
 
     ML.VectorInput = VectorInput;
     ML.vectorInputs = {};
 
     // =========================================================================
-    // 3. ИНИЦИАЛИЗАЦИЯ СЕТОК
+    // 4. ЦИФРОВАЯ КЛАВИАТУРА
     // =========================================================================
+
+    var keyboardEl = null;
+    var currentCell = null;
+    var currentInput = null;
+    var currentKind = null;  // 'matrix' | 'vector'
+
+    function buildKeyboard() {
+        if (keyboardEl) return keyboardEl;
+
+        keyboardEl = document.createElement('div');
+        keyboardEl.className = 'digital-keyboard';
+        keyboardEl.setAttribute('role', 'dialog');
+        keyboardEl.setAttribute('aria-label', 'Цифровая клавиатура');
+        keyboardEl.hidden = true;
+
+        var grid = document.createElement('div');
+        grid.className = 'digital-keyboard__grid';
+
+        KEYPAD_KEYS.forEach(function (key) {
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'digital-keyboard__key';
+            btn.dataset.key = key.k;
+            if (key.kind) btn.classList.add('digital-keyboard__key--' + key.kind);
+            if (key.wide) btn.classList.add('digital-keyboard__key--wide');
+            btn.textContent = key.t;
+            grid.appendChild(btn);
+        });
+
+        keyboardEl.appendChild(grid);
+
+        // Превью текущего значения
+        var preview = document.createElement('div');
+        preview.className = 'digital-keyboard__preview';
+        preview.innerHTML = '<span class="digital-keyboard__preview-label">Значение:</span>' +
+                            '<span class="digital-keyboard__preview-value" data-keypad-preview>—</span>';
+        keyboardEl.appendChild(preview);
+
+        document.body.appendChild(keyboardEl);
+
+        // Обработка нажатий
+        keyboardEl.addEventListener('click', function (e) {
+            var btn = e.target.closest('[data-key]');
+            if (!btn) return;
+            var k = btn.dataset.key;
+
+            if (k === 'done') {
+                closeKeyboard();
+                return;
+            }
+            if (k === 'C') {
+                setCellValue('');
+                return;
+            }
+            if (k === 'back') {
+                var cur = getCellValue();
+                setCellValue(cur.slice(0, -1));
+                return;
+            }
+
+            var insert = k;
+            if (k === 'sqrt') insert = 'sqrt(';
+            if (k === 'pi') insert = 'pi';
+            if (k === '*') insert = '*';
+
+            var cur2 = getCellValue();
+            setCellValue(cur2 + insert);
+        });
+
+        return keyboardEl;
+    }
+
+    function getCellValue() {
+        if (!currentCell) return '';
+        return currentCell.dataset.value || '';
+    }
+
+    function setCellValue(v) {
+        if (!currentCell || !currentInput) return;
+        var r = parseInt(currentCell.dataset.row, 10);
+        var c = parseInt(currentCell.dataset.col, 10);
+        if (currentKind === 'matrix') {
+            currentInput.setValue(r, c, v);
+        } else {
+            currentInput.setValue(r, v);
+        }
+        var prev = keyboardEl.querySelector('[data-keypad-preview]');
+        if (prev) prev.textContent = v || '—';
+    }
+
+    function positionKeyboard(cell) {
+        if (!keyboardEl || !cell) return;
+        var rect = cell.getBoundingClientRect();
+        var kbRect = keyboardEl.getBoundingClientRect();
+        var vw = window.innerWidth;
+        var vh = window.innerHeight;
+        var margin = 12;
+
+        // На мобильном — фиксированная нижняя панель
+        if (vw <= 768) {
+            keyboardEl.classList.add('digital-keyboard--bottom');
+            keyboardEl.style.left = '';
+            keyboardEl.style.top = '';
+            keyboardEl.style.right = '';
+            keyboardEl.style.bottom = '';
+            return;
+        }
+
+        keyboardEl.classList.remove('digital-keyboard--bottom');
+
+        var left = rect.left + rect.width / 2 - kbRect.width / 2;
+        var top = rect.bottom + margin;
+
+        // Если снизу не влезает — открываем сверху
+        if (top + kbRect.height > vh - margin) {
+            top = rect.top - kbRect.height - margin;
+        }
+
+        if (left < margin) left = margin;
+        if (left + kbRect.width > vw - margin) {
+            left = vw - kbRect.width - margin;
+        }
+        if (top < margin) top = margin;
+
+        keyboardEl.style.left = left + 'px';
+        keyboardEl.style.top = top + 'px';
+        keyboardEl.style.right = '';
+        keyboardEl.style.bottom = '';
+    }
+
+    function openKeyboardFor(cell, input, kind) {
+        if (!keyboardEl) buildKeyboard();
+
+        currentCell = cell;
+        currentInput = input;
+        currentKind = kind || 'matrix';
+
+        keyboardEl.hidden = false;
+
+        // Позиционируем после отображения
+        requestAnimationFrame(function () {
+            positionKeyboard(cell);
+            keyboardEl.classList.add('is-visible');
+        });
+
+        // Подсветка активной ячейки
+        ML.$$('.matrix-cell.is-active').forEach(function (c) {
+            c.classList.remove('is-active');
+        });
+        cell.classList.add('is-active');
+
+        // Фокус на ячейку (для доступности)
+        try { cell.focus({ preventScroll: true }); } catch (e) { /* noop */ }
+
+        var prev = keyboardEl.querySelector('[data-keypad-preview]');
+        if (prev) prev.textContent = cell.dataset.value || '—';
+    }
+
+    function closeKeyboard() {
+        if (!keyboardEl || keyboardEl.hidden) return;
+        keyboardEl.classList.remove('is-visible');
+        var el = keyboardEl;
+        setTimeout(function () {
+            if (!el.classList.contains('is-visible')) el.hidden = true;
+        }, 160);
+        ML.$$('.matrix-cell.is-active').forEach(function (c) {
+            c.classList.remove('is-active');
+        });
+        currentCell = null;
+        currentInput = null;
+        currentKind = null;
+    }
+
+    function initKeyboard() {
+        buildKeyboard();
+
+        // Делегирование клика по ячейкам
+        document.addEventListener('click', function (e) {
+            var cell = e.target.closest('.matrix-cell');
+            if (cell) {
+                var grid = cell.closest('[data-matrix-input]');
+                var vecGrid = cell.closest('[data-vector-input]');
+                if (grid) {
+                    var mi = ML.matrixInputs[grid.id];
+                    if (mi) {
+                        openKeyboardFor(cell, mi, 'matrix');
+                        return;
+                    }
+                }
+                if (vecGrid) {
+                    var vi = ML.vectorInputs[vecGrid.id];
+                    if (vi) {
+                        openKeyboardFor(cell, vi, 'vector');
+                        return;
+                    }
+                }
+            }
+
+            // Клик вне клавиатуры и вне ячейки — закрыть
+            if (keyboardEl && !keyboardEl.hidden) {
+                if (!e.target.closest('.digital-keyboard') && !e.target.closest('.matrix-cell')) {
+                    closeKeyboard();
+                }
+            }
+        });
+
+        // Escape
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') closeKeyboard();
+        });
+
+        // Скролл/ресайз — перепозиционировать или закрыть
+        window.addEventListener('resize', function () {
+            if (keyboardEl && !keyboardEl.hidden && currentCell) {
+                positionKeyboard(currentCell);
+            }
+        });
+    }
+
+    ML.digitalKeyboard = {
+        openFor: function (cell, input) {
+            openKeyboardFor(cell, input, 'matrix');
+        },
+        openForVector: function (cell, input) {
+            openKeyboardFor(cell, input, 'vector');
+        },
+        close: closeKeyboard,
+    };
+
+    // =========================================================================
+    // 5. ИНИЦИАЛИЗАЦИЯ СЕТОК
+    // =========================================================================
+
     function initMatrixInputs() {
         ML.$$('[data-matrix-input]').forEach(function (el) {
-            const key = el.id || ('matrix-' + Object.keys(ML.matrixInputs).length);
-            const card = el.closest('[data-matrix-card]');
-            const letter = (card && card.dataset.matrixCard)
-                || el.dataset.matrixLetter
-                || 'a';
+            // Уникальный ключ: id или сгенерированный
+            var key = el.id || ('matrix-' + Object.keys(ML.matrixInputs).length);
+            el.id = key;
+            var card = el.closest('[data-matrix-card]');
+            var letter = (card && card.dataset.matrixCard) || el.dataset.matrixLetter || 'a';
             ML.matrixInputs[key] = new MatrixInput(el, letter);
         });
     }
 
     function initVectorInputs() {
         ML.$$('[data-vector-input]').forEach(function (el) {
-            const key = el.id || 'vector';
+            var key = el.id || 'vector';
+            el.id = key;
             ML.vectorInputs[key] = new VectorInput(el);
         });
     }
 
     ML.getMatrixByLetter = function (letter) {
-        const card = document.querySelector(`[data-matrix-card="${letter}"]`);
+        letter = String(letter || 'a').toLowerCase();
+        var card = document.querySelector('[data-matrix-card="' + letter + '"]');
+        if (!card) {
+            // fallback: первая карточка
+            if (letter === 'a') card = document.querySelector('[data-matrix-card]');
+        }
         if (!card) return null;
-        const grid = card.querySelector('[data-matrix-input]');
+        var grid = card.querySelector('[data-matrix-input]');
+        if (!grid) return null;
+        return ML.matrixInputs[grid.id] || null;
+    };
+
+    ML.getFirstMatrix = function () {
+        var grid = document.querySelector('[data-matrix-input]');
         if (!grid) return null;
         return ML.matrixInputs[grid.id] || null;
     };
 
     // =========================================================================
-    // 4. CHIP-КНОПКИ
+    // 6. РАЗМЕРНЫЕ КОНТРОЛЫ (+/−)
     // =========================================================================
-    function initMatrixTools() {
-        document.addEventListener('click', function (e) {
-            const btn = e.target.closest('[data-matrix-action]');
-            if (!btn) return;
 
-            const target = (btn.dataset.matrixTarget || 'a').toLowerCase();
-            const mi = ML.getMatrixByLetter(target);
-            if (!mi) return;
-
-            const action = btn.dataset.matrixAction;
-            const label = target.toUpperCase();
-
-            switch (action) {
-                case 'zero': mi.fillZero(); ML.toast.info(`${label}: нули`, ''); break;
-                case 'identity': mi.fillIdentity(); ML.toast.info(`${label}: единичная`, ''); break;
-                case 'random': mi.fillRandom(); ML.toast.info(`${label}: случайные значения`, ''); break;
-                case 'transpose': mi.transposeInPlace(); ML.toast.success(`${label} транспонирована`, ''); break;
-                case 'copy': {
-                    const text = mi.read().map(function (row) { return row.join('\t'); }).join('\n');
-                    ML.copy.text(text, `Матрица ${label} скопирована`);
-                    break;
-                }
-                case 'paste':
-                    navigator.clipboard.readText().then(function (text) {
-                        if (!text) { ML.toast.warning('Буфер пуст', ''); return; }
-                        mi.pasteMatrix(text, 0, 0);
-                        ML.toast.success(`Вставлено в ${label}`, '');
-                    }).catch(function () {
-                        ML.toast.warning('Доступ запрещён', 'Разрешите чтение буфера.');
-                    });
-                    break;
-                case 'square': mi.makeSquare(); break;
-                case 'clear': mi.clear(); ML.toast.info(`${label} очищена`, ''); break;
-                case 'remove': ML.chain.remove(target); break;
-            }
-        });
-    }
-
-    // =========================================================================
-    // 5. РАЗМЕРНЫЕ КОНТРОЛЫ +/−
-    // =========================================================================
+    /**
+     * Разбирает dataset кнопки и возвращает {direction, axis, target} или null.
+     * Поддерживает оба стиля:
+     *   • data-size-incr-a-rows  → dataset.sizeIncrARows
+     *   • data-size-incr="rows"  → dataset.sizeIncr = "rows" (target = 'a' по умолчанию)
+     */
     function parseSizeAttr(dataset) {
-        // Ищем ключи вида: sizeIncrXRows, sizeDecrXCols, sizeIncrARows, ...
-        // Возвращаем { direction, axis, target } или null.
-        let result = null;
-
-        Object.keys(dataset).forEach(function (key) {
-            let direction = null;
-            let rest = '';
-
-            if (key.indexOf('sizeIncr') === 0) {
-                direction = 'incr';
-                rest = key.slice('sizeIncr'.length);
-            } else if (key.indexOf('sizeDecr') === 0) {
-                direction = 'decr';
-                rest = key.slice('sizeDecr'.length);
-            } else {
-                return;
+        // Новый стиль: sizeIncrARows / sizeDecrBCols / ...
+        var keys = Object.keys(dataset);
+        for (var i = 0; i < keys.length; i++) {
+            var key = keys[i];
+            var m = key.match(/^size(Incr|Decr)([A-Z])(Rows|Cols)$/);
+            if (m) {
+                return {
+                    direction: m[1].toLowerCase(),
+                    target: m[2].toLowerCase(),
+                    axis: m[3] === 'Rows' ? 'rows' : 'cols'
+                };
             }
+        }
 
-            // rest = "ARows" | "BCols" | "XRows" | ...
-            const m = rest.match(/^([A-Z])(Rows|Cols)$/);
-            if (!m) return;
+        // Старый стиль: data-size-incr="rows" / data-size-decr="cols"
+        if (dataset.sizeIncr === 'rows' || dataset.sizeIncr === 'cols') {
+            return { direction: 'incr', target: 'a', axis: dataset.sizeIncr };
+        }
+        if (dataset.sizeDecr === 'rows' || dataset.sizeDecr === 'cols') {
+            return { direction: 'decr', target: 'a', axis: dataset.sizeDecr };
+        }
 
-            const targetLetter = m[1].toLowerCase();
-            const axis = m[2] === 'Rows' ? 'rows' : 'cols';
-
-            result = { direction, axis, target: targetLetter };
-        });
-
-        return result;
+        return null;
     }
 
     function handleSizeBtn(e) {
-        const btn = e.currentTarget;
-        const info = parseSizeAttr(btn.dataset);
+        var btn = e.currentTarget;
+        var info = parseSizeAttr(btn.dataset);
         if (!info) return;
 
-        const mi = ML.getMatrixByLetter(info.target);
+        var mi = ML.getMatrixByLetter(info.target);
         if (!mi) return;
 
-        let rows = mi.rows;
-        let cols = mi.cols;
-        if (info.axis === 'rows') rows += (info.direction === 'incr' ? 1 : -1);
-        else cols += (info.direction === 'incr' ? 1 : -1);
+        var rows = mi.rows;
+        var cols = mi.cols;
+
+        if (info.axis === 'rows') {
+            rows += (info.direction === 'incr' ? 1 : -1);
+        } else {
+            cols += (info.direction === 'incr' ? 1 : -1);
+        }
 
         mi.setSize(rows, cols);
         if (info.target === 'a') syncVectorToMatrix();
     }
 
     function initSizeControls() {
-        document.querySelectorAll('.size-btn, [data-size-incr], [data-size-decr]')
-            .forEach(function (btn) {
-                btn.addEventListener('click', handleSizeBtn);
-            });
+        // Перепривязываем при каждом вызове — на случай новых матриц
+        ML.$$('.size-btn, [data-size-incr], [data-size-decr]').forEach(function (btn) {
+            if (btn.dataset.sizeBound === '1') return;
+            btn.dataset.sizeBound = '1';
+            btn.addEventListener('click', handleSizeBtn);
+        });
     }
 
     // =========================================================================
-    // 6. РУЧНОЙ ВВОД РАЗМЕРОВ
+    // 7. РУЧНОЙ ВВОД РАЗМЕРОВ
     // =========================================================================
-    function initSizeInputs() {
-        const rInp = document.querySelector('[data-rows-input], #rows-input, [data-n-input]');
-        const cInp = document.querySelector('[data-cols-input], #cols-input, [data-n-input]');
 
-        function applyMain() {
-            const grid = document.querySelector('[data-matrix-card="a"] [data-matrix-input]');
-            if (!grid) return;
-            const mi = ML.matrixInputs[grid.id];
+    function bindSizeInputsForCard(card) {
+        if (!card || card.dataset.sizeInputsBound === '1') return;
+        card.dataset.sizeInputsBound = '1';
+
+        var letter = (card.dataset.matrixCard || 'a').toLowerCase();
+        var rInp = card.querySelector('[data-' + letter + '-rows]');
+        var cInp = card.querySelector('[data-' + letter + '-cols]');
+
+        function apply() {
+            var mi = ML.getMatrixByLetter(letter);
             if (!mi) return;
-
-            let rows = parseInt(rInp && rInp.value, 10);
-            let cols = cInp ? parseInt(cInp.value, 10) : rows;
-            if (isNaN(rows)) rows = mi.rows;
-            if (isNaN(cols)) cols = mi.cols;
-
-            if (rInp && cInp && rInp === cInp) cols = rows;
-
-            mi.setSize(rows, cols);
-            syncVectorToMatrix();
+            var r = parseInt(rInp && rInp.value, 10);
+            var c = parseInt(cInp && cInp.value, 10);
+            if (isNaN(r)) r = mi.rows;
+            if (isNaN(c)) c = mi.cols;
+            mi.setSize(r, c);
+            if (letter === 'a') syncVectorToMatrix();
         }
 
-        if (rInp) rInp.addEventListener('change', applyMain);
-        if (cInp && cInp !== rInp) cInp.addEventListener('change', applyMain);
+        if (rInp) rInp.addEventListener('change', apply);
+        if (cInp) cInp.addEventListener('change', apply);
+    }
 
-        // Поля A/B/C/... (страница операций)
-        ML.$$('[data-a-rows], [data-b-rows], [data-c-rows], [data-d-rows], [data-e-rows]')
-            .forEach(function (r) {
-                const letter = r.dataset.aRows !== undefined ? 'a'
-                    : r.dataset.bRows !== undefined ? 'b'
-                    : r.dataset.cRows !== undefined ? 'c'
-                    : r.dataset.dRows !== undefined ? 'd' : 'e';
-                const c = document.querySelector(`[data-${letter}-cols]`);
+    function initSizeInputs() {
+        // Новый стиль — data-a-rows / data-a-cols на карточке A
+        ML.$$('[data-matrix-card]').forEach(bindSizeInputsForCard);
 
-                function apply() {
-                    const mi = ML.getMatrixByLetter(letter);
-                    if (!mi) return;
-                    let rows = parseInt(r.value, 10);
-                    let cols = parseInt(c && c.value, 10);
-                    if (isNaN(rows)) rows = mi.rows;
-                    if (isNaN(cols)) cols = mi.cols;
-                    mi.setSize(rows, cols);
-                }
-
-                r.addEventListener('change', apply);
-                if (c) c.addEventListener('change', apply);
-            });
+        // Старый стиль — #rows-input / #cols-input (глобально на странице)
+        var rOld = document.querySelector('#rows-input');
+        var cOld = document.querySelector('#cols-input');
+        if (rOld || cOld) {
+            function applyOld() {
+                var mi = ML.getFirstMatrix();
+                if (!mi) return;
+                var r = parseInt(rOld && rOld.value, 10);
+                var c = parseInt(cOld && cOld.value, 10);
+                if (isNaN(r)) r = mi.rows;
+                if (isNaN(c)) c = mi.cols;
+                if (rOld === cOld) c = r;
+                mi.setSize(r, c);
+                syncVectorToMatrix();
+            }
+            if (rOld && rOld.dataset.sizeInputBound !== '1') {
+                rOld.dataset.sizeInputBound = '1';
+                rOld.addEventListener('change', applyOld);
+            }
+            if (cOld && cOld.dataset.sizeInputBound !== '1') {
+                cOld.dataset.sizeInputBound = '1';
+                cOld.addEventListener('change', applyOld);
+            }
+        }
     }
 
     // =========================================================================
-    // 7. СИНХРОНИЗАЦИЯ ВЕКТОРА С МАТРИЦЕЙ
+    // 8. CHIP-КНОПКИ
     // =========================================================================
+
+    function initMatrixTools() {
+        document.addEventListener('click', function (e) {
+            var btn = e.target.closest('[data-matrix-action]');
+            if (!btn) return;
+
+            var action = btn.dataset.matrixAction;
+            var target = (btn.dataset.matrixTarget || 'a').toLowerCase();
+            var mi = ML.getMatrixByLetter(target);
+
+            if (action === 'remove') {
+                if (ML.chain) ML.chain.remove(target);
+                return;
+            }
+
+            if (!mi) return;
+            var label = target.toUpperCase();
+
+            switch (action) {
+                case 'zero':
+                    mi.fillZero();
+                    if (ML.toast) ML.toast.info(label + ': нули', '');
+                    break;
+                case 'identity':
+                    mi.fillIdentity();
+                    if (ML.toast) ML.toast.info(label + ': единичная', '');
+                    break;
+                case 'random':
+                    mi.fillRandom();
+                    if (ML.toast) ML.toast.info(label + ': случайные значения', '');
+                    break;
+                case 'transpose':
+                    mi.transposeInPlace();
+                    if (ML.toast) ML.toast.success(label + ' транспонирована', '');
+                    break;
+                case 'copy':
+                    var text = mi.read().map(function (row) {
+                        return row.join('\t');
+                    }).join('\n');
+                    ML.copy.text(text, 'Матрица ' + label + ' скопирована');
+                    break;
+                case 'paste':
+                    if (navigator.clipboard && navigator.clipboard.readText) {
+                        navigator.clipboard.readText().then(function (t) {
+                            if (!t) { ML.toast.warning('Буфер пуст', ''); return; }
+                            mi.pasteMatrix(t, 0, 0);
+                            ML.toast.success('Вставлено в ' + label, '');
+                        }).catch(function () {
+                            ML.toast.warning('Доступ запрещён', 'Разрешите чтение буфера.');
+                        });
+                    } else {
+                        ML.toast.warning('Не поддерживается', 'Браузер не даёт доступ к буферу.');
+                    }
+                    break;
+                case 'square':
+                    mi.makeSquare();
+                    break;
+                case 'clear':
+                    mi.clear();
+                    if (ML.toast) ML.toast.info(label + ' очищена', '');
+                    break;
+            }
+        });
+    }
+
+    // =========================================================================
+    // 9. СИНХРОНИЗАЦИЯ ВЕКТОРА С МАТРИЦЕЙ
+    // =========================================================================
+
     function syncVectorToMatrix() {
-        const gridA = document.querySelector('[data-matrix-card="a"] [data-matrix-input]');
-        const vecEl = document.querySelector('[data-vector-input]');
+        var gridA = document.querySelector('[data-matrix-card="a"] [data-matrix-input]');
+        if (!gridA) gridA = document.querySelector('[data-matrix-input]');
+        var vecEl = document.querySelector('[data-vector-input]');
         if (!gridA || !vecEl) return;
 
-        const miA = ML.matrixInputs[gridA.id];
-        const vec = ML.vectorInputs[vecEl.id];
+        var miA = ML.matrixInputs[gridA.id];
+        var vec = ML.vectorInputs[vecEl.id];
         if (!miA || !vec) return;
 
         vec.setSize(miA.rows);
@@ -649,57 +971,35 @@
     ML.syncVectorToMatrix = syncVectorToMatrix;
 
     // =========================================================================
-    // 8. ДИНАМИЧЕСКОЕ ДОБАВЛЕНИЕ / УДАЛЕНИЕ МАТРИЦ
+    // 10. ДИНАМИЧЕСКОЕ ДОБАВЛЕНИЕ / УДАЛЕНИЕ МАТРИЦ
     // =========================================================================
-    ML.chain = {
-        _letters: 'abcdefghijklmnopqrstuvwxyz'.split(''),
 
+    ML.chain = {
         letters: function () {
-            return ML.$$('[data-matrix-card]').map(function (card) {
-                return card.dataset.matrixCard;
+            return ML.$$('[data-matrix-card]').map(function (c) {
+                return c.dataset.matrixCard;
             });
         },
 
         add: function () {
-            const cards = ML.$$('[data-matrix-card]');
-            const idx = cards.length;
-            if (idx >= this._letters.length) {
+            var cards = ML.$$('[data-matrix-card]');
+            var idx = cards.length;
+            if (idx >= LETTERS.length) {
                 ML.toast.warning('Слишком много матриц', 'Максимум 26.');
                 return null;
             }
-            const letter = this._letters[idx];
-            const tpl = document.getElementById('matrix-template');
+            var letter = LETTERS[idx];
+            var tpl = document.getElementById('matrix-template');
             if (!tpl) {
                 ML.toast.error('Шаблон не найден', '');
                 return null;
             }
 
-            const node = tpl.content.cloneNode(true);
-            const card = node.querySelector('[data-matrix-card]');
+            var node = tpl.content.cloneNode(true);
+            var card = node.querySelector('[data-matrix-card]');
             card.dataset.matrixCard = letter;
 
-            // Буквы
-            card.querySelectorAll('[data-matrix-letter]').forEach(function (el) {
-                el.textContent = letter.toUpperCase();
-            });
-            card.querySelectorAll('[data-matrix-label]').forEach(function (el) {
-                el.textContent = letter.toUpperCase();
-            });
-
-            // Сетка
-            card.querySelectorAll('[data-matrix-input]').forEach(function (el) {
-                el.dataset.matrixLetter = letter;
-                el.id = `matrix-${letter}-input`;
-                el.dataset.rows = '3';
-                el.dataset.cols = '3';
-            });
-
-            // Бейдж размера
-            card.querySelectorAll('[data-matrix-shape-label]').forEach(function (el) {
-                el.dataset.matrixShapeLabel = letter;
-            });
-
-            // Ручной ввод размеров: data-x-rows → data-c-rows
+            // Заменяем data-x-* на data-<letter>-*
             card.querySelectorAll('[data-x-rows]').forEach(function (el) {
                 el.dataset[letter + 'Rows'] = el.dataset.xRows;
                 delete el.dataset.xRows;
@@ -709,65 +1009,65 @@
                 delete el.dataset.xCols;
             });
 
-            // Кнопки +/−: sizeIncrXRows → sizeIncrCRows
-            card.querySelectorAll('[data-size-incr], [data-size-decr]').forEach(function (el) {
-                ['sizeIncrXRows', 'sizeIncrXCols', 'sizeDecrXRows', 'sizeDecrXCols']
-                    .forEach(function (k) {
-                        if (el.dataset[k] !== undefined) {
-                            const newKey = k.replace(
-                                'X',
-                                letter.charAt(0).toUpperCase() + letter.slice(1)
-                            );
-                            el.dataset[newKey] = el.dataset[k];
-                            delete el.dataset[k];
-                        }
-                    });
+            // data-size-incr-x-rows → data-size-incr-<letter>-rows
+            card.querySelectorAll('[data-size-incr-x-rows]').forEach(function (el) {
+                el.dataset['sizeIncr' + letter.toUpperCase() + 'Rows'] = '';
+                delete el.dataset.sizeIncrXRows;
+            });
+            card.querySelectorAll('[data-size-decr-x-rows]').forEach(function (el) {
+                el.dataset['sizeDecr' + letter.toUpperCase() + 'Rows'] = '';
+                delete el.dataset.sizeDecrXRows;
+            });
+            card.querySelectorAll('[data-size-incr-x-cols]').forEach(function (el) {
+                el.dataset['sizeIncr' + letter.toUpperCase() + 'Cols'] = '';
+                delete el.dataset.sizeIncrXCols;
+            });
+            card.querySelectorAll('[data-size-decr-x-cols]').forEach(function (el) {
+                el.dataset['sizeDecr' + letter.toUpperCase() + 'Cols'] = '';
+                delete el.dataset.sizeDecrXCols;
+            });
+
+            // Буквы
+            card.querySelectorAll('[data-matrix-letter], [data-matrix-label]').forEach(function (el) {
+                el.textContent = letter.toUpperCase();
+            });
+
+            // Бейдж размера
+            card.querySelectorAll('[data-matrix-shape-label]').forEach(function (el) {
+                el.dataset.matrixShapeLabel = letter;
             });
 
             // Chip-кнопки
             card.querySelectorAll('[data-matrix-action]').forEach(function (el) {
-                if (el.dataset.matrixTarget === '') {
+                if (el.dataset.matrixTarget === '' || el.dataset.matrixTarget === undefined) {
                     el.dataset.matrixTarget = letter;
                 }
             });
 
+            // Сетка — назначаем ID и обнуляем размеры
+            var grid = card.querySelector('[data-matrix-input]');
+            if (grid) {
+                grid.id = 'matrix-' + letter + '-input';
+                grid.dataset.rows = '3';
+                grid.dataset.cols = '3';
+                grid.dataset.matrixLetter = letter;
+            }
+
             // Вставка
-            const anchor = document.querySelector('[data-add-matrix]');
+            var anchor = document.querySelector('[data-add-matrix]');
             if (anchor && anchor.parentNode) {
                 anchor.parentNode.insertBefore(card, anchor);
             } else {
-                const cont = document.querySelector('[data-extra-matrices]');
+                var cont = document.querySelector('[data-extra-matrices]');
                 if (cont) cont.appendChild(card);
             }
 
-            // Инициализируем сетку
-            const grid = card.querySelector('[data-matrix-input]');
+            // Инициализация
             if (grid) {
                 ML.matrixInputs[grid.id] = new MatrixInput(grid, letter);
             }
-
-            // Привязываем кнопки +/− этой карточки
-            card.querySelectorAll('.size-btn, [data-size-incr], [data-size-decr]')
-                .forEach(function (btn) {
-                    btn.addEventListener('click', handleSizeBtn);
-                });
-
-            // Привязываем поля ручного ввода
-            const rInp = card.querySelector(`[data-${letter}-rows]`);
-            const cInp = card.querySelector(`[data-${letter}-cols]`);
-            if (rInp || cInp) {
-                function apply() {
-                    const mi = ML.getMatrixByLetter(letter);
-                    if (!mi) return;
-                    let r = parseInt(rInp && rInp.value, 10);
-                    let c = parseInt(cInp && cInp.value, 10);
-                    if (isNaN(r)) r = mi.rows;
-                    if (isNaN(c)) c = mi.cols;
-                    mi.setSize(r, c);
-                }
-                if (rInp) rInp.addEventListener('change', apply);
-                if (cInp) cInp.addEventListener('change', apply);
-            }
+            initSizeControls();
+            bindSizeInputsForCard(card);
 
             return letter;
         },
@@ -777,19 +1077,19 @@
                 ML.toast.warning('Матрицу A удалить нельзя', '');
                 return;
             }
-            const card = document.querySelector(`[data-matrix-card="${letter}"]`);
+            var card = document.querySelector('[data-matrix-card="' + letter + '"]');
             if (!card) return;
-
-            const grid = card.querySelector('[data-matrix-input]');
-            if (grid) delete ML.matrixInputs[grid.id];
-
+            var grid = card.querySelector('[data-matrix-input]');
+            if (grid && ML.matrixInputs[grid.id]) {
+                delete ML.matrixInputs[grid.id];
+            }
             card.remove();
-            ML.toast.info(`Матрица ${letter.toUpperCase()} удалена`, '');
+            ML.toast.info('Матрица ' + letter.toUpperCase() + ' удалена', '');
         },
     };
 
     function initAddMatrixButton() {
-        const btn = document.querySelector('[data-add-matrix]');
+        var btn = document.querySelector('[data-add-matrix]');
         if (!btn) return;
         btn.addEventListener('click', function () {
             ML.chain.add();
@@ -797,19 +1097,40 @@
     }
 
     // =========================================================================
-    // 9. ИНИЦИАЛИЗАЦИЯ МОДУЛЯ
+    // 11. УТИЛИТЫ
     // =========================================================================
+
+    ML.isMatrixEmpty = function (m) {
+        if (!Array.isArray(m) || !m.length) return true;
+        return m.every(function (row) {
+            return row.every(function (v) { return v === ''; });
+        });
+    };
+
+    ML.getAllMatrices = function () {
+        var result = [];
+        ML.$$('[data-matrix-card]').forEach(function (card) {
+            var letter = card.dataset.matrixCard;
+            var grid = card.querySelector('[data-matrix-input]');
+            if (!grid) return;
+            var mi = ML.matrixInputs[grid.id];
+            if (mi) result.push({ letter: letter, mi: mi, card: card });
+        });
+        return result;
+    };
+
+    // =========================================================================
+    // 12. ИНИЦИАЛИЗАЦИЯ МОДУЛЯ
+    // =========================================================================
+
     ML.initMatrixModule = function () {
-        const body = document.body;
-        ML.maxRows = parseInt(
-            body.dataset.maxRows || window.MATRIXLAB_MAX_ROWS || '10', 10
-        );
-        ML.maxCols = parseInt(
-            body.dataset.maxCols || window.MATRIXLAB_MAX_COLS || '10', 10
-        );
+        var body = document.body;
+        ML.maxRows = parseInt(body.dataset.maxRows || window.MATRIXLAB_MAX_ROWS || '10', 10);
+        ML.maxCols = parseInt(body.dataset.maxCols || window.MATRIXLAB_MAX_COLS || '10', 10);
 
         initMatrixInputs();
         initVectorInputs();
+        initKeyboard();
         initMatrixTools();
         initSizeControls();
         initSizeInputs();

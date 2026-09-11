@@ -7,6 +7,7 @@
 {% block extra_head %}
 {{ block.super }}
 <link rel="stylesheet" href="{% static 'matrix_app/css/calculator.css' %}">
+<link rel="stylesheet" href="{% static 'matrix_app/css/keyboard.css' %}">
 <style>
 /* =============================================================================
    Калькулятор — стили в стиле главной (единый фон, glassmorphism)
@@ -65,9 +66,7 @@ body::after {
 }
 
 /* --- Page head --- */
-.page-head {
-    background: transparent;
-}
+.page-head { background: transparent; }
 
 .page-title {
     font-size: clamp(28px, 3vw, 40px);
@@ -93,11 +92,32 @@ body::after {
 .breadcrumbs a:hover { color: var(--accent); }
 
 /* --- Рабочая область --- */
-.calc-workspace {
-    background: transparent;
+.calc-workspace { background: transparent; }
+
+.calc-workspace-grid {
+    display: grid;
+    grid-template-columns: 300px minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
 }
 
-/* --- Левая панель: карточки шагов (glassmorphism) --- */
+@media (max-width: 992px) {
+    .calc-workspace-grid { grid-template-columns: 1fr; }
+}
+
+/* --- Левая панель --- */
+.calc-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    position: sticky;
+    top: calc(var(--header-height, 64px) + 16px);
+}
+
+@media (max-width: 992px) {
+    .calc-panel { position: static; }
+}
+
 .calc-card {
     background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(12px);
@@ -107,6 +127,7 @@ body::after {
     box-shadow:
         0 1px 2px rgba(0, 0, 0, 0.03),
         0 4px 16px -4px rgba(99, 102, 241, 0.12);
+    padding: 20px;
     transition: box-shadow 320ms, border-color 320ms, background-color 320ms;
 }
 
@@ -343,7 +364,6 @@ body::after {
     color: var(--text-secondary);
 }
 
-/* Выбранная операция */
 .op-radio:checked ~ .op-item-body {
     background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(139, 92, 246, 0.08));
     border-color: rgba(99, 102, 241, 0.35);
@@ -399,13 +419,10 @@ body::after {
     margin: 6px 0 0;
 }
 
-/* --- Кнопки калькулятора --- */
+/* --- Кнопки --- */
 .calc-actions {
     display: grid;
     gap: 10px;
-    padding: 0;
-    background: transparent;
-    border: none;
 }
 
 .calc-actions .btn-primary {
@@ -476,6 +493,7 @@ body::after {
     font-size: 15px;
     border-radius: 10px;
     box-shadow: 0 6px 14px -4px rgba(99, 102, 241, 0.5);
+    flex-shrink: 0;
 }
 
 .matrix-input-title h2 {
@@ -500,79 +518,89 @@ body::after {
     display: flex;
     gap: 6px;
     flex-wrap: wrap;
+    align-items: center;
 }
 
-.matrix-input-tools .icon-btn {
+.mini-size {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 8px 12px;
-    background: rgba(255, 255, 255, 0.7);
-    border: 1px solid rgba(99, 102, 241, 0.15);
+    background: rgba(99, 102, 241, 0.06);
+    border: 1px solid rgba(99, 102, 241, 0.12);
     border-radius: 10px;
-    font-size: 12.5px;
+    padding: 4px 8px 4px 12px;
+}
+
+.mini-size > span {
+    font-size: 11.5px;
     font-weight: 600;
-    color: var(--text-primary);
+    color: var(--text-secondary);
+}
+
+.size-btn--mini {
+    width: 26px; height: 26px;
+    font-size: 15px;
+    background: #fff;
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 6px;
+    color: var(--accent);
     cursor: pointer;
     transition: all var(--t-fast);
 }
 
-[data-theme="dark"] .matrix-input-tools .icon-btn {
-    background: rgba(28, 32, 52, 0.7);
+[data-theme="dark"] .size-btn--mini { background: var(--bg-card); }
+
+.size-btn--mini:hover {
+    background: linear-gradient(135deg, #6366F1, #8B5CF6);
+    color: #fff;
+    border-color: transparent;
+    transform: translateY(-1px);
 }
 
-.matrix-input-tools .icon-btn:hover {
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
-    border-color: rgba(99, 102, 241, 0.35);
+.size-input--mini {
+    width: 38px;
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+.size-input--mini:focus {
+    outline: none;
     color: var(--accent);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px -3px rgba(99, 102, 241, 0.25);
 }
 
 .matrix-input-body {
     padding: 22px;
 }
 
+.matrix-scroll {
+    overflow-x: auto;
+    padding-bottom: 8px;
+}
+
+.matrix-scroll::-webkit-scrollbar {
+    height: 8px;
+}
+
+.matrix-scroll::-webkit-scrollbar-thumb {
+    background: rgba(99, 102, 241, 0.3);
+    border-radius: 4px;
+}
+
+/* .matrix-input-grid — задаётся JS, только базовые стили */
 .matrix-input-grid {
     display: grid;
     gap: 8px;
     justify-content: center;
     margin-bottom: 20px;
+    min-width: fit-content;
 }
 
-.matrix-input-grid input {
-    width: 60px; height: 46px;
-    text-align: center;
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--text-primary);
-    background: #fff;
-    border: 1.5px solid rgba(99, 102, 241, 0.15);
-    border-radius: 10px;
-    font-variant-numeric: tabular-nums;
-    transition: all var(--t-fast);
-}
-
-[data-theme="dark"] .matrix-input-grid input {
-    background: var(--bg-card);
-    border-color: rgba(129, 140, 248, 0.2);
-}
-
-.matrix-input-grid input:hover {
-    border-color: rgba(99, 102, 241, 0.35);
-}
-
-.matrix-input-grid input:focus {
-    outline: none;
-    background: #fff;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
-    transform: scale(1.05);
-    z-index: 1;
-    position: relative;
-}
-
-/* --- Футер матрицы: подсказки --- */
+/* --- Футер матрицы --- */
 .matrix-input-footer {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -582,6 +610,12 @@ body::after {
     border-top: 1px solid rgba(99, 102, 241, 0.1);
 }
 
+.matrix-input-footer-col {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
 .matrix-input-footer-title {
     display: block;
     font-size: 11px;
@@ -589,7 +623,6 @@ body::after {
     text-transform: uppercase;
     letter-spacing: 0.06em;
     color: var(--text-secondary);
-    margin-bottom: 8px;
 }
 
 .matrix-input-chips {
@@ -706,7 +739,7 @@ body::after {
     box-shadow: 0 4px 10px -2px rgba(99, 102, 241, 0.4);
 }
 
-/* --- Модалки: сделаем в стиле --- */
+/* --- Модалки --- */
 .modal-dialog {
     background: rgba(255, 255, 255, 0.98);
     backdrop-filter: blur(20px);
@@ -719,15 +752,10 @@ body::after {
     border-color: rgba(129, 140, 248, 0.25);
 }
 
-.modal-head {
-    border-bottom: 1px solid rgba(99, 102, 241, 0.1);
-}
+.modal-head { border-bottom: 1px solid rgba(99, 102, 241, 0.1); }
+.modal-foot { border-top: 1px solid rgba(99, 102, 241, 0.1); }
 
-.modal-foot {
-    border-top: 1px solid rgba(99, 102, 241, 0.1);
-}
-
-/* --- Примеры в модалке --- */
+/* --- Примеры --- */
 .examples-modal-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -782,19 +810,11 @@ body::after {
     line-height: 1.5;
 }
 
-/* --- Форм-сетка в модалке --- */
-.form-grid {
-    display: grid;
-    gap: 14px;
-}
+/* --- Форм-сетка --- */
+.form-grid { display: grid; gap: 14px; }
+.form-grid--2 { grid-template-columns: 1fr 1fr; }
 
-.form-grid--2 {
-    grid-template-columns: 1fr 1fr;
-}
-
-.field {
-    display: block;
-}
+.field { display: block; }
 
 .field-label {
     display: block;
@@ -843,34 +863,17 @@ body::after {
 }
 
 @media (max-width: 640px) {
-    .matrix-input-grid input {
-        width: 48px;
-        height: 40px;
-        font-size: 13px;
-    }
-
-    .matrix-input-tools .icon-btn span {
-        display: none;
-    }
-
-    .matrix-input-tools .icon-btn {
-        padding: 8px;
-    }
-
-    .form-grid--2 {
-        grid-template-columns: 1fr;
-    }
-
-    .op-item-sub {
-        display: none;
-    }
-
-    .matrix-input-title h2 {
-        font-size: 14px;
-    }
+    .matrix-input-tools .icon-btn span { display: none; }
+    .matrix-input-tools .icon-btn { padding: 8px; }
+    .form-grid--2 { grid-template-columns: 1fr; }
+    .op-item-sub { display: none; }
+    .matrix-input-title h2 { font-size: 14px; }
+    .matrix-input-card .matrix-input-head { flex-direction: column; align-items: flex-start; }
+    .matrix-input-tools { width: 100%; }
 }
 </style>
 {% endblock %}
+
 
 {% block content %}
 
@@ -932,32 +935,44 @@ body::after {
                 <div class="size-row">
                     <span class="size-row-label">Строк</span>
                     <div class="size-control">
-                        <button type="button" class="size-btn" data-size-decr="rows" aria-label="Уменьшить число строк">−</button>
+                        <button type="button"
+                                class="size-btn"
+                                data-size-decr-a-rows
+                                aria-label="Уменьшить число строк">−</button>
                         <input type="number"
-                               id="rows-input"
                                class="size-input"
                                value="3"
                                min="1"
                                max="{{ MAX_MATRIX_ROWS }}"
                                step="1"
+                               data-a-rows
                                aria-label="Количество строк">
-                        <button type="button" class="size-btn" data-size-incr="rows" aria-label="Увеличить число строк">+</button>
+                        <button type="button"
+                                class="size-btn"
+                                data-size-incr-a-rows
+                                aria-label="Увеличить число строк">+</button>
                     </div>
                 </div>
 
                 <div class="size-row">
                     <span class="size-row-label">Столбцов</span>
                     <div class="size-control">
-                        <button type="button" class="size-btn" data-size-decr="cols" aria-label="Уменьшить число столбцов">−</button>
+                        <button type="button"
+                                class="size-btn"
+                                data-size-decr-a-cols
+                                aria-label="Уменьшить число столбцов">−</button>
                         <input type="number"
-                               id="cols-input"
                                class="size-input"
                                value="3"
                                min="1"
                                max="{{ MAX_MATRIX_COLS }}"
                                step="1"
+                               data-a-cols
                                aria-label="Количество столбцов">
-                        <button type="button" class="size-btn" data-size-incr="cols" aria-label="Увеличить число столбцов">+</button>
+                        <button type="button"
+                                class="size-btn"
+                                data-size-incr-a-cols
+                                aria-label="Увеличить число столбцов">+</button>
                     </div>
                 </div>
 
@@ -1215,43 +1230,27 @@ body::after {
              ======================================================== -->
         <div class="calc-main">
 
-            <!-- Ввод матрицы -->
-            <div class="matrix-input-card">
+            <!-- Ввод матрицы A -->
+            <div class="matrix-input-card" data-matrix-card="a">
                 <div class="matrix-input-head">
                     <div class="matrix-input-title">
-                        <span class="matrix-letter" aria-hidden="true">A</span>
-                        <h2>Матрица A</h2>
-                        <span class="matrix-shape-badge" data-matrix-shape-label>3 × 3</span>
+                        <span class="matrix-letter" data-matrix-letter aria-hidden="true">A</span>
+                        <h2>Матрица <span data-matrix-label>A</span></h2>
+                        <span class="matrix-shape-badge" data-matrix-shape-label="a">3 × 3</span>
                     </div>
                     <div class="matrix-input-tools">
-                        <button type="button" class="icon-btn" data-matrix-action="zero" title="Заполнить нулями" aria-label="Нули">
-                            {% icon "zero-matrix" size=16 %}
-                            <span>Нули</span>
-                        </button>
-                        <button type="button" class="icon-btn" data-matrix-action="identity" title="Единичная матрица" aria-label="Единичная">
-                            {% icon "identity" size=16 %}
-                            <span>Единичная</span>
-                        </button>
-                        <button type="button" class="icon-btn" data-matrix-action="random" title="Случайные значения" aria-label="Случайная">
-                            {% icon "sparkles" size=16 %}
-                            <span>Случайная</span>
-                        </button>
-                        <button type="button" class="icon-btn" data-matrix-action="transpose" title="Транспонировать" aria-label="Транспонировать">
-                            {% icon "transpose" size=16 %}
-                            <span>Трансп.</span>
-                        </button>
-                        <button type="button" class="icon-btn" data-matrix-action="copy" title="Скопировать (TSV — для Excel)" aria-label="Копировать">
-                            {% icon "copy" size=16 %}
-                            <span>Копировать</span>
-                        </button>
-                        <button type="button" class="icon-btn" data-matrix-action="paste" title="Вставить из буфера обмена" aria-label="Вставить">
-                            {% icon "clipboard" size=16 %}
-                            <span>Вставить</span>
-                        </button>
-                        <button type="button" class="icon-btn" data-matrix-action="square" title="Привести к квадратной (n × n)" aria-label="Квадратная">
-                            {% icon "square-matrix" size=16 %}
-                            <span>Квадратная</span>
-                        </button>
+                        <div class="mini-size">
+                            <span>Строк</span>
+                            <button type="button" class="size-btn size-btn--mini" data-size-decr-a-rows aria-label="Уменьшить строки">−</button>
+                            <input type="number" class="size-input size-input--mini" value="3" min="1" max="{{ MAX_MATRIX_ROWS }}" data-a-rows aria-label="Строк">
+                            <button type="button" class="size-btn size-btn--mini" data-size-incr-a-rows aria-label="Увеличить строки">+</button>
+                        </div>
+                        <div class="mini-size">
+                            <span>Столбцов</span>
+                            <button type="button" class="size-btn size-btn--mini" data-size-decr-a-cols aria-label="Уменьшить столбцы">−</button>
+                            <input type="number" class="size-input size-input--mini" value="3" min="1" max="{{ MAX_MATRIX_COLS }}" data-a-cols aria-label="Столбцов">
+                            <button type="button" class="size-btn size-btn--mini" data-size-incr-a-cols aria-label="Увеличить столбцы">+</button>
+                        </div>
                     </div>
                 </div>
 
@@ -1274,12 +1273,12 @@ body::after {
                             </div>
                         </div>
                         <div class="matrix-input-footer-col">
-                            <span class="matrix-input-footer-title">Горячие клавиши</span>
+                            <span class="matrix-input-footer-title">Как вводить</span>
                             <div class="matrix-input-chips">
-                                <span class="chip"><kbd>Tab</kbd> следующая</span>
+                                <span class="chip">Тап по ячейке — клавиатура</span>
                                 <span class="chip"><kbd>←↑↓→</kbd> навигация</span>
                                 <span class="chip"><kbd>Ctrl+V</kbd> вставить</span>
-                                <span class="chip"><kbd>Enter</kbd> вниз</span>
+                                <span class="chip"><kbd>Esc</kbd> закрыть</span>
                             </div>
                         </div>
                     </div>
@@ -1478,33 +1477,23 @@ body::after {
 <script src="{% static 'matrix_app/js/calculator.js' %}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const placeholder = document.querySelector('[data-calc-placeholder]');
-    const resultBlock = document.querySelector('[data-result-block]');
+    var placeholder = document.querySelector('[data-calc-placeholder]');
+    var resultBlock = document.querySelector('[data-result-block]');
     if (!placeholder || !resultBlock) return;
 
-    const observer = new MutationObserver(function () {
+    // Скрываем заглушку, когда появляется результат
+    var observer = new MutationObserver(function () {
         placeholder.hidden = !resultBlock.hidden;
     });
     observer.observe(resultBlock, { attributes: true, attributeFilter: ['hidden'] });
 
-    const openBtn = document.querySelector('[data-examples-open]');
-    const modal = document.querySelector('#examples-modal');
-    if (openBtn && modal && window.MatrixLab && window.MatrixLab.modal) {
+    // Открытие модалки примеров
+    var openBtn = document.querySelector('[data-examples-open]');
+    if (openBtn && window.MatrixLab && window.MatrixLab.modal) {
         openBtn.addEventListener('click', function () {
             window.MatrixLab.modal.open('#examples-modal');
         });
     }
-
-    document.addEventListener('click', function (e) {
-        if (e.target.closest('[data-close-modal]')) {
-            const modal = e.target.closest('.modal');
-            if (modal && window.MatrixLab && window.MatrixLab.modal) {
-                setTimeout(function () {
-                    window.MatrixLab.modal.close('#' + modal.id);
-                }, 300);
-            }
-        }
-    });
 });
 </script>
 {% endblock %}
