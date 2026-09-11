@@ -1,11 +1,12 @@
 """
 URL-маршруты приложения MatrixLab.
 
-Разделены на четыре группы:
+Разделены на пять групп:
     • HTML-страницы   — отдаются через views.py;
     • Сохранение      — saved/, history/;
     • Генерация       — примеры, случайные матрицы;
-    • JSON API        — математические операции.
+    • JSON API        — математические операции;
+    • Telegram        — webhook для бота.
 
 Пространство имён: matrix_app (см. config/urls.py).
 
@@ -21,6 +22,7 @@ URL-маршруты приложения MatrixLab.
     9.  JSON API — СЛАУ
     10. JSON API — пошаговые решения
     11. JSON API — пояснения
+    12. Telegram webhook
 """
 from __future__ import annotations
 
@@ -180,4 +182,17 @@ urlpatterns += [
 
 urlpatterns += [
     path("api/explain/", api.explain_result, name="api_explain"),
+]
+
+
+# =============================================================================
+# 12. TELEGRAM WEBHOOK
+# =============================================================================
+
+urlpatterns += [
+    path(
+        "telegram/webhook/<str:secret>/",
+        views.telegram_webhook,
+        name="telegram_webhook",
+    ),
 ]

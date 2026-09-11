@@ -5,16 +5,25 @@ AppConfig — это точка, где Django узнаёт о приложен�
     • человекочитаемое имя для админки;
     • тип автоинкрементного поля по умолчанию;
     • точку подключения сигналов;
-    • проверки системы (system checks).
+    • проверки системы (system checks);
+    • установку Telegram-вебхука при старте сервера.
 
-Здесь же можно задать поведение при старте (ready), но мы намеренно
-не делаем тяжёлых операций в ready(), чтобы не замедлять запуск
-и не ломать management-команды.
+Структура:
+    1.  Импорты
+    2.  Класс MatrixAppConfig
+    3.  ready() — сигналы + Telegram webhook
+    4.  validate() — system checks
 """
 from __future__ import annotations
 
+import logging
+import os
+
 from django.apps import AppConfig
+from django.conf import settings
 from django.utils.translation import gettext_lazy as _
+
+logger = logging.getLogger("matrix_app.apps")
 
 
 class MatrixAppConfig(AppConfig):
@@ -33,20 +42,52 @@ class MatrixAppConfig(AppConfig):
     # Короткое имя для логов и CLI.
     label: str = "matrix_app"
 
-    # Готовность приложения — сигналы подключаем здесь.
+    # -------------------------------------------------------------------------
+    # ready(): подключение сигналов и установка Telegram-вебхука
+    # -------------------------------------------------------------------------
     def ready(self) -> None:
         """Вызывается Django, когда все приложения загружены.
 
-        Здесь безопасно импортировать модели и подключать сигналы.
+        Здесь безопасно импортировать модели, подключать сигналы
+        и выполнять разовую инициализацию внешних сервисов.
         """
-        # Импорт сигналов. Если файл signals.py отсутствует или пуст —
+        # --- 1. Сигналы ----------------------------------------------------
+        # Импорт регистрирует декораторы @receiver. Если файл пуст —
         # ничего страшного, просто ничего не произойдёт.
-        # Сигналы используются для: логирования сохранений истории,
-        # автоочистки старых записей сверх лимита и т.п.
         from . import signals  # noqa: F401
 
-    # Собственные system checks (опционально).
-    # Позволяют проверить корректность настроек лимитов при `manage.py check`.
+        # --- 2. Telegram webhook -------------------------------------------
+        # Устанавливаем только если BOT_TOKEN задан в окружении.
+        # Пропускаем миграции, collectstatic, shell и прочие management-команды.
+        if not getattr(settings, "BOT_TOKEN", ""):
+            return
+
+        # Определяем, надо ли ставить webhook:
+        #   • RUN_MAIN=true — это reloader runserver'а (локально).
+        #   • not DEBUG    — это gunicorn на Render.
+        # Во всех остальных случаях (миграции, тесты, management-команды)
+        # webhook НЕ трогаем.
+        is_runserver_reload = os.environ.get("RUN_MAIN") == "true"
+        is_production = not settings.DEBUG
+
+        if not (is_runserver_reload or is_production):
+            return
+
+        try:
+            from asgiref.sync import async_to_sync
+
+            from .telegram_bot import setup_webhook
+
+            async_to_sync(setup_webhook)()
+        except Exception:
+            logger.exception(
+                "Не удалось установить Telegram webhook. "
+                "Проверьте BOT_TOKEN и SITE_URL."
+            )
+
+    # -------------------------------------------------------------------------
+    # validate(): дополнительные system checks
+    # -------------------------------------------------------------------------
     def validate(self) -> None:  # pragma: no cover
         """Проверка конфигурации приложения.
 
@@ -54,9 +95,6 @@ class MatrixAppConfig(AppConfig):
         в DEBUG-режиме. Все ошибки собираются в список и показываются
         как system check messages.
         """
-        from django.core.checks import Error, Warning, register
-
-        # Регистрация проверок делается через декоратор @register,
-        # поэтому в этом методе оставляем только явный вызов
-        # пользовательских проверок из отдельного модуля.
+        # Регистрация проверок делается через декоратор @register
+        # в модуле checks.py.
         from . import checks  # noqa: F401

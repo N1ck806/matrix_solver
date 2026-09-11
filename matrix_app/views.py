@@ -9,19 +9,28 @@ POST обрабатывается в API, а HTML-view только рендер
 """
 from __future__ import annotations
 
+import json
 import logging
 from typing import Any
 
+from asgiref.sync import async_to_sync
 from django.conf import settings
 from django.contrib import messages
-from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.http import (
+    HttpRequest,
+    HttpResponse,
+    HttpResponseBadRequest,
+    JsonResponse,
+)
 from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods, require_POST
 
 from .forms import SaveMatrixForm
 from .models import CalculationHistory, SavedMatrix
 from .services import parse_matrix, ValidationError
 from .services.explanations import list_operations
+from .telegram_bot import process_update
 
 logger = logging.getLogger("matrix_app.views")
 
@@ -522,3 +531,36 @@ def about(request: HttpRequest) -> HttpResponse:
             "operations_count": len(list_operations()),
         },
     )
+
+# =============================================================================
+# Telegram webhook
+# =============================================================================
+
+@csrf_exempt
+@require_POST
+def telegram_webhook(request: HttpRequest, secret: str) -> HttpResponse:
+    """Принимает апдейты от Telegram.
+
+    Telegram сам стучится на этот URL, когда пользователь пишет боту.
+    """
+    if secret != settings.WEBHOOK_SECRET:
+        logger.warning("Telegram webhook: неверный secret")
+        return HttpResponseBadRequest("forbidden")
+
+    if not getattr(settings, "BOT_TOKEN", ""):
+        logger.warning("Telegram webhook: BOT_TOKEN не задан")
+        return HttpResponse("bot disabled")
+
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return HttpResponseBadRequest("bad json")
+
+    try:
+        async_to_sync(process_update)(data)
+    except Exception:
+        logger.exception("Ошибка обработки Telegram update")
+        # Возвращаем 200, чтобы Telegram не спамил повторами.
+        return HttpResponse("error handled")
+
+    return HttpResponse("ok")

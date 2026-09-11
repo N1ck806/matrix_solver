@@ -22,8 +22,9 @@
     14. Логирование
     15. Параметры MatrixLab
     16. CDN
-    17. Дополнительно
-    18. Local settings
+    17. Telegram-бот
+    18. Дополнительно
+    19. Local settings
 """
 from __future__ import annotations
 
@@ -244,7 +245,6 @@ TEMPLATES: list[dict] = [
 _DATABASE_URL: str = os.environ.get("DATABASE_URL", "")
 
 if _DATABASE_URL:
-    # PostgreSQL (Render) или другая СУБД
     DATABASES: dict = {
         "default": dj_database_url.parse(
             _DATABASE_URL,
@@ -253,7 +253,6 @@ if _DATABASE_URL:
         )
     }
 else:
-    # SQLite — локально и как fallback
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
@@ -438,6 +437,11 @@ LOGGING: dict = {
             "level": LOG_LEVEL,
             "propagate": False,
         },
+        "matrix_app.telegram_bot": {
+            "handlers": ["console"],
+            "level": LOG_LEVEL,
+            "propagate": False,
+        },
     },
 }
 
@@ -472,7 +476,24 @@ CDN: dict[str, str] = {
 
 
 # =============================================================================
-# 17. ДОПОЛНИТЕЛЬНО
+# 17. TELEGRAM-БОТ
+# =============================================================================
+# Webhook-режим, встроенный в Django (тот же сервис, что и сайт).
+#   BOT_TOKEN       — токен бота от @BotFather (обязательно на прод).
+#   WEBHOOK_SECRET  — случайная строка, часть URL вебхука.
+#   SITE_URL        — публичный URL сайта (используется в кнопке и в webhook).
+# =============================================================================
+
+BOT_TOKEN: str = env_str("BOT_TOKEN", "")
+WEBHOOK_SECRET: str = env_str("WEBHOOK_SECRET", "matrixlab-secret")
+SITE_URL: str = env_str(
+    "SITE_URL",
+    "https://matrix-solver-qa4g.onrender.com",
+)
+
+
+# =============================================================================
+# 18. ДОПОЛНИТЕЛЬНО
 # =============================================================================
 
 APPEND_SLASH = True
@@ -483,7 +504,7 @@ TEST_RUNNER = "django.test.runner.DiscoverRunner"
 
 
 # =============================================================================
-# 18. LOCAL SETTINGS
+# 19. LOCAL SETTINGS
 # =============================================================================
 
 if LOCAL_SETTINGS_FILE.exists():  # pragma: no cover
