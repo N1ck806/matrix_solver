@@ -557,7 +557,7 @@ def telegram_webhook(request: HttpRequest, secret: str) -> HttpResponse:
         return HttpResponseBadRequest("bad json")
 
     try:
-        async_to_sync(process_update)(data)
+        process_update(data)
     except Exception:
         logger.exception("Ошибка обработки Telegram update")
         # Возвращаем 200, чтобы Telegram не спамил повторами.
