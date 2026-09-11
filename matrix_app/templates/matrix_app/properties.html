@@ -5,7 +5,632 @@
 {% block title %}Свойства матриц — полный справочник{% endblock %}
 
 {% block extra_head %}
+{{ block.super }}
 <link rel="stylesheet" href="{% static 'matrix_app/css/calculator.css' %}">
+<style>
+/* =============================================================================
+   Свойства матриц — стили в едином стиле
+   ============================================================================= */
+
+/* --- ЕДИНЫЙ ФОН НА ВСЮ СТРАНИЦУ --- */
+body {
+    background: #F7F8FC;
+    position: relative;
+    overflow-x: hidden;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    pointer-events: none;
+    background:
+        radial-gradient(ellipse 800px 600px at 15% 10%, rgba(99, 102, 241, 0.12), transparent 60%),
+        radial-gradient(ellipse 700px 500px at 85% 20%, rgba(139, 92, 246, 0.10), transparent 60%),
+        radial-gradient(ellipse 600px 500px at 50% 90%, rgba(6, 182, 212, 0.08), transparent 60%),
+        linear-gradient(180deg, #F7F8FC 0%, #F0F3FF 50%, #F7F8FC 100%);
+}
+
+body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image:
+        linear-gradient(to right, rgba(99, 102, 241, 0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(99, 102, 241, 0.05) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(ellipse 100% 80% at 50% 20%, black 30%, transparent 90%);
+    -webkit-mask-image: radial-gradient(ellipse 100% 80% at 50% 20%, black 30%, transparent 90%);
+    opacity: 0.7;
+}
+
+[data-theme="dark"] body { background: var(--bg-page); }
+
+[data-theme="dark"] body::before {
+    background:
+        radial-gradient(ellipse 800px 600px at 15% 10%, rgba(99, 102, 241, 0.18), transparent 60%),
+        radial-gradient(ellipse 700px 500px at 85% 20%, rgba(139, 92, 246, 0.15), transparent 60%),
+        radial-gradient(ellipse 600px 500px at 50% 90%, rgba(6, 182, 212, 0.12), transparent 60%),
+        linear-gradient(180deg, #0B0E1A 0%, #10142A 50%, #0B0E1A 100%);
+}
+
+[data-theme="dark"] body::after {
+    background-image:
+        linear-gradient(to right, rgba(129, 140, 248, 0.06) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(129, 140, 248, 0.06) 1px, transparent 1px);
+    opacity: 0.6;
+}
+
+/* --- Page head --- */
+.page-head { background: transparent; }
+
+.page-title {
+    font-size: clamp(28px, 3vw, 40px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0 0 10px;
+    color: var(--text-primary);
+}
+
+.page-subtitle {
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    max-width: 720px;
+    margin: 0;
+}
+
+.breadcrumbs a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color var(--t-fast);
+}
+.breadcrumbs a:hover { color: var(--accent); }
+
+/* --- Быстрый анализ --- */
+.calc-workspace { background: transparent; }
+
+.matrix-input-card {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    border-radius: 20px;
+    box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.03),
+        0 8px 24px -8px rgba(99, 102, 241, 0.12);
+    overflow: hidden;
+    transition: box-shadow 320ms, border-color 320ms;
+}
+
+[data-theme="dark"] .matrix-input-card {
+    background: rgba(20, 24, 40, 0.75);
+    border-color: rgba(129, 140, 248, 0.2);
+}
+
+.matrix-input-card:hover {
+    border-color: rgba(99, 102, 241, 0.28);
+    box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.04),
+        0 20px 40px -16px rgba(99, 102, 241, 0.2);
+}
+
+.matrix-input-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px 22px;
+    background: linear-gradient(180deg, rgba(99, 102, 241, 0.04), transparent);
+    border-bottom: 1px solid rgba(99, 102, 241, 0.12);
+    flex-wrap: wrap;
+}
+
+.matrix-input-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.matrix-letter {
+    width: 36px; height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #6366F1, #8B5CF6);
+    color: #fff;
+    font-weight: 800;
+    font-size: 15px;
+    border-radius: 10px;
+    box-shadow: 0 6px 14px -4px rgba(99, 102, 241, 0.5);
+}
+
+.matrix-input-title h2 {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.matrix-shape-badge {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
+    background: rgba(99, 102, 241, 0.1);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 999px;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+}
+
+.matrix-input-tools {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.mini-size {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(99, 102, 241, 0.06);
+    border: 1px solid rgba(99, 102, 241, 0.12);
+    border-radius: 10px;
+    padding: 4px 8px 4px 12px;
+}
+
+.mini-size > span {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.size-btn--mini {
+    width: 26px; height: 26px;
+    font-size: 15px;
+    background: #fff;
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 6px;
+    color: var(--accent);
+    cursor: pointer;
+    transition: all var(--t-fast);
+}
+
+[data-theme="dark"] .size-btn--mini { background: var(--bg-card); }
+
+.size-btn--mini:hover {
+    background: linear-gradient(135deg, #6366F1, #8B5CF6);
+    color: #fff;
+    border-color: transparent;
+    transform: translateY(-1px);
+}
+
+.size-input--mini {
+    width: 38px;
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+.size-input--mini:focus {
+    outline: none;
+    color: var(--accent);
+}
+
+.matrix-input-body {
+    padding: 22px;
+}
+
+.matrix-input-grid {
+    display: grid;
+    gap: 8px;
+    justify-content: center;
+}
+
+.matrix-input-grid input {
+    width: 60px; height: 46px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+    background: #fff;
+    border: 1.5px solid rgba(99, 102, 241, 0.15);
+    border-radius: 10px;
+    font-variant-numeric: tabular-nums;
+    transition: all var(--t-fast);
+}
+
+[data-theme="dark"] .matrix-input-grid input {
+    background: var(--bg-card);
+    border-color: rgba(129, 140, 248, 0.2);
+}
+
+.matrix-input-grid input:hover { border-color: rgba(99, 102, 241, 0.35); }
+
+.matrix-input-grid input:focus {
+    outline: none;
+    background: #fff;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+    transform: scale(1.05);
+    z-index: 1;
+    position: relative;
+}
+
+.matrix-input-footer {
+    padding: 14px 22px;
+    background: rgba(99, 102, 241, 0.03);
+    border-top: 1px solid rgba(99, 102, 241, 0.1);
+}
+
+.matrix-input-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.chip--button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: #fff;
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all var(--t-fast);
+}
+
+[data-theme="dark"] .chip--button { background: var(--bg-card); }
+
+.chip--button:hover {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+    border-color: rgba(99, 102, 241, 0.35);
+    color: var(--accent);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px -3px rgba(99, 102, 241, 0.25);
+}
+
+.chip--button svg { color: var(--accent); flex-shrink: 0; }
+
+/* --- Кнопки анализа --- */
+.props-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 18px 22px;
+    background: linear-gradient(180deg, rgba(99, 102, 241, 0.03), rgba(99, 102, 241, 0.06));
+    border-top: 1px solid rgba(99, 102, 241, 0.12);
+    flex-wrap: wrap;
+}
+
+.props-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.props-buttons .btn-primary {
+    box-shadow:
+        0 8px 20px -6px rgba(99, 102, 241, 0.5),
+        0 0 0 1px rgba(99, 102, 241, 0.1);
+    transition: transform var(--t-fast), box-shadow var(--t-base);
+}
+
+.props-buttons .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 16px 32px -8px rgba(99, 102, 241, 0.55),
+        0 0 0 1px rgba(99, 102, 241, 0.2);
+}
+
+/* --- Блок результата --- */
+.props-block {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    border-radius: 20px;
+    box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.03),
+        0 8px 24px -8px rgba(99, 102, 241, 0.12);
+    padding: 24px;
+    margin-top: 20px;
+}
+
+[data-theme="dark"] .props-block {
+    background: rgba(20, 24, 40, 0.75);
+    border-color: rgba(129, 140, 248, 0.2);
+}
+
+/* --- Справочник --- */
+.section--props-guide {
+    padding: 88px 0;
+    background: transparent;
+}
+
+.section-head {
+    text-align: center;
+    max-width: 720px;
+    margin: 0 auto 40px;
+}
+
+.section-title {
+    font-size: clamp(28px, 3vw, 40px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0 0 12px;
+    color: var(--text-primary);
+}
+
+.section-subtitle {
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* --- Оглавление --- */
+.props-toc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(99, 102, 241, 0.12);
+    border-radius: 16px;
+    margin-bottom: 48px;
+    position: sticky;
+    top: calc(var(--header-height, 64px) + 12px);
+    z-index: 10;
+}
+
+[data-theme="dark"] .props-toc {
+    background: rgba(20, 24, 40, 0.7);
+    border-color: rgba(129, 140, 248, 0.2);
+}
+
+.props-toc-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    background: transparent;
+    border-radius: 10px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    transition: all var(--t-fast);
+}
+
+.props-toc-link:hover {
+    background: rgba(99, 102, 241, 0.1);
+    color: var(--accent);
+}
+
+.props-toc-link svg {
+    color: var(--accent);
+    flex-shrink: 0;
+}
+
+/* --- Категории --- */
+.props-category {
+    margin-bottom: 64px;
+    scroll-margin-top: calc(var(--header-height, 64px) + 80px);
+}
+
+.props-category-head {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid rgba(99, 102, 241, 0.12);
+}
+
+.props-category-icon {
+    width: 52px; height: 52px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #6366F1, #8B5CF6);
+    color: #fff;
+    border-radius: 14px;
+    box-shadow: 0 10px 20px -6px rgba(99, 102, 241, 0.5);
+    flex-shrink: 0;
+}
+
+.props-category-head h3 {
+    font-size: clamp(20px, 2vw, 26px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0 0 4px;
+    color: var(--text-primary);
+}
+
+.props-category-head p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* --- Сетка карточек --- */
+.props-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+}
+
+.prop-detail-card {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    border-radius: 18px;
+    box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.03),
+        0 4px 16px -4px rgba(99, 102, 241, 0.1);
+    overflow: hidden;
+    transition: transform 320ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 320ms, border-color 320ms, background-color 320ms;
+    display: flex;
+    flex-direction: column;
+}
+
+[data-theme="dark"] .prop-detail-card {
+    background: rgba(20, 24, 40, 0.7);
+    border-color: rgba(129, 140, 248, 0.2);
+}
+
+.prop-detail-card:hover {
+    transform: translateY(-4px);
+    background: #fff;
+    border-color: rgba(99, 102, 241, 0.35);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 24px 48px -16px rgba(99, 102, 241, 0.25);
+}
+
+[data-theme="dark"] .prop-detail-card:hover {
+    background: rgba(28, 32, 52, 0.9);
+}
+
+.prop-detail-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    background: linear-gradient(180deg, rgba(99, 102, 241, 0.06), transparent);
+    border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+}
+
+.prop-detail-badge {
+    display: inline-flex;
+    padding: 4px 10px;
+    background: linear-gradient(135deg, #6366F1, #8B5CF6);
+    color: #fff;
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border-radius: 999px;
+    box-shadow: 0 4px 10px -3px rgba(99, 102, 241, 0.4);
+    flex-shrink: 0;
+}
+
+.prop-detail-head h4 {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.prop-detail-body {
+    padding: 18px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+}
+
+.prop-detail-def {
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.prop-detail-formula {
+    padding: 12px 14px;
+    background: rgba(99, 102, 241, 0.05);
+    border: 1px solid rgba(99, 102, 241, 0.12);
+    border-radius: 10px;
+    font-size: 13px;
+    color: var(--text-primary);
+    text-align: center;
+    overflow-x: auto;
+}
+
+.prop-detail-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.prop-detail-label {
+    flex-shrink: 0;
+    font-weight: 700;
+    color: var(--accent);
+    min-width: 84px;
+}
+
+.prop-detail-value {
+    color: var(--text-secondary);
+    overflow-x: auto;
+    min-width: 0;
+}
+
+/* --- Адаптив --- */
+@media (max-width: 992px) {
+    .section--props-guide { padding: 64px 0; }
+    .props-category { margin-bottom: 48px; }
+    .props-cards { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+}
+
+@media (max-width: 640px) {
+    .matrix-input-grid input {
+        width: 48px; height: 40px;
+        font-size: 13px;
+    }
+
+    .props-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .props-buttons {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .props-buttons .btn { width: 100%; }
+
+    .props-cards { grid-template-columns: 1fr; }
+
+    .props-toc {
+        position: static;
+        justify-content: flex-start;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding: 10px;
+    }
+
+    .props-toc-link { flex-shrink: 0; }
+
+    .section--props-guide { padding: 48px 0; }
+
+    .props-category-head {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+</style>
 {% endblock %}
 
 {% block content %}
@@ -268,10 +893,6 @@
                             <span class="prop-detail-label">Пример:</span>
                             <span class="prop-detail-value">$$(1,\ 2,\ 3)$$ или $$\begin{pmatrix}1\\2\\3\end{pmatrix}$$</span>
                         </div>
-                        <div class="prop-detail-row">
-                            <span class="prop-detail-label">Зачем:</span>
-                            <span class="prop-detail-value">Векторы — частный случай матриц, используются в СЛАУ и геометрии.</span>
-                        </div>
                     </div>
                 </article>
 
@@ -286,8 +907,8 @@
             <header class="props-category-head">
                 <span class="props-category-icon">{% icon "matrix-grid" size=22 %}</span>
                 <div>
-                    <h3>Структура элементов</h3>
-                    <p>Расположение нулей и ненулевых элементов.</p>
+                    <h3>Структура матрицы</h3>
+                    <p>Расположение нулевых и ненулевых элементов.</p>
                 </div>
             </header>
 
@@ -296,18 +917,16 @@
                 <article class="prop-detail-card">
                     <header class="prop-detail-head">
                         <span class="prop-detail-badge">Структура</span>
-                        <h4>Нулевая</h4>
+                        <h4>Диагональная</h4>
                     </header>
                     <div class="prop-detail-body">
-                        <p class="prop-detail-def">Все элементы равны нулю.</p>
-                        <div class="prop-detail-formula">$$a_{ij} = 0 \;\forall i,j$$</div>
+                        <p class="prop-detail-def">
+                            Квадратная матрица, у которой все внедиагональные элементы равны нулю.
+                        </p>
+                        <div class="prop-detail-formula">$$a_{ij} = 0 \quad \text{при} \quad i \neq j$$</div>
                         <div class="prop-detail-row">
                             <span class="prop-detail-label">Пример:</span>
-                            <span class="prop-detail-value">$$\begin{pmatrix}0&0\\0&0\end{pmatrix}$$</span>
-                        </div>
-                        <div class="prop-detail-row">
-                            <span class="prop-detail-label">Свойства:</span>
-                            <span class="prop-detail-value">$\operatorname{rank} = 0$, $\det = 0$ (для квадратной).</span>
+                            <span class="prop-detail-value">$$\begin{pmatrix}1&0&0\\0&5&0\\0&0&3\end{pmatrix}$$</span>
                         </div>
                     </div>
                 </article>
@@ -319,17 +938,16 @@
                     </header>
                     <div class="prop-detail-body">
                         <p class="prop-detail-def">
-                            Квадратная матрица с единицами на главной диагонали
-                            и нулями в остальных позициях.
+                            Диагональная матрица, у которой все элементы на главной диагонали равны 1.
                         </p>
-                        <div class="prop-detail-formula">$$a_{ii} = 1,\quad a_{ij} = 0 \ (i \neq j)$$</div>
+                        <div class="prop-detail-formula">$$a_{ij} = \delta_{ij}$$</div>
                         <div class="prop-detail-row">
                             <span class="prop-detail-label">Пример:</span>
-                            <span class="prop-detail-value">$$I_2 = \begin{pmatrix}1&0\\0&1\end{pmatrix}$$</span>
+                            <span class="prop-detail-value">$$I_3 = \begin{pmatrix}1&0&0\\0&1&0\\0&0&1\end{pmatrix}$$</span>
                         </div>
                         <div class="prop-detail-row">
-                            <span class="prop-detail-label">Свойство:</span>
-                            <span class="prop-detail-value">$AI = IA = A$ — нейтральный элемент умножения.</span>
+                            <span class="prop-detail-label">Зачем:</span>
+                            <span class="prop-detail-value">Нейтральный элемент умножения: \(AI = IA = A\).</span>
                         </div>
                     </div>
                 </article>
@@ -337,40 +955,19 @@
                 <article class="prop-detail-card">
                     <header class="prop-detail-head">
                         <span class="prop-detail-badge">Структура</span>
-                        <h4>Диагональная</h4>
-                    </header>
-                    <div class="prop-detail-body">
-                        <p class="prop-detail-def">Все внедиагональные элементы — нули.</p>
-                        <div class="prop-detail-formula">$$a_{ij} = 0 \ (i \neq j)$$</div>
-                        <div class="prop-detail-row">
-                            <span class="prop-detail-label">Пример:</span>
-                            <span class="prop-detail-value">$$\operatorname{diag}(2, 5, 7) = \begin{pmatrix}2&0&0\\0&5&0\\0&0&7\end{pmatrix}$$</span>
-                        </div>
-                        <div class="prop-detail-row">
-                            <span class="prop-detail-label">Свойство:</span>
-                            <span class="prop-detail-value">$\det = \prod a_{ii}$ — произведение диагональных элементов.</span>
-                        </div>
-                    </div>
-                </article>
-
-                <article class="prop-detail-card">
-                    <header class="prop-detail-head">
-                        <span class="prop-detail-badge">Структура</span>
-                        <h4>Скалярная</h4>
+                        <h4>Треугольная</h4>
                     </header>
                     <div class="prop-detail-body">
                         <p class="prop-detail-def">
-                            Диагональная матрица, у которой все диагональные
-                            элементы одинаковы: $A = \lambda I$.
+                            Квадратная матрица, у которой все элементы выше (нижняя треугольная)
+                            или ниже (верхняя треугольная) главной диагонали равны нулю.
                         </p>
-                        <div class="prop-detail-formula">$$a_{ii} = \lambda \;\forall i$$</div>
-                        <div class="prop-detail-row">
-                            <span class="prop-detail-label">Пример:</span>
-                            <span class="prop-detail-value">$$3I = \begin{pmatrix}3&0\\0&3\end{pmatrix}$$</span>
+                        <div class="prop-detail-formula">
+                            $$a_{ij} = 0 \quad \text{при} \quad i < j \quad \text{(нижняя)}$$
                         </div>
                         <div class="prop-detail-row">
-                            <span class="prop-detail-label">Свойство:</span>
-                            <span class="prop-detail-value">Умножение на скаляр — частный случай матричного умножения.</span>
+                            <span class="prop-detail-label">Пример:</span>
+                            <span class="prop-detail-value">$$\begin{pmatrix}1&0&0\\2&5&0\\3&4&3\end{pmatrix}$$</span>
                         </div>
                     </div>
                 </article>
@@ -378,18 +975,17 @@
                 <article class="prop-detail-card">
                     <header class="prop-detail-head">
                         <span class="prop-detail-badge">Структура</span>
-                        <h4>Верхняя треугольная</h4>
+                        <h4>Ленточная</h4>
                     </header>
                     <div class="prop-detail-body">
-                        <p class="prop-detail-def">Все элементы ниже главной диагонали — нули.</p>
-                        <div class="prop-detail-formula">$$a_{ij} = 0 \;(i > j)$$</div>
+                        <p class="prop-detail-def">
+                            Матрица, у которой ненулевые элементы расположены только
+                            на главной диагонали и нескольких прилегающих диагоналях.
+                        </p>
+                        <div class="prop-detail-formula">$$a_{ij} = 0 \quad \text{при} \quad |i - j| > k$$</div>
                         <div class="prop-detail-row">
                             <span class="prop-detail-label">Пример:</span>
-                            <span class="prop-detail-value">$$\begin{pmatrix}1&2&3\\0&4&5\\0&0&6\end{pmatrix}$$</span>
-                        </div>
-                        <div class="prop-detail-row">
-                            <span class="prop-detail-label">Зачем:</span>
-                            <span class="prop-detail-value">$\det = \prod a_{ii}$. Используется в LU-разложении.</span>
+                            <span class="prop-detail-value">Трёхдиагональная матрица (k = 1).</span>
                         </div>
                     </div>
                 </article>
@@ -397,18 +993,16 @@
                 <article class="prop-detail-card">
                     <header class="prop-detail-head">
                         <span class="prop-detail-badge">Структура</span>
-                        <h4>Нижняя треугольная</h4>
+                        <h4>Разреженная</h4>
                     </header>
                     <div class="prop-detail-body">
-                        <p class="prop-detail-def">Все элементы выше главной диагонали — нули.</p>
-                        <div class="prop-detail-formula">$$a_{ij} = 0 \;(i < j)$$</div>
-                        <div class="prop-detail-row">
-                            <span class="prop-detail-label">Пример:</span>
-                            <span class="prop-detail-value">$$\begin{pmatrix}1&0&0\\2&3&0\\4&5&6\end{pmatrix}$$</span>
-                        </div>
+                        <p class="prop-detail-def">
+                            Матрица, в которой большинство элементов равно нулю.
+                        </p>
+                        <div class="prop-detail-formula">$$\text{nnz}(A) \ll mn$$</div>
                         <div class="prop-detail-row">
                             <span class="prop-detail-label">Зачем:</span>
-                            <span class="prop-detail-value">Матрица $L$ в LU-разложении и разложении Холецкого.</span>
+                            <span class="prop-detail-value">Экономия памяти и ускорение вычислений.</span>
                         </div>
                     </div>
                 </article>
@@ -425,7 +1019,7 @@
                 <span class="props-category-icon">{% icon "symmetric" size=22 %}</span>
                 <div>
                     <h3>Симметрия</h3>
-                    <p>Свойства относительно главной диагонали и транспонирования.</p>
+                    <p>Свойства, связанные с равенством элементов относительно диагонали.</p>
                 </div>
             </header>
 
@@ -437,15 +1031,13 @@
                         <h4>Симметричная</h4>
                     </header>
                     <div class="prop-detail-body">
-                        <p class="prop-detail-def">Совпадает со своей транспонированной: $A = A^T$.</p>
-                        <div class="prop-detail-formula">$$a_{ij} = a_{ji}$$</div>
+                        <p class="prop-detail-def">
+                            Квадратная матрица, равная своей транспонированной.
+                        </p>
+                        <div class="prop-detail-formula">$$A = A^T \quad \Leftrightarrow \quad a_{ij} = a_{ji}$$</div>
                         <div class="prop-detail-row">
                             <span class="prop-detail-label">Пример:</span>
-                            <span class="prop-detail-value">$$\begin{pmatrix}1&2\\2&3\end{pmatrix}$$</span>
-                        </div>
-                        <div class="prop-detail-row">
-                            <span class="prop-detail-label">Свойства:</span>
-                            <span class="prop-detail-value">Собственные значения вещественны. Всегда диагонализируема ортогонально: $A = QDQ^T$.</span>
+                            <span class="prop-detail-value">$$\begin{pmatrix}1&2\\2&5\end{pmatrix}$$</span>
                         </div>
                     </div>
                 </article>
@@ -456,37 +1048,17 @@
                         <h4>Кососимметричная</h4>
                     </header>
                     <div class="prop-detail-body">
-                        <p class="prop-detail-def">Равна минус своей транспонированной: $A = -A^T$.</p>
-                        <div class="prop-detail-formula">$$a_{ij} = -a_{ji}$$</div>
-                        <div class="prop-detail-row">
-                            <span class="prop-detail-label">Пример:</span>
-                            <span class="prop-detail-value">$$\begin{pmatrix}0&1\\-1&0\end{pmatrix}$$</span>
-                        </div>
-                        <div class="prop-detail-row">
-                            <span class="prop-detail-label">Свойства:</span>
-                            <span class="prop-detail-value">Диагональ — нули. Все собственные значения чисто мнимые или нули.</span>
-                        </div>
-                    </div>
-                </article>
-
-                <article class="prop-detail-card">
-                    <header class="prop-detail-head">
-                        <span class="prop-detail-badge">Симметрия</span>
-                        <h4>Эрмитова</h4>
-                    </header>
-                    <div class="prop-detail-body">
                         <p class="prop-detail-def">
-                            Комплексная матрица, равная своему эрмитово
-                            сопряжённому: $A = A^*$.
+                            Квадратная матрица, равная своей транспонированной с обратным знаком.
                         </p>
-                        <div class="prop-detail-formula">$$a_{ij} = \overline{a_{ji}}$$</div>
+                        <div class="prop-detail-formula">$$A = -A^T \quad \Leftrightarrow \quad a_{ij} = -a_{ji}$$</div>
                         <div class="prop-detail-row">
                             <span class="prop-detail-label">Пример:</span>
-                            <span class="prop-detail-value">$$\begin{pmatrix}1&i\\-i&2\end{pmatrix}$$</span>
+                            <span class="prop-detail-value">$$\begin{pmatrix}0&-2\\2&0\end{pmatrix}$$</span>
                         </div>
                         <div class="prop-detail-row">
-                            <span class="prop-detail-label">Свойства:</span>
-                            <span class="prop-detail-value">Все собственные значения вещественны. Аналог симметричной для $\mathbb{C}$.</span>
+                            <span class="prop-detail-label">Следствие:</span>
+                            <span class="prop-detail-value">Диагональные элементы равны нулю.</span>
                         </div>
                     </div>
                 </article>
@@ -498,17 +1070,16 @@
                     </header>
                     <div class="prop-detail-body">
                         <p class="prop-detail-def">
-                            Квадратная матрица, у которой $A^T A = I$,
-                            то есть $A^{-1} = A^T$.
+                            Квадратная матрица, произведение которой на транспонированную равно единичной.
                         </p>
                         <div class="prop-detail-formula">$$A^T A = A A^T = I$$</div>
                         <div class="prop-detail-row">
                             <span class="prop-detail-label">Пример:</span>
-                            <span class="prop-detail-value">$$\begin{pmatrix}0&-1\\1&0\end{pmatrix}$$ — поворот на 90°</span>
+                            <span class="prop-detail-value">Матрица поворота на угол \(\theta\).</span>
                         </div>
                         <div class="prop-detail-row">
-                            <span class="prop-detail-label">Свойства:</span>
-                            <span class="prop-detail-value">Столбцы — ортонормированный базис. $\det = \pm 1$.</span>
+                            <span class="prop-detail-label">Зачем:</span>
+                            <span class="prop-detail-value">Сохраняет длины векторов и углы между ними.</span>
                         </div>
                     </div>
                 </article>
@@ -516,21 +1087,16 @@
                 <article class="prop-detail-card">
                     <header class="prop-detail-head">
                         <span class="prop-detail-badge">Симметрия</span>
-                        <h4>Унитарная</h4>
+                        <h4>Эрмитова</h4>
                     </header>
                     <div class="prop-detail-body">
                         <p class="prop-detail-def">
-                            Комплексная матрица, у которой $A^* A = I$,
-                            то есть $A^{-1} = A^*$.
+                            Комплексная квадратная матрица, равная своей сопряжённо-транспонированной.
                         </p>
-                        <div class="prop-detail-formula">$$A^* A = A A^* = I$$</div>
+                        <div class="prop-detail-formula">$$A = A^* = \overline{A}^T$$</div>
                         <div class="prop-detail-row">
-                            <span class="prop-detail-label">Пример:</span>
-                            <span class="prop-detail-value">$$\frac{1}{\sqrt{2}}\begin{pmatrix}1&i\\i&1\end{pmatrix}$$</span>
-                        </div>
-                        <div class="prop-detail-row">
-                            <span class="prop-detail-label">Свойства:</span>
-                            <span class="prop-detail-value">Аналог ортогональной в $\mathbb{C}$. $|\det| = 1$.</span>
+                            <span class="prop-detail-label">Следствие:</span>
+                            <span class="prop-detail-value">Диагональные элементы вещественны.</span>
                         </div>
                     </div>
                 </article>
@@ -547,7 +1113,7 @@
                 <span class="props-category-icon">{% icon "check-badge" size=22 %}</span>
                 <div>
                     <h3>Определённость</h3>
-                    <p>Знак квадратичной формы $x^T A x$ для симметричных матриц.</p>
+                    <p>Знак квадратичной формы, порождаемой симметричной матрицей.</p>
                 </div>
             </header>
 
@@ -560,17 +1126,13 @@
                     </header>
                     <div class="prop-detail-body">
                         <p class="prop-detail-def">
-                            Симметричная матрица, для которой квадратичная
-                            форма строго положительна при ненулевом $x$.
+                            Симметричная матрица, для которой квадратичная форма
+                            положительна при любом ненулевом векторе.
                         </p>
-                        <div class="prop-detail-formula">$$x^T A x > 0 \;\forall x \neq 0$$</div>
+                        <div class="prop-detail-formula">$$x^T A x > 0 \quad \forall x \neq 0$$</div>
                         <div class="prop-detail-row">
-                            <span class="prop-detail-label">Эквивалентно:</span>
-                            <span class="prop-detail-value">Все собственные значения $> 0$; все главные миноры $> 0$ (критерий Сильвестра).</span>
-                        </div>
-                        <div class="prop-detail-row">
-                            <span class="prop-detail-label">Применение:</span>
-                            <span class="prop-detail-value">Оптимизация (минимум), разложение Холецкого, теория упругости.</span>
+                            <span class="prop-detail-label">Проверка:</span>
+                            <span class="prop-detail-value">Все собственные значения \(> 0\).</span>
                         </div>
                     </div>
                 </article>
@@ -582,17 +1144,13 @@
                     </header>
                     <div class="prop-detail-body">
                         <p class="prop-detail-def">
-                            Симметричная матрица, для которой квадратичная
-                            форма строго отрицательна при ненулевом $x$.
+                            Симметричная матрица, для которой квадратичная форма
+                            отрицательна при любом ненулевом векторе.
                         </p>
-                        <div class="prop-detail-formula">$$x^T A x < 0 \;\forall x \neq 0$$</div>
+                        <div class="prop-detail-formula">$$x^T A x < 0 \quad \forall x \neq 0$$</div>
                         <div class="prop-detail-row">
-                            <span class="prop-detail-label">Эквивалентно:</span>
-                            <span class="prop-detail-value">Все собственные значения $< 0$; знаки главных миноров чередуются, начиная с минуса.</span>
-                        </div>
-                        <div class="prop-detail-row">
-                            <span class="prop-detail-label">Применение:</span>
-                            <span class="prop-detail-value">Поиск точки максимума в оптимизации.</span>
+                            <span class="prop-detail-label">Проверка:</span>
+                            <span class="prop-detail-value">Все собственные значения \(< 0\).</span>
                         </div>
                     </div>
                 </article>
@@ -600,21 +1158,17 @@
                 <article class="prop-detail-card">
                     <header class="prop-detail-head">
                         <span class="prop-detail-badge">Определённость</span>
-                        <h4>Знаконеопределённая</h4>
+                        <h4>Неопределённая</h4>
                     </header>
                     <div class="prop-detail-body">
                         <p class="prop-detail-def">
-                            Симметричная матрица, для которой $x^T A x$ принимает
-                            как положительные, так и отрицательные значения.
+                            Симметричная матрица, квадратичная форма которой
+                            принимает как положительные, так и отрицательные значения.
                         </p>
-                        <div class="prop-detail-formula">$$\exists x: x^T A x > 0,\quad \exists y: y^T A y < 0$$</div>
+                        <div class="prop-detail-formula">$$\exists x,\ y: \ x^T A x > 0,\ y^T A y < 0$$</div>
                         <div class="prop-detail-row">
-                            <span class="prop-detail-label">Эквивалентно:</span>
+                            <span class="prop-detail-label">Проверка:</span>
                             <span class="prop-detail-value">Собственные значения разных знаков.</span>
-                        </div>
-                        <div class="prop-detail-row">
-                            <span class="prop-detail-label">Применение:</span>
-                            <span class="prop-detail-value">Седловая точка в оптимизации.</span>
                         </div>
                     </div>
                 </article>
@@ -630,8 +1184,8 @@
             <header class="props-category-head">
                 <span class="props-category-icon">{% icon "sparkles" size=22 %}</span>
                 <div>
-                    <h3>Особые виды</h3>
-                    <p>Матрицы со специальными алгебраическими свойствами.</p>
+                    <h3>Особые виды матриц</h3>
+                    <p>Матрицы с дополнительными алгебраическими свойствами.</p>
                 </div>
             </header>
 
@@ -639,82 +1193,69 @@
 
                 <article class="prop-detail-card">
                     <header class="prop-detail-head">
-                        <span class="prop-detail-badge">Особое</span>
+                        <span class="prop-detail-badge">Особый вид</span>
                         <h4>Идемпотентная</h4>
                     </header>
                     <div class="prop-detail-body">
-                        <p class="prop-detail-def">Матрица, равная своему квадрату: $A^2 = A$.</p>
-                        <div class="prop-detail-formula">$$A \cdot A = A$$</div>
+                        <p class="prop-detail-def">
+                            Матрица, которая при возведении в квадрат равна самой себе.
+                        </p>
+                        <div class="prop-detail-formula">$$A^2 = A$$</div>
                         <div class="prop-detail-row">
                             <span class="prop-detail-label">Пример:</span>
-                            <span class="prop-detail-value">$$\begin{pmatrix}1&0\\0&0\end{pmatrix}$$ — проектор на ось $x$</span>
-                        </div>
-                        <div class="prop-detail-row">
-                            <span class="prop-detail-label">Свойства:</span>
-                            <span class="prop-detail-value">Собственные значения 0 или 1. Используется как матрица проектирования.</span>
+                            <span class="prop-detail-value">Матрица проекции.</span>
                         </div>
                     </div>
                 </article>
 
                 <article class="prop-detail-card">
                     <header class="prop-detail-head">
-                        <span class="prop-detail-badge">Особое</span>
-                        <h4>Инволютивная</h4>
-                    </header>
-                    <div class="prop-detail-body">
-                        <p class="prop-detail-def">Матрица, квадрат которой равен единичной: $A^2 = I$.</p>
-                        <div class="prop-detail-formula">$$A \cdot A = I$$</div>
-                        <div class="prop-detail-row">
-                            <span class="prop-detail-label">Пример:</span>
-                            <span class="prop-detail-value">$$\begin{pmatrix}0&1\\1&0\end{pmatrix}$$ — отражение</span>
-                        </div>
-                        <div class="prop-detail-row">
-                            <span class="prop-detail-label">Свойства:</span>
-                            <span class="prop-detail-value">$A = A^{-1}$. Собственные значения $\pm 1$.</span>
-                        </div>
-                    </div>
-                </article>
-
-                <article class="prop-detail-card">
-                    <header class="prop-detail-head">
-                        <span class="prop-detail-badge">Особое</span>
+                        <span class="prop-detail-badge">Особый вид</span>
                         <h4>Нильпотентная</h4>
                     </header>
                     <div class="prop-detail-body">
                         <p class="prop-detail-def">
-                            Матрица, некоторая степень которой равна нулю:
-                            $A^k = 0$.
+                            Матрица, некоторая степень которой равна нулевой матрице.
                         </p>
-                        <div class="prop-detail-formula">$$\exists k \geq 1: A^k = 0$$</div>
+                        <div class="prop-detail-formula">$$A^k = 0 \quad \text{для некоторого } k > 0$$</div>
                         <div class="prop-detail-row">
                             <span class="prop-detail-label">Пример:</span>
-                            <span class="prop-detail-value">$$\begin{pmatrix}0&1\\0&0\end{pmatrix}$$ — $A^2 = 0$</span>
-                        </div>
-                        <div class="prop-detail-row">
-                            <span class="prop-detail-label">Свойства:</span>
-                            <span class="prop-detail-value">Все собственные значения нули. $\det = 0$.</span>
+                            <span class="prop-detail-value">$$\begin{pmatrix}0&1\\0&0\end{pmatrix}$$</span>
                         </div>
                     </div>
                 </article>
 
                 <article class="prop-detail-card">
                     <header class="prop-detail-head">
-                        <span class="prop-detail-badge">Особое</span>
-                        <h4>Перестановочная</h4>
+                        <span class="prop-detail-badge">Особый вид</span>
+                        <h4>Инволютивная</h4>
                     </header>
                     <div class="prop-detail-body">
                         <p class="prop-detail-def">
-                            Матрица перестановок — получается из единичной
-                            перестановкой строк.
+                            Матрица, которая при возведении в квадрат равна единичной.
                         </p>
-                        <div class="prop-detail-formula">$$P = \text{перестановка строк } I$$</div>
+                        <div class="prop-detail-formula">$$A^2 = I$$</div>
                         <div class="prop-detail-row">
                             <span class="prop-detail-label">Пример:</span>
-                            <span class="prop-detail-value">$$\begin{pmatrix}0&1\\1&0\end{pmatrix}$$</span>
+                            <span class="prop-detail-value">Матрица отражения.</span>
                         </div>
+                    </div>
+                </article>
+
+                <article class="prop-detail-card">
+                    <header class="prop-detail-head">
+                        <span class="prop-detail-badge">Особый вид</span>
+                        <h4>Унитарная</h4>
+                    </header>
+                    <div class="prop-detail-body">
+                        <p class="prop-detail-def">
+                            Комплексная квадратная матрица, произведение которой на
+                            сопряжённо-транспонированную равно единичной.
+                        </p>
+                        <div class="prop-detail-formula">$$U^* U = U U^* = I$$</div>
                         <div class="prop-detail-row">
-                            <span class="prop-detail-label">Свойства:</span>
-                            <span class="prop-detail-value">$P^T = P^{-1}$. $\det = \pm 1$. Используется в LUP-разложении.</span>
+                            <span class="prop-detail-label">Зачем:</span>
+                            <span class="prop-detail-value">Сохраняет скалярное произведение в комплексном пространстве.</span>
                         </div>
                     </div>
                 </article>
@@ -731,7 +1272,7 @@
                 <span class="props-category-icon">{% icon "sigma" size=22 %}</span>
                 <div>
                     <h3>Числовые характеристики</h3>
-                    <p>Определитель, ранг, след, спектр.</p>
+                    <p>Скалярные величины, связанные с матрицей.</p>
                 </div>
             </header>
 
@@ -739,86 +1280,68 @@
 
                 <article class="prop-detail-card">
                     <header class="prop-detail-head">
-                        <span class="prop-detail-badge">Число</span>
+                        <span class="prop-detail-badge">Числовая</span>
                         <h4>Определитель</h4>
                     </header>
                     <div class="prop-detail-body">
                         <p class="prop-detail-def">
-                            Скалярная характеристика квадратной матрицы,
-                            равная коэффициенту изменения объёма.
+                            Скалярная величина, характеризующая линейное преобразование.
                         </p>
-                        <div class="prop-detail-formula">$$\det(A) = |A|$$</div>
+                        <div class="prop-detail-formula">$$\det(A) = \sum_{\sigma \in S_n} \operatorname{sgn}(\sigma) \prod_{i=1}^n a_{i,\sigma(i)}$$</div>
                         <div class="prop-detail-row">
-                            <span class="prop-detail-label">Свойства:</span>
-                            <span class="prop-detail-value">$\det(AB) = \det(A)\det(B)$; $\det(A^{-1}) = 1/\det(A)$; $\det(A^T) = \det(A)$.</span>
-                        </div>
-                        <div class="prop-detail-row">
-                            <span class="prop-detail-label">Применение:</span>
-                            <span class="prop-detail-value">Проверка обратимости, правило Крамера, замена переменных.</span>
+                            <span class="prop-detail-label">Свойство:</span>
+                            <span class="prop-detail-value">\(\det(A) = 0 \Leftrightarrow\) матрица вырождена.</span>
                         </div>
                     </div>
                 </article>
 
                 <article class="prop-detail-card">
                     <header class="prop-detail-head">
-                        <span class="prop-detail-badge">Число</span>
+                        <span class="prop-detail-badge">Числовая</span>
+                        <h4>След</h4>
+                    </header>
+                    <div class="prop-detail-body">
+                        <p class="prop-detail-def">
+                            Сумма элементов главной диагонали квадратной матрицы.
+                        </p>
+                        <div class="prop-detail-formula">$$\operatorname{tr}(A) = \sum_{i=1}^n a_{ii}$$</div>
+                        <div class="prop-detail-row">
+                            <span class="prop-detail-label">Свойство:</span>
+                            <span class="prop-detail-value">\(\operatorname{tr}(A) = \sum \lambda_i\) (сумма собственных значений).</span>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="prop-detail-card">
+                    <header class="prop-detail-head">
+                        <span class="prop-detail-badge">Числовая</span>
                         <h4>Ранг</h4>
                     </header>
                     <div class="prop-detail-body">
                         <p class="prop-detail-def">
                             Максимальное число линейно независимых строк (или столбцов).
                         </p>
-                        <div class="prop-detail-formula">$$\operatorname{rank}(A) \le \min(m, n)$$</div>
+                        <div class="prop-detail-formula">$$\operatorname{rank}(A) = \dim(\operatorname{Im} A)$$</div>
                         <div class="prop-detail-row">
-                            <span class="prop-detail-label">Как вычислить:</span>
-                            <span class="prop-detail-value">Число ненулевых строк в ступенчатой форме.</span>
-                        </div>
-                        <div class="prop-detail-row">
-                            <span class="prop-detail-label">Применение:</span>
-                            <span class="prop-detail-value">Критерий Кронекера-Капелли, размерность образа и ядра.</span>
+                            <span class="prop-detail-label">Свойство:</span>
+                            <span class="prop-detail-value">\(\operatorname{rank}(A) \le \min(m, n)\).</span>
                         </div>
                     </div>
                 </article>
 
                 <article class="prop-detail-card">
                     <header class="prop-detail-head">
-                        <span class="prop-detail-badge">Число</span>
-                        <h4>След</h4>
+                        <span class="prop-detail-badge">Числовая</span>
+                        <h4>Спектр (собственные значения)</h4>
                     </header>
                     <div class="prop-detail-body">
                         <p class="prop-detail-def">
-                            Сумма элементов главной диагонали.
-                        </p>
-                        <div class="prop-detail-formula">$$\operatorname{tr}(A) = \sum_{i} a_{ii}$$</div>
-                        <div class="prop-detail-row">
-                            <span class="prop-detail-label">Свойства:</span>
-                            <span class="prop-detail-value">$\operatorname{tr}(AB) = \operatorname{tr}(BA)$. Равен сумме собственных значений.</span>
-                        </div>
-                        <div class="prop-detail-row">
-                            <span class="prop-detail-label">Применение:</span>
-                            <span class="prop-detail-value">Норма Фробениуса: $\|A\|^2 = \operatorname{tr}(A^*A)$.</span>
-                        </div>
-                    </div>
-                </article>
-
-                <article class="prop-detail-card">
-                    <header class="prop-detail-head">
-                        <span class="prop-detail-badge">Число</span>
-                        <h4>Собственные значения</h4>
-                    </header>
-                    <div class="prop-detail-body">
-                        <p class="prop-detail-def">
-                            Числа $\lambda$, при которых $A v = \lambda v$
-                            имеет ненулевое решение.
+                            Множество чисел \(\lambda\), при которых уравнение \(Ax = \lambda x\) имеет ненулевое решение.
                         </p>
                         <div class="prop-detail-formula">$$\det(A - \lambda I) = 0$$</div>
                         <div class="prop-detail-row">
-                            <span class="prop-detail-label">Инварианты:</span>
-                            <span class="prop-detail-value">$\sum \lambda_i = \operatorname{tr}(A)$; $\prod \lambda_i = \det(A)$.</span>
-                        </div>
-                        <div class="prop-detail-row">
-                            <span class="prop-detail-label">Применение:</span>
-                            <span class="prop-detail-value">Устойчивость систем, PCA, квантовая механика.</span>
+                            <span class="prop-detail-label">Зачем:</span>
+                            <span class="prop-detail-value">Определяют устойчивость, диагонализуемость и динамику систем.</span>
                         </div>
                     </div>
                 </article>
@@ -834,8 +1357,8 @@
             <header class="props-category-head">
                 <span class="props-category-icon">{% icon "alert-circle" size=22 %}</span>
                 <div>
-                    <h3>Вырожденность и обратимость</h3>
-                    <p>Существование обратной матрицы и связанные свойства.</p>
+                    <h3>Вырожденность</h3>
+                    <p>Свойства, связанные с обратимостью и линейной зависимостью.</p>
                 </div>
             </header>
 
@@ -848,17 +1371,12 @@
                     </header>
                     <div class="prop-detail-body">
                         <p class="prop-detail-def">
-                            Квадратная матрица, у которой существует обратная:
-                            $A^{-1}$ такая, что $A A^{-1} = A^{-1} A = I$.
+                            Квадратная матрица, определитель которой отличен от нуля.
                         </p>
                         <div class="prop-detail-formula">$$\det(A) \neq 0$$</div>
                         <div class="prop-detail-row">
-                            <span class="prop-detail-label">Эквивалентно:</span>
-                            <span class="prop-detail-value">$\operatorname{rank}(A) = n$; столбцы линейно независимы; СЛАУ $Ax=b$ имеет единственное решение.</span>
-                        </div>
-                        <div class="prop-detail-row">
-                            <span class="prop-detail-label">Формула:</span>
-                            <span class="prop-detail-value">$A^{-1} = \dfrac{1}{\det A}\operatorname{adj}(A)$.</span>
+                            <span class="prop-detail-label">Свойство:</span>
+                            <span class="prop-detail-value">Существует обратная матрица \(A^{-1}\).</span>
                         </div>
                     </div>
                 </article>
@@ -866,20 +1384,33 @@
                 <article class="prop-detail-card">
                     <header class="prop-detail-head">
                         <span class="prop-detail-badge">Вырожденность</span>
-                        <h4>Вырожденная (сингулярная)</h4>
+                        <h4>Вырожденная (необратимая)</h4>
                     </header>
                     <div class="prop-detail-body">
                         <p class="prop-detail-def">
-                            Квадратная матрица, у которой обратной не существует.
+                            Квадратная матрица, определитель которой равен нулю.
                         </p>
                         <div class="prop-detail-formula">$$\det(A) = 0$$</div>
                         <div class="prop-detail-row">
-                            <span class="prop-detail-label">Эквивалентно:</span>
-                            <span class="prop-detail-value">$\operatorname{rank}(A) < n$; строки или столбцы линейно зависимы; система $Ax=b$ либо несовместна, либо имеет бесконечно много решений.</span>
+                            <span class="prop-detail-label">Следствие:</span>
+                            <span class="prop-detail-value">Строки (столбцы) линейно зависимы; обратной матрицы не существует.</span>
                         </div>
+                    </div>
+                </article>
+
+                <article class="prop-detail-card">
+                    <header class="prop-detail-head">
+                        <span class="prop-detail-badge">Вырожденность</span>
+                        <h4>Обратная матрица</h4>
+                    </header>
+                    <div class="prop-detail-body">
+                        <p class="prop-detail-def">
+                            Матрица \(A^{-1}\), для которой \(A A^{-1} = A^{-1} A = I\).
+                        </p>
+                        <div class="prop-detail-formula">$$A^{-1} = \frac{1}{\det(A)} \operatorname{adj}(A)$$</div>
                         <div class="prop-detail-row">
-                            <span class="prop-detail-label">Геометрически:</span>
-                            <span class="prop-detail-value">Преобразование сжимает пространство в подпространство меньшей размерности.</span>
+                            <span class="prop-detail-label">Условие:</span>
+                            <span class="prop-detail-value">\(\det(A) \neq 0\).</span>
                         </div>
                     </div>
                 </article>
@@ -890,25 +1421,4 @@
     </div>
 </section>
 
-{% endblock %}
-
-
-{% block extra_scripts %}
-<script src="{% static 'matrix_app/js/properties.js' %}"></script>
-<script>
-// Плавная прокрутка к якорям (для навигации по категориям)
-document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('.props-toc-link').forEach(function (link) {
-        link.addEventListener('click', function (e) {
-            const href = link.getAttribute('href');
-            if (!href || href.charAt(0) !== '#') return;
-            const target = document.querySelector(href);
-            if (!target) return;
-            e.preventDefault();
-            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            history.replaceState(null, '', href);
-        });
-    });
-});
-</script>
 {% endblock %}

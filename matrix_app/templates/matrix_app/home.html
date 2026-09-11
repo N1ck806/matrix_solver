@@ -7,12 +7,16 @@
 {% block content %}
 
 <!-- ================================================================
-     Hero
+     HERO
      ================================================================ -->
-<section class="hero" data-animate-section>
-    <div class="container hero-inner">
+<section class="hero">
+    <div class="hero-bg" aria-hidden="true">
+        <div class="hero-bg-grid"></div>
+        <div class="hero-bg-glow hero-bg-glow--1"></div>
+        <div class="hero-bg-glow hero-bg-glow--2"></div>
+    </div>
 
-        <!-- Текстовый блок -->
+    <div class="container hero-inner">
         <div class="hero-content" data-animate="fade-up">
             <span class="hero-badge">
                 <span class="hero-badge-dot"></span>
@@ -25,8 +29,8 @@
 
             <p class="hero-subtitle">
                 Выполняйте операции, исследуйте свойства и получайте
-                пошаговые решения задач по линейной алгебре — от
-                определителя до спектрального разложения.
+                пошаговые решения задач по линейной алгебре —
+                от определителя до спектрального разложения.
             </p>
 
             <div class="hero-actions">
@@ -41,37 +45,26 @@
             </div>
 
             <ul class="hero-features">
-                <li>
-                    {% icon "check-circle" size=16 %}
-                    <span>Дроби, корни, комплексные числа</span>
-                </li>
-                <li>
-                    {% icon "check-circle" size=16 %}
-                    <span>Пошаговые решения с формулами</span>
-                </li>
-                <li>
-                    {% icon "check-circle" size=16 %}
-                    <span>LU, QR, Холецкий, диагонализация</span>
-                </li>
+                <li>{% icon "check-circle" size=16 %}<span>Дроби, корни, комплексные числа</span></li>
+                <li>{% icon "check-circle" size=16 %}<span>Пошаговые решения с формулами</span></li>
+                <li>{% icon "check-circle" size=16 %}<span>LU, QR, Холецкий, диагонализация</span></li>
             </ul>
         </div>
 
-        <!-- Визуализация: две матрицы + парящие формулы -->
         <div class="hero-visual" aria-hidden="true" data-animate="fade-up" data-animate-delay="200">
-
             <div class="matrix-card matrix-card--a">
                 <div class="matrix-card-head">
                     <span class="matrix-label">A</span>
                     <span class="matrix-size">3×3</span>
                 </div>
                 <div class="matrix-grid matrix-grid--3">
-                    {% for row in "123" %}
-                        <div class="matrix-row">
-                            {% for col in "123" %}
-                                <span class="matrix-cell">{{ forloop.counter }}</span>
-                            {% endfor %}
-                        </div>
-                    {% endfor %}
+                    <div class="matrix-row"><span class="matrix-cell">2</span><span class="matrix-cell">-1</span><span class="matrix-cell">0</span></div>
+                    <div class="matrix-row"><span class="matrix-cell">1</span><span class="matrix-cell">3</span><span class="matrix-cell">4</span></div>
+                    <div class="matrix-row"><span class="matrix-cell">0</span><span class="matrix-cell">2</span><span class="matrix-cell">-2</span></div>
+                </div>
+                <div class="matrix-card-foot">
+                    <span class="matrix-foot-label">det A</span>
+                    <span class="matrix-foot-value">−28</span>
                 </div>
             </div>
 
@@ -81,28 +74,26 @@
                     <span class="matrix-size">2×2</span>
                 </div>
                 <div class="matrix-grid matrix-grid--2">
-                    {% for row in "12" %}
-                        <div class="matrix-row">
-                            {% for col in "12" %}
-                                <span class="matrix-cell">{{ forloop.counter }}</span>
-                            {% endfor %}
-                        </div>
-                    {% endfor %}
+                    <div class="matrix-row"><span class="matrix-cell">3</span><span class="matrix-cell">1</span></div>
+                    <div class="matrix-row"><span class="matrix-cell">2</span><span class="matrix-cell">4</span></div>
+                </div>
+                <div class="matrix-card-foot">
+                    <span class="matrix-foot-label">det B</span>
+                    <span class="matrix-foot-value">10</span>
                 </div>
             </div>
 
-            <!-- Парящие формулы -->
             <div class="formula-chip formula-chip--1">
-                <span class="formula-chip-body">$\det(A)$</span>
+                <span class="formula-chip-body">$A^{-1} = \frac{1}{-28}\operatorname{adj}A$</span>
             </div>
             <div class="formula-chip formula-chip--2">
-                <span class="formula-chip-body">$A^{-1}$</span>
+                <span class="formula-chip-body">$\lambda_{1,2} = 4,\ -1$</span>
             </div>
             <div class="formula-chip formula-chip--3">
-                <span class="formula-chip-body">$\lambda_i$</span>
+                <span class="formula-chip-body">$A = LU$</span>
             </div>
             <div class="formula-chip formula-chip--4">
-                <span class="formula-chip-body">$A = LU$</span>
+                <span class="formula-chip-body">$\operatorname{rank}(B) = 2$</span>
             </div>
         </div>
     </div>
@@ -110,11 +101,12 @@
 
 
 <!-- ================================================================
-     Возможности
+     ВОЗМОЖНОСТИ
      ================================================================ -->
-<section class="section section--features" data-animate-section>
+<section class="section">
     <div class="container">
         <header class="section-head">
+            <span class="section-label">Возможности</span>
             <h2 class="section-title">Всё, что нужно для линейной алгебры</h2>
             <p class="section-subtitle">
                 От базовых операций до продвинутых разложений —
@@ -129,62 +121,70 @@
                 </div>
                 <h3>Определитель</h3>
                 <p>Разложение по строке, столбцу и метод Гаусса. Пошаговое решение с минорами.</p>
+                <span class="feature-example">Пример: $\det\begin{pmatrix}2&-1\\1&3\end{pmatrix} = 7$</span>
             </article>
 
-            <article class="feature-card" data-animate="fade-up" data-animate-delay="50">
+            <article class="feature-card" data-animate="fade-up" data-animate-delay="60">
                 <div class="feature-icon feature-icon--violet">
                     {% icon "inverse" size=22 %}
                 </div>
                 <h3>Обратная матрица</h3>
                 <p>Через присоединённую и методом Гаусса-Жордана. Проверка A·A⁻¹ = I.</p>
+                <span class="feature-example">$A^{-1} = \dfrac{1}{7}\begin{pmatrix}3&1\\-1&2\end{pmatrix}$</span>
             </article>
 
-            <article class="feature-card" data-animate="fade-up" data-animate-delay="100">
+            <article class="feature-card" data-animate="fade-up" data-animate-delay="120">
                 <div class="feature-icon feature-icon--emerald">
                     {% icon "rank" size=22 %}
                 </div>
                 <h3>Ранг</h3>
                 <p>Приведение к ступенчатой форме с показом всех преобразований строк.</p>
+                <span class="feature-example">$\operatorname{rank}\begin{pmatrix}1&2&3\\2&4&6\end{pmatrix} = 1$</span>
             </article>
 
-            <article class="feature-card" data-animate="fade-up" data-animate-delay="150">
+            <article class="feature-card" data-animate="fade-up" data-animate-delay="180">
                 <div class="feature-icon feature-icon--amber">
                     {% icon "transpose" size=22 %}
                 </div>
                 <h3>Транспонирование</h3>
                 <p>Транспонирование и сопряжённое транспонирование для комплексных матриц.</p>
+                <span class="feature-example">$(AB)^{T} = B^{T} A^{T}$</span>
             </article>
 
-            <article class="feature-card" data-animate="fade-up" data-animate-delay="200">
+            <article class="feature-card" data-animate="fade-up" data-animate-delay="240">
                 <div class="feature-icon feature-icon--rose">
                     {% icon "system" size=22 %}
                 </div>
                 <h3>СЛАУ</h3>
                 <p>Метод Гаусса, Гаусса-Жордана, Крамера и через обратную. Анализ по Кронекеру-Капелли.</p>
+                <span class="feature-example">$\begin{cases}2x+y=5\\x-3y=-1\end{cases} \Rightarrow x=2,\ y=1$</span>
             </article>
 
-            <article class="feature-card" data-animate="fade-up" data-animate-delay="250">
+            <article class="feature-card" data-animate="fade-up" data-animate-delay="300">
                 <div class="feature-icon feature-icon--cyan">
                     {% icon "lambda" size=22 %}
                 </div>
                 <h3>Собственные значения</h3>
                 <p>Характеристический многочлен, кратности, собственные векторы и диагонализация.</p>
+                <span class="feature-example">$\det(A-\lambda I)=0 \Rightarrow \lambda_{1,2}$</span>
             </article>
 
-            <article class="feature-card" data-animate="fade-up" data-animate-delay="300">
+            <article class="feature-card" data-animate="fade-up" data-animate-delay="360">
                 <div class="feature-icon feature-icon--indigo">
                     {% icon "lu" size=22 %}
                 </div>
                 <h3>Разложения</h3>
                 <p>LU, QR, Холецкого, диагонализация и спектральное разложение.</p>
+                <span class="feature-example">$A = L \cdot U = Q \cdot R$</span>
             </article>
 
-            <article class="feature-card" data-animate="fade-up" data-animate-delay="350">
+            <article class="feature-card" data-animate="fade-up" data-animate-delay="420">
                 <div class="feature-icon feature-icon--slate">
                     {% icon "sparkles" size=22 %}
                 </div>
                 <h3>Пошаговое решение</h3>
                 <p>Каждая операция сопровождается подробными шагами с формулами и пояснениями.</p>
+                <span class="feature-example">Каждый шаг — формула + объяснение</span>
             </article>
         </div>
     </div>
@@ -192,11 +192,12 @@
 
 
 <!-- ================================================================
-     Как это работает
+     КАК ЭТО РАБОТАЕТ
      ================================================================ -->
-<section class="section section--how" data-animate-section>
+<section class="section">
     <div class="container">
         <header class="section-head">
+            <span class="section-label">Процесс</span>
             <h2 class="section-title">Как это работает</h2>
             <p class="section-subtitle">Четыре шага от условия до решения</p>
         </header>
@@ -207,10 +208,7 @@
                 <div class="how-icon">{% icon "matrix-grid" size=24 %}</div>
                 <h3>Введите матрицу</h3>
                 <p>Целые, дроби, десятичные, корни, комплексные числа — всё принимается в точной форме.</p>
-            </div>
-
-            <div class="how-arrow" aria-hidden="true">
-                {% icon "arrow-right" size=20 %}
+                <code class="how-code">1/2, sqrt(2), 2+3i</code>
             </div>
 
             <div class="how-step" data-animate="fade-up" data-animate-delay="100">
@@ -218,10 +216,7 @@
                 <div class="how-icon">{% icon "layers" size=24 %}</div>
                 <h3>Выберите операцию</h3>
                 <p>От простого определителя до спектрального разложения — всё в одном интерфейсе.</p>
-            </div>
-
-            <div class="how-arrow" aria-hidden="true">
-                {% icon "arrow-right" size=20 %}
+                <code class="how-code">det, rank, inv, LU</code>
             </div>
 
             <div class="how-step" data-animate="fade-up" data-animate-delay="200">
@@ -229,10 +224,7 @@
                 <div class="how-icon">{% icon "check-circle" size=24 %}</div>
                 <h3>Получите результат</h3>
                 <p>Точный ответ в символьном виде, готовый для копирования или экспорта.</p>
-            </div>
-
-            <div class="how-arrow" aria-hidden="true">
-                {% icon "arrow-right" size=20 %}
+                <code class="how-code">$\sqrt{2},\ \tfrac{1}{3},\ -i$</code>
             </div>
 
             <div class="how-step" data-animate="fade-up" data-animate-delay="300">
@@ -240,6 +232,7 @@
                 <div class="how-icon">{% icon "book-open" size=24 %}</div>
                 <h3>Изучите решение</h3>
                 <p>Пошаговые вычисления с формулами и объяснениями «что это значит».</p>
+                <code class="how-code">Шаг 1 → Шаг 2 → …</code>
             </div>
         </div>
     </div>
@@ -247,17 +240,17 @@
 
 
 <!-- ================================================================
-     Популярные операции
+     ПОПУЛЯРНЫЕ ОПЕРАЦИИ
      ================================================================ -->
-<section class="section section--popular" data-animate-section>
+<section class="section">
     <div class="container">
         <header class="section-head">
+            <span class="section-label">Быстрый старт</span>
             <h2 class="section-title">Популярные операции</h2>
             <p class="section-subtitle">Начните с готового примера или введите свою матрицу</p>
         </header>
 
         <div class="popular-grid">
-
             <a href="{% url 'matrix_app:calculator' %}?op=determinant" class="popular-card" data-animate="fade-up">
                 <div class="popular-head">
                     <span class="popular-icon">{% icon "determinant" size=20 %}</span>
@@ -265,6 +258,7 @@
                 </div>
                 <h3>Определитель</h3>
                 <p>Вычислить $\det(A)$ с разложением по строке</p>
+                <span class="popular-preview">$\begin{vmatrix}1&2\\3&4\end{vmatrix} = -2$</span>
             </a>
 
             <a href="{% url 'matrix_app:calculator' %}?op=inverse" class="popular-card" data-animate="fade-up" data-animate-delay="60">
@@ -274,6 +268,7 @@
                 </div>
                 <h3>Обратная матрица</h3>
                 <p>Найти $A^{-1}$ с проверкой $A \cdot A^{-1} = I$</p>
+                <span class="popular-preview">$A^{-1} = \dfrac{1}{\det A}\,\operatorname{adj}A$</span>
             </a>
 
             <a href="{% url 'matrix_app:calculator' %}?op=rank" class="popular-card" data-animate="fade-up" data-animate-delay="120">
@@ -283,6 +278,7 @@
                 </div>
                 <h3>Ранг</h3>
                 <p>Привести к ступенчатой форме и посчитать ранг</p>
+                <span class="popular-preview">$\operatorname{rank}(A) \le \min(m,n)$</span>
             </a>
 
             <a href="{% url 'matrix_app:systems' %}" class="popular-card" data-animate="fade-up" data-animate-delay="180">
@@ -292,6 +288,7 @@
                 </div>
                 <h3>СЛАУ</h3>
                 <p>Решить систему $Ax = b$ с анализом совместности</p>
+                <span class="popular-preview">$\operatorname{rank}A = \operatorname{rank}[A|b]$</span>
             </a>
 
             <a href="{% url 'matrix_app:eigen' %}" class="popular-card" data-animate="fade-up" data-animate-delay="240">
@@ -301,6 +298,7 @@
                 </div>
                 <h3>Собственные значения</h3>
                 <p>Найти $\lambda_i$ и собственные векторы</p>
+                <span class="popular-preview">$A v = \lambda v$</span>
             </a>
 
             <a href="{% url 'matrix_app:decompositions' %}" class="popular-card" data-animate="fade-up" data-animate-delay="300">
@@ -310,17 +308,17 @@
                 </div>
                 <h3>LU-разложение</h3>
                 <p>Разложить $A = L \cdot U$ с частичным пивотингом</p>
+                <span class="popular-preview">$A = P^{-1} L U$</span>
             </a>
-
         </div>
     </div>
 </section>
 
 
 <!-- ================================================================
-     Краткая теория
+     КРАТКАЯ ТЕОРИЯ
      ================================================================ -->
-<section class="section section--theory-teaser" data-animate-section>
+<section class="section">
     <div class="container">
         <div class="theory-teaser">
             <div class="theory-teaser-content" data-animate="fade-up">
@@ -340,11 +338,11 @@
                 <div class="theory-formulas">
                     <div class="theory-formula">
                         <span class="formula-label">Определитель</span>
-                        <span class="formula-latex">$\det(A)$</span>
+                        <span class="formula-latex">$\det(A) = ad - bc$</span>
                     </div>
                     <div class="theory-formula">
                         <span class="formula-label">Обратная</span>
-                        <span class="formula-latex">$A^{-1} = \frac{1}{\det A} \operatorname{adj} A$</span>
+                        <span class="formula-latex">$A^{-1} = \dfrac{1}{\det A}\,\operatorname{adj}A$</span>
                     </div>
                     <div class="theory-formula">
                         <span class="formula-label">Спектр</span>
@@ -377,7 +375,7 @@
 <!-- ================================================================
      CTA
      ================================================================ -->
-<section class="section section--cta" data-animate-section>
+<section class="section section--cta">
     <div class="container">
         <div class="cta-block" data-animate="fade-up">
             <div class="cta-icon">
@@ -396,38 +394,860 @@
 {% endblock %}
 
 
+{% block extra_head %}
+{{ block.super }}
+<style>
+/* =============================================================================
+   Главная — стили
+   ============================================================================= */
+
+/* --- ЕДИНЫЙ ФОН НА ВСЮ СТРАНИЦУ --- */
+body {
+    background: #F7F8FC;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Свечения + мягкий градиент — фиксированы на всю высоту */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    pointer-events: none;
+    background:
+        radial-gradient(ellipse 800px 600px at 15% 10%, rgba(99, 102, 241, 0.12), transparent 60%),
+        radial-gradient(ellipse 700px 500px at 85% 20%, rgba(139, 92, 246, 0.10), transparent 60%),
+        radial-gradient(ellipse 600px 500px at 50% 90%, rgba(6, 182, 212, 0.08), transparent 60%),
+        linear-gradient(180deg, #F7F8FC 0%, #F0F3FF 50%, #F7F8FC 100%);
+}
+
+/* Сетка поверх свечений — мягко исчезает */
+body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image:
+        linear-gradient(to right, rgba(99, 102, 241, 0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(99, 102, 241, 0.05) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(ellipse 100% 80% at 50% 20%, black 30%, transparent 90%);
+    -webkit-mask-image: radial-gradient(ellipse 100% 80% at 50% 20%, black 30%, transparent 90%);
+    opacity: 0.7;
+}
+
+/* Тёмная тема */
+[data-theme="dark"] body {
+    background: var(--bg-page);
+}
+
+[data-theme="dark"] body::before {
+    background:
+        radial-gradient(ellipse 800px 600px at 15% 10%, rgba(99, 102, 241, 0.18), transparent 60%),
+        radial-gradient(ellipse 700px 500px at 85% 20%, rgba(139, 92, 246, 0.15), transparent 60%),
+        radial-gradient(ellipse 600px 500px at 50% 90%, rgba(6, 182, 212, 0.12), transparent 60%),
+        linear-gradient(180deg, #0B0E1A 0%, #10142A 50%, #0B0E1A 100%);
+}
+
+[data-theme="dark"] body::after {
+    background-image:
+        linear-gradient(to right, rgba(129, 140, 248, 0.06) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(129, 140, 248, 0.06) 1px, transparent 1px);
+    opacity: 0.6;
+}
+
+/* --- Анимации появления --- */
+[data-animate] {
+    opacity: 0;
+    transform: translateY(12px);
+    transition:
+        opacity 500ms cubic-bezier(0.16, 1, 0.3, 1),
+        transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+}
+[data-animate].is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+html:not(.js-ready) [data-animate] {
+    opacity: 1 !important;
+    transform: none !important;
+}
+
+/* --- HERO --- */
+.hero {
+    position: relative;
+    overflow: hidden;
+    padding: 96px 0 88px;
+    background: transparent;
+}
+
+.hero-bg { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+
+.hero-bg-grid {
+    position: absolute; inset: 0;
+    background-image:
+        linear-gradient(to right, rgba(99, 102, 241, 0.06) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(99, 102, 241, 0.06) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 30%, transparent 90%);
+    -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 30%, transparent 90%);
+}
+
+.hero-bg-glow { position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.5; }
+.hero-bg-glow--1 {
+    width: 520px; height: 520px;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.35), transparent 70%);
+    top: -160px; left: -120px;
+}
+.hero-bg-glow--2 {
+    width: 460px; height: 460px;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.3), transparent 70%);
+    bottom: -180px; right: -100px;
+}
+
+.hero-inner {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    align-items: center;
+}
+
+.hero-title {
+    font-size: clamp(38px, 5vw, 60px);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    font-weight: 800;
+    margin: 0 0 20px;
+    color: var(--text-primary);
+}
+
+.hero-title .accent {
+    background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 50%, #06B6D4 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 200% 200%;
+    animation: gradient-shift 8s ease infinite;
+}
+
+@keyframes gradient-shift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+.hero-subtitle {
+    font-size: clamp(16px, 1.4vw, 19px);
+    line-height: 1.6;
+    max-width: 560px;
+    color: var(--text-secondary);
+    margin: 0 0 32px;
+}
+
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    backdrop-filter: blur(8px);
+    background: rgba(99, 102, 241, 0.1);
+    border: 1px solid rgba(99, 102, 241, 0.25);
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--accent);
+    margin-bottom: 20px;
+}
+
+.hero-badge-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+.hero-actions {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+}
+
+.hero-features {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 10px;
+    max-width: 420px;
+}
+
+.hero-features li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.hero-features svg { color: #10B981; flex-shrink: 0; }
+
+/* --- Hero visual --- */
+.hero-visual {
+    position: relative;
+    height: 480px;
+}
+
+.matrix-card {
+    position: absolute;
+    background: #fff;
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    border-radius: 18px;
+    padding: 18px 20px;
+    box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.04),
+        0 24px 48px -16px rgba(99, 102, 241, 0.25);
+}
+
+[data-theme="dark"] .matrix-card {
+    background: var(--bg-card);
+    border-color: rgba(129, 140, 248, 0.25);
+}
+
+.matrix-card--a {
+    top: 20px; left: 0;
+    animation: float-slow 7s ease-in-out infinite;
+}
+.matrix-card--b {
+    bottom: 40px; right: 20px;
+    animation: float-slow 8s ease-in-out infinite;
+    animation-delay: -2s;
+}
+
+@keyframes float-slow {
+    0%, 100% { transform: translateY(0) rotate(-1deg); }
+    50% { transform: translateY(-10px) rotate(-1deg); }
+}
+
+.matrix-card-head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.matrix-label {
+    width: 28px; height: 28px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #6366F1, #8B5CF6);
+    color: #fff; font-weight: 700; font-size: 13px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px -2px rgba(99, 102, 241, 0.4);
+}
+
+.matrix-card--b .matrix-label {
+    background: linear-gradient(135deg, #06B6D4, #0891B2);
+    box-shadow: 0 4px 12px -2px rgba(6, 182, 212, 0.4);
+}
+
+.matrix-size {
+    font-size: 11px; font-weight: 600;
+    color: var(--text-secondary);
+    background: rgba(99, 102, 241, 0.08);
+    padding: 3px 8px;
+    border-radius: 6px;
+}
+
+.matrix-grid { display: grid; gap: 6px; }
+.matrix-grid--2 { grid-template-columns: repeat(2, 1fr); }
+.matrix-grid--3 { grid-template-columns: repeat(3, 1fr); }
+.matrix-row { display: contents; }
+
+.matrix-cell {
+    display: flex; align-items: center; justify-content: center;
+    min-width: 40px; height: 36px;
+    background: linear-gradient(180deg, #F8FAFF, #F1F4FF);
+    border: 1px solid rgba(99, 102, 241, 0.12);
+    border-radius: 8px;
+    font-size: 13px; font-weight: 700;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+[data-theme="dark"] .matrix-cell {
+    background: linear-gradient(180deg, var(--bg-subtle), var(--bg-card));
+    border-color: rgba(129, 140, 248, 0.2);
+}
+
+.matrix-card-foot {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 12px; padding-top: 10px;
+    border-top: 1px dashed rgba(99, 102, 241, 0.2);
+}
+
+.matrix-foot-label {
+    font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--text-secondary);
+}
+
+.matrix-foot-value {
+    font-size: 15px; font-weight: 800;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+}
+
+.formula-chip {
+    position: absolute;
+    padding: 8px 14px;
+    background: #fff;
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 12px;
+    font-size: 13px; font-weight: 600;
+    color: var(--text-primary);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 12px 24px -8px rgba(99, 102, 241, 0.25);
+    white-space: nowrap;
+}
+
+[data-theme="dark"] .formula-chip { background: var(--bg-card); }
+
+.formula-chip--1 {
+    top: 10px; right: 40px;
+    animation: float-soft 6s ease-in-out infinite;
+}
+.formula-chip--2 {
+    top: 200px; left: 20px;
+    animation: float-soft 7s ease-in-out infinite;
+    animation-delay: -1s;
+}
+.formula-chip--3 {
+    bottom: 200px; right: 0;
+    animation: float-soft 8s ease-in-out infinite;
+    animation-delay: -3s;
+}
+.formula-chip--4 {
+    bottom: 0; left: 100px;
+    animation: float-soft 9s ease-in-out infinite;
+    animation-delay: -2s;
+}
+
+@keyframes float-soft {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+}
+
+/* --- СЕКЦИИ --- */
+.section {
+    padding: 88px 0;
+    background: transparent;
+}
+
+.section--cta { padding: 64px 0 96px; }
+
+.section-head {
+    text-align: center;
+    max-width: 720px;
+    margin: 0 auto 56px;
+}
+
+.section-label {
+    display: inline-block;
+    font-size: 12px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--accent);
+    padding: 4px 12px;
+    background: rgba(99, 102, 241, 0.1);
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    backdrop-filter: blur(6px);
+    border-radius: 999px;
+    margin-bottom: 14px;
+}
+
+.section-title {
+    font-size: clamp(28px, 3vw, 40px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0 0 12px;
+    color: var(--text-primary);
+}
+
+.section-subtitle {
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* --- FEATURES --- */
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+}
+
+.feature-card {
+    padding: 26px 24px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    border-radius: 18px;
+    box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.03),
+        0 4px 16px -4px rgba(99, 102, 241, 0.12);
+    transition: transform 320ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 320ms, border-color 320ms, background-color 320ms;
+}
+
+[data-theme="dark"] .feature-card {
+    background: rgba(20, 24, 40, 0.7);
+    border-color: rgba(129, 140, 248, 0.2);
+}
+
+.feature-card:hover {
+    transform: translateY(-4px);
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 24px 48px -16px rgba(99, 102, 241, 0.28);
+    border-color: rgba(99, 102, 241, 0.35);
+}
+
+[data-theme="dark"] .feature-card:hover {
+    background: rgba(28, 32, 52, 0.9);
+}
+
+.feature-card h3 {
+    font-size: 17px; font-weight: 700;
+    margin: 14px 0 8px;
+    color: var(--text-primary);
+}
+
+.feature-card p {
+    font-size: 14px; line-height: 1.55;
+    color: var(--text-secondary);
+    margin: 0 0 14px;
+}
+
+.feature-example {
+    display: block;
+    padding: 10px 12px;
+    background: rgba(99, 102, 241, 0.06);
+    border: 1px solid rgba(99, 102, 241, 0.12);
+    border-radius: 10px;
+    font-size: 12.5px;
+    color: var(--text-primary);
+    overflow-x: auto;
+}
+
+.feature-icon {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 320ms;
+    color: #fff;
+}
+
+.feature-card:hover .feature-icon { transform: scale(1.08) rotate(-3deg); }
+
+.feature-icon--blue    { background: linear-gradient(135deg, #3B82F6, #2563EB); box-shadow: 0 8px 16px -4px rgba(59, 130, 246, 0.4); }
+.feature-icon--violet  { background: linear-gradient(135deg, #8B5CF6, #7C3AED); box-shadow: 0 8px 16px -4px rgba(139, 92, 246, 0.4); }
+.feature-icon--emerald { background: linear-gradient(135deg, #10B981, #059669); box-shadow: 0 8px 16px -4px rgba(16, 185, 129, 0.4); }
+.feature-icon--amber   { background: linear-gradient(135deg, #F59E0B, #D97706); box-shadow: 0 8px 16px -4px rgba(245, 158, 11, 0.4); }
+.feature-icon--rose    { background: linear-gradient(135deg, #F43F5E, #E11D48); box-shadow: 0 8px 16px -4px rgba(244, 63, 94, 0.4); }
+.feature-icon--cyan    { background: linear-gradient(135deg, #06B6D4, #0891B2); box-shadow: 0 8px 16px -4px rgba(6, 182, 212, 0.4); }
+.feature-icon--indigo  { background: linear-gradient(135deg, #6366F1, #4F46E5); box-shadow: 0 8px 16px -4px rgba(99, 102, 241, 0.4); }
+.feature-icon--slate   { background: linear-gradient(135deg, #64748B, #475569); box-shadow: 0 8px 16px -4px rgba(100, 116, 139, 0.4); }
+
+/* --- HOW --- */
+.how-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+}
+
+.how-step {
+    position: relative;
+    padding: 28px 24px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    border-radius: 18px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+    transition: transform 320ms, box-shadow 320ms, background-color 320ms;
+}
+
+[data-theme="dark"] .how-step {
+    background: rgba(20, 24, 40, 0.7);
+    border-color: rgba(129, 140, 248, 0.2);
+}
+
+.how-step:hover {
+    transform: translateY(-3px);
+    background: #fff;
+    box-shadow: 0 16px 32px -12px rgba(99, 102, 241, 0.25);
+}
+
+[data-theme="dark"] .how-step:hover {
+    background: rgba(28, 32, 52, 0.9);
+}
+
+.how-number {
+    position: absolute;
+    top: 16px; right: 20px;
+    font-size: 13px; font-weight: 800;
+    letter-spacing: 0.05em;
+    color: var(--accent);
+    opacity: 0.6;
+}
+
+.how-icon {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.15));
+    color: var(--accent);
+    margin-bottom: 16px;
+}
+
+.how-step h3 {
+    font-size: 16px; font-weight: 700;
+    margin: 0 0 8px;
+    color: var(--text-primary);
+}
+
+.how-step p {
+    font-size: 14px; line-height: 1.55;
+    color: var(--text-secondary);
+    margin: 0 0 12px;
+}
+
+.how-code {
+    display: inline-block;
+    padding: 4px 10px;
+    background: rgba(99, 102, 241, 0.08);
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+    font-size: 12px;
+    color: var(--accent);
+    font-weight: 600;
+}
+
+/* --- POPULAR --- */
+.popular-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+.popular-card {
+    display: block;
+    padding: 22px 22px 20px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    border-radius: 16px;
+    text-decoration: none;
+    color: inherit;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+    transition: transform 280ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 280ms, border-color 280ms, background-color 280ms;
+}
+
+[data-theme="dark"] .popular-card {
+    background: rgba(20, 24, 40, 0.7);
+    border-color: rgba(129, 140, 248, 0.2);
+}
+
+.popular-card:hover {
+    transform: translateY(-3px);
+    background: #fff;
+    border-color: rgba(99, 102, 241, 0.35);
+    box-shadow: 0 16px 32px -12px rgba(99, 102, 241, 0.25);
+}
+
+[data-theme="dark"] .popular-card:hover {
+    background: rgba(28, 32, 52, 0.9);
+}
+
+.popular-head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.popular-icon {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #6366F1, #8B5CF6);
+    color: #fff;
+    box-shadow: 0 6px 12px -3px rgba(99, 102, 241, 0.4);
+}
+
+.popular-arrow {
+    color: var(--text-secondary);
+    transition: transform 280ms, color 280ms;
+}
+
+.popular-card:hover .popular-arrow {
+    transform: translateX(3px);
+    color: var(--accent);
+}
+
+.popular-card h3 {
+    font-size: 16px; font-weight: 700;
+    margin: 0 0 6px;
+    color: var(--text-primary);
+}
+
+.popular-card p {
+    font-size: 13.5px; line-height: 1.5;
+    color: var(--text-secondary);
+    margin: 0 0 12px;
+}
+
+.popular-preview {
+    display: block;
+    padding: 8px 10px;
+    background: rgba(99, 102, 241, 0.06);
+    border-radius: 8px;
+    font-size: 12.5px;
+    color: var(--text-primary);
+    overflow-x: auto;
+}
+
+/* --- THEORY TEASER --- */
+.theory-teaser {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 48px;
+    align-items: center;
+    padding: 48px;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03), 0 24px 48px -20px rgba(99, 102, 241, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+[data-theme="dark"] .theory-teaser {
+    background: rgba(20, 24, 40, 0.7);
+    border-color: rgba(129, 140, 248, 0.2);
+}
+
+.theory-teaser::before {
+    content: "";
+    position: absolute;
+    top: -50%; right: -10%;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.12), transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.theory-teaser h2 {
+    font-size: clamp(28px, 3vw, 38px);
+    letter-spacing: -0.02em;
+    margin: 12px 0 16px;
+    color: var(--text-primary);
+}
+
+.theory-teaser p {
+    font-size: 15px; line-height: 1.65;
+    color: var(--text-secondary);
+}
+
+.theory-formulas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin: 24px 0;
+}
+
+.theory-formula {
+    padding: 14px 16px;
+    background: rgba(99, 102, 241, 0.05);
+    border: 1px solid rgba(99, 102, 241, 0.12);
+    border-radius: 12px;
+}
+
+.formula-label {
+    display: block;
+    font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+}
+
+.formula-latex { font-size: 15px; color: var(--text-primary); }
+
+.theory-teaser-visual {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.teaser-matrix {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+}
+
+.teaser-matrix-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    padding: 20px 16px;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(139, 92, 246, 0.08));
+    border-radius: 12px;
+}
+
+.teaser-matrix-grid span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary);
+}
+
+.bracket {
+    font-size: 80px;
+    line-height: 1;
+    color: rgba(99, 102, 241, 0.4);
+    font-weight: 200;
+    font-family: serif;
+}
+
+/* --- CTA --- */
+.cta-block {
+    position: relative;
+    text-align: center;
+    padding: 64px 40px;
+    border-radius: 24px;
+    background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+    color: #fff;
+    overflow: hidden;
+    box-shadow: 0 24px 48px -16px rgba(99, 102, 241, 0.5);
+}
+
+.cta-block::before {
+    content: "";
+    position: absolute; inset: 0;
+    background-image:
+        linear-gradient(to right, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+    background-size: 40px 40px;
+    mask-image: radial-gradient(ellipse 70% 80% at 50% 50%, black, transparent);
+    -webkit-mask-image: radial-gradient(ellipse 70% 80% at 50% 50%, black, transparent);
+    pointer-events: none;
+}
+
+.cta-block > * { position: relative; z-index: 1; }
+
+.cta-block h2 {
+    font-size: clamp(26px, 3vw, 36px);
+    letter-spacing: -0.02em;
+    margin: 16px 0 12px;
+    color: #fff;
+}
+
+.cta-block p {
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.9);
+    max-width: 520px;
+    margin: 0 auto 28px;
+}
+
+.cta-icon {
+    display: inline-flex;
+    width: 64px; height: 64px;
+    align-items: center; justify-content: center;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #fff;
+}
+
+.cta-block .btn-primary {
+    background: #fff;
+    color: var(--accent);
+    box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.25);
+}
+
+.cta-block .btn-primary:hover {
+    background: #fff;
+    transform: translateY(-2px);
+}
+
+/* --- Адаптив --- */
+@media (max-width: 992px) {
+    .section { padding: 64px 0; }
+    .hero { padding: 72px 0 56px; }
+    .hero-inner { grid-template-columns: 1fr; gap: 48px; }
+    .hero-visual { height: 420px; }
+    .theory-teaser { grid-template-columns: 1fr; padding: 32px 24px; gap: 32px; }
+    .cta-block { padding: 48px 24px; }
+}
+
+@media (max-width: 640px) {
+    .section { padding: 48px 0; }
+    .features-grid, .popular-grid, .how-grid { grid-template-columns: 1fr; }
+    .hero-title { font-size: 32px; }
+    .hero-visual { height: 360px; }
+    .matrix-card--a { top: 0; left: 0; }
+    .matrix-card--b { bottom: 0; right: 0; }
+    .formula-chip--2, .formula-chip--4 { display: none; }
+    .bracket { font-size: 56px; }
+}
+</style>
+{% endblock %}
+
+
 {% block extra_scripts %}
 <script>
-// Анимация появления секций при скролле
-document.addEventListener('DOMContentLoaded', function () {
-    if (!('IntersectionObserver' in window)) {
-        // Старые браузеры — показываем всё сразу
-        document.querySelectorAll('[data-animate]').forEach(function (el) {
-            el.style.opacity = '1';
-            el.style.transform = 'none';
-        });
-        return;
+(function () {
+    document.documentElement.classList.add('js-ready');
+
+    function reveal(el) {
+        var delay = parseInt(el.dataset.animateDelay || '0', 10);
+        if (delay) {
+            setTimeout(function () { el.classList.add('is-visible'); }, delay);
+        } else {
+            el.classList.add('is-visible');
+        }
     }
 
-    var observer = new IntersectionObserver(function (entries) {
-        entries.forEach(function (entry) {
-            if (entry.isIntersecting) {
-                var el = entry.target;
-                var delay = parseInt(el.dataset.animateDelay || '0', 10);
-                setTimeout(function () {
-                    el.classList.add('is-visible');
-                }, delay);
-                observer.unobserve(el);
-            }
-        });
-    }, {
-        threshold: 0.12,
-        rootMargin: '0px 0px -50px 0px'
-    });
+    document.addEventListener('DOMContentLoaded', function () {
+        var els = document.querySelectorAll('[data-animate]');
+        if (!els.length) return;
 
-    document.querySelectorAll('[data-animate]').forEach(function (el) {
-        observer.observe(el);
+        if (!('IntersectionObserver' in window)) {
+            els.forEach(reveal);
+            return;
+        }
+
+        var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    reveal(entry.target);
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.05, rootMargin: '0px' });
+
+        els.forEach(function (el) { observer.observe(el); });
+
+        // Страховка: через 1.5 сек показываем всё, что не успело
+        setTimeout(function () {
+            els.forEach(function (el) { el.classList.add('is-visible'); });
+        }, 1500);
     });
-});
+})();
 </script>
 {% endblock %}
