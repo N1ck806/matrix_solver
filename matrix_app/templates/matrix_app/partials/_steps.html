@@ -1,0 +1,34 @@
+{% comment %}
+Секция пошагового решения.
+
+Разметка заполняется JavaScript-ом через клонирование <template>.
+Здесь — только структура одного шага.
+
+Параметры для JS:
+    step.number     — номер шага ('1', '2', ...);
+    step.title      — короткий заголовок;
+    step.text       — текстовое пояснение;
+    step.latex      — формула/матрица;
+    step.matrices   — словарь названных матриц для отображения.
+{% endcomment %}
+
+<template id="step-template">
+    <article class="step" data-step>
+        <div class="step-marker" data-step-marker>
+            <span class="step-number" data-step-number></span>
+        </div>
+        <div class="step-content">
+            <h4 class="step-title" data-step-title></h4>
+            <p class="step-text" data-step-text></p>
+            <div class="step-formula" data-step-formula></div>
+            <div class="step-matrices" data-step-matrices hidden></div>
+        </div>
+    </article>
+</template>
+
+<template id="step-matrix-template">
+    <div class="step-matrix">
+        <span class="step-matrix-label" data-step-matrix-label></span>
+        <div class="step-matrix-body" data-step-matrix-body></div>
+    </div>
+</template>

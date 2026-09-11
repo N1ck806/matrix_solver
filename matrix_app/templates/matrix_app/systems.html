@@ -1,0 +1,343 @@
+{% extends "matrix_app/base.html" %}
+{% load static %}
+{% load matrix_icons %}
+
+{% block title %}СЛАУ — системы линейных уравнений{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'matrix_app/css/calculator.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- ================================================================
+     Заголовок
+     ================================================================ -->
+<section class="page-head">
+    <div class="container">
+        <nav class="breadcrumbs" aria-label="Навигационная цепочка">
+            <a href="{% url 'matrix_app:home' %}">Главная</a>
+            <span class="breadcrumbs-sep">/</span>
+            <span aria-current="page">СЛАУ</span>
+        </nav>
+        <div class="page-head-row">
+            <div>
+                <h1 class="page-title">Решение систем линейных уравнений</h1>
+                <p class="page-subtitle">
+                    Введите матрицу коэффициентов $A$ и вектор $b$ — сервис
+                    решит систему $Ax = b$ любым из методов и проверит
+                    совместность по теореме Кронекера-Капелли.
+                </p>
+            </div>
+            <div class="page-head-actions">
+                <a href="#kronecker" class="btn btn-soft btn-sm">
+                    {% icon "book-open" size=14 %}
+                    <span>О теореме</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ================================================================
+     Рабочая область
+     ================================================================ -->
+<section class="calc-workspace">
+    <div class="container systems-layout">
+
+        <!-- ========================================================
+             Матрица A
+             ======================================================== -->
+        <div class="matrix-input-card" data-matrix-card="a">
+            <div class="matrix-input-head">
+                <div class="matrix-input-title">
+                    <span class="matrix-letter" data-matrix-letter aria-hidden="true">A</span>
+                    <h2>Матрица коэффициентов</h2>
+                    <span class="matrix-shape-badge" data-matrix-shape-label="a">3 × 3</span>
+                </div>
+                <div class="matrix-input-tools">
+                    <div class="mini-size">
+                        <span>Уравнений</span>
+                        <button type="button" class="size-btn size-btn--mini" data-size-decr-a-rows aria-label="Уменьшить уравнений">−</button>
+                        <input type="number" class="size-input size-input--mini" value="3" min="1" max="{{ MAX_MATRIX_ROWS }}" data-a-rows data-rows-input aria-label="Уравнений">
+                        <button type="button" class="size-btn size-btn--mini" data-size-incr-a-rows aria-label="Увеличить уравнений">+</button>
+                    </div>
+                    <div class="mini-size">
+                        <span>Неизвестных</span>
+                        <button type="button" class="size-btn size-btn--mini" data-size-decr-a-cols aria-label="Уменьшить неизвестных">−</button>
+                        <input type="number" class="size-input size-input--mini" value="3" min="1" max="{{ MAX_MATRIX_COLS }}" data-a-cols data-cols-input aria-label="Неизвестных">
+                        <button type="button" class="size-btn size-btn--mini" data-size-incr-a-cols aria-label="Увеличить неизвестных">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="matrix-input-body">
+                <div class="matrix-scroll">
+                    <div class="matrix-input-grid" id="matrix-a-input" data-matrix-input data-rows="3" data-cols="3"></div>
+                </div>
+            </div>
+
+            <div class="matrix-input-footer matrix-input-footer--compact">
+                <div class="matrix-input-chips">
+                    <button type="button" class="chip chip--button" data-matrix-action="zero" data-matrix-target="a">
+                        {% icon "zero-matrix" size=14 %}<span>Нули</span>
+                    </button>
+                    <button type="button" class="chip chip--button" data-matrix-action="identity" data-matrix-target="a">
+                        {% icon "identity" size=14 %}<span>Единичная</span>
+                    </button>
+                    <button type="button" class="chip chip--button" data-matrix-action="random" data-matrix-target="a">
+                        {% icon "sparkles" size=14 %}<span>Случайная</span>
+                    </button>
+                    <button type="button" class="chip chip--button" data-matrix-action="transpose" data-matrix-target="a">
+                        {% icon "transpose" size=14 %}<span>Трансп.</span>
+                    </button>
+                    <button type="button" class="chip chip--button" data-matrix-action="copy" data-matrix-target="a">
+                        {% icon "copy" size=14 %}<span>Копировать</span>
+                    </button>
+                    <button type="button" class="chip chip--button" data-matrix-action="paste" data-matrix-target="a">
+                        {% icon "clipboard" size=14 %}<span>Вставить</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- ========================================================
+             Вектор b
+             ======================================================== -->
+        <div class="vector-input-card">
+            <div class="matrix-input-head">
+                <div class="matrix-input-title">
+                    <span class="matrix-letter matrix-letter--b" aria-hidden="true">b</span>
+                    <h2>Свободные члены</h2>
+                    <span class="matrix-shape-badge" data-vector-shape-label>3 × 1</span>
+                </div>
+                <div class="matrix-input-tools">
+                    <div class="mini-size">
+                        <span>Строк</span>
+                        <button type="button" class="size-btn size-btn--mini" data-size-decr-b-rows aria-label="Уменьшить">−</button>
+                        <input type="number" class="size-input size-input--mini" value="3" min="1" max="{{ MAX_MATRIX_ROWS }}" data-b-rows aria-label="Строк">
+                        <button type="button" class="size-btn size-btn--mini" data-size-incr-b-rows aria-label="Увеличить">+</button>
+                    </div>
+                </div>
+            </div>
+            <div class="matrix-input-body">
+                <div class="vector-input-grid" id="system-b-input" data-vector-input data-rows="3"></div>
+            </div>
+        </div>
+
+
+        <!-- ========================================================
+             Метод решения
+             ======================================================== -->
+        <div class="systems-methods">
+            <h3 class="systems-methods-title">
+                {% icon "layers" size=16 %}
+                <span>Метод решения</span>
+            </h3>
+
+            <div class="methods-row">
+                {% for method in methods %}
+                    <label class="method-item">
+                        <input type="radio" name="system-method" value="{{ method.code }}"
+                               class="method-radio" data-system-method
+                               {% if method.code == 'auto' %}checked{% endif %}>
+                        <span class="method-item-body">{{ method.label }}</span>
+                    </label>
+                {% endfor %}
+            </div>
+
+            <div class="systems-controls">
+                <label class="switch switch--inline">
+                    <input type="checkbox" data-system-steps checked>
+                    <span class="switch-track"></span>
+                    <span class="switch-label">Пошаговое решение</span>
+                </label>
+                <div class="systems-buttons">
+                    <button type="button" class="btn btn-primary" data-system-run>
+                        {% icon "arrow-right" size=16 %}
+                        <span>Решить систему</span>
+                    </button>
+                    <button type="button" class="btn btn-soft" data-system-kronecker>
+                        {% icon "check-badge" size=16 %}
+                        <span>Проверить совместность</span>
+                    </button>
+                    <button type="button" class="btn btn-ghost" data-system-reset>
+                        {% icon "trash" size=14 %}
+                        <span>Очистить</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- ========================================================
+             Результат
+             ======================================================== -->
+        {% include "matrix_app/partials/_result_block.html" with result_id="system-result" show_steps=True show_actions=True %}
+
+        <!-- Заглушка до первого вычисления -->
+        <div class="calc-placeholder" data-system-placeholder>
+            <div class="calc-placeholder-icon" aria-hidden="true">
+                {% icon "system" size=48 %}
+            </div>
+            <h3>Результат появится здесь</h3>
+            <p>
+                Введите матрицу коэффициентов A и вектор b,
+                выберите метод и нажмите <b>«Решить систему»</b>
+                или <b>«Проверить совместность»</b>.
+            </p>
+            <div class="calc-placeholder-tips">
+                <div class="calc-placeholder-tip">
+                    <span class="calc-placeholder-tip-num">1</span>
+                    <span>Заполните A и b</span>
+                </div>
+                <div class="calc-placeholder-tip">
+                    <span class="calc-placeholder-tip-num">2</span>
+                    <span>Выберите метод</span>
+                </div>
+                <div class="calc-placeholder-tip">
+                    <span class="calc-placeholder-tip-num">3</span>
+                    <span>Нажмите кнопку</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+
+<!-- ================================================================
+     Теорема Кронекера-Капелли — справка
+     ================================================================ -->
+<section class="section section--kronecker" id="kronecker">
+    <div class="container">
+        <div class="kronecker-card">
+            <header class="kronecker-head">
+                <div class="kronecker-head-icon">
+                    {% icon "book-open" size=22 %}
+                </div>
+                <div>
+                    <h2>Теорема Кронекера-Капелли</h2>
+                    <p>Критерий совместности системы линейных уравнений.</p>
+                </div>
+            </header>
+
+            <div class="kronecker-body">
+                <div class="kronecker-theorem">
+                    <p>Система $Ax = b$ совместна тогда и только тогда, когда</p>
+                    <p class="kronecker-formula">$$\operatorname{rank}(A) = \operatorname{rank}([A \mid b])$$</p>
+                </div>
+
+                <ul class="kronecker-cases">
+                    <li>
+                        <span class="kronecker-case-icon kronecker-case-icon--green">
+                            {% icon "check-circle" size=18 %}
+                        </span>
+                        <div class="kronecker-case-body">
+                            <span class="kronecker-badge kronecker-badge--green">Единственное решение</span>
+                            <span class="kronecker-condition">$\operatorname{rank}(A) = \operatorname{rank}([A|b]) = n$</span>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="kronecker-case-icon kronecker-case-icon--blue">
+                            {% icon "info" size=18 %}
+                        </span>
+                        <div class="kronecker-case-body">
+                            <span class="kronecker-badge kronecker-badge--blue">Бесконечно много решений</span>
+                            <span class="kronecker-condition">$\operatorname{rank}(A) = \operatorname{rank}([A|b]) < n$</span>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="kronecker-case-icon kronecker-case-icon--red">
+                            {% icon "alert-circle" size=18 %}
+                        </span>
+                        <div class="kronecker-case-body">
+                            <span class="kronecker-badge kronecker-badge--red">Решений нет</span>
+                            <span class="kronecker-condition">$\operatorname{rank}(A) \neq \operatorname{rank}([A|b])$</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ================================================================
+     Быстрые примеры СЛАУ
+     ================================================================ -->
+<section class="section section--examples">
+    <div class="container">
+        <header class="section-head section-head--compact">
+            <h2 class="section-title">Примеры систем</h2>
+        </header>
+
+        <div class="examples-grid">
+            <button type="button" class="example-card" data-load-system="slau_unique">
+                <div class="example-card-head">
+                    <span class="example-card-icon example-card-icon--green">
+                        {% icon "check-circle" size=16 %}
+                    </span>
+                    <strong>Единственное решение</strong>
+                    {% icon "arrow-right" size=14 %}
+                </div>
+                <p>Квадратная система 3×3 с $\det(A) \neq 0$.</p>
+            </button>
+
+            <button type="button" class="example-card" data-load-system="slau_infinite">
+                <div class="example-card-head">
+                    <span class="example-card-icon example-card-icon--blue">
+                        {% icon "info" size=16 %}
+                    </span>
+                    <strong>Бесконечно много решений</strong>
+                    {% icon "arrow-right" size=14 %}
+                </div>
+                <p>rank(A) = rank([A|b]) &lt; n — параметрическое решение.</p>
+            </button>
+
+            <button type="button" class="example-card" data-load-system="slau_none">
+                <div class="example-card-head">
+                    <span class="example-card-icon example-card-icon--red">
+                        {% icon "alert-circle" size=16 %}
+                    </span>
+                    <strong>Несовместная система</strong>
+                    {% icon "arrow-right" size=14 %}
+                </div>
+                <p>rank(A) ≠ rank([A|b]) — решений нет.</p>
+            </button>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+
+{% block extra_scripts %}
+<script src="{% static 'matrix_app/js/calculator.js' %}"></script>
+<script src="{% static 'matrix_app/js/systems.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var placeholder = document.querySelector('[data-system-placeholder]');
+    var resultBlock = document.querySelector('[data-result-block]');
+    if (!placeholder || !resultBlock) return;
+
+    var observer = new MutationObserver(function () {
+        placeholder.hidden = !resultBlock.hidden;
+    });
+    observer.observe(resultBlock, { attributes: true, attributeFilter: ['hidden'] });
+
+    var tocLink = document.querySelector('[href="#kronecker"]');
+    if (tocLink) {
+        tocLink.addEventListener('click', function (e) {
+            var target = document.querySelector('#kronecker');
+            if (!target) return;
+            e.preventDefault();
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            history.replaceState(null, '', '#kronecker');
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,433 @@
+{% extends "matrix_app/base.html" %}
+{% load static %}
+{% load matrix_icons %}
+
+{% block title %}Матрицы без лишней сложности{% endblock %}
+
+{% block content %}
+
+<!-- ================================================================
+     Hero
+     ================================================================ -->
+<section class="hero" data-animate-section>
+    <div class="container hero-inner">
+
+        <!-- Текстовый блок -->
+        <div class="hero-content" data-animate="fade-up">
+            <span class="hero-badge">
+                <span class="hero-badge-dot"></span>
+                Точные вычисления · Пошаговые решения
+            </span>
+
+            <h1 class="hero-title">
+                Матрицы <span class="accent">без лишней сложности</span>
+            </h1>
+
+            <p class="hero-subtitle">
+                Выполняйте операции, исследуйте свойства и получайте
+                пошаговые решения задач по линейной алгебре — от
+                определителя до спектрального разложения.
+            </p>
+
+            <div class="hero-actions">
+                <a href="{% url 'matrix_app:calculator' %}" class="btn btn-primary btn-lg">
+                    {% icon "calculator" size=18 %}
+                    <span>Решить матрицу</span>
+                </a>
+                <a href="{% url 'matrix_app:theory' %}" class="btn btn-ghost btn-lg">
+                    {% icon "book-open" size=18 %}
+                    <span>Изучить теорию</span>
+                </a>
+            </div>
+
+            <ul class="hero-features">
+                <li>
+                    {% icon "check-circle" size=16 %}
+                    <span>Дроби, корни, комплексные числа</span>
+                </li>
+                <li>
+                    {% icon "check-circle" size=16 %}
+                    <span>Пошаговые решения с формулами</span>
+                </li>
+                <li>
+                    {% icon "check-circle" size=16 %}
+                    <span>LU, QR, Холецкий, диагонализация</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Визуализация: две матрицы + парящие формулы -->
+        <div class="hero-visual" aria-hidden="true" data-animate="fade-up" data-animate-delay="200">
+
+            <div class="matrix-card matrix-card--a">
+                <div class="matrix-card-head">
+                    <span class="matrix-label">A</span>
+                    <span class="matrix-size">3×3</span>
+                </div>
+                <div class="matrix-grid matrix-grid--3">
+                    {% for row in "123" %}
+                        <div class="matrix-row">
+                            {% for col in "123" %}
+                                <span class="matrix-cell">{{ forloop.counter }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="matrix-card matrix-card--b">
+                <div class="matrix-card-head">
+                    <span class="matrix-label">B</span>
+                    <span class="matrix-size">2×2</span>
+                </div>
+                <div class="matrix-grid matrix-grid--2">
+                    {% for row in "12" %}
+                        <div class="matrix-row">
+                            {% for col in "12" %}
+                                <span class="matrix-cell">{{ forloop.counter }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Парящие формулы -->
+            <div class="formula-chip formula-chip--1">
+                <span class="formula-chip-body">$\det(A)$</span>
+            </div>
+            <div class="formula-chip formula-chip--2">
+                <span class="formula-chip-body">$A^{-1}$</span>
+            </div>
+            <div class="formula-chip formula-chip--3">
+                <span class="formula-chip-body">$\lambda_i$</span>
+            </div>
+            <div class="formula-chip formula-chip--4">
+                <span class="formula-chip-body">$A = LU$</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ================================================================
+     Возможности
+     ================================================================ -->
+<section class="section section--features" data-animate-section>
+    <div class="container">
+        <header class="section-head">
+            <h2 class="section-title">Всё, что нужно для линейной алгебры</h2>
+            <p class="section-subtitle">
+                От базовых операций до продвинутых разложений —
+                с точными вычислениями и понятными объяснениями.
+            </p>
+        </header>
+
+        <div class="features-grid">
+            <article class="feature-card" data-animate="fade-up">
+                <div class="feature-icon feature-icon--blue">
+                    {% icon "determinant" size=22 %}
+                </div>
+                <h3>Определитель</h3>
+                <p>Разложение по строке, столбцу и метод Гаусса. Пошаговое решение с минорами.</p>
+            </article>
+
+            <article class="feature-card" data-animate="fade-up" data-animate-delay="50">
+                <div class="feature-icon feature-icon--violet">
+                    {% icon "inverse" size=22 %}
+                </div>
+                <h3>Обратная матрица</h3>
+                <p>Через присоединённую и методом Гаусса-Жордана. Проверка A·A⁻¹ = I.</p>
+            </article>
+
+            <article class="feature-card" data-animate="fade-up" data-animate-delay="100">
+                <div class="feature-icon feature-icon--emerald">
+                    {% icon "rank" size=22 %}
+                </div>
+                <h3>Ранг</h3>
+                <p>Приведение к ступенчатой форме с показом всех преобразований строк.</p>
+            </article>
+
+            <article class="feature-card" data-animate="fade-up" data-animate-delay="150">
+                <div class="feature-icon feature-icon--amber">
+                    {% icon "transpose" size=22 %}
+                </div>
+                <h3>Транспонирование</h3>
+                <p>Транспонирование и сопряжённое транспонирование для комплексных матриц.</p>
+            </article>
+
+            <article class="feature-card" data-animate="fade-up" data-animate-delay="200">
+                <div class="feature-icon feature-icon--rose">
+                    {% icon "system" size=22 %}
+                </div>
+                <h3>СЛАУ</h3>
+                <p>Метод Гаусса, Гаусса-Жордана, Крамера и через обратную. Анализ по Кронекеру-Капелли.</p>
+            </article>
+
+            <article class="feature-card" data-animate="fade-up" data-animate-delay="250">
+                <div class="feature-icon feature-icon--cyan">
+                    {% icon "lambda" size=22 %}
+                </div>
+                <h3>Собственные значения</h3>
+                <p>Характеристический многочлен, кратности, собственные векторы и диагонализация.</p>
+            </article>
+
+            <article class="feature-card" data-animate="fade-up" data-animate-delay="300">
+                <div class="feature-icon feature-icon--indigo">
+                    {% icon "lu" size=22 %}
+                </div>
+                <h3>Разложения</h3>
+                <p>LU, QR, Холецкого, диагонализация и спектральное разложение.</p>
+            </article>
+
+            <article class="feature-card" data-animate="fade-up" data-animate-delay="350">
+                <div class="feature-icon feature-icon--slate">
+                    {% icon "sparkles" size=22 %}
+                </div>
+                <h3>Пошаговое решение</h3>
+                <p>Каждая операция сопровождается подробными шагами с формулами и пояснениями.</p>
+            </article>
+        </div>
+    </div>
+</section>
+
+
+<!-- ================================================================
+     Как это работает
+     ================================================================ -->
+<section class="section section--how" data-animate-section>
+    <div class="container">
+        <header class="section-head">
+            <h2 class="section-title">Как это работает</h2>
+            <p class="section-subtitle">Четыре шага от условия до решения</p>
+        </header>
+
+        <div class="how-grid">
+            <div class="how-step" data-animate="fade-up">
+                <div class="how-number">01</div>
+                <div class="how-icon">{% icon "matrix-grid" size=24 %}</div>
+                <h3>Введите матрицу</h3>
+                <p>Целые, дроби, десятичные, корни, комплексные числа — всё принимается в точной форме.</p>
+            </div>
+
+            <div class="how-arrow" aria-hidden="true">
+                {% icon "arrow-right" size=20 %}
+            </div>
+
+            <div class="how-step" data-animate="fade-up" data-animate-delay="100">
+                <div class="how-number">02</div>
+                <div class="how-icon">{% icon "layers" size=24 %}</div>
+                <h3>Выберите операцию</h3>
+                <p>От простого определителя до спектрального разложения — всё в одном интерфейсе.</p>
+            </div>
+
+            <div class="how-arrow" aria-hidden="true">
+                {% icon "arrow-right" size=20 %}
+            </div>
+
+            <div class="how-step" data-animate="fade-up" data-animate-delay="200">
+                <div class="how-number">03</div>
+                <div class="how-icon">{% icon "check-circle" size=24 %}</div>
+                <h3>Получите результат</h3>
+                <p>Точный ответ в символьном виде, готовый для копирования или экспорта.</p>
+            </div>
+
+            <div class="how-arrow" aria-hidden="true">
+                {% icon "arrow-right" size=20 %}
+            </div>
+
+            <div class="how-step" data-animate="fade-up" data-animate-delay="300">
+                <div class="how-number">04</div>
+                <div class="how-icon">{% icon "book-open" size=24 %}</div>
+                <h3>Изучите решение</h3>
+                <p>Пошаговые вычисления с формулами и объяснениями «что это значит».</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ================================================================
+     Популярные операции
+     ================================================================ -->
+<section class="section section--popular" data-animate-section>
+    <div class="container">
+        <header class="section-head">
+            <h2 class="section-title">Популярные операции</h2>
+            <p class="section-subtitle">Начните с готового примера или введите свою матрицу</p>
+        </header>
+
+        <div class="popular-grid">
+
+            <a href="{% url 'matrix_app:calculator' %}?op=determinant" class="popular-card" data-animate="fade-up">
+                <div class="popular-head">
+                    <span class="popular-icon">{% icon "determinant" size=20 %}</span>
+                    <span class="popular-arrow">{% icon "arrow-right" size=16 %}</span>
+                </div>
+                <h3>Определитель</h3>
+                <p>Вычислить $\det(A)$ с разложением по строке</p>
+            </a>
+
+            <a href="{% url 'matrix_app:calculator' %}?op=inverse" class="popular-card" data-animate="fade-up" data-animate-delay="60">
+                <div class="popular-head">
+                    <span class="popular-icon">{% icon "inverse" size=20 %}</span>
+                    <span class="popular-arrow">{% icon "arrow-right" size=16 %}</span>
+                </div>
+                <h3>Обратная матрица</h3>
+                <p>Найти $A^{-1}$ с проверкой $A \cdot A^{-1} = I$</p>
+            </a>
+
+            <a href="{% url 'matrix_app:calculator' %}?op=rank" class="popular-card" data-animate="fade-up" data-animate-delay="120">
+                <div class="popular-head">
+                    <span class="popular-icon">{% icon "rank" size=20 %}</span>
+                    <span class="popular-arrow">{% icon "arrow-right" size=16 %}</span>
+                </div>
+                <h3>Ранг</h3>
+                <p>Привести к ступенчатой форме и посчитать ранг</p>
+            </a>
+
+            <a href="{% url 'matrix_app:systems' %}" class="popular-card" data-animate="fade-up" data-animate-delay="180">
+                <div class="popular-head">
+                    <span class="popular-icon">{% icon "system" size=20 %}</span>
+                    <span class="popular-arrow">{% icon "arrow-right" size=16 %}</span>
+                </div>
+                <h3>СЛАУ</h3>
+                <p>Решить систему $Ax = b$ с анализом совместности</p>
+            </a>
+
+            <a href="{% url 'matrix_app:eigen' %}" class="popular-card" data-animate="fade-up" data-animate-delay="240">
+                <div class="popular-head">
+                    <span class="popular-icon">{% icon "lambda" size=20 %}</span>
+                    <span class="popular-arrow">{% icon "arrow-right" size=16 %}</span>
+                </div>
+                <h3>Собственные значения</h3>
+                <p>Найти $\lambda_i$ и собственные векторы</p>
+            </a>
+
+            <a href="{% url 'matrix_app:decompositions' %}" class="popular-card" data-animate="fade-up" data-animate-delay="300">
+                <div class="popular-head">
+                    <span class="popular-icon">{% icon "lu" size=20 %}</span>
+                    <span class="popular-arrow">{% icon "arrow-right" size=16 %}</span>
+                </div>
+                <h3>LU-разложение</h3>
+                <p>Разложить $A = L \cdot U$ с частичным пивотингом</p>
+            </a>
+
+        </div>
+    </div>
+</section>
+
+
+<!-- ================================================================
+     Краткая теория
+     ================================================================ -->
+<section class="section section--theory-teaser" data-animate-section>
+    <div class="container">
+        <div class="theory-teaser">
+            <div class="theory-teaser-content" data-animate="fade-up">
+                <span class="section-label">Краткая теория</span>
+                <h2>Что такое матрица?</h2>
+                <p>
+                    Матрица — это прямоугольная таблица чисел. Она задаёт
+                    линейное преобразование пространства: поворот, отражение,
+                    растяжение или их композицию.
+                </p>
+                <p>
+                    Действия над матрицами позволяют решать системы уравнений,
+                    находить собственные направления преобразования и
+                    разлагать сложные операторы на простые компоненты.
+                </p>
+
+                <div class="theory-formulas">
+                    <div class="theory-formula">
+                        <span class="formula-label">Определитель</span>
+                        <span class="formula-latex">$\det(A)$</span>
+                    </div>
+                    <div class="theory-formula">
+                        <span class="formula-label">Обратная</span>
+                        <span class="formula-latex">$A^{-1} = \frac{1}{\det A} \operatorname{adj} A$</span>
+                    </div>
+                    <div class="theory-formula">
+                        <span class="formula-label">Спектр</span>
+                        <span class="formula-latex">$\det(A - \lambda I) = 0$</span>
+                    </div>
+                </div>
+
+                <a href="{% url 'matrix_app:theory' %}" class="btn btn-outline">
+                    <span>Перейти к теории</span>
+                    {% icon "arrow-right" size=16 %}
+                </a>
+            </div>
+
+            <div class="theory-teaser-visual" aria-hidden="true" data-animate="fade-up" data-animate-delay="150">
+                <div class="teaser-matrix">
+                    <span class="bracket bracket--left">[</span>
+                    <div class="teaser-matrix-grid">
+                        <span>a₁₁</span><span>a₁₂</span><span>a₁₃</span>
+                        <span>a₂₁</span><span>a₂₂</span><span>a₂₃</span>
+                        <span>a₃₁</span><span>a₃₂</span><span>a₃₃</span>
+                    </div>
+                    <span class="bracket bracket--right">]</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ================================================================
+     CTA
+     ================================================================ -->
+<section class="section section--cta" data-animate-section>
+    <div class="container">
+        <div class="cta-block" data-animate="fade-up">
+            <div class="cta-icon">
+                {% icon "rocket" size=32 %}
+            </div>
+            <h2>Готовы решить свою первую матрицу?</h2>
+            <p>Введите любую матрицу — от 1×1 до 10×10. Дроби, корни и комплексные числа поддерживаются.</p>
+            <a href="{% url 'matrix_app:calculator' %}" class="btn btn-primary btn-lg">
+                {% icon "calculator" size=18 %}
+                <span>Открыть калькулятор</span>
+            </a>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+
+{% block extra_scripts %}
+<script>
+// Анимация появления секций при скролле
+document.addEventListener('DOMContentLoaded', function () {
+    if (!('IntersectionObserver' in window)) {
+        // Старые браузеры — показываем всё сразу
+        document.querySelectorAll('[data-animate]').forEach(function (el) {
+            el.style.opacity = '1';
+            el.style.transform = 'none';
+        });
+        return;
+    }
+
+    var observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+                var el = entry.target;
+                var delay = parseInt(el.dataset.animateDelay || '0', 10);
+                setTimeout(function () {
+                    el.classList.add('is-visible');
+                }, delay);
+                observer.unobserve(el);
+            }
+        });
+    }, {
+        threshold: 0.12,
+        rootMargin: '0px 0px -50px 0px'
+    });
+
+    document.querySelectorAll('[data-animate]').forEach(function (el) {
+        observer.observe(el);
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,752 @@
+# =============================================================================
+# MatrixLab — pyproject.toml
+# =============================================================================
+# Единый конфигурационный файл проекта по стандартам:
+#   PEP 518 — build-system
+#   PEP 621 — project metadata
+#   PEP 639 — license expression
+#   PEP 735 — dependency groups
+#
+# Содержит:
+#   1.  [build-system]           — правила сборки
+#   2.  [project]                — метаданные пакета
+#   3.  [project.optional-dependencies] — группы зависимостей
+#   4.  [dependency-groups]      — PEP 735 dev-группы
+#   5.  [project.urls]           — ссылки
+#   6.  [project.scripts]        — CLI-команды
+#   7.  [tool.setuptools]        — упаковка
+#   8.  [tool.ruff]              — линтер + форматтер
+#   9.  [tool.mypy]              — типизация
+#  10.  [tool.pytest]            — тесты
+#  11.  [tool.coverage]          — покрытие
+#  12.  [tool.isort]             — совместимость
+#  13.  [tool.bandit]            — безопасность
+#  14.  [tool.uv]                — uv (опционально)
+#  15.  [tool.pip-tools]         — requirements.txt
+#  16.  [tool.towncrier]         — changelog
+#  17.  [tool.django-stubs]      — Django stubs
+#  18.  [tool.pytest_env]        — env для тестов
+# =============================================================================
+
+
+# =============================================================================
+# 1. [build-system] — правила сборки
+# =============================================================================
+[build-system]
+requires = [
+    "setuptools>=75.0",
+    "wheel>=0.44",
+]
+build-backend = "setuptools.build_meta"
+
+
+# =============================================================================
+# 2. [project] — метаданные пакета
+# =============================================================================
+[project]
+name = "matrixlab"
+version = "1.0.0"
+description = """
+Современный веб-сервис для решения задач с матрицами по высшей математике:
+операции, свойства, СЛАУ, разложения, собственные значения, пошаговые решения.
+""".strip()
+readme = "README.md"
+requires-python = ">=3.14"
+
+# PEP 639 — современный синтаксис лицензии
+license = "MIT"
+license-files = ["LICENSE"]
+
+authors = [
+    { name = "MatrixLab", email = "matrixlab@example.com" },
+]
+
+maintainers = [
+    { name = "MatrixLab", email = "matrixlab@example.com" },
+]
+
+keywords = [
+    "matrix",
+    "linear-algebra",
+    "sympy",
+    "django",
+    "math",
+    "education",
+    "eigenvalues",
+    "gaussian-elimination",
+    "lu-decomposition",
+    "qr-decomposition",
+    "determinant",
+    "rank",
+    "inverse-matrix",
+    "slau",
+    "высшая-математика",
+    "линейная-алгебра",
+    "матрицы",
+]
+
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Web Environment",
+    "Framework :: Django",
+    "Framework :: Django :: 5.1",
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: Russian",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Education",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Typing :: Typed",
+]
+
+# -----------------------------------------------------------------------------
+# Runtime-зависимости
+# -----------------------------------------------------------------------------
+dependencies = [
+    # Веб-фреймворк
+    "Django==5.1.4",
+
+    # Символьная математика — ядро проекта
+    "sympy==1.13.3",
+
+    # Точная арифметика произвольной точности
+    # (транзитивно от SymPy, фиксируем явно для воспроизводимости)
+    "mpmath==1.3.0",
+]
+
+
+# =============================================================================
+# 3. [project.optional-dependencies] — группы зависимостей
+# =============================================================================
+[project.optional-dependencies]
+# --- Инструменты разработки ---
+dev = [
+    "ruff>=0.7.0",
+    "mypy>=1.13.0",
+    "django-stubs>=5.1.0",
+    "types-setuptools>=75.0",
+    "pre-commit>=4.0.0",
+]
+
+# --- Тестирование ---
+test = [
+    "pytest>=8.3.0",
+    "pytest-django>=4.9.0",
+    "pytest-cov>=6.0.0",
+    "pytest-xdist>=3.6.0",
+    "pytest-env>=1.1.0",
+    "hypothesis>=6.122.0",
+    "freezegun>=1.5.0",
+]
+
+# --- Документация ---
+docs = [
+    "mkdocs>=1.6.0",
+    "mkdocs-material>=9.5.0",
+    "mkdocstrings[python]>=0.27.0",
+    "mkdocs-gen-files>=0.5.0",
+    "mkdocs-literate-nav>=0.6.0",
+    "mkdocs-section-index>=0.3.9",
+]
+
+# --- Production ---
+prod = [
+    "gunicorn>=23.0.0",
+    "whitenoise>=6.8.0",
+    "psycopg[binary]>=3.2.0",
+]
+
+# --- Всё сразу ---
+all = [
+    "matrixlab[dev,test,docs,prod]",
+]
+
+
+# =============================================================================
+# 4. [dependency-groups] — PEP 735
+# =============================================================================
+# Новый стандарт для dev-зависимостей. Позволяет не публиковать их в PyPI.
+# =============================================================================
+[dependency-groups]
+dev = [
+    { include-group = "test" },
+    "ruff>=0.7.0",
+    "mypy>=1.13.0",
+    "django-stubs>=5.1.0",
+    "types-setuptools>=75.0",
+    "pre-commit>=4.0.0",
+]
+
+test = [
+    "pytest>=8.3.0",
+    "pytest-django>=4.9.0",
+    "pytest-cov>=6.0.0",
+    "pytest-xdist>=3.6.0",
+    "pytest-env>=1.1.0",
+    "hypothesis>=6.122.0",
+    "freezegun>=1.5.0",
+]
+
+docs = [
+    "mkdocs>=1.6.0",
+    "mkdocs-material>=9.5.0",
+    "mkdocstrings[python]>=0.27.0",
+]
+
+lint = [
+    "ruff>=0.7.0",
+    "mypy>=1.13.0",
+    "bandit[toml]>=1.8.0",
+]
+
+
+# =============================================================================
+# 5. [project.urls] — ссылки
+# =============================================================================
+[project.urls]
+Homepage = "https://example.com/matrixlab"
+Documentation = "https://example.com/matrixlab/docs"
+Repository = "https://example.com/matrixlab/repo"
+Issues = "https://example.com/matrixlab/issues"
+Changelog = "https://example.com/matrixlab/CHANGELOG.md"
+Funding = "https://example.com/matrixlab/donate"
+
+
+# =============================================================================
+# 6. [project.scripts] — CLI-команды
+# =============================================================================
+[project.scripts]
+matrixlab = "manage:main"
+
+
+# =============================================================================
+# 7. [tool.setuptools] — упаковка
+# =============================================================================
+[tool.setuptools]
+py-modules = ["manage"]
+include-package-data = true
+zip-safe = false
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["config*", "matrix_app*"]
+exclude = [
+    "tests*",
+    "*.tests*",
+    "docs*",
+    "staticfiles*",
+    "htmlcov*",
+    ".venv*",
+    "venv*",
+]
+
+[tool.setuptools.package-data]
+matrix_app = [
+    "templates/**/*.html",
+    "static/**/*.css",
+    "static/**/*.js",
+    "static/**/*.svg",
+    "static/**/*.png",
+    "static/**/*.webp",
+    "static/**/*.woff2",
+    "locale/**/*.po",
+    "locale/**/*.mo",
+]
+
+
+# =============================================================================
+# 8. [tool.ruff] — линтер + форматтер
+# =============================================================================
+[tool.ruff]
+line-length = 100
+target-version = "py314"
+src = [".", "config", "matrix_app"]
+extend-exclude = [
+    ".venv",
+    "venv",
+    "build",
+    "dist",
+    "staticfiles",
+    "media",
+    "htmlcov",
+    "__pycache__",
+    "migrations",
+]
+fix = true
+show-fixes = true
+respect-gitignore = true
+output-format = "concise"
+
+# -----------------------------------------------------------------------------
+# 8.1. Правила линтинга
+# -----------------------------------------------------------------------------
+[tool.ruff.lint]
+select = [
+    # --- Базовые ---
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # pyflakes
+
+    # --- Импорты ---
+    "I",      # isort
+    "TID",    # flake8-tidy-imports
+
+    # --- Именование ---
+    "N",      # pep8-naming
+
+    # --- Модернизация ---
+    "UP",     # pyupgrade
+    "FURB",   # refurb
+
+    # --- Баги ---
+    "B",      # flake8-bugbear
+    "A",      # flake8-builtins
+    "C4",     # flake8-comprehensions
+    "DTZ",    # flake8-datetimez
+    "T10",    # flake8-debugger
+    "EM",     # flake8-errmsg
+    "ISC",    # flake8-implicit-str-concat
+    "ICN",    # flake8-import-conventions
+    "LOG",    # flake8-logging
+    "G",      # flake8-logging-format
+    "PIE",    # flake8-pie
+    "PT",     # flake8-pytest-style
+    "Q",      # flake8-quotes
+    "RSE",    # flake8-raise
+    "RET",    # flake8-return
+    "SIM",    # flake8-simplify
+    "TCH",    # flake8-type-checking
+    "INT",    # flake8-gettext
+    "ARG",    # flake8-unused-arguments
+    "PTH",    # flake8-use-pathlib
+    "ERA",    # eradicate
+    "PL",     # pylint
+    "TRY",    # tryceratops
+    "FLY",    # flynt
+    "PERF",   # perflint
+    "RUF",    # ruff-specific
+
+    # --- Django ---
+    "DJ",     # flake8-django
+]
+
+ignore = [
+    "E501",     # line-length — формулы бывают длинными
+    "PLR0913",  # too-many-arguments — у сервисов бывает
+    "PLR2004",  # magic-value — размерности 2, 3 — не магия
+    "TRY003",   # длинные сообщения исключений
+    "EM101",    # строковые литералы в исключениях
+    "EM102",    # f-string в исключениях
+    "D",        # docstring — включим позже
+]
+
+# -----------------------------------------------------------------------------
+# 8.2. Исключения по файлам
+# -----------------------------------------------------------------------------
+[tool.ruff.lint.per-file-ignores]
+"matrix_app/services/*.py" = [
+    "PLR0912",  # too-many-branches — в математике бывает
+    "PLR0915",  # too-many-statements — то же
+    "C901",     # too-complex — алгоритмы бывают сложными
+]
+"matrix_app/migrations/*.py" = ["ALL"]
+"tests/*.py" = [
+    "S101",     # assert
+    "PLR2004",  # magic values
+    "ARG",      # unused arguments
+    "PT011",    # pytest.raises too broad
+]
+"manage.py" = ["TID252", "INP001"]
+"config/settings.py" = ["F403", "F405"]
+
+# -----------------------------------------------------------------------------
+# 8.3. isort
+# -----------------------------------------------------------------------------
+[tool.ruff.lint.isort]
+known-first-party = ["config", "matrix_app"]
+known-third-party = ["django", "sympy", "mpmath"]
+section-order = [
+    "future",
+    "standard-library",
+    "third-party",
+    "first-party",
+    "local-folder",
+]
+combine-as-imports = true
+force-wrap-aliases = true
+split-on-trailing-comma = true
+lines-after-imports = 2
+
+# -----------------------------------------------------------------------------
+# 8.4. flake8-tidy-imports — запрет относительных импортов
+# -----------------------------------------------------------------------------
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "parents"
+
+# -----------------------------------------------------------------------------
+# 8.5. flake8-errmsg — ограничение длины сообщений
+# -----------------------------------------------------------------------------
+[tool.ruff.lint.flake8-errmsg]
+max-string-length = 120
+
+# -----------------------------------------------------------------------------
+# 8.6. pydocstyle
+# -----------------------------------------------------------------------------
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+# -----------------------------------------------------------------------------
+# 8.7. pylint
+# -----------------------------------------------------------------------------
+[tool.ruff.lint.pylint]
+max-args = 8
+max-branches = 15
+max-returns = 8
+max-statements = 60
+
+# -----------------------------------------------------------------------------
+# 8.8. Форматтер
+# -----------------------------------------------------------------------------
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "lf"
+docstring-code-format = true
+docstring-code-line-length = 88
+
+
+# =============================================================================
+# 9. [tool.mypy] — строгая типизация
+# =============================================================================
+[tool.mypy]
+python_version = "3.14"
+platform = "linux"
+
+# --- Строгость ---
+warn_return_any = true
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+
+# --- Обязательные аннотации ---
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+disallow_untyped_decorators = true
+
+# --- Any ---
+disallow_any_unimported = true
+disallow_any_expr = false
+disallow_any_decorated = false
+disallow_any_explicit = false
+disallow_any_generics = true
+disallow_subclassing_any = true
+
+# --- Опциональные ---
+no_implicit_optional = true
+strict_equality = true
+extra_checks = true
+
+# --- Вывод ---
+show_error_codes = true
+show_column_numbers = true
+show_error_context = true
+pretty = true
+error_summary = true
+
+# --- Пакеты ---
+namespace_packages = true
+explicit_package_bases = true
+mypy_path = "."
+
+# --- Файлы ---
+files = [
+    "config",
+    "matrix_app",
+]
+exclude = [
+    "migrations",
+    "staticfiles",
+    "media",
+    "htmlcov",
+    "__pycache__",
+]
+
+# -----------------------------------------------------------------------------
+# 9.1. Переопределения
+# -----------------------------------------------------------------------------
+[[tool.mypy.overrides]]
+module = "sympy.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "mpmath.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "matrix_app.migrations.*"
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+
+[[tool.mypy.overrides]]
+module = "config.settings"
+disable_error_code = ["attr-defined"]
+
+
+# =============================================================================
+# 10. [tool.pytest.ini_options] — тесты
+# =============================================================================
+[tool.pytest.ini_options]
+minversion = "8.0"
+
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--tb=short",
+    "--color=yes",
+    "-ra",
+    "--showlocals",
+]
+
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+DJANGO_SETTINGS_MODULE = "config.settings"
+django_find_project = false
+
+# --- Предупреждения ---
+filterwarnings = [
+    "error",
+    "ignore::DeprecationWarning:sympy.*",
+    "ignore::PendingDeprecationWarning:sympy.*",
+    "ignore::DeprecationWarning:mpmath.*",
+]
+
+# --- Маркеры ---
+markers = [
+    "slow: медленные тесты (символьные вычисления большого размера)",
+    "numeric: тесты численных методов",
+    "symbolic: тесты символьных вычислений",
+    "edge_case: тесты краевых случаев (1×1, нулевая, вырожденная)",
+    "integration: интеграционные тесты (views + services)",
+    "smoke: быстрые проверки базовой работоспособности",
+]
+
+# --- Параллельность ---
+# xdist: -n auto (в командной строке)
+
+# --- Hypothesis ---
+[tool.pytest.ini_options.hypothesis]
+max_examples = 100
+deadline = 500
+suppress_health_check = ["too_slow"]
+
+
+# =============================================================================
+# 11. [tool.coverage] — покрытие
+# =============================================================================
+[tool.coverage.run]
+source = ["matrix_app", "config"]
+branch = true
+parallel = true
+concurrency = ["thread", "multiprocessing"]
+omit = [
+    "*/migrations/*",
+    "*/__init__.py",
+    "*/apps.py",
+    "*/admin.py",
+    "manage.py",
+    "config/asgi.py",
+    "config/wsgi.py",
+    "*/tests/*",
+]
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false
+skip_empty = true
+sort = "Cover"
+exclude_also = [
+    "pragma: no cover",
+    "def __repr__",
+    "def __str__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+    "@overload",
+    "@typing.overload",
+]
+
+[tool.coverage.html]
+directory = "htmlcov"
+show_contexts = true
+title = "MatrixLab — Coverage Report"
+
+[tool.coverage.xml]
+output = "coverage.xml"
+package_depth = 2
+
+[tool.coverage.json]
+output = "coverage.json"
+pretty_print = true
+show_contexts = true
+
+[tool.coverage.paths]
+source = [
+    "matrix_app",
+    "*/site-packages",
+]
+
+
+# =============================================================================
+# 12. [tool.isort] — совместимость с ruff
+# =============================================================================
+# На случай, если кто-то запустит isort напрямую.
+# =============================================================================
+[tool.isort]
+profile = "black"
+line_length = 100
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true
+lines_after_imports = 2
+known_first_party = ["config", "matrix_app"]
+known_third_party = ["django", "sympy", "mpmath"]
+skip = [
+    ".venv",
+    "venv",
+    "migrations",
+    "staticfiles",
+    "htmlcov",
+]
+
+
+# =============================================================================
+# 13. [tool.bandit] — безопасность
+# =============================================================================
+[tool.bandit]
+exclude_dirs = [
+    "tests",
+    "migrations",
+    ".venv",
+    "venv",
+    "staticfiles",
+    "htmlcov",
+]
+skips = [
+    "B101",  # assert_used — в тестах допустимо
+]
+
+[tool.bandit.assert_used]
+skips = ["*_test.py", "test_*.py"]
+
+
+# =============================================================================
+# 14. [tool.uv] — uv (опционально)
+# =============================================================================
+# Если используешь uv — раскомментируй.
+# =============================================================================
+# [tool.uv]
+# package = true
+# default-groups = ["dev"]
+#
+# [tool.uv.sources]
+# # Локальные пакеты, если есть
+#
+# [tool.uv.pip]
+# index-url = "https://pypi.org/simple"
+
+
+# =============================================================================
+# 15. [tool.pip-tools] — генерация requirements.txt
+# =============================================================================
+[tool.pip-tools]
+generate-hashes = true
+allow-unsafe = true
+resolver = "backtracking"
+strip-extras = false
+output-file = "requirements.txt"
+
+[tool.pip-tools.compile]
+build-isolation = true
+
+[tool.pip-tools.sync]
+install-hashes = true
+
+
+# =============================================================================
+# 16. [tool.towncrier] — changelog
+# =============================================================================
+[tool.towncrier]
+package = "matrixlab"
+package_dir = "matrix_app"
+filename = "CHANGELOG.md"
+directory = "changes"
+title_format = "## [{version}] — {project_date}"
+issue_format = "[#{issue}](https://example.com/matrixlab/issues/{issue})"
+underlines = ["=", "-", "~"]
+
+[[tool.towncrier.type]]
+directory = "feature"
+name = "Добавлено"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "bugfix"
+name = "Исправлено"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "doc"
+name = "Документация"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "removal"
+name = "Удалено"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "misc"
+name = "Прочее"
+showcontent = false
+
+
+# =============================================================================
+# 17. [tool.django-stubs] — Django stubs
+# =============================================================================
+[tool.django-stubs]
+django_settings_module = "config.settings"
+strict_settings = false
+
+
+# =============================================================================
+# 18. [tool.pytest_env] — переменные окружения для тестов
+# =============================================================================
+[tool.pytest_env]
+DJANGO_SETTINGS_MODULE = "config.settings"
+DJANGO_DEBUG = "False"
+DJANGO_SECRET_KEY = "test-secret-key-not-for-production"
+DJANGO_ALLOWED_HOSTS = "localhost,127.0.0.1,testserver"
+DATABASE_URL = "sqlite:///:memory:"

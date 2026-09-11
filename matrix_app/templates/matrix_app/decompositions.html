@@ -1,0 +1,360 @@
+{% extends "matrix_app/base.html" %}
+{% load static %}
+{% load matrix_icons %}
+
+{% block title %}Разложения матриц — LU, QR, Холецкий, диагонализация{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'matrix_app/css/calculator.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- ================================================================
+     Заголовок
+     ================================================================ -->
+<section class="page-head">
+    <div class="container">
+        <nav class="breadcrumbs" aria-label="Навигационная цепочка">
+            <a href="{% url 'matrix_app:home' %}">Главная</a>
+            <span class="breadcrumbs-sep">/</span>
+            <span aria-current="page">Разложения</span>
+        </nav>
+        <div class="page-head-row">
+            <div>
+                <h1 class="page-title">Разложения матриц</h1>
+                <p class="page-subtitle">
+                    LU, QR, разложение Холецкого, диагонализация и спектральное
+                    разложение — с пошаговым построением и проверкой
+                    восстановления исходной матрицы.
+                </p>
+            </div>
+            <div class="page-head-actions">
+                <a href="#decomp-info" class="btn btn-soft btn-sm">
+                    {% icon "book-open" size=14 %}
+                    <span>Когда применять</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ================================================================
+     Рабочая область
+     ================================================================ -->
+<section class="calc-workspace">
+    <div class="container decompositions-layout">
+
+        <!-- ========================================================
+             Селектор разложений
+             ======================================================== -->
+        <div class="decomp-selector">
+
+            <button type="button" class="decomp-btn is-active" data-decomp="lu">
+                <span class="decomp-symbol">{% icon "lu" size=22 %}</span>
+                <div class="decomp-text">
+                    <strong>$A = L \cdot U$</strong>
+                    <span>Нижняя и верхняя треугольные</span>
+                </div>
+            </button>
+
+            <button type="button" class="decomp-btn" data-decomp="qr">
+                <span class="decomp-symbol">{% icon "qr" size=22 %}</span>
+                <div class="decomp-text">
+                    <strong>$A = Q \cdot R$</strong>
+                    <span>Ортогональная и верхняя треугольная</span>
+                </div>
+            </button>
+
+            <button type="button" class="decomp-btn" data-decomp="cholesky">
+                <span class="decomp-symbol">{% icon "diagonal" size=22 %}</span>
+                <div class="decomp-text">
+                    <strong>$A = L \cdot L^{T}$</strong>
+                    <span>Симметричные положительно определённые</span>
+                </div>
+            </button>
+
+            <button type="button" class="decomp-btn" data-decomp="diagonalize">
+                <span class="decomp-symbol">{% icon "diagonalize" size=22 %}</span>
+                <div class="decomp-text">
+                    <strong>$A = P \cdot D \cdot P^{-1}$</strong>
+                    <span>Диагонализация через собственные векторы</span>
+                </div>
+            </button>
+
+            <button type="button" class="decomp-btn" data-decomp="spectral">
+                <span class="decomp-symbol">{% icon "symmetric" size=22 %}</span>
+                <div class="decomp-text">
+                    <strong>$A = Q \cdot D \cdot Q^{T}$</strong>
+                    <span>Спектральное разложение симметричной</span>
+                </div>
+            </button>
+        </div>
+
+
+        <!-- ========================================================
+             Ввод матрицы
+             ======================================================== -->
+        <div class="matrix-input-card" data-matrix-card="a">
+            <div class="matrix-input-head">
+                <div class="matrix-input-title">
+                    <span class="matrix-letter" data-matrix-letter aria-hidden="true">A</span>
+                    <h2>Матрица <span data-matrix-label>A</span></h2>
+                    <span class="matrix-shape-badge" data-matrix-shape-label="a">3 × 3</span>
+                </div>
+                <div class="matrix-input-tools">
+                    <div class="mini-size">
+                        <span>Строк</span>
+                        <button type="button" class="size-btn size-btn--mini" data-size-decr-a-rows aria-label="Уменьшить строки">−</button>
+                        <input type="number" class="size-input size-input--mini" value="3" min="1" max="{{ MAX_MATRIX_ROWS }}" data-a-rows data-rows-input aria-label="Строк">
+                        <button type="button" class="size-btn size-btn--mini" data-size-incr-a-rows aria-label="Увеличить строки">+</button>
+                    </div>
+                    <div class="mini-size">
+                        <span>Столбцов</span>
+                        <button type="button" class="size-btn size-btn--mini" data-size-decr-a-cols aria-label="Уменьшить столбцы">−</button>
+                        <input type="number" class="size-input size-input--mini" value="3" min="1" max="{{ MAX_MATRIX_COLS }}" data-a-cols data-cols-input aria-label="Столбцов">
+                        <button type="button" class="size-btn size-btn--mini" data-size-incr-a-cols aria-label="Увеличить столбцы">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="matrix-input-body">
+                <div class="matrix-scroll">
+                    <div class="matrix-input-grid" id="matrix-a-input" data-matrix-input data-rows="3" data-cols="3"></div>
+                </div>
+                <p class="matrix-input-hint">
+                    <strong>Замечание:</strong> QR требует <em>m ≥ n</em>, Холецкий — симметричную положительно определённую,
+                    спектральное — симметричную матрицу.
+                </p>
+            </div>
+
+            <div class="matrix-input-footer matrix-input-footer--compact">
+                <div class="matrix-input-chips">
+                    <button type="button" class="chip chip--button" data-matrix-action="zero" data-matrix-target="a">
+                        {% icon "zero-matrix" size=14 %}<span>Нули</span>
+                    </button>
+                    <button type="button" class="chip chip--button" data-matrix-action="identity" data-matrix-target="a">
+                        {% icon "identity" size=14 %}<span>Единичная</span>
+                    </button>
+                    <button type="button" class="chip chip--button" data-matrix-action="random" data-matrix-target="a">
+                        {% icon "sparkles" size=14 %}<span>Случайная</span>
+                    </button>
+                    <button type="button" class="chip chip--button" data-matrix-action="transpose" data-matrix-target="a">
+                        {% icon "transpose" size=14 %}<span>Трансп.</span>
+                    </button>
+                    <button type="button" class="chip chip--button" data-matrix-action="copy" data-matrix-target="a">
+                        {% icon "copy" size=14 %}<span>Копировать</span>
+                    </button>
+                    <button type="button" class="chip chip--button" data-matrix-action="paste" data-matrix-target="a">
+                        {% icon "clipboard" size=14 %}<span>Вставить</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="decomp-controls">
+                <label class="switch switch--inline">
+                    <input type="checkbox" data-decomp-check checked>
+                    <span class="switch-track"></span>
+                    <span class="switch-label">Проверка восстановления A</span>
+                </label>
+                <div class="decomp-buttons">
+                    <button type="button" class="btn btn-primary" data-decomp-run>
+                        {% icon "arrow-right" size=16 %}
+                        <span>Разложить</span>
+                    </button>
+                    <button type="button" class="btn btn-ghost" data-decomp-reset>
+                        {% icon "trash" size=14 %}
+                        <span>Очистить</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- ========================================================
+             Результат
+             ======================================================== -->
+        <div class="result-block decomp-result" id="decomp-result" data-decomp-result hidden>
+
+            <section class="result-section result-section--task">
+                <header class="result-section-head">
+                    <span class="result-section-number">1</span>
+                    <h3 class="result-section-title">Задание</h3>
+                </header>
+                <div class="result-section-body">
+                    <p class="result-task-text" data-decomp-task-text></p>
+                    <div class="result-task-formula" data-decomp-task-formula></div>
+                </div>
+            </section>
+
+            <section class="result-section result-section--steps">
+                <header class="result-section-head">
+                    <span class="result-section-number">2</span>
+                    <h3 class="result-section-title">Построение</h3>
+                </header>
+                <div class="result-section-body decomp-steps" data-decomp-steps></div>
+            </section>
+
+            <section class="result-section result-section--result">
+                <header class="result-section-head">
+                    <span class="result-section-number">3</span>
+                    <h3 class="result-section-title">Результат</h3>
+                </header>
+                <div class="result-section-body">
+                    <div class="decomp-parts" data-decomp-parts></div>
+
+                    <div class="decomp-checks" data-decomp-checks hidden>
+                        <h4 class="result-checks-title">Проверка</h4>
+                        <ul class="result-checks-list" data-decomp-checks-list></ul>
+                    </div>
+
+                    <div class="decomp-reason" data-decomp-reason hidden></div>
+
+                    <div class="result-actions" data-decomp-actions>
+                        <button type="button" class="btn btn-soft btn-sm" data-copy-result>
+                            {% icon "copy" size=14 %}
+                            <span>Копировать</span>
+                        </button>
+                        <button type="button" class="btn btn-soft btn-sm" data-export-result>
+                            {% icon "download" size=14 %}
+                            <span>Скачать</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <div class="result-error" data-decomp-error hidden>
+                <h4 class="result-error-title">Разложение неприменимо</h4>
+                <p class="result-error-message" data-decomp-error-message></p>
+            </div>
+        </div>
+
+        <!-- Заглушка -->
+        <div class="calc-placeholder" data-decomp-placeholder>
+            <div class="calc-placeholder-icon" aria-hidden="true">
+                {% icon "lu" size=48 %}
+            </div>
+            <h3>Результат появится здесь</h3>
+            <p>
+                Введите матрицу, выберите разложение и нажмите
+                <b>«Разложить»</b>.
+            </p>
+            <div class="calc-placeholder-tips">
+                <div class="calc-placeholder-tip">
+                    <span class="calc-placeholder-tip-num">1</span>
+                    <span>Введите матрицу</span>
+                </div>
+                <div class="calc-placeholder-tip">
+                    <span class="calc-placeholder-tip-num">2</span>
+                    <span>Выберите разложение</span>
+                </div>
+                <div class="calc-placeholder-tip">
+                    <span class="calc-placeholder-tip-num">3</span>
+                    <span>Нажмите «Разложить»</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+
+<!-- ================================================================
+     Справка по разложениям
+     ================================================================ -->
+<section class="section section--decomp-info" id="decomp-info">
+    <div class="container">
+        <header class="section-head">
+            <h2 class="section-title">Когда применять какое разложение</h2>
+            <p class="section-subtitle">
+                Краткий гид по выбору метода для конкретной задачи.
+            </p>
+        </header>
+
+        <div class="decomp-info-grid">
+
+            <article class="decomp-info-card">
+                <div class="decomp-info-icon decomp-info-icon--indigo">
+                    {% icon "lu" size=22 %}
+                </div>
+                <h3>LU-разложение</h3>
+                <p class="decomp-info-formula">$A = L \cdot U$</p>
+                <p>Когда нужно решать одну и ту же систему с разными правыми частями или вычислять определитель как произведение диагоналей $U$.</p>
+                <span class="decomp-info-tag">Применимо к любой матрице (с пивотингом)</span>
+            </article>
+
+            <article class="decomp-info-card">
+                <div class="decomp-info-icon decomp-info-icon--emerald">
+                    {% icon "qr" size=22 %}
+                </div>
+                <h3>QR-разложение</h3>
+                <p class="decomp-info-formula">$A = Q \cdot R$</p>
+                <p>Для метода наименьших квадратов, QR-алгоритма поиска собственных значений и численно устойчивого решения систем.</p>
+                <span class="decomp-info-tag">Требуется $m \ge n$</span>
+            </article>
+
+            <article class="decomp-info-card">
+                <div class="decomp-info-icon decomp-info-icon--violet">
+                    {% icon "diagonal" size=22 %}
+                </div>
+                <h3>Холецкого</h3>
+                <p class="decomp-info-formula">$A = L \cdot L^{T}$</p>
+                <p>Ускоренное разложение для симметричных положительно определённых матриц. Вдвое быстрее LU.</p>
+                <span class="decomp-info-tag">Симметричная положительно определённая</span>
+            </article>
+
+            <article class="decomp-info-card">
+                <div class="decomp-info-icon decomp-info-icon--amber">
+                    {% icon "diagonalize" size=22 %}
+                </div>
+                <h3>Диагонализация</h3>
+                <p class="decomp-info-formula">$A = P \cdot D \cdot P^{-1}$</p>
+                <p>Быстрое вычисление $A^n$, решение систем ОДУ $x' = Ax$, понимание структуры преобразования.</p>
+                <span class="decomp-info-tag">Диагонализируемая матрица</span>
+            </article>
+
+            <article class="decomp-info-card">
+                <div class="decomp-info-icon decomp-info-icon--cyan">
+                    {% icon "symmetric" size=22 %}
+                </div>
+                <h3>Спектральное</h3>
+                <p class="decomp-info-formula">$A = Q \cdot D \cdot Q^{T}$</p>
+                <p>Ортогональная диагонализация симметричной матрицы. Широко используется в PCA, квантовой механике, теории колебаний.</p>
+                <span class="decomp-info-tag">Только симметричная</span>
+            </article>
+
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+
+{% block extra_scripts %}
+<script src="{% static 'matrix_app/js/calculator.js' %}"></script>
+<script src="{% static 'matrix_app/js/decompositions.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var placeholder = document.querySelector('[data-decomp-placeholder]');
+    var resultBlock = document.querySelector('[data-decomp-result]');
+    if (!placeholder || !resultBlock) return;
+
+    var observer = new MutationObserver(function () {
+        placeholder.hidden = !resultBlock.hidden;
+    });
+    observer.observe(resultBlock, { attributes: true, attributeFilter: ['hidden'] });
+
+    var infoLink = document.querySelector('[href="#decomp-info"]');
+    if (infoLink) {
+        infoLink.addEventListener('click', function (e) {
+            var target = document.querySelector('#decomp-info');
+            if (!target) return;
+            e.preventDefault();
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            history.replaceState(null, '', '#decomp-info');
+        });
+    }
+});
+</script>
+{% endblock %}

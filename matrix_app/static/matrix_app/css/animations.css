@@ -1,0 +1,854 @@
+/* =============================================================================
+   MatrixLab — animations.css
+   =============================================================================
+   Единая система анимаций проекта.
+
+       1. Уважение к prefers-reduced-motion
+       2. Все keyframes
+       3. Анимации входа страниц и секций
+       4. Анимации ячеек матрицы
+       5. Анимации кнопок
+       6. Анимации карточек (hover, focus)
+       7. Анимации результата (3 секции, шаги)
+       8. Анимации Hero (формулы, матричные карточки)
+       9. Анимации модальных окон и тостов
+      10. Анимации загрузки (спиннер, скелетон, «вычисляем»)
+      11. Анимации иконок
+      12. Анимации темы
+      13. Утилитарные animation-классы
+   ============================================================================= */
+
+
+/* =============================================================================
+   1. УВАЖЕНИЕ К ПОЛЬЗОВАТЕЛЬСКИМ ПРЕДПОЧТЕНИЯМ
+   ============================================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+
+/* =============================================================================
+   2. ВСЕ KEYFRAMES
+   ============================================================================= */
+
+/* Появление */
+@keyframes fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes fade-in-up {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in-down {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in-scale {
+    from { opacity: 0; transform: scale(0.97); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+/* Сдвиг */
+@keyframes slide-in-left {
+    from { opacity: 0; transform: translateX(-8px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slide-in-right {
+    from { opacity: 0; transform: translateX(8px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Пульсация / мерцание */
+@keyframes pulse-soft {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.65; }
+}
+
+@keyframes pulse-scale {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.04); }
+}
+
+/* Встряска */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%      { transform: translateX(-4px); }
+    40%      { transform: translateX(4px); }
+    60%      { transform: translateX(-3px); }
+    80%      { transform: translateX(3px); }
+}
+
+/* Ячейки матрицы */
+@keyframes matrix-cell-pop {
+    0%   { transform: scale(0.8); opacity: 0; }
+    60%  { transform: scale(1.04); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes matrix-cell-correct {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    50%      { box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2); }
+}
+
+/* Каретка */
+@keyframes typing-caret {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.3; }
+}
+
+/* Градиент */
+@keyframes gradient-shift {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Спиннер */
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes icon-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Скелетон */
+@keyframes skeleton-loading {
+    from { left: -150%; }
+    to   { left: 150%; }
+}
+
+/* Toast */
+@keyframes toast-in {
+    from { opacity: 0; transform: translateX(24px) scale(0.98); }
+    to   { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+@keyframes toast-out {
+    from { opacity: 1; transform: translateX(0) scale(1); }
+    to   { opacity: 0; transform: translateX(24px) scale(0.98); }
+}
+
+@keyframes toast-progress {
+    from { transform: scaleX(1); }
+    to   { transform: scaleX(0); }
+}
+
+/* Модальные окна */
+@keyframes modal-in {
+    from { opacity: 0; transform: translateY(8px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes modal-in-mobile {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+}
+
+/* Hero: плавание */
+@keyframes float {
+    0%, 100% { transform: translateY(0) rotate(var(--rotate, 0deg)); }
+    50%      { transform: translateY(-10px) rotate(var(--rotate, 0deg)); }
+}
+
+@keyframes float-soft {
+    0%, 100% { transform: translate(0, 0) rotate(var(--rotate, -4deg)); }
+    50%      { transform: translate(0, -6px) rotate(var(--rotate, -4deg)); }
+}
+
+/* Иконки */
+@keyframes icon-fade-in {
+    from { opacity: 0; transform: scale(0.9); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes icon-wiggle {
+    0%, 100% { transform: rotate(0deg); }
+    25%      { transform: rotate(-8deg); }
+    75%      { transform: rotate(8deg); }
+}
+
+/* Появление строки таблицы */
+@keyframes row-in {
+    from { opacity: 0; transform: translateX(-6px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Индикатор успеха */
+@keyframes checkmark-draw {
+    0%   { stroke-dashoffset: 30; }
+    100% { stroke-dashoffset: 0; }
+}
+
+@keyframes checkmark-pop {
+    0%   { transform: scale(0.5); opacity: 0; }
+    60%  { transform: scale(1.1); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+
+/* =============================================================================
+   3. АНИМАЦИИ ВХОДА СТРАНИЦ И СЕКЦИЙ
+   ============================================================================= */
+
+/* Классы-утилиты для ручного применения */
+.fade-in-up {
+    animation: fade-in-up 320ms ease both;
+}
+
+.fade-in-scale {
+    animation: fade-in-scale 260ms ease both;
+}
+
+.fade-in {
+    animation: fade-in 260ms ease both;
+}
+
+/* Секции с data-animate (для IntersectionObserver в home.js) */
+[data-animate] {
+    opacity: 0;
+    transform: translateY(8px);
+    transition:
+        opacity 420ms cubic-bezier(0.16, 1, 0.3, 1),
+        transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+}
+
+[data-animate="fade-up"] {
+    transform: translateY(12px);
+}
+
+[data-animate="fade-scale"] {
+    transform: scale(0.98);
+}
+
+[data-animate].is-visible {
+    opacity: 1;
+    transform: none;
+}
+
+/* Плавное появление статей теории при входе в viewport */
+.theory-article {
+    animation: fade-in-up 400ms ease both;
+}
+
+/* Появление примеров и карточек */
+.example-card,
+.type-card,
+.prop-detail-card,
+.decomp-info-card,
+.eigen-info-card,
+.feature-card {
+    animation: fade-in-up 320ms ease both;
+}
+
+
+/* =============================================================================
+   4. АНИМАЦИИ ЯЧЕЕК МАТРИЦЫ
+   ============================================================================= */
+
+.matrix-input-grid input {
+    animation: matrix-cell-pop 220ms ease both;
+}
+
+/* Ступенчатое появление — первые 10 ячеек «выстраиваются» */
+.matrix-input-grid input:nth-child(1)  { animation-delay: 10ms; }
+.matrix-input-grid input:nth-child(2)  { animation-delay: 20ms; }
+.matrix-input-grid input:nth-child(3)  { animation-delay: 30ms; }
+.matrix-input-grid input:nth-child(4)  { animation-delay: 40ms; }
+.matrix-input-grid input:nth-child(5)  { animation-delay: 50ms; }
+.matrix-input-grid input:nth-child(6)  { animation-delay: 60ms; }
+.matrix-input-grid input:nth-child(7)  { animation-delay: 70ms; }
+.matrix-input-grid input:nth-child(8)  { animation-delay: 80ms; }
+.matrix-input-grid input:nth-child(9)  { animation-delay: 90ms; }
+.matrix-input-grid input:nth-child(10) { animation-delay: 100ms; }
+
+/* Ячейка в фокусе — мягкое увеличение */
+.matrix-input-grid input:focus {
+    animation: fade-in-scale 180ms ease;
+}
+
+/* Ячейка с ошибкой — встряска */
+.matrix-input-grid input.has-error {
+    animation: shake 320ms ease;
+}
+
+/* Ячейка после валидации — плавное «успокоение» */
+.matrix-input-grid input.is-valid {
+    animation: matrix-cell-correct 480ms ease;
+}
+
+
+/* =============================================================================
+   5. АНИМАЦИИ КНОПОК
+   ============================================================================= */
+
+.btn {
+    position: relative;
+    overflow: hidden;
+}
+
+/* Радиальное свечение при клике */
+.btn::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, currentColor 0%, transparent 70%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--t-base);
+}
+
+.btn:active:not(:disabled)::after {
+    opacity: 0.08;
+    transition: opacity 0s;
+}
+
+/* Primary — подъём при hover */
+.btn-primary:hover:not(:disabled) {
+    transform: translateY(-1px);
+}
+
+.btn-primary:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+/* Мягкие — плавный сдвиг цвета */
+.btn-soft {
+    transition:
+        background-color var(--t-fast),
+        color var(--t-fast),
+        transform var(--t-fast);
+}
+
+.btn-soft:hover:not(:disabled) {
+    transform: translateY(-1px);
+}
+
+/* Кнопки с иконкой — иконка едет вправо при hover */
+.btn:hover:not(:disabled) .icon--arrow {
+    transform: translateX(2px);
+    transition: transform var(--t-fast);
+}
+
+/* Кнопка «Показать решение» — градиент */
+.btn-accent-gradient {
+    background: linear-gradient(
+        135deg,
+        var(--accent) 0%,
+        var(--accent-violet) 100%
+    );
+    background-size: 200% 200%;
+    color: #fff;
+    animation: gradient-shift 6s ease infinite;
+}
+
+/* Кнопки копирования — «моргание» при успехе */
+.icon-btn.is-copied {
+    animation: fade-in-scale 300ms ease;
+    background: var(--success-soft) !important;
+    color: var(--success) !important;
+}
+
+
+/* =============================================================================
+   6. АНИМАЦИИ КАРТОЧЕК (hover, focus)
+   ============================================================================= */
+
+/* Карточки возможностей на главной */
+.feature-card {
+    transition:
+        transform var(--t-base),
+        box-shadow var(--t-base),
+        border-color var(--t-base);
+}
+
+.feature-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--border-medium);
+}
+
+.feature-icon {
+    transition: transform var(--t-base), background var(--t-base);
+}
+
+.feature-card:hover .feature-icon {
+    transform: scale(1.08) rotate(-3deg);
+}
+
+/* Базовые карточки */
+.card,
+.prop-detail-card,
+.type-card,
+.saved-card,
+.example-card,
+.decomp-info-card,
+.eigen-info-card,
+.about-audience-card,
+.about-tech-card,
+.about-principle,
+.history-item {
+    transition:
+        transform var(--t-base),
+        box-shadow var(--t-base),
+        border-color var(--t-base),
+        background-color var(--t-base);
+}
+
+/* Подъём при hover — для карточек «мягкой» группы */
+.prop-detail-card:hover,
+.decomp-info-card:hover,
+.eigen-info-card:hover,
+.about-audience-card:hover,
+.about-tech-card:hover,
+.about-principle:hover {
+    transform: translateY(-2px);
+}
+
+/* Карточки примеров — аккуратный сдвиг */
+.example-card:hover {
+    transform: translateY(-2px);
+}
+
+.example-card:hover .example-card-arrow {
+    transform: translateX(3px);
+    color: var(--accent);
+}
+
+/* Строки истории — плавный сдвиг вправо */
+.history-item:hover {
+    transform: translateX(2px);
+}
+
+
+/* =============================================================================
+   7. АНИМАЦИИ РЕЗУЛЬТАТА (3 секции + шаги)
+   ============================================================================= */
+
+/* Секции появляются ступенчато */
+.result-section {
+    animation: fade-in-up 320ms ease both;
+}
+
+.result-section:nth-child(1) { animation-delay: 0ms; }
+.result-section:nth-child(2) { animation-delay: 60ms; }
+.result-section:nth-child(3) { animation-delay: 120ms; }
+
+/* Шаги решения */
+.step {
+    animation: fade-in-up 260ms ease both;
+}
+
+.step:nth-child(1) { animation-delay: 0ms; }
+.step:nth-child(2) { animation-delay: 40ms; }
+.step:nth-child(3) { animation-delay: 80ms; }
+.step:nth-child(4) { animation-delay: 120ms; }
+.step:nth-child(5) { animation-delay: 160ms; }
+.step:nth-child(6) { animation-delay: 200ms; }
+.step:nth-child(7) { animation-delay: 240ms; }
+.step:nth-child(8) { animation-delay: 280ms; }
+
+/* Плавное раскрытие/сжатие тела секции */
+.result-section-body {
+    transition: max-height var(--t-slow) ease, opacity var(--t-base) ease;
+}
+
+.result-section.is-collapsed .result-section-body {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+}
+
+/* Дополнительные элементы результата */
+.result-checks,
+.decomp-checks,
+.decomp-reason,
+.result-explain {
+    animation: fade-in 300ms ease both;
+    animation-delay: 160ms;
+}
+
+.result-output {
+    animation: fade-in-scale 320ms ease both;
+    animation-delay: 80ms;
+}
+
+/* Плавное появление MathJax после рендера */
+.MathJax {
+    animation: fade-in 220ms ease both;
+}
+
+
+/* =============================================================================
+   8. АНИМАЦИИ HERO (формулы, матричные карточки)
+   ============================================================================= */
+
+/* Плавающие формулы */
+.hero .formula-chip {
+    animation: float 6s ease-in-out infinite;
+}
+
+.formula-chip--1 { animation-delay: 0s; }
+.formula-chip--2 { animation-delay: 1.5s; }
+.formula-chip--3 { animation-delay: 3s; }
+.formula-chip--4 { animation-delay: 4.5s; }
+
+/* Матричные карточки в hero — покачивание */
+.hero .matrix-card--a {
+    animation: float-soft 7s ease-in-out infinite;
+}
+
+.hero .matrix-card--b {
+    animation: float-soft 8s ease-in-out infinite;
+    animation-delay: -2s;
+}
+
+/* Hero badge — мягкая пульсация точки */
+.hero-badge-dot {
+    animation: pulse-soft 2s ease-in-out infinite;
+}
+
+/* Hero-actions — появление с задержкой */
+.hero-content [data-animate] {
+    animation: fade-in-up 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+
+/* =============================================================================
+   9. АНИМАЦИИ МОДАЛЬНЫХ ОКОН И ТОСТОВ
+   ============================================================================= */
+
+/* Модальные окна */
+.modal {
+    animation: fade-in var(--t-base) ease both;
+}
+
+.modal-dialog {
+    animation: modal-in var(--t-base) cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Тосты — появление и закрытие */
+.toast {
+    animation: toast-in var(--t-base) cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.toast.is-leaving {
+    animation: toast-out var(--t-fast) ease forwards;
+}
+
+.toast-progress {
+    animation: toast-progress linear forwards;
+}
+
+
+/* =============================================================================
+   10. АНИМАЦИИ ЗАГРУЗКИ
+   ============================================================================= */
+
+/* Глобальный лоадер */
+.global-loader.is-visible {
+    animation: fade-in var(--t-base) ease both;
+}
+
+.loader-spinner {
+    animation: spin 0.7s linear infinite;
+}
+
+/* Пульсация индикатора «вычисляем» */
+.loading-pulse {
+    animation: pulse-soft 1.4s ease-in-out infinite;
+}
+
+/* Скелетон для превью матриц (пока MathJax не отрендерил) */
+.skeleton {
+    position: relative;
+    overflow: hidden;
+    background: var(--bg-subtle);
+    border-radius: var(--radius-sm);
+}
+
+.skeleton::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -150%;
+    width: 150%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.5) 50%,
+        transparent 100%
+    );
+    animation: skeleton-loading 1.4s infinite;
+}
+
+[data-theme="dark"] .skeleton::after {
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.06) 50%,
+        transparent 100%
+    );
+}
+
+/* Заглушка превью сохранённой матрицы */
+.saved-card-preview-placeholder {
+    animation: pulse-soft 1.6s ease-in-out infinite;
+}
+
+/* Пишущая каретка */
+.caret::after {
+    content: "▌";
+    display: inline-block;
+    margin-left: 2px;
+    animation: typing-caret 1s steps(2) infinite;
+    color: var(--accent);
+    font-weight: 400;
+}
+
+/* Индикатор в кнопке загрузки */
+.btn.is-loading {
+    pointer-events: none;
+    opacity: 0.75;
+}
+
+.btn.is-loading .icon {
+    animation: icon-spin 1s linear infinite;
+}
+
+
+/* =============================================================================
+   11. АНИМАЦИИ ИКОНОК
+   ============================================================================= */
+
+.icon {
+    animation: icon-fade-in 220ms ease both;
+}
+
+/* Иконки в навигации — мягкое масштабирование при hover */
+.nav-link .icon,
+.mobile-nav-link .icon {
+    transition: opacity var(--t-fast), transform var(--t-fast);
+}
+
+.nav-link:hover .icon,
+.mobile-nav-link:hover .icon {
+    transform: scale(1.08);
+}
+
+/* Иконки в кнопках действий */
+.btn:hover:not(:disabled) .icon {
+    transition: transform var(--t-fast);
+}
+
+/* Иконки в заголовках — «виляние» при появлении */
+.theory-article-icon .icon,
+.props-category-icon .icon,
+.kronecker-head-icon .icon,
+.decomp-info-icon .icon,
+.eigen-info-icon .icon,
+.about-section-icon .icon,
+.about-principle-icon .icon,
+.about-tech-icon .icon {
+    animation: icon-wiggle 1.2s ease 1;
+    animation-iteration-count: 1;
+}
+
+/* Иконки-статусы проверок — «рисующаяся» галочка */
+.result-checks-list .icon--success,
+.kronecker-case-icon--green .icon {
+    animation: checkmark-pop 380ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+
+/* =============================================================================
+   12. АНИМАЦИИ ТЕМЫ
+   ============================================================================= */
+
+/* html */
+html {
+    transition: background-color var(--t-base);
+}
+
+/* Плавный переход всех ключевых элементов при смене темы */
+body,
+.app-header,
+.app-footer,
+.app-body,
+.app-main,
+.card,
+.field-input,
+.result-block,
+.theory-article,
+.type-card,
+.history-item,
+.saved-card,
+.prop-detail-card,
+.example-card,
+.about-principle,
+.about-tech-card,
+.about-audience-card,
+.about-capability-group,
+.matrix-input-card,
+.matrix-input-head,
+.matrix-input-footer,
+.result-toolbar,
+.result-section,
+.step,
+.kronecker-card,
+.kronecker-head,
+.decomp-part,
+.eigen-value-item,
+.eigen-vector-group,
+.calc-card,
+.calc-placeholder,
+.props-block,
+.props-category-head,
+.ops-controls,
+.ops-selector,
+.systems-methods,
+.vector-input-card {
+    transition:
+        background-color var(--t-base),
+        border-color var(--t-base),
+        color var(--t-base);
+}
+
+/* Переключатель темы — иконки солнца/луны */
+.theme-icon--sun,
+.theme-icon--moon {
+    transition: transform var(--t-base), opacity var(--t-base);
+}
+
+
+/* =============================================================================
+   13. УТИЛИТАРНЫЕ ANIMATION-КЛАССЫ
+   ============================================================================= */
+
+/* Применяются через JS или как отдельные классы в шаблоне */
+.anim-fade-in      { animation: fade-in 260ms ease both; }
+.anim-fade-in-up   { animation: fade-in-up 320ms ease both; }
+.anim-fade-in-down { animation: fade-in-down 320ms ease both; }
+.anim-fade-scale   { animation: fade-in-scale 260ms ease both; }
+.anim-slide-left   { animation: slide-in-left 300ms ease both; }
+.anim-slide-right  { animation: slide-in-right 300ms ease both; }
+
+/* Задержки — 6 шагов по 60мс */
+.anim-delay-1 { animation-delay: 60ms; }
+.anim-delay-2 { animation-delay: 120ms; }
+.anim-delay-3 { animation-delay: 180ms; }
+.anim-delay-4 { animation-delay: 240ms; }
+.anim-delay-5 { animation-delay: 300ms; }
+.anim-delay-6 { animation-delay: 360ms; }
+
+/* Остановка анимации */
+.anim-paused { animation-play-state: paused; }
+.anim-none   { animation: none !important; transition: none !important; }
+
+/* Мягкая пульсация для акцентов */
+.anim-pulse       { animation: pulse-soft 1.4s ease-in-out infinite; }
+.anim-pulse-scale { animation: pulse-scale 1.4s ease-in-out infinite; }
+
+/* Вращение (для кнопок загрузки) */
+.anim-spin        { animation: spin 0.9s linear infinite; }
+
+
+/* =============================================================================
+   14. ПЛАВНОЕ РАСКРЫТИЕ (details, type-card-body, result-explain)
+   ============================================================================= */
+
+/* Раскрытие body у type-card — уже через display, но добавим плавность */
+.type-card-body[hidden] {
+    display: none;
+}
+
+.type-card.is-open {
+    transition: box-shadow var(--t-base), border-color var(--t-base);
+}
+
+/* Раскрытие результата-пояснения */
+.result-explain[hidden] {
+    display: none;
+}
+
+
+/* =============================================================================
+   15. HOVER-ПОДСВЕТКА ССЫЛОК В ТЕОРИИ
+   ============================================================================= */
+
+.theory-toc-link {
+    position: relative;
+}
+
+.theory-toc-link::after {
+    content: "";
+    position: absolute;
+    left: var(--space-2);
+    right: var(--space-2);
+    bottom: 4px;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--t-base);
+}
+
+.theory-toc-link:hover::after {
+    transform: scaleX(1);
+}
+
+
+/* =============================================================================
+   16. ПЛАВНОЕ ПОЯВЛЕНИЕ СТРОК СПИСКОВ (история, спектр, разложения)
+   ============================================================================= */
+
+.history-item,
+.eigen-value-item,
+.decomp-part,
+.prop-item,
+.spectrum-item {
+    animation: row-in 280ms ease both;
+}
+
+.history-item:nth-child(1)  { animation-delay: 20ms; }
+.history-item:nth-child(2)  { animation-delay: 40ms; }
+.history-item:nth-child(3)  { animation-delay: 60ms; }
+.history-item:nth-child(4)  { animation-delay: 80ms; }
+.history-item:nth-child(5)  { animation-delay: 100ms; }
+.history-item:nth-child(6)  { animation-delay: 120ms; }
+.history-item:nth-child(7)  { animation-delay: 140ms; }
+.history-item:nth-child(8)  { animation-delay: 160ms; }
+.history-item:nth-child(9)  { animation-delay: 180ms; }
+.history-item:nth-child(10) { animation-delay: 200ms; }
+
+
+/* =============================================================================
+   17. ФИНАЛЬНАЯ ОЧИСТКА — убираем конфликты со старыми анимациями
+   ============================================================================= */
+
+/* Отключаем анимацию появления внутри уже показанного блока результата,
+   чтобы не было «мигания» при перерендере */
+.result-block[hidden] * {
+    animation: none !important;
+}
+
+/* При отсутствии IntersectionObserver — показать всё сразу */
+.no-intersection [data-animate] {
+    opacity: 1 !important;
+    transform: none !important;
+}

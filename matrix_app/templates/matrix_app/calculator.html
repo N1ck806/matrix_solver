@@ -1,0 +1,654 @@
+{% extends "matrix_app/base.html" %}
+{% load static %}
+{% load matrix_icons %}
+
+{% block title %}Калькулятор матриц{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'matrix_app/css/calculator.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- ================================================================
+     Заголовок страницы
+     ================================================================ -->
+<section class="page-head">
+    <div class="container">
+        <nav class="breadcrumbs" aria-label="Навигационная цепочка">
+            <a href="{% url 'matrix_app:home' %}">Главная</a>
+            <span class="breadcrumbs-sep">/</span>
+            <span aria-current="page">Калькулятор</span>
+        </nav>
+        <div class="page-head-row">
+            <div>
+                <h1 class="page-title">Калькулятор матриц</h1>
+                <p class="page-subtitle">
+                    Введите матрицу в любой точной форме — целые, дроби,
+                    корни, комплексные. Выберите операцию и получите результат
+                    с полным ходом решения.
+                </p>
+            </div>
+            <div class="page-head-actions">
+                <button type="button" class="btn btn-soft btn-sm" data-random-open>
+                    {% icon "sparkles" size=14 %}
+                    <span>Случайная</span>
+                </button>
+                <button type="button" class="btn btn-soft btn-sm" data-examples-open>
+                    {% icon "grid" size=14 %}
+                    <span>Примеры</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ================================================================
+     Рабочая область
+     ================================================================ -->
+<section class="calc-workspace">
+    <div class="container calc-workspace-grid">
+
+        <!-- ========================================================
+             ЛЕВАЯ ПАНЕЛЬ — пошаговая настройка
+             ======================================================== -->
+        <aside class="calc-panel" aria-label="Настройка операции">
+
+            <!-- Шаг 1. Размер -->
+            <div class="calc-card calc-card--step">
+                <div class="calc-card-head">
+                    <span class="calc-step">1</span>
+                    <h2 class="calc-card-title">Размер матрицы</h2>
+                </div>
+                <p class="calc-card-hint">
+                    Задайте количество строк и столбцов.
+                </p>
+
+                <div class="size-row">
+                    <span class="size-row-label">Строк</span>
+                    <div class="size-control">
+                        <button type="button" class="size-btn" data-size-decr="rows" aria-label="Уменьшить число строк">−</button>
+                        <input type="number"
+                               id="rows-input"
+                               class="size-input"
+                               value="3"
+                               min="1"
+                               max="{{ MAX_MATRIX_ROWS }}"
+                               step="1"
+                               aria-label="Количество строк">
+                        <button type="button" class="size-btn" data-size-incr="rows" aria-label="Увеличить число строк">+</button>
+                    </div>
+                </div>
+
+                <div class="size-row">
+                    <span class="size-row-label">Столбцов</span>
+                    <div class="size-control">
+                        <button type="button" class="size-btn" data-size-decr="cols" aria-label="Уменьшить число столбцов">−</button>
+                        <input type="number"
+                               id="cols-input"
+                               class="size-input"
+                               value="3"
+                               min="1"
+                               max="{{ MAX_MATRIX_COLS }}"
+                               step="1"
+                               aria-label="Количество столбцов">
+                        <button type="button" class="size-btn" data-size-incr="cols" aria-label="Увеличить число столбцов">+</button>
+                    </div>
+                </div>
+
+                <p class="calc-hint">
+                    Максимум <b>{{ MAX_MATRIX_ROWS }} × {{ MAX_MATRIX_COLS }}</b>.
+                    Символические — до {{ MAX_SYMBOLIC_SIZE }} × {{ MAX_SYMBOLIC_SIZE }}.
+                </p>
+            </div>
+
+            <!-- Шаг 2. Операция -->
+            <div class="calc-card calc-card--step">
+                <div class="calc-card-head">
+                    <span class="calc-step">2</span>
+                    <h2 class="calc-card-title">Операция</h2>
+                </div>
+                <p class="calc-card-hint">
+                    Что хотите найти? Операции, требующие квадратной матрицы,
+                    подстроят размер автоматически.
+                </p>
+
+                <div class="op-groups" role="tablist" aria-label="Группы операций">
+                    <button type="button" class="op-group is-active" data-op-group="basic" role="tab" aria-selected="true">Основные</button>
+                    <button type="button" class="op-group" data-op-group="spectrum" role="tab" aria-selected="false">Спектр</button>
+                    <button type="button" class="op-group" data-op-group="decomp" role="tab" aria-selected="false">Разложения</button>
+                </div>
+
+                <!-- Основные -->
+                <div class="op-list" data-op-list="basic">
+
+                    <label class="op-item" title="Определитель квадратной матрицы">
+                        <input type="radio" name="operation" value="determinant" class="op-radio" checked data-op-select>
+                        <span class="op-item-body">
+                            <span class="op-item-icon">{% icon "determinant" size=18 %}</span>
+                            <span class="op-item-text">
+                                <span class="op-item-label">Определитель</span>
+                                <span class="op-item-sub">det(A)</span>
+                            </span>
+                        </span>
+                    </label>
+
+                    <label class="op-item" title="Максимальное число линейно независимых строк">
+                        <input type="radio" name="operation" value="rank" class="op-radio" data-op-select>
+                        <span class="op-item-body">
+                            <span class="op-item-icon">{% icon "rank" size=18 %}</span>
+                            <span class="op-item-text">
+                                <span class="op-item-label">Ранг</span>
+                                <span class="op-item-sub">rank(A)</span>
+                            </span>
+                        </span>
+                    </label>
+
+                    <label class="op-item" title="Обратная матрица (если существует)">
+                        <input type="radio" name="operation" value="inverse" class="op-radio" data-op-select>
+                        <span class="op-item-body">
+                            <span class="op-item-icon">{% icon "inverse" size=18 %}</span>
+                            <span class="op-item-text">
+                                <span class="op-item-label">Обратная матрица</span>
+                                <span class="op-item-sub">A⁻¹</span>
+                            </span>
+                        </span>
+                    </label>
+
+                    <label class="op-item" title="Транспонирование матрицы">
+                        <input type="radio" name="operation" value="transpose" class="op-radio" data-op-select>
+                        <span class="op-item-body">
+                            <span class="op-item-icon">{% icon "transpose" size=18 %}</span>
+                            <span class="op-item-text">
+                                <span class="op-item-label">Транспонирование</span>
+                                <span class="op-item-sub">Aᵀ</span>
+                            </span>
+                        </span>
+                    </label>
+
+                    <label class="op-item" title="Сумма элементов главной диагонали">
+                        <input type="radio" name="operation" value="trace" class="op-radio" data-op-select>
+                        <span class="op-item-body">
+                            <span class="op-item-icon">{% icon "trace" size=18 %}</span>
+                            <span class="op-item-text">
+                                <span class="op-item-label">След</span>
+                                <span class="op-item-sub">tr(A)</span>
+                            </span>
+                        </span>
+                    </label>
+
+                    <label class="op-item" title="Приведённая ступенчатая форма">
+                        <input type="radio" name="operation" value="rref" class="op-radio" data-op-select>
+                        <span class="op-item-body">
+                            <span class="op-item-icon">{% icon "rank" size=18 %}</span>
+                            <span class="op-item-text">
+                                <span class="op-item-label">RREF</span>
+                                <span class="op-item-sub">приведённая ступенчатая</span>
+                            </span>
+                        </span>
+                    </label>
+
+                    <label class="op-item" title="Ступенчатая форма (метод Гаусса)">
+                        <input type="radio" name="operation" value="echelon" class="op-radio" data-op-select>
+                        <span class="op-item-body">
+                            <span class="op-item-icon">{% icon "matrix-grid" size=18 %}</span>
+                            <span class="op-item-text">
+                                <span class="op-item-label">Ступенчатая форма</span>
+                                <span class="op-item-sub">REF</span>
+                            </span>
+                        </span>
+                    </label>
+
+                    <label class="op-item" title="Полный анализ всех свойств матрицы">
+                        <input type="radio" name="operation" value="properties" class="op-radio" data-op-select>
+                        <span class="op-item-body">
+                            <span class="op-item-icon">{% icon "check-badge" size=18 %}</span>
+                            <span class="op-item-text">
+                                <span class="op-item-label">Свойства</span>
+                                <span class="op-item-sub">анализ матрицы</span>
+                            </span>
+                        </span>
+                    </label>
+                </div>
+
+                <!-- Спектр -->
+                <div class="op-list" data-op-list="spectrum" hidden>
+
+                    <label class="op-item" title="Собственные значения через det(A − λI) = 0">
+                        <input type="radio" name="operation" value="eigenvalues" class="op-radio" data-op-select>
+                        <span class="op-item-body">
+                            <span class="op-item-icon">{% icon "lambda" size=18 %}</span>
+                            <span class="op-item-text">
+                                <span class="op-item-label">Собственные значения</span>
+                                <span class="op-item-sub">det(A − λI) = 0</span>
+                            </span>
+                        </span>
+                    </label>
+
+                    <label class="op-item" title="Базис собственных подпространств">
+                        <input type="radio" name="operation" value="eigenvectors" class="op-radio" data-op-select>
+                        <span class="op-item-body">
+                            <span class="op-item-icon">{% icon "vector" size=18 %}</span>
+                            <span class="op-item-text">
+                                <span class="op-item-label">Собственные векторы</span>
+                                <span class="op-item-sub">базис подпространства</span>
+                            </span>
+                        </span>
+                    </label>
+
+                    <label class="op-item" title="Характеристический многочлен p(λ)">
+                        <input type="radio" name="operation" value="char_poly" class="op-radio" data-op-select>
+                        <span class="op-item-body">
+                            <span class="op-item-icon">{% icon "sigma" size=18 %}</span>
+                            <span class="op-item-text">
+                                <span class="op-item-label">Характеристический многочлен</span>
+                                <span class="op-item-sub">p(λ) = det(A − λI)</span>
+                            </span>
+                        </span>
+                    </label>
+                </div>
+
+                <!-- Разложения -->
+                <div class="op-list" data-op-list="decomp" hidden>
+
+                    <label class="op-item" title="LU-разложение A = L · U">
+                        <input type="radio" name="operation" value="lu" class="op-radio" data-op-select>
+                        <span class="op-item-body">
+                            <span class="op-item-icon">{% icon "lu" size=18 %}</span>
+                            <span class="op-item-text">
+                                <span class="op-item-label">LU-разложение</span>
+                                <span class="op-item-sub">A = L · U</span>
+                            </span>
+                        </span>
+                    </label>
+
+                    <label class="op-item" title="QR-разложение A = Q · R">
+                        <input type="radio" name="operation" value="qr" class="op-radio" data-op-select>
+                        <span class="op-item-body">
+                            <span class="op-item-icon">{% icon "qr" size=18 %}</span>
+                            <span class="op-item-text">
+                                <span class="op-item-label">QR-разложение</span>
+                                <span class="op-item-sub">A = Q · R</span>
+                            </span>
+                        </span>
+                    </label>
+
+                    <label class="op-item" title="Разложение Холецкого A = L · Lᵀ">
+                        <input type="radio" name="operation" value="cholesky" class="op-radio" data-op-select>
+                        <span class="op-item-body">
+                            <span class="op-item-icon">{% icon "diagonal" size=18 %}</span>
+                            <span class="op-item-text">
+                                <span class="op-item-label">Разложение Холецкого</span>
+                                <span class="op-item-sub">A = L · Lᵀ</span>
+                            </span>
+                        </span>
+                    </label>
+
+                    <label class="op-item" title="Диагонализация A = P · D · P⁻¹">
+                        <input type="radio" name="operation" value="diagonalize" class="op-radio" data-op-select>
+                        <span class="op-item-body">
+                            <span class="op-item-icon">{% icon "diagonalize" size=18 %}</span>
+                            <span class="op-item-text">
+                                <span class="op-item-label">Диагонализация</span>
+                                <span class="op-item-sub">A = P · D · P⁻¹</span>
+                            </span>
+                        </span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Шаг 3. Дополнительные параметры -->
+            <div class="calc-card calc-card--step" data-op-extra hidden>
+                <div class="calc-card-head">
+                    <span class="calc-step">3</span>
+                    <h2 class="calc-card-title">Параметры</h2>
+                </div>
+
+                <div class="param-row" data-param="method" hidden>
+                    <label class="param-label" for="method-select">Метод вычисления</label>
+                    <select id="method-select" class="param-select" data-method-select>
+                        <option value="auto">Автоматически</option>
+                        <option value="adjugate">Через присоединённую матрицу</option>
+                        <option value="gauss_jordan">Метод Гаусса-Жордана</option>
+                        <option value="cofactor">Разложение по строке</option>
+                        <option value="gauss">Метод Гаусса</option>
+                    </select>
+                    <p class="param-hint">«Автоматически» подбирает оптимальный метод по размеру матрицы.</p>
+                </div>
+
+                <div class="param-row" data-param="power" hidden>
+                    <label class="param-label" for="power-input">Целая степень n</label>
+                    <input type="number" id="power-input" class="param-input" value="2" data-power-input>
+                    <p class="param-hint">Может быть отрицательной, если матрица обратима.</p>
+                </div>
+
+                <div class="param-row param-row--switch">
+                    <label class="switch">
+                        <input type="checkbox" id="show-steps" data-show-steps checked>
+                        <span class="switch-track"></span>
+                        <span class="switch-label">Показывать подробное решение</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Шаг 4. Кнопки -->
+            <div class="calc-actions">
+                <button type="button" class="btn btn-primary btn-block btn-lg" data-calc-run>
+                    {% icon "arrow-right" size=18 %}
+                    <span>Вычислить</span>
+                </button>
+                <button type="button" class="btn btn-ghost btn-block" data-calc-reset>
+                    {% icon "trash" size=14 %}
+                    <span>Очистить</span>
+                </button>
+            </div>
+        </aside>
+
+
+        <!-- ========================================================
+             ПРАВАЯ ЧАСТЬ — матрица + результат
+             ======================================================== -->
+        <div class="calc-main">
+
+            <!-- Ввод матрицы -->
+            <div class="matrix-input-card">
+                <div class="matrix-input-head">
+                    <div class="matrix-input-title">
+                        <span class="matrix-letter" aria-hidden="true">A</span>
+                        <h2>Матрица A</h2>
+                        <span class="matrix-shape-badge" data-matrix-shape-label>3 × 3</span>
+                    </div>
+                    <div class="matrix-input-tools">
+                        <button type="button" class="icon-btn" data-matrix-action="zero" title="Заполнить нулями" aria-label="Нули">
+                            {% icon "zero-matrix" size=16 %}
+                            <span>Нули</span>
+                        </button>
+                        <button type="button" class="icon-btn" data-matrix-action="identity" title="Единичная матрица" aria-label="Единичная">
+                            {% icon "identity" size=16 %}
+                            <span>Единичная</span>
+                        </button>
+                        <button type="button" class="icon-btn" data-matrix-action="random" title="Случайные значения" aria-label="Случайная">
+                            {% icon "sparkles" size=16 %}
+                            <span>Случайная</span>
+                        </button>
+                        <button type="button" class="icon-btn" data-matrix-action="transpose" title="Транспонировать" aria-label="Транспонировать">
+                            {% icon "transpose" size=16 %}
+                            <span>Трансп.</span>
+                        </button>
+                        <button type="button" class="icon-btn" data-matrix-action="copy" title="Скопировать (TSV — для Excel)" aria-label="Копировать">
+                            {% icon "copy" size=16 %}
+                            <span>Копировать</span>
+                        </button>
+                        <button type="button" class="icon-btn" data-matrix-action="paste" title="Вставить из буфера обмена" aria-label="Вставить">
+                            {% icon "clipboard" size=16 %}
+                            <span>Вставить</span>
+                        </button>
+                        <button type="button" class="icon-btn" data-matrix-action="square" title="Привести к квадратной (n × n)" aria-label="Квадратная">
+                            {% icon "square-matrix" size=16 %}
+                            <span>Квадратная</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="matrix-input-body">
+                    <div class="matrix-scroll">
+                        <div class="matrix-input-grid" id="matrix-a-input" data-matrix-input data-rows="3" data-cols="3"></div>
+                    </div>
+
+                    <div class="matrix-input-footer">
+                        <div class="matrix-input-footer-col">
+                            <span class="matrix-input-footer-title">Что можно вводить</span>
+                            <div class="matrix-input-chips">
+                                <span class="chip"><code>5</code> целое</span>
+                                <span class="chip"><code>-3</code> отрицательное</span>
+                                <span class="chip"><code>1/2</code> дробь</span>
+                                <span class="chip"><code>-4.5</code> десятичное</span>
+                                <span class="chip"><code>sqrt(2)</code> корень</span>
+                                <span class="chip"><code>2*pi</code> константа</span>
+                                <span class="chip"><code>2+3i</code> комплексное</span>
+                            </div>
+                        </div>
+                        <div class="matrix-input-footer-col">
+                            <span class="matrix-input-footer-title">Горячие клавиши</span>
+                            <div class="matrix-input-chips">
+                                <span class="chip"><kbd>Tab</kbd> следующая</span>
+                                <span class="chip"><kbd>←↑↓→</kbd> навигация</span>
+                                <span class="chip"><kbd>Ctrl+V</kbd> вставить</span>
+                                <span class="chip"><kbd>Enter</kbd> вниз</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Результат -->
+            {% include "matrix_app/partials/_result_block.html" with result_id="calculator-result" show_steps=True show_actions=True %}
+
+            <!-- Заглушка до первого вычисления -->
+            <div class="calc-placeholder" data-calc-placeholder>
+                <div class="calc-placeholder-icon" aria-hidden="true">
+                    {% icon "arrow-right" size=48 %}
+                </div>
+                <h3>Результат появится здесь</h3>
+                <p>
+                    Введите матрицу, выберите операцию слева
+                    и нажмите <b>«Вычислить»</b>. Сервис покажет не только
+                    ответ, но и ход решения.
+                </p>
+                <div class="calc-placeholder-tips">
+                    <div class="calc-placeholder-tip">
+                        <span class="calc-placeholder-tip-num">1</span>
+                        <span>Введите матрицу</span>
+                    </div>
+                    <div class="calc-placeholder-tip">
+                        <span class="calc-placeholder-tip-num">2</span>
+                        <span>Выберите операцию</span>
+                    </div>
+                    <div class="calc-placeholder-tip">
+                        <span class="calc-placeholder-tip-num">3</span>
+                        <span>Нажмите «Вычислить»</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ================================================================
+     Модальное окно генератора
+     ================================================================ -->
+<div class="modal" id="random-modal" data-random-modal hidden>
+    <div class="modal-backdrop" data-random-close></div>
+    <div class="modal-dialog" role="dialog" aria-labelledby="random-modal-title" aria-modal="true">
+        <header class="modal-head">
+            <h3 id="random-modal-title">Случайная матрица</h3>
+            <button type="button" class="modal-close" data-random-close aria-label="Закрыть">
+                {% icon "close" size=16 %}
+            </button>
+        </header>
+
+        <div class="modal-body">
+            <div class="form-grid form-grid--2">
+                <label class="field">
+                    <span class="field-label">Строк</span>
+                    <input type="number" class="field-input" value="3" min="1" max="{{ MAX_MATRIX_ROWS }}" data-random-rows>
+                </label>
+                <label class="field">
+                    <span class="field-label">Столбцов</span>
+                    <input type="number" class="field-input" value="3" min="1" max="{{ MAX_MATRIX_COLS }}" data-random-cols>
+                </label>
+                <label class="field">
+                    <span class="field-label">Минимум</span>
+                    <input type="number" class="field-input" value="-9" data-random-min>
+                </label>
+                <label class="field">
+                    <span class="field-label">Максимум</span>
+                    <input type="number" class="field-input" value="9" data-random-max>
+                </label>
+            </div>
+
+            <label class="field">
+                <span class="field-label">Тип матрицы</span>
+                <select class="field-input" data-random-kind>
+                    <option value="random">Случайная</option>
+                    <option value="symmetric">Симметричная</option>
+                    <option value="diagonal">Диагональная</option>
+                    <option value="identity">Единичная</option>
+                    <option value="upper_triangular">Верхняя треугольная</option>
+                    <option value="lower_triangular">Нижняя треугольная</option>
+                    <option value="invertible">Обратимая</option>
+                    <option value="singular">Вырожденная</option>
+                </select>
+            </label>
+
+            <label class="checkbox-row">
+                <input type="checkbox" data-random-fractions>
+                <span>Разрешить дроби</span>
+            </label>
+        </div>
+
+        <footer class="modal-foot">
+            <button type="button" class="btn btn-ghost" data-random-close>Отмена</button>
+            <button type="button" class="btn btn-primary" data-random-generate>
+                {% icon "sparkles" size=14 %}
+                <span>Сгенерировать</span>
+            </button>
+        </footer>
+    </div>
+</div>
+
+
+<!-- ================================================================
+     Модальное окно примеров
+     ================================================================ -->
+<div class="modal" id="examples-modal" data-examples-modal hidden>
+    <div class="modal-backdrop" data-examples-close></div>
+    <div class="modal-dialog modal-dialog--lg" role="dialog" aria-labelledby="examples-modal-title" aria-modal="true">
+        <header class="modal-head">
+            <h3 id="examples-modal-title">Примеры матриц</h3>
+            <button type="button" class="modal-close" data-examples-close aria-label="Закрыть">
+                {% icon "close" size=16 %}
+            </button>
+        </header>
+
+        <div class="modal-body">
+            <p class="modal-hint" style="margin-bottom: var(--space-4);">
+                Нажмите на пример — матрица загрузится в калькулятор.
+            </p>
+
+            <div class="examples-modal-grid">
+                <button type="button" class="example-card example-card--compact" data-load-example="matrix_2x2" data-close-modal>
+                    <div class="example-card-head">
+                        <strong>Матрица 2×2</strong>
+                        {% icon "arrow-right" size=14 %}
+                    </div>
+                    <p>Базовые операции</p>
+                </button>
+                <button type="button" class="example-card example-card--compact" data-load-example="matrix_3x3" data-close-modal>
+                    <div class="example-card-head">
+                        <strong>Матрица 3×3</strong>
+                        {% icon "arrow-right" size=14 %}
+                    </div>
+                    <p>Определитель, обратная</p>
+                </button>
+                <button type="button" class="example-card example-card--compact" data-load-example="determinant" data-close-modal>
+                    <div class="example-card-head">
+                        <strong>Определитель 3×3</strong>
+                        {% icon "arrow-right" size=14 %}
+                    </div>
+                    <p>det ≠ 0</p>
+                </button>
+                <button type="button" class="example-card example-card--compact" data-load-example="inverse" data-close-modal>
+                    <div class="example-card-head">
+                        <strong>Обратная</strong>
+                        {% icon "arrow-right" size=14 %}
+                    </div>
+                    <p>Хорошо обусловленная</p>
+                </button>
+                <button type="button" class="example-card example-card--compact" data-load-example="rank" data-close-modal>
+                    <div class="example-card-head">
+                        <strong>Ранг</strong>
+                        {% icon "arrow-right" size=14 %}
+                    </div>
+                    <p>Линейно зависимые строки</p>
+                </button>
+                <button type="button" class="example-card example-card--compact" data-load-example="singular" data-close-modal>
+                    <div class="example-card-head">
+                        <strong>Вырожденная</strong>
+                        {% icon "arrow-right" size=14 %}
+                    </div>
+                    <p>det(A) = 0</p>
+                </button>
+                <button type="button" class="example-card example-card--compact" data-load-example="symmetric" data-close-modal>
+                    <div class="example-card-head">
+                        <strong>Симметричная</strong>
+                        {% icon "arrow-right" size=14 %}
+                    </div>
+                    <p>A = Aᵀ</p>
+                </button>
+                <button type="button" class="example-card example-card--compact" data-load-example="fractions" data-close-modal>
+                    <div class="example-card-head">
+                        <strong>Дроби</strong>
+                        {% icon "arrow-right" size=14 %}
+                    </div>
+                    <p>Rational точно</p>
+                </button>
+                <button type="button" class="example-card example-card--compact" data-load-example="complex" data-close-modal>
+                    <div class="example-card-head">
+                        <strong>Комплексная</strong>
+                        {% icon "arrow-right" size=14 %}
+                    </div>
+                    <p>a+bi</p>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+
+{% block extra_scripts %}
+{# steps.js уже загружен в base.html #}
+<script src="{% static 'matrix_app/js/calculator.js' %}"></script>
+<script>
+// Скрываем заглушку при первом успешном вычислении
+document.addEventListener('DOMContentLoaded', function () {
+    const placeholder = document.querySelector('[data-calc-placeholder]');
+    const resultBlock = document.querySelector('[data-result-block]');
+    if (!placeholder || !resultBlock) return;
+
+    const observer = new MutationObserver(function () {
+        if (!resultBlock.hidden) {
+            placeholder.hidden = true;
+        } else {
+            placeholder.hidden = false;
+        }
+    });
+    observer.observe(resultBlock, { attributes: true, attributeFilter: ['hidden'] });
+
+    // Обработчик открытия модального окна примеров
+    const openBtn = document.querySelector('[data-examples-open]');
+    const modal = document.querySelector('#examples-modal');
+    if (openBtn && modal && window.MatrixLab && window.MatrixLab.modal) {
+        openBtn.addEventListener('click', function () {
+            window.MatrixLab.modal.open('#examples-modal');
+        });
+    }
+
+    // Закрытие модального окна примеров после загрузки примера
+    document.addEventListener('click', function (e) {
+        if (e.target.closest('[data-close-modal]')) {
+            const modal = e.target.closest('.modal');
+            if (modal && window.MatrixLab && window.MatrixLab.modal) {
+                setTimeout(function () {
+                    window.MatrixLab.modal.close('#' + modal.id);
+                }, 300);
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

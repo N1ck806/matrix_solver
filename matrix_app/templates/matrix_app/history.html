@@ -1,0 +1,212 @@
+{% extends "matrix_app/base.html" %}
+{% load static %}
+{% load matrix_icons %}
+
+{% block title %}История вычислений{% endblock %}
+
+{% block content %}
+
+<!-- ================================================================
+     Заголовок
+     ================================================================ -->
+<section class="page-head">
+    <div class="container">
+        <nav class="breadcrumbs" aria-label="Навигационная цепочка">
+            <a href="{% url 'matrix_app:home' %}">Главная</a>
+            <span class="breadcrumbs-sep">/</span>
+            <span aria-current="page">История</span>
+        </nav>
+        <div class="page-head-row">
+            <div>
+                <h1 class="page-title">История вычислений</h1>
+                <p class="page-subtitle">
+                    Последние операции, выполненные в этом браузере. Историю
+                    можно открыть, повторить или удалить.
+                </p>
+            </div>
+            {% if history_count %}
+                <div class="page-head-actions">
+                    <button type="button" class="btn btn-ghost btn-sm" data-history-clear>
+                        {% icon "trash" size=14 %}
+                        <span>Очистить историю</span>
+                    </button>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+
+<!-- ================================================================
+     Список истории
+     ================================================================ -->
+<section class="history-layout">
+    <div class="container">
+
+        {% if history_entries %}
+
+            <!-- Статистика -->
+            <div class="history-stats">
+                <div class="history-stat history-stat--total">
+                    <span class="history-stat-icon">
+                        {% icon "history" size=20 %}
+                    </span>
+                    <div class="history-stat-body">
+                        <span class="history-stat-value">{{ history_count }}</span>
+                        <span class="history-stat-label">записей</span>
+                    </div>
+                </div>
+                <div class="history-stat">
+                    <span class="history-stat-icon">
+                        {% icon "clock" size=20 %}
+                    </span>
+                    <div class="history-stat-body">
+                        <span class="history-stat-value">
+                            {% if history_entries.0.created_at %}{{ history_entries.0.created_at|date:"H:i" }}{% else %}—{% endif %}
+                        </span>
+                        <span class="history-stat-label">последняя запись</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Список -->
+            <div class="history-list" data-history-list>
+                {% for entry in history_entries %}
+                    <article class="history-item"
+                             data-history-item="{{ entry.pk }}"
+                             data-history-operation="{{ entry.operation }}"
+                             data-history-date="{{ entry.created_at|date:'Y-m-d' }}">
+
+                        <!-- Время -->
+                        <div class="history-item-time">
+                            <time datetime="{{ entry.created_at|date:'c' }}">
+                                <span class="history-time-date">{{ entry.created_at|date:"d.m.Y" }}</span>
+                                <span class="history-time-clock">{{ entry.created_at|date:"H:i" }}</span>
+                            </time>
+                        </div>
+
+                        <!-- Содержание -->
+                        <div class="history-item-body">
+                            <div class="history-item-head">
+                                <span class="history-op-badge history-op-badge--{{ entry.operation }}">
+                                    {% if entry.operation == "determinant" %}{% icon "determinant" size=12 %}
+                                    {% elif entry.operation == "inverse" %}{% icon "inverse" size=12 %}
+                                    {% elif entry.operation == "rank" %}{% icon "rank" size=12 %}
+                                    {% elif entry.operation == "rref" or entry.operation == "echelon" %}{% icon "matrix-grid" size=12 %}
+                                    {% elif entry.operation == "transpose" %}{% icon "transpose" size=12 %}
+                                    {% elif entry.operation == "trace" %}{% icon "trace" size=12 %}
+                                    {% elif entry.operation == "eigenvalues" or entry.operation == "eigenvectors" or entry.operation == "char_poly" %}{% icon "lambda" size=12 %}
+                                    {% elif entry.operation == "lu" %}{% icon "lu" size=12 %}
+                                    {% elif entry.operation == "qr" %}{% icon "qr" size=12 %}
+                                    {% elif entry.operation == "cholesky" %}{% icon "diagonal" size=12 %}
+                                    {% elif entry.operation == "diagonalize" %}{% icon "diagonalize" size=12 %}
+                                    {% elif entry.operation == "properties" %}{% icon "check-badge" size=12 %}
+                                    {% elif entry.operation == "solve_gauss" or entry.operation == "kronecker_capelli" %}{% icon "system" size=12 %}
+                                    {% elif entry.operation == "add" %}{% icon "plus" size=12 %}
+                                    {% elif entry.operation == "subtract" %}{% icon "minus" size=12 %}
+                                    {% elif entry.operation == "multiply" %}{% icon "close" size=12 %}
+                                    {% elif entry.operation == "scalar_multiply" %}{% icon "sigma" size=12 %}
+                                    {% elif entry.operation == "power" %}{% icon "sparkles" size=12 %}
+                                    {% elif entry.operation == "compare" %}{% icon "list" size=12 %}
+                                    {% else %}{% icon "matrix-grid" size=12 %}
+                                    {% endif %}
+                                    <span>{{ entry.operation_label|default:entry.get_operation_display }}</span>
+                                </span>
+                                {% if entry.matrix_shape %}
+                                    <span class="history-shape">
+                                        {% icon "square-matrix" size=11 %}
+                                        <span>{{ entry.matrix_shape }}</span>
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                            <div class="history-item-preview">
+                                {% if entry.input_preview %}
+                                    <span class="history-preview-in">{{ entry.input_preview }}</span>
+                                {% endif %}
+                                {% if entry.result_preview %}
+                                    <span class="history-preview-arrow">
+                                        {% icon "arrow-right" size=12 %}
+                                    </span>
+                                    <span class="history-preview-out">{{ entry.result_preview }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Действия -->
+                        <div class="history-item-actions">
+                            <button type="button"
+                                    class="icon-btn icon-btn--sm"
+                                    data-history-open="{{ entry.pk }}"
+                                    title="Открыть"
+                                    aria-label="Открыть запись">
+                                {% icon "eye" size=14 %}
+                            </button>
+                            <button type="button"
+                                    class="icon-btn icon-btn--sm"
+                                    data-history-repeat="{{ entry.pk }}"
+                                    title="Повторить"
+                                    aria-label="Повторить операцию">
+                                {% icon "repeat" size=14 %}
+                            </button>
+                            <button type="button"
+                                    class="icon-btn icon-btn--sm icon-btn--danger"
+                                    data-history-delete="{{ entry.pk }}"
+                                    title="Удалить"
+                                    aria-label="Удалить запись">
+                                {% icon "close" size=14 %}
+                            </button>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+
+        {% else %}
+            <!-- Пустое состояние -->
+            <div class="history-empty">
+                <div class="history-empty-icon" aria-hidden="true">
+                    {% icon "history" size=48 %}
+                </div>
+                <h2>История пока пуста</h2>
+                <p>Здесь появятся ваши вычисления после первого запуска.</p>
+                <a href="{% url 'matrix_app:calculator' %}" class="btn btn-primary">
+                    {% icon "calculator" size=16 %}
+                    <span>Открыть калькулятор</span>
+                </a>
+            </div>
+        {% endif %}
+
+    </div>
+</section>
+
+
+<!-- ================================================================
+     Модальное окно для просмотра записи
+     ================================================================ -->
+<div class="modal" id="history-modal" data-history-modal hidden>
+    <div class="modal-backdrop" data-history-modal-close></div>
+    <div class="modal-dialog modal-dialog--lg" role="dialog" aria-labelledby="history-modal-title" aria-modal="true">
+        <header class="modal-head">
+            <div class="modal-head-title">
+                <div class="modal-head-icon">
+                    {% icon "history" size=18 %}
+                </div>
+                <h3 id="history-modal-title" data-history-modal-title>Запись истории</h3>
+            </div>
+            <button type="button" class="modal-close" data-history-modal-close aria-label="Закрыть">
+                {% icon "close" size=16 %}
+            </button>
+        </header>
+        <div class="modal-body" data-history-modal-body>
+            <!-- заполняется JS -->
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+
+{% block extra_scripts %}
+{# history.js уже частично подключён в base.html? Нет, только тут #}
+<script src="{% static 'matrix_app/js/history.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,231 @@
+{% extends "matrix_app/base.html" %}
+{% load static %}
+{% load matrix_icons %}
+
+{% block title %}Сохранённые матрицы{% endblock %}
+
+{% block content %}
+
+<!-- ================================================================
+     Заголовок
+     ================================================================ -->
+<section class="page-head">
+    <div class="container">
+        <nav class="breadcrumbs" aria-label="Навигационная цепочка">
+            <a href="{% url 'matrix_app:home' %}">Главная</a>
+            <span class="breadcrumbs-sep">/</span>
+            <span aria-current="page">Сохранённые матрицы</span>
+        </nav>
+        <div class="page-head-row">
+            <div>
+                <h1 class="page-title">Сохранённые матрицы</h1>
+                <p class="page-subtitle">
+                    Именованные матрицы, которые можно открыть, переименовать
+                    или использовать повторно в калькуляторе.
+                </p>
+            </div>
+            <div class="page-head-actions">
+                <a href="{% url 'matrix_app:calculator' %}" class="btn btn-primary btn-sm">
+                    {% icon "plus" size=14 %}
+                    <span>Новая матрица</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ================================================================
+     Список сохранённых матриц
+     ================================================================ -->
+<section class="saved-layout">
+    <div class="container">
+
+        {% if saved %}
+
+            <!-- Статистика -->
+            <div class="saved-stats">
+                <div class="saved-stat">
+                    <span class="saved-stat-icon">
+                        {% icon "square-matrix" size=20 %}
+                    </span>
+                    <div class="saved-stat-body">
+                        <span class="saved-stat-value">{{ saved|length }}</span>
+                        <span class="saved-stat-label">
+                            {% if saved|length == 1 %}матрица{% elif saved|length < 5 %}матрицы{% else %}матриц{% endif %}
+                        </span>
+                    </div>
+                </div>
+                <div class="saved-stat">
+                    <span class="saved-stat-icon">
+                        {% icon "clock" size=20 %}
+                    </span>
+                    <div class="saved-stat-body">
+                        <span class="saved-stat-value">
+                            {% if saved.0.updated_at %}{{ saved.0.updated_at|date:"H:i" }}{% else %}—{% endif %}
+                        </span>
+                        <span class="saved-stat-label">последнее обновление</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Сетка карточек -->
+            <div class="saved-grid">
+                {% for item in saved %}
+                    <article class="saved-card" data-saved-item="{{ item.pk }}">
+
+                        <header class="saved-card-head">
+                            <div class="saved-card-title">
+                                <span class="saved-card-letter" aria-hidden="true">
+                                    {{ item.name|first|upper }}
+                                </span>
+                                <div class="saved-card-title-text">
+                                    <h3>{{ item.name }}</h3>
+                                    <span class="saved-card-shape">
+                                        {% icon "square-matrix" size=12 %}
+                                        <span>{{ item.shape_label }}</span>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="saved-card-menu">
+                                <button type="button"
+                                        class="icon-btn icon-btn--sm"
+                                        data-saved-use="{{ item.pk }}"
+                                        title="Использовать в калькуляторе"
+                                        aria-label="Использовать в калькуляторе">
+                                    {% icon "arrow-right" size=14 %}
+                                </button>
+                                <button type="button"
+                                        class="icon-btn icon-btn--sm icon-btn--danger"
+                                        data-saved-delete="{{ item.pk }}"
+                                        title="Удалить"
+                                        aria-label="Удалить матрицу">
+                                    {% icon "trash" size=14 %}
+                                </button>
+                            </div>
+                        </header>
+
+                        <!-- Превью матрицы (заполняется JS через MathJax) -->
+                        <div class="saved-card-preview" data-saved-preview="{{ item.pk }}">
+                            <span class="saved-card-preview-placeholder">
+                                {% icon "matrix-grid" size=20 %}
+                                <span>Загрузка…</span>
+                            </span>
+                        </div>
+
+                        {% if item.notes %}
+                            <p class="saved-card-notes">
+                                {% icon "file-text" size=12 %}
+                                <span>{{ item.notes }}</span>
+                            </p>
+                        {% endif %}
+
+                        <footer class="saved-card-foot">
+                            <time class="saved-card-time" datetime="{{ item.updated_at|date:'c' }}">
+                                {% icon "clock" size=12 %}
+                                <span>{{ item.updated_at|date:"d.m.Y H:i" }}</span>
+                            </time>
+                            <button type="button"
+                                    class="btn btn-soft btn-xs"
+                                    data-saved-use="{{ item.pk }}">
+                                {% icon "calculator" size=12 %}
+                                <span>Использовать</span>
+                            </button>
+                        </footer>
+
+                        <!-- Скрытые данные для JS -->
+                        <script type="application/json" data-saved-data="{{ item.pk }}">{{ item.matrix_data|safe }}</script>
+                    </article>
+                {% endfor %}
+            </div>
+
+        {% else %}
+
+            <!-- Пустое состояние -->
+            <div class="saved-empty">
+                <div class="saved-empty-icon" aria-hidden="true">
+                    {% icon "square-matrix" size=48 %}
+                </div>
+                <h2>Сохранённых матриц пока нет</h2>
+                <p>
+                    Сохраните матрицу в калькуляторе, чтобы вернуться к ней позже.
+                    Сохранённые матрицы доступны только в этом браузере.
+                </p>
+                <a href="{% url 'matrix_app:calculator' %}" class="btn btn-primary">
+                    {% icon "calculator" size=16 %}
+                    <span>Открыть калькулятор</span>
+                </a>
+            </div>
+
+        {% endif %}
+
+    </div>
+</section>
+
+
+<!-- ================================================================
+     Модальное окно для сохранения
+     ================================================================ -->
+<div class="modal" id="saved-modal" data-saved-modal hidden>
+    <div class="modal-backdrop" data-saved-modal-close></div>
+    <div class="modal-dialog modal-dialog--md" role="dialog" aria-labelledby="saved-modal-title" aria-modal="true">
+        <header class="modal-head">
+            <div class="modal-head-title">
+                <div class="modal-head-icon">
+                    {% icon "clipboard" size=18 %}
+                </div>
+                <h3 id="saved-modal-title">Сохранить матрицу</h3>
+            </div>
+            <button type="button" class="modal-close" data-saved-modal-close aria-label="Закрыть">
+                {% icon "close" size=16 %}
+            </button>
+        </header>
+
+        <div class="modal-body">
+            <label class="field">
+                <span class="field-label">
+                    {% icon "edit" size=12 %}
+                    <span>Название матрицы</span>
+                </span>
+                <input type="text"
+                       class="field-input"
+                       placeholder="Например, «Матрица A из задачи 3.4»"
+                       data-saved-name
+                       maxlength="120"
+                       autocomplete="off">
+            </label>
+
+            <label class="field">
+                <span class="field-label">
+                    {% icon "file-text" size=12 %}
+                    <span>Заметка (необязательно)</span>
+                </span>
+                <textarea class="field-input field-textarea"
+                          rows="3"
+                          placeholder="Зачем эта матрица сохранена"
+                          data-saved-notes></textarea>
+            </label>
+
+            <p class="modal-hint">
+                {% icon "check-circle" size=14 %}
+                <span>Матрица сохраняется в точной форме — дроби, корни и комплексные числа не теряют точности.</span>
+            </p>
+        </div>
+
+        <footer class="modal-foot">
+            <button type="button" class="btn btn-ghost" data-saved-modal-close>Отмена</button>
+            <button type="button" class="btn btn-primary" data-saved-save>
+                {% icon "clipboard" size=14 %}
+                <span>Сохранить</span>
+            </button>
+        </footer>
+    </div>
+</div>
+
+{% endblock %}
+
+
+{% block extra_scripts %}
+<script src="{% static 'matrix_app/js/saved.js' %}"></script>
+{% endblock %}

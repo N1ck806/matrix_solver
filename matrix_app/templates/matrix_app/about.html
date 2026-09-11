@@ -1,0 +1,383 @@
+{% extends "matrix_app/base.html" %}
+{% load static %}
+{% load matrix_icons %}
+
+{% block title %}О проекте {{ APP_NAME }}{% endblock %}
+
+{% block content %}
+
+<!-- ================================================================
+     Заголовок
+     ================================================================ -->
+<section class="page-head">
+    <div class="container">
+        <nav class="breadcrumbs" aria-label="Навигационная цепочка">
+            <a href="{% url 'matrix_app:home' %}">Главная</a>
+            <span class="breadcrumbs-sep">/</span>
+            <span aria-current="page">О проекте</span>
+        </nav>
+        <div class="page-head-row">
+            <div>
+                <h1 class="page-title">О проекте {{ APP_NAME }}</h1>
+                <p class="page-subtitle">{{ APP_DESCRIPTION }}</p>
+            </div>
+            <div class="page-head-actions">
+                <a href="{% url 'matrix_app:calculator' %}" class="btn btn-soft btn-sm">
+                    {% icon "calculator" size=14 %}
+                    <span>Попробовать</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<section class="about-layout">
+    <div class="container">
+
+        <!-- ================================================================
+             Что это
+             ================================================================ -->
+        <div class="about-intro">
+            <div class="about-intro-content">
+                <span class="section-label">
+                    {% icon "info" size=14 %}
+                    <span>Что это</span>
+                </span>
+                <h2>Матричный сервис для студентов и преподавателей</h2>
+                <p>
+                    <strong>{{ APP_NAME }}</strong> — это локально запускаемый
+                    веб-сервис для работы с матрицами и линейной алгеброй.
+                    Он объединяет точный математический движок на базе
+                    <strong>SymPy</strong> с интерактивным интерфейсом на
+                    <strong>Django</strong>.
+                </p>
+                <p>
+                    Каждая операция — от определителя до спектрального
+                    разложения — выполняется в точной арифметике. Дроби
+                    остаются дробями, корни — корнями, комплексные числа —
+                    комплексными. Никаких потерь точности из-за промежуточного
+                    перехода в <code>float</code>.
+                </p>
+                <p>
+                    Помимо готового ответа, сервис показывает <strong>ход
+                    решения</strong>: формулу за формулой, шаг за шагом,
+                    с объяснением «что это значит» и проверкой результата.
+                </p>
+            </div>
+
+            <div class="about-intro-visual" aria-hidden="true">
+                <div class="about-visual-formula">
+                    $$A^{-1} = \frac{1}{\det(A)} \operatorname{adj}(A)$$
+                </div>
+                <div class="about-visual-formula">
+                    $$\det(A - \lambda I) = 0$$
+                </div>
+                <div class="about-visual-formula">
+                    $$A = Q \cdot D \cdot Q^{T}$$
+                </div>
+            </div>
+        </div>
+
+
+        <!-- ================================================================
+             Для кого
+             ================================================================ -->
+        <div class="about-section">
+            <header class="about-section-head">
+                <div class="about-section-icon">
+                    {% icon "users" size=22 %}
+                </div>
+                <div>
+                    <h2>Для кого этот сервис</h2>
+                    <p class="about-section-subtitle">
+                        Три аудитории, которым MatrixLab приносит пользу каждый день.
+                    </p>
+                </div>
+            </header>
+
+            <div class="about-audience">
+                <article class="about-audience-card">
+                    <div class="about-audience-icon about-audience-icon--blue">
+                        {% icon "graduation" size=24 %}
+                    </div>
+                    <h3>Студентам</h3>
+                    <p>Решать задачи по линейной алгебре и понимать ход решения, а не просто списывать ответ.</p>
+                </article>
+
+                <article class="about-audience-card">
+                    <div class="about-audience-icon about-audience-icon--violet">
+                        {% icon "book-open" size=24 %}
+                    </div>
+                    <h3>Преподавателям</h3>
+                    <p>Готовить примеры, проверять задания и иллюстрировать сложные концепции на живых вычислениях.</p>
+                </article>
+
+                <article class="about-audience-card">
+                    <div class="about-audience-icon about-audience-icon--emerald">
+                        {% icon "code" size=24 %}
+                    </div>
+                    <h3>Разработчикам</h3>
+                    <p>Использовать JSON API для интеграции матричных вычислений в свои приложения.</p>
+                </article>
+            </div>
+        </div>
+
+
+        <!-- ================================================================
+             Возможности
+             ================================================================ -->
+        <div class="about-section">
+            <header class="about-section-head">
+                <div class="about-section-icon">
+                    {% icon "check-badge" size=22 %}
+                </div>
+                <div>
+                    <h2>Что поддерживается</h2>
+                    <p class="about-section-subtitle">
+                        <strong>{{ operations_count }}</strong> типов операций, включая пошаговые решения.
+                    </p>
+                </div>
+            </header>
+
+            <div class="about-capabilities">
+                <div class="about-capability-group">
+                    <h3>
+                        {% icon "plus" size=16 %}
+                        <span>Базовые операции</span>
+                    </h3>
+                    <ul>
+                        <li>Сложение, вычитание, умножение матриц</li>
+                        <li>Умножение на скаляр, возведение в степень</li>
+                        <li>Транспонирование и эрмитово сопряжение</li>
+                    </ul>
+                </div>
+
+                <div class="about-capability-group">
+                    <h3>
+                        {% icon "determinant" size=16 %}
+                        <span>Свойства матриц</span>
+                    </h3>
+                    <ul>
+                        <li>Определитель (разными методами)</li>
+                        <li>Ранг, след</li>
+                        <li>Обратная матрица (2 метода)</li>
+                        <li>Миноры, алгебраические дополнения, кофакторы</li>
+                    </ul>
+                </div>
+
+                <div class="about-capability-group">
+                    <h3>
+                        {% icon "matrix-grid" size=16 %}
+                        <span>Приведение форм</span>
+                    </h3>
+                    <ul>
+                        <li>Ступенчатая форма (REF)</li>
+                        <li>Приведённая ступенчатая форма (RREF)</li>
+                        <li>Элементарные преобразования строк</li>
+                    </ul>
+                </div>
+
+                <div class="about-capability-group">
+                    <h3>
+                        {% icon "system" size=16 %}
+                        <span>Системы линейных уравнений</span>
+                    </h3>
+                    <ul>
+                        <li>Метод Гаусса</li>
+                        <li>Метод Гаусса-Жордана</li>
+                        <li>Правило Крамера</li>
+                        <li>Решение через обратную матрицу</li>
+                        <li>Кронекер-Капелли</li>
+                    </ul>
+                </div>
+
+                <div class="about-capability-group">
+                    <h3>
+                        {% icon "lambda" size=16 %}
+                        <span>Спектр</span>
+                    </h3>
+                    <ul>
+                        <li>Характеристический многочлен</li>
+                        <li>Собственные значения с кратностями</li>
+                        <li>Собственные векторы и их базисы</li>
+                    </ul>
+                </div>
+
+                <div class="about-capability-group">
+                    <h3>
+                        {% icon "lu" size=16 %}
+                        <span>Разложения</span>
+                    </h3>
+                    <ul>
+                        <li>LU-разложение (с пивотингом)</li>
+                        <li>QR-разложение (Грам-Шмидт)</li>
+                        <li>Разложение Холецкого</li>
+                        <li>Диагонализация</li>
+                        <li>Спектральное разложение</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- ================================================================
+             Технологии
+             ================================================================ -->
+        <div class="about-section">
+            <header class="about-section-head">
+                <div class="about-section-icon">
+                    {% icon "layers" size=22 %}
+                </div>
+                <div>
+                    <h2>Технологии</h2>
+                    <p class="about-section-subtitle">
+                        Минимальный набор зависимостей — максимальная надёжность.
+                    </p>
+                </div>
+            </header>
+
+            <div class="about-tech">
+                <article class="about-tech-card">
+                    <div class="about-tech-icon about-tech-icon--blue">
+                        {% icon "code" size=22 %}
+                    </div>
+                    <div class="about-tech-name">Python 3.14</div>
+                    <p>Современный Python с type hints, dataclasses и полной типизацией кода.</p>
+                </article>
+
+                <article class="about-tech-card">
+                    <div class="about-tech-icon about-tech-icon--emerald">
+                        {% icon "layers" size=22 %}
+                    </div>
+                    <div class="about-tech-name">Django 5</div>
+                    <p>Веб-фреймворк: маршрутизация, шаблоны, ORM, CSRF-защита, админка.</p>
+                </article>
+
+                <article class="about-tech-card">
+                    <div class="about-tech-icon about-tech-icon--violet">
+                        {% icon "sigma" size=22 %}
+                    </div>
+                    <div class="about-tech-name">SymPy</div>
+                    <p>Точная символьная математика: дроби, корни, комплексные числа, символы.</p>
+                </article>
+
+                <article class="about-tech-card">
+                    <div class="about-tech-icon about-tech-icon--amber">
+                        {% icon "sparkles" size=22 %}
+                    </div>
+                    <div class="about-tech-name">MathJax 3</div>
+                    <p>Профессиональный рендеринг формул прямо в браузере — LaTeX качество.</p>
+                </article>
+
+                <article class="about-tech-card">
+                    <div class="about-tech-icon about-tech-icon--cyan">
+                        {% icon "grid" size=22 %}
+                    </div>
+                    <div class="about-tech-name">SQLite</div>
+                    <p>Локальное хранение истории вычислений и сохранённых матриц.</p>
+                </article>
+
+                <article class="about-tech-card">
+                    <div class="about-tech-icon about-tech-icon--rose">
+                        {% icon "code" size=22 %}
+                    </div>
+                    <div class="about-tech-name">HTML · CSS · JS</div>
+                    <p>Интерфейс без фреймворков — быстрый, лёгкий, легко расширяемый.</p>
+                </article>
+            </div>
+        </div>
+
+
+        <!-- ================================================================
+             Принципы
+             ================================================================ -->
+        <div class="about-section">
+            <header class="about-section-head">
+                <div class="about-section-icon">
+                    {% icon "shield" size=22 %}
+                </div>
+                <div>
+                    <h2>Принципы проекта</h2>
+                    <p class="about-section-subtitle">
+                        Четыре принципа, на которых построен MatrixLab.
+                    </p>
+                </div>
+            </header>
+
+            <div class="about-principles">
+
+                <div class="about-principle">
+                    <div class="about-principle-head">
+                        <div class="about-principle-num">01</div>
+                        <div class="about-principle-icon">
+                            {% icon "sigma" size=20 %}
+                        </div>
+                    </div>
+                    <h3>Точность</h3>
+                    <p>Никаких <code>float</code> там, где нужна точность. Дроби, корни и символы сохраняются без потерь.</p>
+                </div>
+
+                <div class="about-principle">
+                    <div class="about-principle-head">
+                        <div class="about-principle-num">02</div>
+                        <div class="about-principle-icon">
+                            {% icon "book-open" size=20 %}
+                        </div>
+                    </div>
+                    <h3>Понятность</h3>
+                    <p>Каждая операция сопровождается шагами решения и объяснением «что это значит».</p>
+                </div>
+
+                <div class="about-principle">
+                    <div class="about-principle-head">
+                        <div class="about-principle-num">03</div>
+                        <div class="about-principle-icon">
+                            {% icon "shield" size=20 %}
+                        </div>
+                    </div>
+                    <h3>Безопасность</h3>
+                    <p>Никакого <code>eval()</code> — весь пользовательский ввод проходит через SymPy-парсер с whitelist имён.</p>
+                </div>
+
+                <div class="about-principle">
+                    <div class="about-principle-head">
+                        <div class="about-principle-num">04</div>
+                        <div class="about-principle-icon">
+                            {% icon "sparkles" size=20 %}
+                        </div>
+                    </div>
+                    <h3>Открытость</h3>
+                    <p>Локальный запуск, JSON API, чёткая архитектура, чистый код — можно изучить и адаптировать под себя.</p>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- ================================================================
+             CTA
+             ================================================================ -->
+        <div class="about-cta">
+            <div class="about-cta-icon">
+                {% icon "rocket" size=32 %}
+            </div>
+            <div class="about-cta-content">
+                <h2>Готовы попробовать?</h2>
+                <p>Калькулятор запускается в браузере — не нужна установка приложений.</p>
+                <div class="about-cta-actions">
+                    <a href="{% url 'matrix_app:calculator' %}" class="btn btn-primary btn-lg">
+                        {% icon "calculator" size=18 %}
+                        <span>Открыть калькулятор</span>
+                    </a>
+                    <a href="{% url 'matrix_app:theory' %}" class="btn btn-ghost btn-lg">
+                        {% icon "book-open" size=18 %}
+                        <span>Изучить теорию</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,234 @@
+{% extends "matrix_app/base.html" %}
+{% load static %}
+{% load matrix_icons %}
+
+{% block title %}Виды матриц — полная классификация{% endblock %}
+
+{% block content %}
+
+<!-- ================================================================
+     Заголовок
+     ================================================================ -->
+<section class="page-head">
+    <div class="container">
+        <nav class="breadcrumbs" aria-label="Навигационная цепочка">
+            <a href="{% url 'matrix_app:home' %}">Главная</a>
+            <span class="breadcrumbs-sep">/</span>
+            <span aria-current="page">Виды матриц</span>
+        </nav>
+        <div class="page-head-row">
+            <div>
+                <h1 class="page-title">Классификация матриц</h1>
+                <p class="page-subtitle">
+                    Базовые и специальные типы матриц с определениями,
+                    формулами, примерами и областями применения.
+                </p>
+            </div>
+            <div class="page-head-actions">
+                <button type="button" class="btn btn-soft btn-sm" data-types-expand-all>
+                    {% icon "grid" size=14 %}
+                    <span>Развернуть всё</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ================================================================
+     Список типов
+     ================================================================ -->
+<section class="types-layout">
+    <div class="container">
+
+        {% for category, category_types in categories.items %}
+            <section class="types-category">
+                <header class="types-category-head">
+                    <div class="types-category-icon">
+                        {% if category == "Базовые" %}
+                            {% icon "matrix-grid" size=22 %}
+                        {% elif category == "Специальные" %}
+                            {% icon "sparkles" size=22 %}
+                        {% else %}
+                            {% icon "layers" size=22 %}
+                        {% endif %}
+                    </div>
+                    <div class="types-category-text">
+                        <h2>{{ category }} матрицы</h2>
+                        <p class="types-category-desc">
+                            {% if category == "Базовые" %}
+                                Определяются формой и структурой элементов.
+                            {% elif category == "Специальные" %}
+                                Обладают дополнительными алгебраическими свойствами.
+                            {% else %}
+                                Прочие типы матриц.
+                            {% endif %}
+                        </p>
+                    </div>
+                    <span class="types-category-count">{{ category_types|length }}</span>
+                </header>
+
+                <div class="types-grid">
+                    {% for t in category_types %}
+                        <article class="type-card" id="{{ t.slug }}">
+                            <header class="type-card-head">
+                                <div class="type-card-head-text">
+                                    <h3 class="type-card-title">{{ t.title }}</h3>
+                                </div>
+                                <button type="button" class="type-card-toggle"
+                                        data-type-toggle
+                                        aria-expanded="false"
+                                        aria-controls="body-{{ t.slug }}"
+                                        aria-label="Развернуть описание">
+                                    {% icon "arrow-down" size=16 %}
+                                </button>
+                            </header>
+
+                            <p class="type-card-definition">{{ t.definition }}</p>
+
+                            <div class="type-card-formula">
+                                <span class="type-card-formula-label">
+                                    {% icon "sigma" size=12 %}
+                                    <span>Формула</span>
+                                </span>
+                                <span class="type-card-formula-body">$${{ t.formula }}$$</span>
+                            </div>
+
+                            <div class="type-card-body" id="body-{{ t.slug }}" hidden>
+
+                                <div class="type-card-section">
+                                    <span class="type-card-section-label">
+                                        {% icon "code" size=12 %}
+                                        <span>Пример</span>
+                                    </span>
+                                    <code class="type-card-example">{{ t.example }}</code>
+                                </div>
+
+                                <div class="type-card-section">
+                                    <span class="type-card-section-label">
+                                        {% icon "sparkles" size=12 %}
+                                        <span>Применения</span>
+                                    </span>
+                                    <p>{{ t.uses }}</p>
+                                </div>
+
+                                <a href="{% url 'matrix_app:properties' %}" class="type-card-link">
+                                    <span>Проверить свою матрицу</span>
+                                    {% icon "arrow-right" size=14 %}
+                                </a>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            </section>
+        {% endfor %}
+
+
+        <!-- ================================================================
+             CTA
+             ================================================================ -->
+        <div class="types-cta">
+            <div class="types-cta-icon">
+                {% icon "check-badge" size=32 %}
+            </div>
+            <div class="types-cta-content">
+                <h3>Определить тип своей матрицы</h3>
+                <p>
+                    Введите матрицу — сервис автоматически определит все её
+                    свойства: квадратность, диагональность, симметрию,
+                    ортогональность, положительную определённость и многое другое.
+                </p>
+                <a href="{% url 'matrix_app:properties' %}" class="btn btn-primary">
+                    {% icon "check-badge" size=16 %}
+                    <span>Перейти к анализу свойств</span>
+                </a>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+{% endblock %}
+
+
+{% block extra_scripts %}
+<script>
+/* =============================================================================
+   Логика страницы типов матриц:
+       • раскрытие/сворачивание карточек описания;
+       • кнопка «Развернуть всё» / «Свернуть всё»;
+       • плавная прокрутка при переходе по якорю.
+   ============================================================================= */
+document.addEventListener('DOMContentLoaded', function () {
+
+    // --- Раскрытие одной карточки --------------------------------------------
+    document.querySelectorAll('[data-type-toggle]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var card = btn.closest('.type-card');
+            if (!card) return;
+
+            var body = card.querySelector('.type-card-body');
+            if (!body) return;
+
+            var isOpen = btn.getAttribute('aria-expanded') === 'true';
+            var newState = !isOpen;
+
+            btn.setAttribute('aria-expanded', String(newState));
+            body.hidden = !newState;
+            card.classList.toggle('is-open', newState);
+        });
+    });
+
+    // --- Кнопка «Развернуть всё» / «Свернуть всё» ----------------------------
+    var expandBtn = document.querySelector('[data-types-expand-all]');
+    if (expandBtn) {
+        var allExpanded = false;
+
+        expandBtn.addEventListener('click', function () {
+            allExpanded = !allExpanded;
+
+            document.querySelectorAll('.type-card').forEach(function (card) {
+                var body = card.querySelector('.type-card-body');
+                var toggle = card.querySelector('[data-type-toggle]');
+                if (!body || !toggle) return;
+
+                body.hidden = !allExpanded;
+                toggle.setAttribute('aria-expanded', String(allExpanded));
+                card.classList.toggle('is-open', allExpanded);
+            });
+
+            // Обновляем текст кнопки
+            var label = expandBtn.querySelector('span');
+            if (label) {
+                label.textContent = allExpanded ? 'Свернуть всё' : 'Развернуть всё';
+            }
+        });
+    }
+
+    // --- Плавная прокрутка к якорю (если в URL есть #slug) -------------------
+    if (window.location.hash) {
+        var target = document.querySelector(window.location.hash);
+        if (target) {
+            // Небольшая задержка для завершения раскладки
+            setTimeout(function () {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                // Автоматически раскрываем карточку, к которой пришли по ссылке
+                var card = target.closest('.type-card');
+                if (card) {
+                    var toggle = card.querySelector('[data-type-toggle]');
+                    var body = card.querySelector('.type-card-body');
+                    if (toggle && body) {
+                        toggle.setAttribute('aria-expanded', 'true');
+                        body.hidden = false;
+                        card.classList.add('is-open');
+                    }
+                }
+            }, 100);
+        }
+    }
+
+    // --- Плавная прокрутка при клике на ссылку «Проверить свою матрицу» -----
+    // (оставлена стандартная навигация — она ведёт на другую страницу)
+});
+</script>
+{% endblock %}

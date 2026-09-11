@@ -1,0 +1,1076 @@
+{% extends "matrix_app/base.html" %}
+{% load static %}
+{% load matrix_icons %}
+
+{% block title %}Теория — линейная алгебра{% endblock %}
+
+{% block content %}
+
+<!-- ================================================================
+     Заголовок
+     ================================================================ -->
+<section class="page-head">
+    <div class="container">
+        <nav class="breadcrumbs" aria-label="Навигационная цепочка">
+            <a href="{% url 'matrix_app:home' %}">Главная</a>
+            <span class="breadcrumbs-sep">/</span>
+            <span aria-current="page">Теория</span>
+        </nav>
+        <div class="page-head-row">
+            <div>
+                <h1 class="page-title">Теория линейной алгебры</h1>
+                <p class="page-subtitle">
+                    Понятные объяснения ключевых понятий: что это, зачем нужно,
+                    как вычислять, типичные ошибки. С формулами и примерами.
+                </p>
+            </div>
+            <div class="page-head-actions">
+                <a href="{% url 'matrix_app:types' %}" class="btn btn-soft btn-sm">
+                    {% icon "matrix-grid" size=14 %}
+                    <span>Виды матриц</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<section class="theory-layout">
+    <div class="container theory-layout-grid">
+
+        <!-- ========================================================
+             Боковое оглавление
+             ======================================================== -->
+        <aside class="theory-toc" aria-label="Оглавление теории">
+
+            <!-- Поиск по темам -->
+            <div class="theory-toc-search">
+                <span class="theory-toc-search-icon">{% icon "search" size=16 %}</span>
+                <input type="text"
+                       class="theory-toc-search-input"
+                       placeholder="Найти тему…"
+                       data-theory-search
+                       aria-label="Поиск по темам">
+            </div>
+
+            <h2 class="theory-toc-title">
+                {% icon "book-open" size=16 %}
+                <span>Содержание</span>
+            </h2>
+
+            <nav>
+                {% for category, category_topics in categories.items %}
+                    <div class="theory-toc-group" data-theory-category>
+                        <h3 class="theory-toc-category">
+                            {% if category == "Основы" %}{% icon "matrix-grid" size=14 %}
+                            {% elif category == "Операции" %}{% icon "layers" size=14 %}
+                            {% elif category == "Определители" %}{% icon "determinant" size=14 %}
+                            {% elif category == "Ранг" %}{% icon "rank" size=14 %}
+                            {% elif category == "СЛАУ" %}{% icon "system" size=14 %}
+                            {% elif category == "Спектр" %}{% icon "lambda" size=14 %}
+                            {% elif category == "Разложения" %}{% icon "lu" size=14 %}
+                            {% elif category == "Специальные" %}{% icon "sparkles" size=14 %}
+                            {% endif %}
+                            <span>{{ category }}</span>
+                        </h3>
+                        <ul>
+                            {% for topic in category_topics %}
+                                <li data-theory-topic data-theory-title="{{ topic.title|lower }}">
+                                    <a href="#{{ topic.slug }}"
+                                       class="theory-toc-link"
+                                       data-theory-link="{{ topic.slug }}">
+                                        {{ topic.title }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endfor %}
+
+                <!-- Пустое состояние поиска -->
+                <div class="theory-toc-empty" data-theory-empty hidden>
+                    {% icon "search" size=24 %}
+                    <p>Ничего не найдено</p>
+                </div>
+            </nav>
+        </aside>
+
+
+        <!-- ========================================================
+             Основной контент
+             ======================================================== -->
+        <div class="theory-content">
+
+            <!-- ==============================================
+                 Основы
+                 ============================================== -->
+
+            <article class="theory-article" id="matrix-basics">
+                <header class="theory-article-head">
+                    <div class="theory-article-icon">
+                        {% icon "matrix-grid" size=20 %}
+                    </div>
+                    <div>
+                        <span class="theory-category">Основы</span>
+                        <h2>Что такое матрица</h2>
+                    </div>
+                </header>
+
+                <div class="theory-article-body">
+                    <p>
+                        <strong>Матрица</strong> — это прямоугольная таблица чисел,
+                        упорядоченная по строкам и столбцам. Матрица размера
+                        $m \times n$ содержит $m$ строк и $n$ столбцов.
+                    </p>
+                    <p>
+                        Элемент на пересечении $i$-й строки и $j$-го столбца
+                        обозначается $a_{ij}$. Матрица целиком записывается так:
+                    </p>
+                    <div class="theory-formula-block">
+                        $$A = \begin{pmatrix} a_{11} & a_{12} & \cdots & a_{1n} \\ a_{21} & a_{22} & \cdots & a_{2n} \\ \vdots & \vdots & \ddots & \vdots \\ a_{m1} & a_{m2} & \cdots & a_{mn} \end{pmatrix}$$
+                    </div>
+
+                    <h3>Зачем нужны матрицы</h3>
+                    <p>
+                        Матрица — это удобный способ описать <strong>линейное
+                        преобразование</strong>: правило, которое каждому
+                        вектору $x$ ставит в соответствие новый вектор $y = Ax$.
+                    </p>
+                    <ul class="theory-list">
+                        <li>Повороты, отражения, растяжения в геометрии;</li>
+                        <li>Решение систем линейных уравнений;</li>
+                        <li>Описание электрических цепей, механических систем, экономических моделей;</li>
+                        <li>Обработка изображений и сигналов;</li>
+                        <li>Машинное обучение и анализ данных.</li>
+                    </ul>
+
+                    <div class="theory-note">
+                        <strong>Важно:</strong> матрица — не просто таблица чисел.
+                        За ней стоит линейное преобразование пространства,
+                        и все операции над матрицами отражают операции над
+                        этими преобразованиями.
+                    </div>
+                </div>
+            </article>
+
+
+            <article class="theory-article" id="matrix-types">
+                <header class="theory-article-head">
+                    <div class="theory-article-icon">
+                        {% icon "grid" size=20 %}
+                    </div>
+                    <div>
+                        <span class="theory-category">Основы</span>
+                        <h2>Виды матриц</h2>
+                    </div>
+                </header>
+
+                <div class="theory-article-body">
+                    <p>
+                        Матрицы классифицируются по структуре, форме и свойствам
+                        элементов. Вот основные виды:
+                    </p>
+
+                    <dl class="theory-definition-list">
+                        <dt>Квадратная</dt>
+                        <dd>Число строк равно числу столбцов ($m = n$). Только для квадратных определён определитель.</dd>
+
+                        <dt>Прямоугольная</dt>
+                        <dd>$m \neq n$. В общем случае не имеет определителя и обратной матрицы.</dd>
+
+                        <dt>Диагональная</dt>
+                        <dd>Все внедиагональные элементы нули: $a_{ij} = 0$ при $i \neq j$.</dd>
+
+                        <dt>Единичная</dt>
+                        <dd>Диагональная с единицами на диагонали. Нейтральный элемент по умножению: $AI = IA = A$.</dd>
+
+                        <dt>Симметричная</dt>
+                        <dd>Совпадает со своей транспонированной: $A = A^T$, то есть $a_{ij} = a_{ji}$.</dd>
+
+                        <dt>Треугольная</dt>
+                        <dd>Верхняя — все элементы ниже диагонали нули. Нижняя — все элементы выше диагонали нули.</dd>
+
+                        <dt>Ортогональная</dt>
+                        <dd>$A^T A = I$, то есть $A^T = A^{-1}$. Столбцы образуют ортонормированный базис.</dd>
+
+                        <dt>Положительно определённая</dt>
+                        <dd>Симметричная матрица, для которой $x^T A x > 0$ при любом ненулевом $x$.</dd>
+                    </dl>
+
+                    <a href="{% url 'matrix_app:types' %}" class="theory-link-more">
+                        <span>Подробнее о видах матриц</span>
+                        {% icon "arrow-right" size=14 %}
+                    </a>
+                </div>
+            </article>
+
+
+            <article class="theory-article" id="matrix-size">
+                <header class="theory-article-head">
+                    <div class="theory-article-icon">
+                        {% icon "square-matrix" size=20 %}
+                    </div>
+                    <div>
+                        <span class="theory-category">Основы</span>
+                        <h2>Размер матрицы</h2>
+                    </div>
+                </header>
+
+                <div class="theory-article-body">
+                    <p>
+                        Размер матрицы записывается как $m \times n$, где
+                        $m$ — число строк, $n$ — число столбцов. Всего матрица
+                        содержит $m \cdot n$ элементов.
+                    </p>
+
+                    <div class="theory-example">
+                        <div class="theory-example-head">
+                            {% icon "sparkles" size=14 %}
+                            <span>Пример</span>
+                        </div>
+                        <div class="theory-example-body">
+                            <p>Матрица размера $3 \times 4$:</p>
+                            $$\begin{pmatrix} 1 & 2 & 3 & 4 \\ 5 & 6 & 7 & 8 \\ 9 & 10 & 11 & 12 \end{pmatrix}$$
+                            <p>3 строки, 4 столбца, 12 элементов.</p>
+                        </div>
+                    </div>
+
+                    <h3>Почему важен размер</h3>
+                    <ul class="theory-list">
+                        <li><strong>Сложение</strong> — только для матриц одинакового размера;</li>
+                        <li><strong>Умножение</strong> — $A_{m \times k} \cdot B_{k \times n} = C_{m \times n}$;</li>
+                        <li><strong>Определитель</strong> — только для квадратных;</li>
+                        <li><strong>Обратная матрица</strong> — только для квадратных с $\det \neq 0$.</li>
+                    </ul>
+                </div>
+            </article>
+
+
+            <!-- ==============================================
+                 Операции
+                 ============================================== -->
+
+            <article class="theory-article" id="addition">
+                <header class="theory-article-head">
+                    <div class="theory-article-icon">
+                        {% icon "plus" size=20 %}
+                    </div>
+                    <div>
+                        <span class="theory-category">Операции</span>
+                        <h2>Сложение матриц</h2>
+                    </div>
+                </header>
+
+                <div class="theory-article-body">
+                    <p>
+                        Сложение выполняется <strong>поэлементно</strong> и
+                        допустимо только для матриц одинакового размера:
+                    </p>
+                    <div class="theory-formula-block">
+                        $$(A + B)_{ij} = a_{ij} + b_{ij}$$
+                    </div>
+
+                    <div class="theory-example">
+                        <div class="theory-example-head">
+                            {% icon "sparkles" size=14 %}
+                            <span>Пример</span>
+                        </div>
+                        <div class="theory-example-body">
+                            $$\begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix} + \begin{pmatrix} 5 & 6 \\ 7 & 8 \end{pmatrix} = \begin{pmatrix} 6 & 8 \\ 10 & 12 \end{pmatrix}$$
+                        </div>
+                    </div>
+
+                    <h3>Свойства</h3>
+                    <ul class="theory-list">
+                        <li>Коммутативность: $A + B = B + A$;</li>
+                        <li>Ассоциативность: $(A + B) + C = A + (B + C)$;</li>
+                        <li>Нейтральный элемент — нулевая матрица: $A + 0 = A$.</li>
+                    </ul>
+                </div>
+            </article>
+
+
+            <article class="theory-article" id="multiplication">
+                <header class="theory-article-head">
+                    <div class="theory-article-icon">
+                        {% icon "close" size=20 %}
+                    </div>
+                    <div>
+                        <span class="theory-category">Операции</span>
+                        <h2>Умножение матриц</h2>
+                    </div>
+                </header>
+
+                <div class="theory-article-body">
+                    <p>
+                        Это самая важная и самая неочевидная операция.
+                        Элемент $c_{ij}$ произведения $C = AB$ вычисляется как
+                        <strong>скалярное произведение</strong> $i$-й строки $A$
+                        и $j$-го столбца $B$:
+                    </p>
+                    <div class="theory-formula-block">
+                        $$c_{ij} = \sum_{k=1}^{p} a_{ik} b_{kj}$$
+                    </div>
+
+                    <div class="theory-note theory-note--warning">
+                        <strong>Условие существования произведения:</strong>
+                        если $A$ размера $m \times p$, а $B$ — $p \times n$,
+                        то произведение $AB$ существует и имеет размер $m \times n$.
+                    </div>
+
+                    <h3>Свойства</h3>
+                    <ul class="theory-list">
+                        <li><strong>Не коммутативно!</strong> $AB \neq BA$ в общем случае;</li>
+                        <li>Ассоциативно: $(AB)C = A(BC)$;</li>
+                        <li>Дистрибутивно: $A(B + C) = AB + AC$;</li>
+                        <li>Транспонирование меняет порядок: $(AB)^T = B^T A^T$.</li>
+                    </ul>
+
+                    <h3>Типичные ошибки</h3>
+                    <ul class="theory-list theory-list--errors">
+                        <li>Менять порядок множителей без причины;</li>
+                        <li>Умножать поэлементно, а не «строка на столбец»;</li>
+                        <li>Забывать проверять совместимость размеров.</li>
+                    </ul>
+                </div>
+            </article>
+
+
+            <article class="theory-article" id="transpose">
+                <header class="theory-article-head">
+                    <div class="theory-article-icon">
+                        {% icon "transpose" size=20 %}
+                    </div>
+                    <div>
+                        <span class="theory-category">Операции</span>
+                        <h2>Транспонирование</h2>
+                    </div>
+                </header>
+
+                <div class="theory-article-body">
+                    <p>
+                        Транспонирование — это отражение матрицы относительно
+                        главной диагонали. Строки становятся столбцами:
+                    </p>
+                    <div class="theory-formula-block">
+                        $$(A^T)_{ij} = a_{ji}$$
+                    </div>
+
+                    <h3>Свойства</h3>
+                    <ul class="theory-list">
+                        <li>$(A^T)^T = A$;</li>
+                        <li>$(A + B)^T = A^T + B^T$;</li>
+                        <li>$(AB)^T = B^T A^T$ — порядок меняется!</li>
+                        <li>$\det(A^T) = \det(A)$ для квадратной $A$.</li>
+                    </ul>
+
+                    <h3>Где применяется</h3>
+                    <ul class="theory-list">
+                        <li>Проверка симметричности: $A = A^T$;</li>
+                        <li>Метод наименьших квадратов: нормальные уравнения $A^T A x = A^T b$;</li>
+                        <li>Определение ортогональных матриц: $A^T A = I$.</li>
+                    </ul>
+                </div>
+            </article>
+
+
+            <!-- ==============================================
+                 Определители
+                 ============================================== -->
+
+            <article class="theory-article" id="determinant">
+                <header class="theory-article-head">
+                    <div class="theory-article-icon">
+                        {% icon "determinant" size=20 %}
+                    </div>
+                    <div>
+                        <span class="theory-category">Определители</span>
+                        <h2>Определитель</h2>
+                    </div>
+                </header>
+
+                <div class="theory-article-body">
+                    <p>
+                        <strong>Определитель</strong> — это число, сопоставляемое
+                        квадратной матрице. Обозначается $\det(A)$ или $|A|$.
+                    </p>
+
+                    <h3>Геометрический смысл</h3>
+                    <p>
+                        $|\det(A)|$ показывает, во сколько раз линейное
+                        преобразование, задаваемое матрицей $A$, изменяет
+                        <strong>объём</strong>. Знак отвечает за ориентацию:
+                    </p>
+                    <ul class="theory-list">
+                        <li>$\det > 0$ — ориентация сохраняется;</li>
+                        <li>$\det < 0$ — ориентация меняется (отражение);</li>
+                        <li>$\det = 0$ — преобразование <strong>сжимает</strong> пространство.</li>
+                    </ul>
+
+                    <h3>Формулы для частных случаев</h3>
+                    <div class="theory-formula-block">
+                        <p>2×2:</p>
+                        $$\det \begin{pmatrix} a & b \\ c & d \end{pmatrix} = ad - bc$$
+                    </div>
+
+                    <div class="theory-formula-block">
+                        <p>3×3 (правило треугольников):</p>
+                        $$\det \begin{pmatrix} a & b & c \\ d & e & f \\ g & h & i \end{pmatrix} = aei + bfg + cdh - ceg - bdi - afh$$
+                    </div>
+
+                    <h3>Свойства</h3>
+                    <ul class="theory-list">
+                        <li>$\det(AB) = \det(A) \cdot \det(B)$;</li>
+                        <li>$\det(A^T) = \det(A)$;</li>
+                        <li>$\det(A^{-1}) = 1 / \det(A)$;</li>
+                        <li>Перестановка двух строк меняет знак определителя;</li>
+                        <li>Умножение строки на $\lambda$ умножает определитель на $\lambda$.</li>
+                    </ul>
+
+                    <div class="theory-note">
+                        <strong>Ключевой факт:</strong> $\det(A) \neq 0$
+                        тогда и только тогда, когда $A$ обратима.
+                    </div>
+                </div>
+            </article>
+
+
+            <article class="theory-article" id="inverse">
+                <header class="theory-article-head">
+                    <div class="theory-article-icon">
+                        {% icon "inverse" size=20 %}
+                    </div>
+                    <div>
+                        <span class="theory-category">Определители</span>
+                        <h2>Обратная матрица</h2>
+                    </div>
+                </header>
+
+                <div class="theory-article-body">
+                    <p>
+                        <strong>Обратная матрица</strong> $A^{-1}$ — такая,
+                        что $A A^{-1} = A^{-1} A = I$. Существует тогда и
+                        только тогда, когда $\det(A) \neq 0$.
+                    </p>
+
+                    <h3>Формула через присоединённую</h3>
+                    <div class="theory-formula-block">
+                        $$A^{-1} = \frac{1}{\det(A)} \operatorname{adj}(A)$$
+                    </div>
+                    <p>где $\operatorname{adj}(A) = C(A)^T$ — транспонированная матрица алгебраических дополнений.</p>
+
+                    <h3>Метод Гаусса-Жордана</h3>
+                    <div class="theory-formula-block">
+                        $$[\,A \mid I\,] \;\longrightarrow\; [\,I \mid A^{-1}\,]$$
+                    </div>
+
+                    <h3>Свойства</h3>
+                    <ul class="theory-list">
+                        <li>$(A^{-1})^{-1} = A$;</li>
+                        <li>$(AB)^{-1} = B^{-1} A^{-1}$;</li>
+                        <li>$(A^T)^{-1} = (A^{-1})^T$;</li>
+                        <li>$\det(A^{-1}) = 1 / \det(A)$.</li>
+                    </ul>
+
+                    <h3>Где применяется</h3>
+                    <ul class="theory-list">
+                        <li>Решение СЛАУ: $x = A^{-1} b$;</li>
+                        <li>Смена базиса;</li>
+                        <li>Обратные преобразования.</li>
+                    </ul>
+
+                    <div class="theory-note theory-note--warning">
+                        <strong>Не путайте:</strong> $A^{-1}$ — не
+                        поэлементное обращение.
+                    </div>
+                </div>
+            </article>
+
+
+            <article class="theory-article" id="rank">
+                <header class="theory-article-head">
+                    <div class="theory-article-icon">
+                        {% icon "rank" size=20 %}
+                    </div>
+                    <div>
+                        <span class="theory-category">Ранг</span>
+                        <h2>Ранг матрицы</h2>
+                    </div>
+                </header>
+
+                <div class="theory-article-body">
+                    <p>
+                        <strong>Ранг</strong> — максимальное число линейно
+                        независимых строк (эквивалентно — столбцов).
+                    </p>
+
+                    <h3>Как вычисляется</h3>
+                    <ol class="theory-ordered">
+                        <li>Привести матрицу к ступенчатой форме методом Гаусса;</li>
+                        <li>Посчитать число ненулевых строк — это и есть ранг.</li>
+                    </ol>
+
+                    <h3>Свойства</h3>
+                    <ul class="theory-list">
+                        <li>$\operatorname{rank}(A) \le \min(m, n)$;</li>
+                        <li>$\operatorname{rank}(A) = \operatorname{rank}(A^T)$;</li>
+                        <li>Для квадратной: $\operatorname{rank}(A) = n \iff \det(A) \neq 0$.</li>
+                    </ul>
+
+                    <div class="theory-note">
+                        <strong>Теорема о нульности:</strong>
+                        $$\operatorname{rank}(A) + \dim \ker(A) = n$$
+                    </div>
+                </div>
+            </article>
+
+
+            <!-- ==============================================
+                 СЛАУ
+                 ============================================== -->
+
+            <article class="theory-article" id="slau">
+                <header class="theory-article-head">
+                    <div class="theory-article-icon">
+                        {% icon "system" size=20 %}
+                    </div>
+                    <div>
+                        <span class="theory-category">СЛАУ</span>
+                        <h2>Системы линейных уравнений</h2>
+                    </div>
+                </header>
+
+                <div class="theory-article-body">
+                    <p><strong>СЛАУ</strong> — это набор уравнений вида:</p>
+                    <div class="theory-formula-block">
+                        $$\begin{cases} a_{11} x_1 + a_{12} x_2 + \cdots + a_{1n} x_n = b_1 \\ a_{21} x_1 + a_{22} x_2 + \cdots + a_{2n} x_n = b_2 \\ \vdots \\ a_{m1} x_1 + a_{m2} x_2 + \cdots + a_{mn} x_n = b_m \end{cases}$$
+                    </div>
+
+                    <p>В матричной форме:</p>
+                    <div class="theory-formula-block">$$A x = b$$</div>
+
+                    <h3>Три возможных случая</h3>
+                    <ul class="theory-list">
+                        <li><strong>Единственное решение</strong> — плоскости пересекаются в одной точке;</li>
+                        <li><strong>Бесконечно много решений</strong> — плоскости пересекаются по прямой или плоскости;</li>
+                        <li><strong>Нет решений</strong> — плоскости параллельны.</li>
+                    </ul>
+
+                    <h3>Расширенная матрица</h3>
+                    <div class="theory-formula-block">
+                        $$[A \mid b] = \left(\begin{array}{ccc|c} a_{11} & \cdots & a_{1n} & b_1 \\ \vdots & \ddots & \vdots & \vdots \\ a_{m1} & \cdots & a_{mn} & b_m \end{array}\right)$$
+                    </div>
+                </div>
+            </article>
+
+
+            <article class="theory-article" id="gauss">
+                <header class="theory-article-head">
+                    <div class="theory-article-icon">
+                        {% icon "layers" size=20 %}
+                    </div>
+                    <div>
+                        <span class="theory-category">СЛАУ</span>
+                        <h2>Метод Гаусса</h2>
+                    </div>
+                </header>
+
+                <div class="theory-article-body">
+                    <p>
+                        <strong>Метод Гаусса</strong> — универсальный способ
+                        решения СЛАУ: последовательное исключение переменных.
+                    </p>
+
+                    <h3>Алгоритм</h3>
+                    <ol class="theory-ordered">
+                        <li>Записать расширенную матрицу $[A \mid b]$;</li>
+                        <li><strong>Прямой ход:</strong> привести к ступенчатой форме;</li>
+                        <li><strong>Обратный ход:</strong> выразить переменные снизу вверх.</li>
+                    </ol>
+
+                    <h3>Разрешённые преобразования строк</h3>
+                    <ul class="theory-list">
+                        <li>Перестановка двух строк;</li>
+                        <li>Умножение строки на число $\neq 0$;</li>
+                        <li>Прибавление к строке другой строки, умноженной на число.</li>
+                    </ul>
+
+                    <div class="theory-note">
+                        <strong>Сложность:</strong> $O(n^3)$ операций.
+                    </div>
+                </div>
+            </article>
+
+
+            <article class="theory-article" id="gauss-jordan">
+                <header class="theory-article-head">
+                    <div class="theory-article-icon">
+                        {% icon "layers" size=20 %}
+                    </div>
+                    <div>
+                        <span class="theory-category">СЛАУ</span>
+                        <h2>Метод Гаусса-Жордана</h2>
+                    </div>
+                </header>
+
+                <div class="theory-article-body">
+                    <p>
+                        Модификация метода Гаусса: приведение к
+                        <strong>приведённой ступенчатой форме</strong> (RREF).
+                    </p>
+
+                    <h3>Отличия от метода Гаусса</h3>
+                    <ul class="theory-list">
+                        <li>Каждый ведущий элемент нормируется к 1;</li>
+                        <li>Обнуляются элементы и под, и над ведущими;</li>
+                        <li>Все переменные выражаются непосредственно.</li>
+                    </ul>
+
+                    <h3>Преимущества</h3>
+                    <ul class="theory-list">
+                        <li>Работает для нескольких правых частей;</li>
+                        <li>Даёт $A^{-1}$ при применении к $[A \mid I]$;</li>
+                        <li>Удобен в учебных целях.</li>
+                    </ul>
+                </div>
+            </article>
+
+
+            <article class="theory-article" id="cramer">
+                <header class="theory-article-head">
+                    <div class="theory-article-icon">
+                        {% icon "determinant" size=20 %}
+                    </div>
+                    <div>
+                        <span class="theory-category">СЛАУ</span>
+                        <h2>Правило Крамера</h2>
+                    </div>
+                </header>
+
+                <div class="theory-article-body">
+                    <p>
+                        Если $A$ — квадратная и $\det(A) \neq 0$, то решение
+                        системы $Ax = b$ выражается через определители:
+                    </p>
+                    <div class="theory-formula-block">
+                        $$x_i = \frac{\det(A_i)}{\det(A)}$$
+                    </div>
+                    <p>где $A_i$ — матрица $A$ с заменённым $i$-м столбцом на вектор $b$.</p>
+
+                    <div class="theory-note theory-note--warning">
+                        <strong>Недостаток:</strong> вычислительно дорого для $n > 3$.
+                    </div>
+                </div>
+            </article>
+
+
+            <!-- ==============================================
+                 Спектр
+                 ============================================== -->
+
+            <article class="theory-article" id="eigenvalues">
+                <header class="theory-article-head">
+                    <div class="theory-article-icon">
+                        {% icon "lambda" size=20 %}
+                    </div>
+                    <div>
+                        <span class="theory-category">Спектр</span>
+                        <h2>Собственные значения</h2>
+                    </div>
+                </header>
+
+                <div class="theory-article-body">
+                    <p>
+                        <strong>Собственное значение</strong> матрицы $A$ — число
+                        $\lambda$, при котором уравнение
+                    </p>
+                    <div class="theory-formula-block">
+                        $$A v = \lambda v, \quad v \neq 0$$
+                    </div>
+                    <p>имеет ненулевое решение $v$.</p>
+
+                    <h3>Как находятся</h3>
+                    <div class="theory-formula-block">$$\det(A - \lambda I) = 0$$</div>
+
+                    <h3>Инварианты</h3>
+                    <ul class="theory-list">
+                        <li>$\sum \lambda_i = \operatorname{tr}(A)$;</li>
+                        <li>$\prod \lambda_i = \det(A)$;</li>
+                        <li>Собственные значения симметричной вещественной матрицы вещественны;</li>
+                        <li>Собственные значения ортогональной матрицы по модулю равны 1.</li>
+                    </ul>
+                </div>
+            </article>
+
+
+            <article class="theory-article" id="eigenvectors">
+                <header class="theory-article-head">
+                    <div class="theory-article-icon">
+                        {% icon "vector" size=20 %}
+                    </div>
+                    <div>
+                        <span class="theory-category">Спектр</span>
+                        <h2>Собственные векторы</h2>
+                    </div>
+                </header>
+
+                <div class="theory-article-body">
+                    <p>
+                        <strong>Собственный вектор</strong> — ненулевой вектор
+                        $v$, который под действием $A$ только масштабируется:
+                    </p>
+                    <div class="theory-formula-block">$$A v = \lambda v$$</div>
+
+                    <h3>Как находятся</h3>
+                    <p>
+                        Для каждого $\lambda_i$ решается однородная система
+                        $(A - \lambda_i I) v = 0$.
+                    </p>
+
+                    <h3>Кратности</h3>
+                    <ul class="theory-list">
+                        <li><strong>Алгебраическая кратность</strong> — кратность $\lambda$ как корня характеристического многочлена;</li>
+                        <li><strong>Геометрическая кратность</strong> — размерность собственного подпространства;</li>
+                        <li>Всегда: геометрическая $\le$ алгебраическая.</li>
+                    </ul>
+                </div>
+            </article>
+
+
+            <article class="theory-article" id="char-poly">
+                <header class="theory-article-head">
+                    <div class="theory-article-icon">
+                        {% icon "sigma" size=20 %}
+                    </div>
+                    <div>
+                        <span class="theory-category">Спектр</span>
+                        <h2>Характеристический многочлен</h2>
+                    </div>
+                </header>
+
+                <div class="theory-article-body">
+                    <p>
+                        <strong>Характеристический многочлен</strong> матрицы $A$:
+                    </p>
+                    <div class="theory-formula-block">
+                        $$p(\lambda) = \det(A - \lambda I)$$
+                    </div>
+
+                    <h3>Структура</h3>
+                    <div class="theory-formula-block">
+                        $$p(\lambda) = (-\lambda)^n + (-\lambda)^{n-1} \operatorname{tr}(A) + \cdots + \det(A)$$
+                    </div>
+
+                    <h3>Теорема Гамильтона-Кэли</h3>
+                    <p>Матрица удовлетворяет своему характеристическому многочлену: $p(A) = 0$.</p>
+                </div>
+            </article>
+
+
+            <article class="theory-article" id="diagonalization">
+                <header class="theory-article-head">
+                    <div class="theory-article-icon">
+                        {% icon "diagonalize" size=20 %}
+                    </div>
+                    <div>
+                        <span class="theory-category">Спектр</span>
+                        <h2>Диагонализация</h2>
+                    </div>
+                </header>
+
+                <div class="theory-article-body">
+                    <p>
+                        <strong>Диагонализация</strong> — представление:
+                    </p>
+                    <div class="theory-formula-block">$$A = P D P^{-1}$$</div>
+
+                    <h3>Условие существования</h3>
+                    <p>
+                        Матрица диагонализируема $\iff$ геометрическая кратность
+                        каждого $\lambda$ совпадает с алгебраической.
+                    </p>
+
+                    <h3>Зачем нужно</h3>
+                    <ul class="theory-list">
+                        <li>Быстрое вычисление $A^n = P D^n P^{-1}$;</li>
+                        <li>Решение систем ОДУ $x' = Ax$;</li>
+                        <li>Понимание структуры линейного преобразования.</li>
+                    </ul>
+
+                    <div class="theory-note">
+                        <strong>Спектральная теорема:</strong>
+                        симметричная вещественная матрица всегда
+                        диагонализируема ортогонально: $A = Q D Q^T$.
+                    </div>
+                </div>
+            </article>
+
+
+            <!-- ==============================================
+                 Разложения
+                 ============================================== -->
+
+            <article class="theory-article" id="lu">
+                <header class="theory-article-head">
+                    <div class="theory-article-icon">
+                        {% icon "lu" size=20 %}
+                    </div>
+                    <div>
+                        <span class="theory-category">Разложения</span>
+                        <h2>LU-разложение</h2>
+                    </div>
+                </header>
+
+                <div class="theory-article-body">
+                    <p>
+                        Представление $A = L U$, где $L$ — нижняя треугольная
+                        с единицами на диагонали, $U$ — верхняя треугольная.
+                    </p>
+
+                    <h3>Зачем нужно</h3>
+                    <ul class="theory-list">
+                        <li>Быстрое решение СЛАУ: $Ly = b$, затем $Ux = y$;</li>
+                        <li>Вычисление определителя: $\det(A) = \prod u_{ii}$;</li>
+                        <li>Многократное решение системы с одной $A$ и разными $b$.</li>
+                    </ul>
+
+                    <div class="theory-note theory-note--warning">
+                        Если требуются перестановки строк, используют LUP-разложение.
+                    </div>
+                </div>
+            </article>
+
+
+            <article class="theory-article" id="qr">
+                <header class="theory-article-head">
+                    <div class="theory-article-icon">
+                        {% icon "qr" size=20 %}
+                    </div>
+                    <div>
+                        <span class="theory-category">Разложения</span>
+                        <h2>QR-разложение</h2>
+                    </div>
+                </header>
+
+                <div class="theory-article-body">
+                    <p>
+                        Представление $A = Q R$, где $Q$ — ортогональная,
+                        $R$ — верхняя треугольная.
+                    </p>
+
+                    <h3>Зачем нужно</h3>
+                    <ul class="theory-list">
+                        <li>Метод наименьших квадратов;</li>
+                        <li>Вычисление собственных значений (QR-алгоритм);</li>
+                        <li>Численно устойчивое решение СЛАУ.</li>
+                    </ul>
+                </div>
+            </article>
+
+
+            <article class="theory-article" id="cholesky">
+                <header class="theory-article-head">
+                    <div class="theory-article-icon">
+                        {% icon "diagonal" size=20 %}
+                    </div>
+                    <div>
+                        <span class="theory-category">Разложения</span>
+                        <h2>Разложение Холецкого</h2>
+                    </div>
+                </header>
+
+                <div class="theory-article-body">
+                    <p>
+                        Представление $A = L L^T$, где $L$ — нижняя треугольная.
+                        Существует $\iff$ $A$ <strong>симметрична</strong> и
+                        <strong>положительно определена</strong>.
+                    </p>
+
+                    <h3>Преимущества перед LU</h3>
+                    <ul class="theory-list">
+                        <li>Вдвое быстрее;</li>
+                        <li>Вдвое меньше памяти;</li>
+                        <li>Численно устойчиво без перестановок.</li>
+                    </ul>
+
+                    <h3>Применения</h3>
+                    <ul class="theory-list">
+                        <li>Генерация коррелированных случайных величин;</li>
+                        <li>Решение нормальных уравнений в оптимизации;</li>
+                        <li>Фильтр Калмана.</li>
+                    </ul>
+                </div>
+            </article>
+
+
+            <!-- ==============================================
+                 Специальные
+                 ============================================== -->
+
+            <article class="theory-article" id="symmetric">
+                <header class="theory-article-head">
+                    <div class="theory-article-icon">
+                        {% icon "symmetric" size=20 %}
+                    </div>
+                    <div>
+                        <span class="theory-category">Специальные</span>
+                        <h2>Симметричные матрицы</h2>
+                    </div>
+                </header>
+
+                <div class="theory-article-body">
+                    <p>
+                        <strong>Симметричная матрица</strong> — совпадает со
+                        своей транспонированной: $A = A^T$.
+                    </p>
+
+                    <h3>Свойства</h3>
+                    <ul class="theory-list">
+                        <li>Все собственные значения вещественны;</li>
+                        <li>Собственные векторы для разных $\lambda$ ортогональны;</li>
+                        <li>Всегда диагонализируема ортогонально: $A = Q D Q^T$.</li>
+                    </ul>
+
+                    <h3>Примеры применения</h3>
+                    <ul class="theory-list">
+                        <li>Ковариационные матрицы в статистике;</li>
+                        <li>Матрицы инерции в механике;</li>
+                        <li>Квадратичные формы $x^T A x$.</li>
+                    </ul>
+                </div>
+            </article>
+
+
+            <article class="theory-article" id="positive-definite">
+                <header class="theory-article-head">
+                    <div class="theory-article-icon">
+                        {% icon "check-badge" size=20 %}
+                    </div>
+                    <div>
+                        <span class="theory-category">Специальные</span>
+                        <h2>Положительно определённые матрицы</h2>
+                    </div>
+                </header>
+
+                <div class="theory-article-body">
+                    <p>
+                        Симметричная матрица $A$ называется
+                        <strong>положительно определённой</strong>, если
+                    </p>
+                    <div class="theory-formula-block">
+                        $$x^T A x > 0 \quad \text{для всех } x \neq 0$$
+                    </div>
+
+                    <h3>Эквивалентные условия</h3>
+                    <ul class="theory-list">
+                        <li>Все собственные значения положительны;</li>
+                        <li>Все главные миноры (критерий Сильвестра) положительны;</li>
+                        <li>Существует разложение Холецкого $A = L L^T$.</li>
+                    </ul>
+
+                    <h3>Применения</h3>
+                    <ul class="theory-list">
+                        <li>Оптимизация: точка минимума функции;</li>
+                        <li>Теория упругости;</li>
+                        <li>Оценка устойчивости систем.</li>
+                    </ul>
+                </div>
+            </article>
+
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+
+{% block extra_scripts %}
+<script>
+/* =============================================================================
+   Логика страницы теории:
+       • подсветка активной темы в оглавлении при скролле (IntersectionObserver);
+       • плавная прокрутка при клике по ссылке;
+       • фильтр поиска по темам в реальном времени.
+   ============================================================================= */
+document.addEventListener('DOMContentLoaded', function () {
+
+    // --- Подсветка активной темы ---------------------------------------------
+    var links = document.querySelectorAll('[data-theory-link]');
+    var articles = Array.from(document.querySelectorAll('.theory-article'));
+
+    if (links.length && articles.length) {
+        var byId = {};
+        links.forEach(function (link) {
+            byId[link.dataset.theoryLink] = link;
+        });
+
+        var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                var id = entry.target.id;
+                var link = byId[id];
+                if (!link) return;
+                if (entry.isIntersecting) {
+                    links.forEach(function (l) { l.classList.remove('is-active'); });
+                    link.classList.add('is-active');
+                }
+            });
+        }, {
+            rootMargin: '-20% 0px -60% 0px',
+            threshold: 0,
+        });
+
+        articles.forEach(function (a) { observer.observe(a); });
+    }
+
+    // --- Плавная прокрутка ---------------------------------------------------
+    document.querySelectorAll('.theory-toc-link').forEach(function (link) {
+        link.addEventListener('click', function (e) {
+            var href = link.getAttribute('href');
+            if (!href || href.charAt(0) !== '#') return;
+            var target = document.querySelector(href);
+            if (!target) return;
+            e.preventDefault();
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            history.replaceState(null, '', href);
+        });
+    });
+
+    // --- Поиск по темам ------------------------------------------------------
+    var searchInput = document.querySelector('[data-theory-search]');
+    var emptyState = document.querySelector('[data-theory-empty]');
+    var categories = document.querySelectorAll('[data-theory-category]');
+
+    if (searchInput && categories.length) {
+        var filterTopics = function (query) {
+            query = (query || '').toLowerCase().trim();
+            var totalVisible = 0;
+
+            categories.forEach(function (cat) {
+                var topics = cat.querySelectorAll('[data-theory-topic]');
+                var catVisible = 0;
+
+                topics.forEach(function (topic) {
+                    var title = topic.dataset.theoryTitle || '';
+                    var match = !query || title.indexOf(query) !== -1;
+                    topic.hidden = !match;
+                    if (match) {
+                        catVisible += 1;
+                        totalVisible += 1;
+                    }
+                });
+
+                // Скрыть категорию, если все темы отфильтрованы
+                cat.hidden = (catVisible === 0);
+            });
+
+            // Показать пустое состояние
+            if (emptyState) emptyState.hidden = (totalVisible !== 0);
+        };
+
+        searchInput.addEventListener('input', ML.debounce(function () {
+            filterTopics(searchInput.value);
+        }, 150));
+    }
+});
+</script>
+{% endblock %}
