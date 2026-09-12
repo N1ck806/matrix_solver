@@ -9,59 +9,10 @@
 <style>
 /* =============================================================================
    О проекте — единый стиль проекта
+   -----------------------------------------------------------------------------
+   Фон страницы НЕ переопределяем: глобальный фон из main.css + слой
+   .app-body::before. Здесь — только локальные стили секций.
    ============================================================================= */
-
-/* --- Фон на всю страницу --- */
-body {
-    background: #F7F8FC;
-    position: relative;
-    overflow-x: hidden;
-}
-
-body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: -2;
-    pointer-events: none;
-    background:
-        radial-gradient(ellipse 800px 600px at 15% 10%, rgba(99, 102, 241, 0.12), transparent 60%),
-        radial-gradient(ellipse 700px 500px at 85% 20%, rgba(139, 92, 246, 0.10), transparent 60%),
-        radial-gradient(ellipse 600px 500px at 50% 90%, rgba(6, 182, 212, 0.08), transparent 60%),
-        linear-gradient(180deg, #F7F8FC 0%, #F0F3FF 50%, #F7F8FC 100%);
-}
-
-body::after {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    background-image:
-        linear-gradient(to right, rgba(99, 102, 241, 0.05) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(99, 102, 241, 0.05) 1px, transparent 1px);
-    background-size: 56px 56px;
-    mask-image: radial-gradient(ellipse 100% 80% at 50% 20%, black 30%, transparent 90%);
-    -webkit-mask-image: radial-gradient(ellipse 100% 80% at 50% 20%, black 30%, transparent 90%);
-    opacity: 0.7;
-}
-
-[data-theme="dark"] body { background: var(--bg-page); }
-
-[data-theme="dark"] body::before {
-    background:
-        radial-gradient(ellipse 800px 600px at 15% 10%, rgba(99, 102, 241, 0.18), transparent 60%),
-        radial-gradient(ellipse 700px 500px at 85% 20%, rgba(139, 92, 246, 0.15), transparent 60%),
-        radial-gradient(ellipse 600px 500px at 50% 90%, rgba(6, 182, 212, 0.12), transparent 60%),
-        linear-gradient(180deg, #0B0E1A 0%, #10142A 50%, #0B0E1A 100%);
-}
-
-[data-theme="dark"] body::after {
-    background-image:
-        linear-gradient(to right, rgba(129, 140, 248, 0.06) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(129, 140, 248, 0.06) 1px, transparent 1px);
-    opacity: 0.6;
-}
 
 /* --- Заголовок страницы --- */
 .page-head { background: transparent; }
@@ -119,6 +70,12 @@ body::after {
     box-shadow: 0 10px 20px -6px rgba(99, 102, 241, 0.5);
     flex-shrink: 0;
 }
+.about-section-icon .ml-icon,
+.about-section-icon svg {
+    width: 22px;
+    height: 22px;
+    color: #fff;
+}
 
 .about-section-head h2 {
     font-size: clamp(20px, 2vw, 26px);
@@ -175,6 +132,12 @@ body::after {
     font-weight: 800;
     letter-spacing: 0.06em;
     text-transform: uppercase;
+    color: var(--accent);
+}
+.section-label .ml-icon,
+.section-label svg {
+    width: 14px;
+    height: 14px;
     color: var(--accent);
 }
 
@@ -308,6 +271,10 @@ body::after {
     margin-bottom: 16px;
     box-shadow: 0 10px 20px -6px rgba(99, 102, 241, 0.4);
 }
+.about-audience-icon .ml-icon,
+.about-audience-icon svg {
+    width: 24px; height: 24px; color: #fff;
+}
 
 .about-audience-icon--blue {
     background: linear-gradient(135deg, #3B82F6, #06B6D4);
@@ -381,7 +348,12 @@ body::after {
     letter-spacing: -0.01em;
 }
 
-.about-capability-group h3 svg { color: var(--accent); flex-shrink: 0; }
+.about-capability-group h3 .ml-icon,
+.about-capability-group h3 svg {
+    width: 16px; height: 16px;
+    color: var(--accent);
+    flex-shrink: 0;
+}
 
 .about-capability-group ul {
     list-style: none;
@@ -452,6 +424,10 @@ body::after {
     border-radius: 13px;
     margin-bottom: 14px;
     box-shadow: 0 8px 18px -6px rgba(99, 102, 241, 0.4);
+}
+.about-tech-icon .ml-icon,
+.about-tech-icon svg {
+    width: 22px; height: 22px; color: #fff;
 }
 
 .about-tech-icon--blue {
@@ -563,6 +539,10 @@ body::after {
     color: var(--accent);
     flex-shrink: 0;
 }
+.about-principle-icon .ml-icon,
+.about-principle-icon svg {
+    width: 20px; height: 20px; color: var(--accent);
+}
 
 .about-principle h3 {
     font-size: 17px;
@@ -642,6 +622,10 @@ body::after {
     position: relative;
     z-index: 1;
 }
+.about-cta-icon .ml-icon,
+.about-cta-icon svg {
+    width: 32px; height: 32px; color: #fff;
+}
 
 .about-cta-content {
     flex: 1;
@@ -672,6 +656,12 @@ body::after {
     flex-wrap: wrap;
 }
 
+.about-cta-actions .btn .ml-icon,
+.about-cta-actions .btn svg {
+    width: 18px; height: 18px;
+    color: inherit;
+}
+
 .about-cta-actions .btn-primary {
     box-shadow:
         0 8px 20px -6px rgba(99, 102, 241, 0.5),
@@ -694,15 +684,11 @@ body::after {
 }
 
 @media (max-width: 640px) {
-    .about-section-head {
-        flex-wrap: wrap;
-    }
+    .about-section-head { flex-wrap: wrap; }
     .about-audience,
     .about-capabilities,
     .about-tech,
-    .about-principles {
-        grid-template-columns: 1fr;
-    }
+    .about-principles { grid-template-columns: 1fr; }
     .about-cta {
         flex-direction: column;
         text-align: center;
@@ -736,7 +722,7 @@ body::after {
             </div>
             <div class="page-head-actions">
                 <a href="{% url 'matrix_app:calculator' %}" class="btn btn-soft btn-sm">
-                    {% icon "calculator" size=14 %}
+                    {% icon "ui/calculator" size=14 %}
                     <span>Попробовать</span>
                 </a>
             </div>
@@ -754,7 +740,7 @@ body::after {
         <div class="about-intro">
             <div class="about-intro-content">
                 <span class="section-label">
-                    {% icon "info" size=14 %}
+                    {% icon "ui/info" size=14 %}
                     <span>Что это</span>
                 </span>
                 <h2>Матричный сервис для студентов и преподавателей</h2>
@@ -774,7 +760,7 @@ body::after {
                 </p>
                 <p>
                     Помимо готового ответа, сервис показывает <strong>ход
-                    решения</strong>: формулу за формулой, шаг за шагом,
+                    решения</strong>: формулой за формулой, шаг за шагом,
                     с объяснением «что это значит» и проверкой результата.
                 </p>
             </div>
@@ -799,7 +785,7 @@ body::after {
         <div class="about-section">
             <header class="about-section-head">
                 <div class="about-section-icon">
-                    {% icon "users" size=22 %}
+                    {% icon "ui/users" size=22 %}
                 </div>
                 <div>
                     <h2>Для кого этот сервис</h2>
@@ -812,7 +798,7 @@ body::after {
             <div class="about-audience">
                 <article class="about-audience-card">
                     <div class="about-audience-icon about-audience-icon--blue">
-                        {% icon "graduation" size=24 %}
+                        {% icon "ui/graduation" size=24 %}
                     </div>
                     <h3>Студентам</h3>
                     <p>Решать задачи по линейной алгебре и понимать ход решения, а не просто списывать ответ.</p>
@@ -820,7 +806,7 @@ body::after {
 
                 <article class="about-audience-card">
                     <div class="about-audience-icon about-audience-icon--violet">
-                        {% icon "book-open" size=24 %}
+                        {% icon "ui/book-open" size=24 %}
                     </div>
                     <h3>Преподавателям</h3>
                     <p>Готовить примеры, проверять задания и иллюстрировать сложные концепции на живых вычислениях.</p>
@@ -828,7 +814,7 @@ body::after {
 
                 <article class="about-audience-card">
                     <div class="about-audience-icon about-audience-icon--emerald">
-                        {% icon "code" size=24 %}
+                        {% icon "ui/code" size=24 %}
                     </div>
                     <h3>Разработчикам</h3>
                     <p>Использовать JSON API для интеграции матричных вычислений в свои приложения.</p>
@@ -843,7 +829,7 @@ body::after {
         <div class="about-section">
             <header class="about-section-head">
                 <div class="about-section-icon">
-                    {% icon "check-badge" size=22 %}
+                    {% icon "ui/check-badge" size=22 %}
                 </div>
                 <div>
                     <h2>Что поддерживается</h2>
@@ -856,7 +842,7 @@ body::after {
             <div class="about-capabilities">
                 <div class="about-capability-group">
                     <h3>
-                        {% icon "plus" size=16 %}
+                        {% icon "ui/plus" size=16 %}
                         <span>Базовые операции</span>
                     </h3>
                     <ul>
@@ -868,7 +854,7 @@ body::after {
 
                 <div class="about-capability-group">
                     <h3>
-                        {% icon "determinant" size=16 %}
+                        {% icon "math/determinant" size=16 %}
                         <span>Свойства матриц</span>
                     </h3>
                     <ul>
@@ -881,7 +867,7 @@ body::after {
 
                 <div class="about-capability-group">
                     <h3>
-                        {% icon "matrix-grid" size=16 %}
+                        {% icon "ui/matrix-grid" size=16 %}
                         <span>Приведение форм</span>
                     </h3>
                     <ul>
@@ -893,7 +879,7 @@ body::after {
 
                 <div class="about-capability-group">
                     <h3>
-                        {% icon "system" size=16 %}
+                        {% icon "ui/system" size=16 %}
                         <span>Системы линейных уравнений</span>
                     </h3>
                     <ul>
@@ -907,7 +893,7 @@ body::after {
 
                 <div class="about-capability-group">
                     <h3>
-                        {% icon "lambda" size=16 %}
+                        {% icon "math/lambda" size=16 %}
                         <span>Спектр</span>
                     </h3>
                     <ul>
@@ -919,7 +905,7 @@ body::after {
 
                 <div class="about-capability-group">
                     <h3>
-                        {% icon "lu" size=16 %}
+                        {% icon "ui/lu" size=16 %}
                         <span>Разложения</span>
                     </h3>
                     <ul>
@@ -940,7 +926,7 @@ body::after {
         <div class="about-section">
             <header class="about-section-head">
                 <div class="about-section-icon">
-                    {% icon "layers" size=22 %}
+                    {% icon "ui/layers" size=22 %}
                 </div>
                 <div>
                     <h2>Технологии</h2>
@@ -953,7 +939,7 @@ body::after {
             <div class="about-tech">
                 <article class="about-tech-card">
                     <div class="about-tech-icon about-tech-icon--blue">
-                        {% icon "code" size=22 %}
+                        {% icon "ui/code" size=22 %}
                     </div>
                     <div class="about-tech-name">Python 3.14</div>
                     <p>Современный Python с type hints, dataclasses и полной типизацией кода.</p>
@@ -961,7 +947,7 @@ body::after {
 
                 <article class="about-tech-card">
                     <div class="about-tech-icon about-tech-icon--emerald">
-                        {% icon "layers" size=22 %}
+                        {% icon "ui/layers" size=22 %}
                     </div>
                     <div class="about-tech-name">Django 5</div>
                     <p>Веб-фреймворк: маршрутизация, шаблоны, ORM, CSRF-защита, админка.</p>
@@ -969,7 +955,7 @@ body::after {
 
                 <article class="about-tech-card">
                     <div class="about-tech-icon about-tech-icon--violet">
-                        {% icon "sigma" size=22 %}
+                        {% icon "math/sigma" size=22 %}
                     </div>
                     <div class="about-tech-name">SymPy</div>
                     <p>Точная символьная математика: дроби, корни, комплексные числа, символы.</p>
@@ -977,7 +963,7 @@ body::after {
 
                 <article class="about-tech-card">
                     <div class="about-tech-icon about-tech-icon--amber">
-                        {% icon "sparkles" size=22 %}
+                        {% icon "ui/sparkles" size=22 %}
                     </div>
                     <div class="about-tech-name">MathJax 3</div>
                     <p>Профессиональный рендеринг формул прямо в браузере — LaTeX качество.</p>
@@ -985,7 +971,7 @@ body::after {
 
                 <article class="about-tech-card">
                     <div class="about-tech-icon about-tech-icon--cyan">
-                        {% icon "grid" size=22 %}
+                        {% icon "ui/grid" size=22 %}
                     </div>
                     <div class="about-tech-name">SQLite</div>
                     <p>Локальное хранение истории вычислений и сохранённых матриц.</p>
@@ -993,7 +979,7 @@ body::after {
 
                 <article class="about-tech-card">
                     <div class="about-tech-icon about-tech-icon--rose">
-                        {% icon "code" size=22 %}
+                        {% icon "ui/code" size=22 %}
                     </div>
                     <div class="about-tech-name">HTML · CSS · JS</div>
                     <p>Интерфейс без фреймворков — быстрый, лёгкий, легко расширяемый.</p>
@@ -1008,7 +994,7 @@ body::after {
         <div class="about-section">
             <header class="about-section-head">
                 <div class="about-section-icon">
-                    {% icon "shield" size=22 %}
+                    {% icon "ui/shield" size=22 %}
                 </div>
                 <div>
                     <h2>Принципы проекта</h2>
@@ -1024,7 +1010,7 @@ body::after {
                     <div class="about-principle-head">
                         <div class="about-principle-num">01</div>
                         <div class="about-principle-icon">
-                            {% icon "sigma" size=20 %}
+                            {% icon "math/sigma" size=20 %}
                         </div>
                     </div>
                     <h3>Точность</h3>
@@ -1035,7 +1021,7 @@ body::after {
                     <div class="about-principle-head">
                         <div class="about-principle-num">02</div>
                         <div class="about-principle-icon">
-                            {% icon "book-open" size=20 %}
+                            {% icon "ui/book-open" size=20 %}
                         </div>
                     </div>
                     <h3>Понятность</h3>
@@ -1046,7 +1032,7 @@ body::after {
                     <div class="about-principle-head">
                         <div class="about-principle-num">03</div>
                         <div class="about-principle-icon">
-                            {% icon "shield" size=20 %}
+                            {% icon "ui/shield" size=20 %}
                         </div>
                     </div>
                     <h3>Безопасность</h3>
@@ -1057,7 +1043,7 @@ body::after {
                     <div class="about-principle-head">
                         <div class="about-principle-num">04</div>
                         <div class="about-principle-icon">
-                            {% icon "sparkles" size=20 %}
+                            {% icon "ui/sparkles" size=20 %}
                         </div>
                     </div>
                     <h3>Открытость</h3>
@@ -1072,18 +1058,18 @@ body::after {
              ================================================================ -->
         <div class="about-cta">
             <div class="about-cta-icon">
-                {% icon "rocket" size=32 %}
+                {% icon "ui/rocket" size=32 %}
             </div>
             <div class="about-cta-content">
                 <h2>Готовы попробовать?</h2>
                 <p>Калькулятор запускается в браузере — не нужна установка приложений.</p>
                 <div class="about-cta-actions">
                     <a href="{% url 'matrix_app:calculator' %}" class="btn btn-primary btn-lg">
-                        {% icon "calculator" size=18 %}
+                        {% icon "ui/calculator" size=18 %}
                         <span>Открыть калькулятор</span>
                     </a>
                     <a href="{% url 'matrix_app:theory' %}" class="btn btn-ghost btn-lg">
-                        {% icon "book-open" size=18 %}
+                        {% icon "ui/book-open" size=18 %}
                         <span>Изучить теорию</span>
                     </a>
                 </div>

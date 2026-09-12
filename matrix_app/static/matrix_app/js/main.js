@@ -30,7 +30,10 @@
        • реестр модулей (ML.register) и единый boot (ML.boot);
        • error boundary для необработанных ошибок;
        • ML.history — клиентская история;
-       • ML.workspace — заготовка рабочего пространства.
+       • ML.workspace — заготовка рабочего пространства;
+       • ML.header — состояние .is-scrolled у шапки;
+       • ML.sidebar — открытие/закрытие левого сайдбара на мобилке;
+       • ML.search — модалка поиска (open/close/toggle, живой поиск).
 
    Модуль НЕ зависит от других файлов проекта и подключается первым.
 
@@ -61,6 +64,9 @@
        ML.hotkeys.init()
        ML.history.{push,all,clear,remove,load}
        ML.workspace
+       ML.header.init()
+       ML.sidebar.{init,open,close}
+       ML.search.{init,open,close,toggle}
        ML.register(name, initFn) / ML.boot()
    ============================================================================= */
 (function () {
@@ -73,7 +79,7 @@
     const ML = window.MatrixLab = window.MatrixLab || {};
 
     // Версия ядра — для миграций prefs и отладки
-    ML.VERSION = '2.0.0';
+    ML.VERSION = '3.0.0';
 
     // =========================================================================
     // 1. БАЗОВЫЕ УТИЛИТЫ
@@ -274,10 +280,6 @@
             if (typeof v === 'object' && v !== null) return JSON.stringify(v);
             return String(v);
         },
-        /**
-         * Проверяет версию схемы prefs. Если она меньше текущей —
-         * сбрасывает старые значения (миграция).
-         */
         migrate() {
             const saved = parseInt(ML.storage.get('prefs.schema', '0'), 10) || 0;
             if (saved === PREFS_SCHEMA_VERSION) return;
@@ -312,7 +314,17 @@
             'common.no': 'Нет',
             'theme.light': 'Светлая тема',
             'theme.dark': 'Тёмная тема',
-            'theme.auto': 'Системная тема'
+            'theme.auto': 'Системная тема',
+            'saved.invalidData': 'Некорректные данные',
+            'export.report': 'отчёт',
+            'export.task': 'ЗАДАНИЕ',
+            'export.solution': 'РЕШЕНИЕ',
+            'export.result': 'РЕЗУЛЬТАТ',
+            'export.checks': 'ПРОВЕРКИ',
+            'export.explanation': 'ПОЯСНЕНИЕ',
+            'search.placeholder': 'Определитель, обратная, LU, СЛАУ…',
+            'search.hint': 'Введите запрос — начнём искать по разделам, операциям и теории. Например: «обратная», «LU», «собственные», «СЛАУ».',
+            'search.empty': 'Ничего не найдено по запросу «{q}».'
         },
         en: {
             'common.ok': 'OK',
@@ -331,7 +343,17 @@
             'common.no': 'No',
             'theme.light': 'Light theme',
             'theme.dark': 'Dark theme',
-            'theme.auto': 'System theme'
+            'theme.auto': 'System theme',
+            'saved.invalidData': 'Invalid data',
+            'export.report': 'report',
+            'export.task': 'TASK',
+            'export.solution': 'SOLUTION',
+            'export.result': 'RESULT',
+            'export.checks': 'CHECKS',
+            'export.explanation': 'EXPLANATION',
+            'search.placeholder': 'Determinant, inverse, LU, linear systems…',
+            'search.hint': 'Type a query — we\'ll search sections, operations, and theory. Try: "inverse", "LU", "eigen", "systems".',
+            'search.empty': 'Nothing found for "{q}".'
         }
     };
 
@@ -375,7 +397,6 @@
         apply(theme) {
             document.documentElement.setAttribute('data-theme', theme);
 
-            // Обновляем оба meta[name="theme-color"] (light + dark)
             const metas = document.querySelectorAll('meta[name="theme-color"]');
             if (metas.length > 0) {
                 metas.forEach(function (meta) {
@@ -407,9 +428,6 @@
             return next;
         },
 
-        /**
-         * Возвращает true, если тема сейчас следует системной.
-         */
         followSystem() {
             return (ML.prefs.get('theme') || 'auto') === 'auto';
         },
@@ -711,7 +729,6 @@
             } catch (err) {
                 lastError = err;
 
-                // 401 — просим перезагрузить страницу (CSRF истёк)
                 if (err.status === 401 || err.status === 403) {
                     ML.emit('api:auth-error', { error: err });
                     throw err;
@@ -870,8 +887,7 @@
         '[data-history-modal-close]',
         '[data-saved-modal-close]',
         '[data-examples-close]',
-        '[data-export-close]',
-        '[data-mobile-nav-close]'
+        '[data-export-close]'
     ].join(', ');
 
     ML.modal = {
@@ -953,21 +969,6 @@
     // 14. ПОДТВЕРЖДЕНИЕ (Promise-based)
     // =========================================================================
 
-    /**
-     * Подтверждение действия.
-     *
-     * Ищет модалку [data-confirm-modal] с:
-     *   [data-confirm-message] — текст
-     *   [data-confirm-ok]      — кнопка «ОК»
-     *   [data-confirm-cancel]  — кнопка «Отмена»
-     *   [data-confirm-backdrop]— backdrop
-     *
-     * Если модалки нет — использует window.confirm.
-     *
-     * @param {string} message
-     * @param {{okText?: string, cancelText?: string, title?: string}} [opts]
-     * @returns {Promise<boolean>}
-     */
     ML.confirm = function (message, opts) {
         opts = opts || {};
 
@@ -1022,12 +1023,6 @@
     // =========================================================================
 
     ML.preview = {
-        /**
-         * Рендерит превью матрицы в контейнер через MathJax.
-         * @param {HTMLElement} container
-         * @param {Array<Array>} matrix
-         * @param {{brackets?: 'p'|'b'}} [opts]
-         */
         render(container, matrix, opts) {
             if (!container) return Promise.resolve();
             opts = opts || {};
@@ -1038,7 +1033,7 @@
                 container.classList.remove('is-loading');
                 container.classList.add('is-error');
                 container.innerHTML = '<span class="saved-card-preview-error">'
-                    + ML.escapeHtml(ML.i18n.t('saved.invalidData', 'Некорректные данные'))
+                    + ML.escapeHtml(ML.i18n.t('saved.invalidData'))
                     + '</span>';
                 return Promise.resolve();
             }
@@ -1064,12 +1059,6 @@
     // 16. ТЕКСТОВЫЙ ОТЧЁТ ИЗ PAYLOAD
     // =========================================================================
 
-    /**
-     * Собирает плоский текстовый отчёт из payload результата.
-     * Используется в export.js и steps.js.
-     * @param {object} payload
-     * @returns {string}
-     */
     ML.buildPlainText = function (payload) {
         if (!payload) return '';
 
@@ -1077,16 +1066,15 @@
         const t = function (k, d) { return ML.i18n.t(k, d); };
 
         lines.push('========================================');
-        lines.push('            MatrixLab — ' + t('export.report', 'отчёт'));
+        lines.push('            MatrixLab — ' + t('export.report'));
         lines.push('========================================');
         lines.push('');
 
-        // --- Задание
         const task = payload.task || {};
         if (task.operation_latex || task.matrix_latex
             || task.matrix_a_latex || task.vector_latex
             || (Array.isArray(task.matrices_latex) && task.matrices_latex.length)) {
-            lines.push('--- ' + t('export.task', 'ЗАДАНИЕ') + ' ---');
+            lines.push('--- ' + t('export.task') + ' ---');
 
             if (task.operation_latex) {
                 lines.push('Операция: ' + String(task.operation_latex));
@@ -1107,9 +1095,8 @@
             lines.push('');
         }
 
-        // --- Решение
         if (Array.isArray(payload.steps) && payload.steps.length) {
-            lines.push('--- ' + t('export.solution', 'РЕШЕНИЕ') + ' ---');
+            lines.push('--- ' + t('export.solution') + ' ---');
             payload.steps.forEach(function (step, i) {
                 lines.push('');
                 lines.push('Шаг ' + (i + 1)
@@ -1120,8 +1107,7 @@
             lines.push('');
         }
 
-        // --- Результат
-        lines.push('--- ' + t('export.result', 'РЕЗУЛЬТАТ') + ' ---');
+        lines.push('--- ' + t('export.result') + ' ---');
         if (payload.latex) lines.push('LaTeX: ' + String(payload.latex));
         if (payload.plain) lines.push(String(payload.plain));
         if (typeof payload.result !== 'undefined') {
@@ -1134,20 +1120,18 @@
             }
         }
 
-        // --- Проверки
         if (Array.isArray(payload.checks) && payload.checks.length) {
             lines.push('');
-            lines.push('--- ' + t('export.checks', 'ПРОВЕРКИ') + ' ---');
+            lines.push('--- ' + t('export.checks') + ' ---');
             payload.checks.forEach(function (c) {
                 lines.push((c.ok === false ? '[FAIL] ' : '[OK]   ')
                     + String(c.name || ''));
             });
         }
 
-        // --- Пояснение
         if (payload.explanation) {
             lines.push('');
-            lines.push('--- ' + t('export.explanation', 'ПОЯСНЕНИЕ') + ' ---');
+            lines.push('--- ' + t('export.explanation') + ' ---');
             lines.push(String(payload.explanation));
         }
 
@@ -1158,15 +1142,6 @@
     // 17. РЕЕСТР РЕНДЕРЕРОВ РЕЗУЛЬТАТА
     // =========================================================================
 
-    /**
-     * Реестр рендереров для steps.js.
-     * Каждый рендерер получает payload и возвращает HTML-строку.
-     *
-     * steps.js регистрирует свои рендереры здесь:
-     *   ML.resultRenderers.register('scalar', fn)
-     *
-     * Рендерер имеет подпись (payload) => string.
-     */
     ML.resultRenderers = {
         _map: {},
 
@@ -1212,10 +1187,6 @@
     const ALLOWED_TOKENS = /^(sqrt|pi|e|i|\d+|\+|\-|\*|\/|\^|\(|\)|\.|,|\s)+$/;
 
     ML.validators = {
-        /**
-         * Классифицирует ввод ячейки матрицы.
-         * @returns {{valid: boolean, kind: string, message: string}}
-         */
         classifyInput(raw) {
             const s = String(raw == null ? '' : raw).trim();
 
@@ -1329,7 +1300,9 @@
                 // Ctrl/Cmd + K — поиск
                 if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
                     e.preventDefault();
-                    ML.search && ML.search.open && ML.search.open();
+                    if (ML.search && typeof ML.search.open === 'function') {
+                        ML.search.open();
+                    }
                     return;
                 }
 
@@ -1407,7 +1380,288 @@
     };
 
     // =========================================================================
-    // 24. РЕЕСТР МОДУЛЕЙ И BOOT
+    // 24. ШАПКА — состояние .is-scrolled
+    // =========================================================================
+
+    ML.header = {
+        init() {
+            const header = document.querySelector('[data-app-header]');
+            if (!header) return;
+
+            const onScroll = ML.throttle(function () {
+                const y = window.pageYOffset || document.documentElement.scrollTop || 0;
+                header.classList.toggle('is-scrolled', y > 4);
+            }, 100);
+
+            window.addEventListener('scroll', onScroll, { passive: true });
+            onScroll();
+        }
+    };
+
+    // =========================================================================
+    // 25. САЙДБАР — открытие/закрытие на мобилке
+    // =========================================================================
+
+    ML.sidebar = {
+        _sidebar: null,
+        _backdrop: null,
+
+        init() {
+            const sidebar = document.querySelector('[data-app-sidebar]');
+            if (!sidebar) return;
+
+            this._sidebar = sidebar;
+            this._backdrop = document.querySelector('[data-sidebar-backdrop]');
+
+            const self = this;
+
+            // Кнопки открытия
+            ML.$$('[data-sidebar-toggle]').forEach(function (btn) {
+                if (btn.dataset.sidebarBound === '1') return;
+                btn.dataset.sidebarBound = '1';
+                btn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    if (sidebar.classList.contains('is-open')) self.close();
+                    else self.open();
+                });
+            });
+
+            // Кнопки закрытия (крестик)
+            ML.$$('[data-sidebar-close]').forEach(function (btn) {
+                if (btn.dataset.sidebarBound === '1') return;
+                btn.dataset.sidebarBound = '1';
+                btn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    self.close();
+                });
+            });
+
+            // Клик по backdrop
+            if (this._backdrop) {
+                this._backdrop.addEventListener('click', function () { self.close(); });
+            }
+
+            // Esc
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && sidebar.classList.contains('is-open')) {
+                    self.close();
+                }
+            });
+
+            // Закрыть при переходе на десктоп
+            window.addEventListener('resize', ML.debounce(function () {
+                if (window.innerWidth > 1024 && sidebar.classList.contains('is-open')) {
+                    self.close();
+                }
+            }, 150), { passive: true });
+        },
+
+        open() {
+            const sidebar = this._sidebar;
+            if (!sidebar) return;
+
+            sidebar.classList.add('is-open');
+            if (this._backdrop) {
+                this._backdrop.hidden = false;
+                requestAnimationFrame(function () {
+                    if (ML.sidebar._backdrop) {
+                        ML.sidebar._backdrop.classList.add('is-visible');
+                    }
+                });
+            }
+            document.body.style.overflow = 'hidden';
+
+            ML.$$('[data-sidebar-toggle]').forEach(function (b) {
+                b.setAttribute('aria-expanded', 'true');
+            });
+
+            ML.emit('sidebar:open', {});
+        },
+
+        close() {
+            const sidebar = this._sidebar;
+            if (!sidebar) return;
+
+            sidebar.classList.remove('is-open');
+
+            const backdrop = this._backdrop;
+            if (backdrop) {
+                backdrop.classList.remove('is-visible');
+                setTimeout(function () {
+                    if (backdrop) backdrop.hidden = true;
+                }, 220);
+            }
+
+            document.body.style.overflow = '';
+
+            ML.$$('[data-sidebar-toggle]').forEach(function (b) {
+                b.setAttribute('aria-expanded', 'false');
+            });
+
+            ML.emit('sidebar:close', {});
+        }
+    };
+
+    // =========================================================================
+    // 26. ПОИСК — модалка с живым поиском
+    // =========================================================================
+
+    ML.search = {
+        _modal: null,
+        _input: null,
+        _results: null,
+        _debounced: null,
+
+        // Статический индекс для локального поиска.
+        // Если появится /api/search — заменить на fetch в _renderLocal.
+        _index: [
+            { title: 'Калькулятор',   desc: 'Определитель, обратная, транспонирование', url: '/calculator/',    icon: 'calculator' },
+            { title: 'Операции',      desc: 'Сложение, умножение, степень, цепочки',     url: '/operations/',    icon: 'operations' },
+            { title: 'Свойства',      desc: 'det, rank, tr, след, миноры',                url: '/properties/',    icon: 'properties' },
+            { title: 'СЛАУ',          desc: 'Системы Ax = b, метод Крамера, Гаусса',      url: '/systems/',       icon: 'systems' },
+            { title: 'Разложения',    desc: 'LU, QR, Холецкого, сингулярное',             url: '/decompositions/', icon: 'decompositions' },
+            { title: 'Спектр',        desc: 'Собственные значения и векторы',             url: '/eigen/',         icon: 'eigen' },
+            { title: 'Теория',        desc: 'Основы линейной алгебры',                    url: '/theory/',        icon: 'theory' },
+            { title: 'Виды матриц',   desc: 'Симметричные, диагональные, ортогональные',  url: '/types/',         icon: 'types' },
+            { title: 'Сохранённые',   desc: 'Ваши сохранённые матрицы',                   url: '/saved/',         icon: 'bookmark' },
+            { title: 'История',       desc: 'История ваших вычислений',                   url: '/history/',       icon: 'history' },
+            { title: 'О проекте',     desc: 'О MatrixLab',                                url: '/about/',         icon: 'info' }
+        ],
+
+        init() {
+            this._modal = document.querySelector('[data-search-modal]');
+            if (!this._modal) return;
+
+            this._input   = this._modal.querySelector('[data-search-input]');
+            this._results = this._modal.querySelector('[data-search-results]');
+
+            const self = this;
+
+            // Кнопки открытия
+            ML.$$('[data-search-open]').forEach(function (btn) {
+                if (btn.dataset.searchBound === '1') return;
+                btn.dataset.searchBound = '1';
+                btn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    self.open();
+                });
+            });
+
+            // Кнопки закрытия
+            ML.$$('[data-search-close]').forEach(function (btn) {
+                if (btn.dataset.searchBound === '1') return;
+                btn.dataset.searchBound = '1';
+                btn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    self.close();
+                });
+            });
+
+            // Esc
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape'
+                    && self._modal
+                    && !self._modal.hidden) {
+                    self.close();
+                }
+            });
+
+            // Живой поиск по мере ввода
+            if (this._input) {
+                this._debounced = ML.debounce(function () {
+                    self._renderLocal(self._input.value);
+                }, 160);
+                this._input.addEventListener('input', this._debounced);
+            }
+
+            // Enter — отправить форму
+            // (форма внутри модалки уже это делает)
+        },
+
+        open() {
+            const modal = this._modal;
+            if (!modal) return;
+
+            modal.hidden = false;
+            document.body.style.overflow = 'hidden';
+
+            setTimeout(function () {
+                if (ML.search._input) {
+                    try { ML.search._input.focus(); } catch (e) {}
+                    try { ML.search._input.select(); } catch (e) {}
+                }
+            }, 40);
+
+            ML.emit('search:open', {});
+        },
+
+        close() {
+            const modal = this._modal;
+            if (!modal) return;
+
+            modal.hidden = true;
+            document.body.style.overflow = '';
+
+            ML.emit('search:close', {});
+        },
+
+        toggle() {
+            const modal = this._modal;
+            if (!modal) return;
+            if (modal.hidden) this.open();
+            else this.close();
+        },
+
+        /**
+         * Локальные подсказки по статическому индексу.
+         * Если появится /api/search — заменить на fetch.
+         */
+        _renderLocal(query) {
+            const box = this._results;
+            if (!box) return;
+
+            query = (query || '').trim().toLowerCase();
+
+            if (!query) {
+                box.innerHTML =
+                    '<p class="search-modal__hint">' +
+                    ML.escapeHtml(ML.i18n.t('search.hint')) +
+                    '</p>';
+                return;
+            }
+
+            const hits = this._index.filter(function (item) {
+                return (item.title + ' ' + item.desc).toLowerCase().indexOf(query) !== -1;
+            });
+
+            if (!hits.length) {
+                box.innerHTML =
+                    '<p class="search-modal__hint">' +
+                    ML.escapeHtml(ML.i18n.t('search.empty').replace('{q}', query)) +
+                    '</p>';
+                return;
+            }
+
+            box.innerHTML = hits.map(function (item) {
+                return '<a class="search-result" href="' + ML.escapeHtml(item.url) + '">' +
+                           '<span class="search-result__icon" aria-hidden="true">' +
+                               ML.escapeHtml(item.icon) +
+                           '</span>' +
+                           '<span class="search-result__body">' +
+                               '<span class="search-result__title">' +
+                                   ML.escapeHtml(item.title) +
+                               '</span>' +
+                               '<span class="search-result__desc">' +
+                                   ML.escapeHtml(item.desc) +
+                               '</span>' +
+                           '</span>' +
+                       '</a>';
+            }).join('');
+        }
+    };
+
+    // =========================================================================
+    // 27. РЕЕСТР МОДУЛЕЙ И BOOT
     // =========================================================================
 
     const _modules = [];
@@ -1426,6 +1680,9 @@
 
         // Ядро
         ML.theme.init();
+        ML.header.init();
+        ML.sidebar.init();   // ← новый модуль
+        ML.search.init();    // ← модалка поиска
         ML.hotkeys.init();
         ML.history.load();
 
@@ -1445,7 +1702,7 @@
     };
 
     // =========================================================================
-    // 25. ERROR BOUNDARY
+    // 28. ERROR BOUNDARY
     // =========================================================================
 
     window.addEventListener('error', function (e) {
@@ -1463,7 +1720,7 @@
     });
 
     // =========================================================================
-    // 26. ЗАПУСК
+    // 29. ЗАПУСК
     // =========================================================================
 
     if (document.readyState === 'loading') {

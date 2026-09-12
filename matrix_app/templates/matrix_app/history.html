@@ -8,94 +8,14 @@
 {{ block.super }}
 <style>
 /* =============================================================================
-   История вычислений — единый стиль проекта
+   История вычислений — только специфика страницы.
+   Всё общее — в main.css.
    ============================================================================= */
 
-/* --- Фон на всю страницу --- */
-body {
-    background: #F7F8FC;
-    position: relative;
-    overflow-x: hidden;
-}
-
-body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: -2;
-    pointer-events: none;
-    background:
-        radial-gradient(ellipse 800px 600px at 15% 10%, rgba(99, 102, 241, 0.12), transparent 60%),
-        radial-gradient(ellipse 700px 500px at 85% 20%, rgba(139, 92, 246, 0.10), transparent 60%),
-        radial-gradient(ellipse 600px 500px at 50% 90%, rgba(6, 182, 212, 0.08), transparent 60%),
-        linear-gradient(180deg, #F7F8FC 0%, #F0F3FF 50%, #F7F8FC 100%);
-}
-
-body::after {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    background-image:
-        linear-gradient(to right, rgba(99, 102, 241, 0.05) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(99, 102, 241, 0.05) 1px, transparent 1px);
-    background-size: 56px 56px;
-    mask-image: radial-gradient(ellipse 100% 80% at 50% 20%, black 30%, transparent 90%);
-    -webkit-mask-image: radial-gradient(ellipse 100% 80% at 50% 20%, black 30%, transparent 90%);
-    opacity: 0.7;
-}
-
-[data-theme="dark"] body { background: var(--bg-page); }
-
-[data-theme="dark"] body::before {
-    background:
-        radial-gradient(ellipse 800px 600px at 15% 10%, rgba(99, 102, 241, 0.18), transparent 60%),
-        radial-gradient(ellipse 700px 500px at 85% 20%, rgba(139, 92, 246, 0.15), transparent 60%),
-        radial-gradient(ellipse 600px 500px at 50% 90%, rgba(6, 182, 212, 0.12), transparent 60%),
-        linear-gradient(180deg, #0B0E1A 0%, #10142A 50%, #0B0E1A 100%);
-}
-
-[data-theme="dark"] body::after {
-    background-image:
-        linear-gradient(to right, rgba(129, 140, 248, 0.06) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(129, 140, 248, 0.06) 1px, transparent 1px);
-    opacity: 0.6;
-}
-
-/* --- Заголовок страницы --- */
-.page-head { background: transparent; }
-
-.page-title {
-    font-size: clamp(28px, 3vw, 40px);
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    margin: 0 0 10px;
-    color: var(--text-primary);
-}
-
-.page-subtitle {
-    font-size: 16px;
-    line-height: 1.6;
-    color: var(--text-secondary);
-    max-width: 720px;
-    margin: 0;
-}
-
-.breadcrumbs a {
-    color: var(--text-secondary);
-    text-decoration: none;
-    transition: color var(--t-fast);
-}
-.breadcrumbs a:hover { color: var(--accent); }
-
-/* --- Раскладка --- */
 .history-layout {
     padding: 40px 0 96px;
-    background: transparent;
 }
 
-/* --- Статистика --- */
 .history-stats {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -108,47 +28,57 @@ body::after {
     align-items: center;
     gap: 16px;
     padding: 20px 22px;
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(99, 102, 241, 0.15);
-    border-radius: 18px;
-    box-shadow:
-        0 1px 2px rgba(0, 0, 0, 0.03),
-        0 4px 16px -4px rgba(99, 102, 241, 0.1);
-    transition: transform 320ms cubic-bezier(0.16, 1, 0.3, 1),
-                box-shadow 320ms,
-                border-color 320ms;
-}
-
-[data-theme="dark"] .history-stat {
-    background: rgba(20, 24, 40, 0.75);
-    border-color: rgba(129, 140, 248, 0.2);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-xs);
+    transition: transform var(--dur-base) var(--ease-out),
+                box-shadow var(--dur-base),
+                border-color var(--dur-base);
 }
 
 .history-stat:hover {
     transform: translateY(-3px);
-    border-color: rgba(99, 102, 241, 0.3);
-    box-shadow: 0 16px 32px -12px rgba(99, 102, 241, 0.22);
+    border-color: var(--accent);
+    box-shadow: var(--shadow);
 }
 
 .history-stat-icon {
-    width: 48px; height: 48px;
+    width: 48px;
+    height: 48px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: rgba(99, 102, 241, 0.1);
-    border: 1px solid rgba(99, 102, 241, 0.2);
-    border-radius: 13px;
+    background: var(--accent-soft);
+    border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+    border-radius: var(--radius-md);
     color: var(--accent);
     flex-shrink: 0;
+    overflow: hidden;
+}
+
+.history-stat-icon .ml-icon {
+    width: 22px;
+    height: 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.history-stat-icon .ml-icon svg,
+.history-stat-icon svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    stroke: currentColor;
+    fill: none;
 }
 
 .history-stat--total .history-stat-icon {
-    background: linear-gradient(135deg, #6366F1, #8B5CF6);
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
     color: #fff;
     border-color: transparent;
-    box-shadow: 0 8px 18px -6px rgba(99, 102, 241, 0.5);
+    box-shadow: 0 8px 18px -6px var(--accent-glow);
 }
 
 .history-stat-body {
@@ -159,94 +89,74 @@ body::after {
 }
 
 .history-stat-value {
-    font-size: 22px;
+    font-size: var(--fs-xl);
     font-weight: 800;
     letter-spacing: -0.02em;
-    color: var(--text-primary);
+    color: var(--text);
     font-variant-numeric: tabular-nums;
     line-height: 1.15;
 }
 
 .history-stat-label {
-    font-size: 12.5px;
+    font-size: var(--fs-xs);
     font-weight: 600;
-    color: var(--text-secondary);
+    color: var(--text-dim);
 }
 
-/* --- Список истории --- */
 .history-list {
     display: flex;
     flex-direction: column;
     gap: 12px;
 }
 
-/* --- Запись истории --- */
 .history-item {
     display: grid;
-    grid-template-columns: 96px 1fr auto;
+    grid-template-columns: 96px minmax(0, 1fr) auto;
     align-items: center;
     gap: 20px;
     padding: 18px 22px;
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(99, 102, 241, 0.15);
-    border-radius: 18px;
-    box-shadow:
-        0 1px 2px rgba(0, 0, 0, 0.03),
-        0 4px 16px -4px rgba(99, 102, 241, 0.1);
-    transition: transform 320ms cubic-bezier(0.16, 1, 0.3, 1),
-                box-shadow 320ms,
-                border-color 320ms,
-                background-color 320ms;
-}
-
-[data-theme="dark"] .history-item {
-    background: rgba(20, 24, 40, 0.75);
-    border-color: rgba(129, 140, 248, 0.2);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-xs);
+    transition: transform var(--dur-base) var(--ease-out),
+                box-shadow var(--dur-base),
+                border-color var(--dur-base),
+                background-color var(--dur-base);
 }
 
 .history-item:hover {
     transform: translateY(-3px);
-    background: #fff;
-    border-color: rgba(99, 102, 241, 0.35);
-    box-shadow:
-        0 1px 2px rgba(0, 0, 0, 0.04),
-        0 20px 40px -16px rgba(99, 102, 241, 0.25);
+    border-color: var(--accent);
+    box-shadow: var(--shadow);
 }
 
-[data-theme="dark"] .history-item:hover {
-    background: rgba(28, 32, 52, 0.9);
-}
-
-/* --- Время --- */
 .history-item-time {
     display: flex;
     flex-direction: column;
     gap: 2px;
     padding-right: 20px;
-    border-right: 1px solid rgba(99, 102, 241, 0.12);
+    border-right: 1px solid var(--border);
     min-width: 0;
 }
 
 .history-time-date {
-    font-size: 12px;
+    font-size: var(--fs-xs);
     font-weight: 700;
-    color: var(--text-secondary);
+    color: var(--text-dim);
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
 }
 
 .history-time-clock {
-    font-size: 18px;
+    font-size: var(--fs-lg);
     font-weight: 800;
     letter-spacing: -0.02em;
-    color: var(--text-primary);
+    color: var(--text);
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
 }
 
-/* --- Содержание --- */
 .history-item-body {
     display: flex;
     flex-direction: column;
@@ -266,41 +176,56 @@ body::after {
     align-items: center;
     gap: 7px;
     padding: 5px 12px 5px 10px;
-    background: rgba(99, 102, 241, 0.1);
-    border: 1px solid rgba(99, 102, 241, 0.2);
-    border-radius: 999px;
-    font-size: 12px;
+    background: var(--accent-soft);
+    border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+    border-radius: var(--radius-full);
+    font-size: var(--fs-xs);
     font-weight: 700;
     color: var(--accent);
     white-space: nowrap;
 }
 
-.history-op-badge svg { flex-shrink: 0; }
+.history-op-badge .ml-icon,
+.history-op-badge svg {
+    width: 12px;
+    height: 12px;
+    display: block;
+    flex-shrink: 0;
+    stroke: currentColor;
+    fill: none;
+}
 
 .history-shape {
     display: inline-flex;
     align-items: center;
     gap: 5px;
     padding: 4px 10px;
-    background: rgba(6, 182, 212, 0.08);
-    border: 1px solid rgba(6, 182, 212, 0.2);
-    border-radius: 999px;
+    background: color-mix(in srgb, var(--accent-5) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent-5) 30%, transparent);
+    border-radius: var(--radius-full);
     font-size: 11.5px;
     font-weight: 700;
-    color: #0891B2;
+    color: var(--accent-5);
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
 }
 
-[data-theme="dark"] .history-shape { color: #22D3EE; }
+.history-shape .ml-icon,
+.history-shape svg {
+    width: 11px;
+    height: 11px;
+    display: block;
+    flex-shrink: 0;
+    stroke: currentColor;
+    fill: none;
+}
 
-/* --- Превью ввода/вывода --- */
 .history-item-preview {
     display: flex;
     align-items: center;
     gap: 10px;
     flex-wrap: wrap;
-    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-family: var(--font-mono);
     font-size: 12.5px;
     min-width: 0;
 }
@@ -310,26 +235,24 @@ body::after {
     display: inline-block;
     max-width: 100%;
     padding: 5px 12px;
-    border-radius: 9px;
+    border-radius: var(--radius-sm);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
 .history-preview-in {
-    background: rgba(99, 102, 241, 0.06);
-    border: 1px solid rgba(99, 102, 241, 0.15);
-    color: var(--text-secondary);
+    background: var(--accent-soft);
+    border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+    color: var(--text-dim);
 }
 
 .history-preview-out {
-    background: rgba(16, 185, 129, 0.07);
-    border: 1px solid rgba(16, 185, 129, 0.2);
-    color: #059669;
+    background: color-mix(in srgb, var(--success) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--success) 25%, transparent);
+    color: var(--success);
     font-weight: 700;
 }
-
-[data-theme="dark"] .history-preview-out { color: #34D399; }
 
 .history-preview-arrow {
     display: inline-flex;
@@ -340,43 +263,59 @@ body::after {
     opacity: 0.7;
 }
 
-/* --- Действия --- */
+.history-preview-arrow .ml-icon,
+.history-preview-arrow svg {
+    width: 12px;
+    height: 12px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+}
+
 .history-item-actions {
     display: flex;
     gap: 6px;
     flex-shrink: 0;
 }
 
-.icon-btn {
-    width: 36px; height: 36px;
+.history-item-actions .icon-btn {
+    width: 34px;
+    height: 34px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: rgba(99, 102, 241, 0.06);
-    border: 1px solid rgba(99, 102, 241, 0.15);
-    border-radius: 10px;
-    color: var(--text-secondary);
+    background: var(--accent-soft);
+    border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+    border-radius: var(--radius-sm);
+    color: var(--text-dim);
     cursor: pointer;
-    transition: all var(--t-fast);
+    transition: all var(--dur-fast);
     flex-shrink: 0;
+    padding: 0;
 }
 
-.icon-btn--sm { width: 34px; height: 34px; }
+.history-item-actions .icon-btn .ml-icon,
+.history-item-actions .icon-btn svg {
+    width: 14px;
+    height: 14px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+}
 
-.icon-btn:hover {
-    background: linear-gradient(135deg, #6366F1, #8B5CF6);
+.history-item-actions .icon-btn:hover {
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
     border-color: transparent;
     color: #fff;
     transform: translateY(-2px);
-    box-shadow: 0 8px 16px -6px rgba(99, 102, 241, 0.5);
+    box-shadow: 0 8px 16px -6px var(--accent-glow);
 }
 
-.icon-btn--danger:hover {
-    background: linear-gradient(135deg, #EF4444, #DC2626);
-    box-shadow: 0 8px 16px -6px rgba(239, 68, 68, 0.5);
+.history-item-actions .icon-btn--danger:hover {
+    background: linear-gradient(135deg, var(--danger), #DC2626);
+    box-shadow: 0 8px 16px -6px color-mix(in srgb, var(--danger) 50%, transparent);
 }
 
-/* --- Пустое состояние --- */
 .history-empty {
     display: flex;
     flex-direction: column;
@@ -384,28 +323,31 @@ body::after {
     justify-content: center;
     text-align: center;
     padding: 72px 24px;
-    background: rgba(255, 255, 255, 0.6);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px dashed rgba(99, 102, 241, 0.25);
-    border-radius: 24px;
-}
-
-[data-theme="dark"] .history-empty {
-    background: rgba(20, 24, 40, 0.5);
-    border-color: rgba(129, 140, 248, 0.3);
+    background: var(--surface);
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius-xl);
 }
 
 .history-empty-icon {
-    width: 96px; height: 96px;
+    width: 96px;
+    height: 96px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     margin-bottom: 20px;
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(139, 92, 246, 0.12));
-    border: 1px solid rgba(99, 102, 241, 0.2);
-    border-radius: 24px;
+    background: var(--accent-soft);
+    border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+    border-radius: var(--radius-xl);
     color: var(--accent);
+}
+
+.history-empty-icon .ml-icon,
+.history-empty-icon svg {
+    width: 48px;
+    height: 48px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
 }
 
 .history-empty h2 {
@@ -413,98 +355,18 @@ body::after {
     font-weight: 800;
     letter-spacing: -0.02em;
     margin: 0 0 10px;
-    color: var(--text-primary);
+    color: var(--text);
 }
 
 .history-empty p {
-    font-size: 14.5px;
-    line-height: 1.6;
-    color: var(--text-secondary);
+    font-size: var(--fs-base);
+    line-height: var(--lh-loose);
+    color: var(--text-dim);
     margin: 0 0 24px;
     max-width: 420px;
 }
 
-.history-empty .btn-primary {
-    box-shadow:
-        0 8px 20px -6px rgba(99, 102, 241, 0.5),
-        0 0 0 1px rgba(99, 102, 241, 0.1);
-    transition: transform var(--t-fast), box-shadow var(--t-base);
-}
-
-.history-empty .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow:
-        0 16px 32px -8px rgba(99, 102, 241, 0.55),
-        0 0 0 1px rgba(99, 102, 241, 0.2);
-}
-
-/* --- Модальное окно --- */
-.modal[hidden] { display: none !important; }
-
-.modal {
-    position: fixed;
-    inset: 0;
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-}
-
-.modal-backdrop {
-    position: absolute;
-    inset: 0;
-    background: rgba(11, 14, 26, 0.55);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    animation: modalFade 240ms ease;
-}
-
-@keyframes modalFade {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-.modal-dialog {
-    position: relative;
-    width: 100%;
-    max-width: 560px;
-    max-height: calc(100vh - 48px);
-    display: flex;
-    flex-direction: column;
-    background: rgba(255, 255, 255, 0.96);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(99, 102, 241, 0.2);
-    border-radius: 22px;
-    box-shadow:
-        0 1px 2px rgba(0, 0, 0, 0.04),
-        0 32px 64px -16px rgba(11, 14, 26, 0.35);
-    overflow: hidden;
-    animation: modalPop 320ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
 .modal-dialog--lg { max-width: 720px; }
-
-@keyframes modalPop {
-    from { opacity: 0; transform: translateY(12px) scale(0.97); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-[data-theme="dark"] .modal-dialog {
-    background: rgba(20, 24, 40, 0.96);
-    border-color: rgba(129, 140, 248, 0.25);
-}
-
-.modal-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    padding: 18px 22px;
-    background: linear-gradient(180deg, rgba(99, 102, 241, 0.06), transparent);
-    border-bottom: 1px solid rgba(99, 102, 241, 0.12);
-}
 
 .modal-head-title {
     display: flex;
@@ -514,56 +376,27 @@ body::after {
 }
 
 .modal-head-icon {
-    width: 36px; height: 36px;
+    width: 36px;
+    height: 36px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #6366F1, #8B5CF6);
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
     color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 6px 14px -4px rgba(99, 102, 241, 0.5);
+    border-radius: var(--radius-sm);
+    box-shadow: 0 6px 14px -4px var(--accent-glow);
     flex-shrink: 0;
 }
 
-.modal-head h3 {
-    font-size: 16px;
-    font-weight: 800;
-    letter-spacing: -0.01em;
-    margin: 0;
-    color: var(--text-primary);
+.modal-head-icon .ml-icon,
+.modal-head-icon svg {
+    width: 18px;
+    height: 18px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
 }
 
-.modal-close {
-    width: 34px; height: 34px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(99, 102, 241, 0.08);
-    border: 1px solid rgba(99, 102, 241, 0.18);
-    border-radius: 10px;
-    color: var(--text-secondary);
-    cursor: pointer;
-    transition: all var(--t-fast);
-    flex-shrink: 0;
-}
-
-.modal-close:hover {
-    background: linear-gradient(135deg, #EF4444, #DC2626);
-    border-color: transparent;
-    color: #fff;
-    transform: translateY(-1px);
-    box-shadow: 0 6px 14px -4px rgba(239, 68, 68, 0.5);
-}
-
-.modal-body {
-    padding: 22px;
-    overflow-y: auto;
-    color: var(--text-secondary);
-    font-size: 14px;
-    line-height: 1.6;
-}
-
-/* --- Адаптив --- */
 @media (max-width: 992px) {
     .history-layout { padding: 32px 0 64px; }
 }
@@ -582,32 +415,24 @@ body::after {
         padding-right: 0;
         padding-bottom: 12px;
         border-right: none;
-        border-bottom: 1px solid rgba(99, 102, 241, 0.12);
+        border-bottom: 1px solid var(--border);
     }
 
-    .history-time-clock { font-size: 15px; }
+    .history-time-clock { font-size: var(--fs-base); }
 
     .history-item-actions {
         justify-content: flex-end;
         padding-top: 4px;
-        border-top: 1px dashed rgba(99, 102, 241, 0.15);
+        border-top: 1px dashed var(--border);
     }
 
-    .history-item-preview { font-size: 12px; }
-
-    .history-preview-in,
-    .history-preview-out {
-        max-width: 100%;
-    }
+    .history-item-preview { font-size: var(--fs-xs); }
 }
 
 @media (max-width: 640px) {
     .history-stats { grid-template-columns: 1fr; }
     .history-empty { padding: 48px 20px; }
     .history-empty .btn-primary { width: 100%; justify-content: center; }
-    .modal { padding: 12px; }
-    .modal-dialog { border-radius: 18px; max-height: calc(100vh - 24px); }
-    .modal-body { padding: 18px; }
 }
 </style>
 {% endblock %}
@@ -615,9 +440,6 @@ body::after {
 
 {% block content %}
 
-<!-- ================================================================
-     Заголовок
-     ================================================================ -->
 <section class="page-head">
     <div class="container">
         <nav class="breadcrumbs" aria-label="Навигационная цепочка">
@@ -646,29 +468,21 @@ body::after {
 </section>
 
 
-<!-- ================================================================
-     Список истории
-     ================================================================ -->
 <section class="history-layout">
     <div class="container">
 
         {% if history_entries %}
 
-            <!-- Статистика -->
             <div class="history-stats">
                 <div class="history-stat history-stat--total">
-                    <span class="history-stat-icon">
-                        {% icon "history" size=20 %}
-                    </span>
+                    <span class="history-stat-icon">{% icon "history" size=20 %}</span>
                     <div class="history-stat-body">
                         <span class="history-stat-value">{{ history_count }}</span>
                         <span class="history-stat-label">записей</span>
                     </div>
                 </div>
                 <div class="history-stat">
-                    <span class="history-stat-icon">
-                        {% icon "clock" size=20 %}
-                    </span>
+                    <span class="history-stat-icon">{% icon "clock" size=20 %}</span>
                     <div class="history-stat-body">
                         <span class="history-stat-value">
                             {% if history_entries.0.created_at %}{{ history_entries.0.created_at|date:"H:i" }}{% else %}—{% endif %}
@@ -678,7 +492,6 @@ body::after {
                 </div>
             </div>
 
-            <!-- Список -->
             <div class="history-list" data-history-list>
                 {% for entry in history_entries %}
                     <article class="history-item"
@@ -686,7 +499,6 @@ body::after {
                              data-history-operation="{{ entry.operation }}"
                              data-history-date="{{ entry.created_at|date:'Y-m-d' }}">
 
-                        <!-- Время -->
                         <div class="history-item-time">
                             <time datetime="{{ entry.created_at|date:'c' }}">
                                 <span class="history-time-date">{{ entry.created_at|date:"d.m.Y" }}</span>
@@ -694,10 +506,9 @@ body::after {
                             </time>
                         </div>
 
-                        <!-- Содержание -->
                         <div class="history-item-body">
                             <div class="history-item-head">
-                                <span class="history-op-badge history-op-badge--{{ entry.operation }}">
+                                <span class="history-op-badge">
                                     {% if entry.operation == "determinant" %}{% icon "determinant" size=12 %}
                                     {% elif entry.operation == "inverse" %}{% icon "inverse" size=12 %}
                                     {% elif entry.operation == "rank" %}{% icon "rank" size=12 %}
@@ -742,27 +553,20 @@ body::after {
                             </div>
                         </div>
 
-                        <!-- Действия -->
                         <div class="history-item-actions">
-                            <button type="button"
-                                    class="icon-btn icon-btn--sm"
+                            <button type="button" class="icon-btn"
                                     data-history-open="{{ entry.pk }}"
-                                    title="Открыть"
-                                    aria-label="Открыть запись">
+                                    title="Открыть" aria-label="Открыть запись">
                                 {% icon "eye" size=14 %}
                             </button>
-                            <button type="button"
-                                    class="icon-btn icon-btn--sm"
+                            <button type="button" class="icon-btn"
                                     data-history-repeat="{{ entry.pk }}"
-                                    title="Повторить"
-                                    aria-label="Повторить операцию">
+                                    title="Повторить" aria-label="Повторить операцию">
                                 {% icon "repeat" size=14 %}
                             </button>
-                            <button type="button"
-                                    class="icon-btn icon-btn--sm icon-btn--danger"
+                            <button type="button" class="icon-btn icon-btn--danger"
                                     data-history-delete="{{ entry.pk }}"
-                                    title="Удалить"
-                                    aria-label="Удалить запись">
+                                    title="Удалить" aria-label="Удалить запись">
                                 {% icon "close" size=14 %}
                             </button>
                         </div>
@@ -771,7 +575,6 @@ body::after {
             </div>
 
         {% else %}
-            <!-- Пустое состояние -->
             <div class="history-empty">
                 <div class="history-empty-icon" aria-hidden="true">
                     {% icon "history" size=48 %}
@@ -789,26 +592,19 @@ body::after {
 </section>
 
 
-<!-- ================================================================
-     Модальное окно для просмотра записи
-     ================================================================ -->
 <div class="modal" id="history-modal" data-history-modal hidden>
     <div class="modal-backdrop" data-history-modal-close></div>
     <div class="modal-dialog modal-dialog--lg" role="dialog" aria-labelledby="history-modal-title" aria-modal="true">
         <header class="modal-head">
             <div class="modal-head-title">
-                <div class="modal-head-icon">
-                    {% icon "history" size=18 %}
-                </div>
+                <div class="modal-head-icon">{% icon "history" size=18 %}</div>
                 <h3 id="history-modal-title" data-history-modal-title>Запись истории</h3>
             </div>
             <button type="button" class="modal-close" data-history-modal-close aria-label="Закрыть">
                 {% icon "close" size=16 %}
             </button>
         </header>
-        <div class="modal-body" data-history-modal-body>
-            <!-- заполняется JS -->
-        </div>
+        <div class="modal-body" data-history-modal-body></div>
     </div>
 </div>
 

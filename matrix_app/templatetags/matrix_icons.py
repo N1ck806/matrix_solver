@@ -25,6 +25,10 @@
     {% illustration "hero-matrix" width=480 height=360 %}
     {% illustration "determinant" width=480 height=360 label="Определитель как площадь" %}
 
+    {# Сохранить результат в переменную #}
+    {% icon "plus" size=18 as plus_icon %}
+    {{ plus_icon }}
+
 Поиск {% icon "name" %}:
     1) icons/<name>.svg
     2) icons/brand/<name>.svg
@@ -51,6 +55,8 @@
     • Имена валидируются: разрешены буквы, цифры, дефис, подчёркивание
       и один уровень вложенности через слэш. Никаких ../, абсолютных путей,
       пробелов, точек.
+    • Если name не передан или пустой — тег возвращает пустую строку,
+      НЕ роняя всю страницу TemplateSyntaxError'ом.
 """
 
 from __future__ import annotations
@@ -391,9 +397,9 @@ def _next_prefix(name: str) -> str:
 # Публичные теги
 # =============================================================================
 
-@register.simple_tag
+@register.simple_tag(name="icon")
 def icon(
-    name: str,
+    name: str = "",
     size: int = 20,
     variant: str = "",
     extra_class: str = "",
@@ -410,36 +416,43 @@ def icon(
         {% icon "features/determinant" size=96 %}
         {% icon "hero/hero-transform" size=320 %}
         {% icon "determinant" size=20 label="Определитель" %}
+
+    Если name пустой или невалидный — возвращает пустую строку.
+    Это специально: старый вызов {% icon size=18 %} больше не роняет
+    всю страницу TemplateSyntaxError'ом, а просто ничего не рисует.
     """
-    if not _is_safe_name(name):
+    # Мягкая защита: имя могло прийти как None/пустое/невалидное.
+    if not name or not _is_safe_name(str(name)):
         return ""
 
-    found = _find_icon(name)
+    found = _find_icon(str(name))
     if found is None:
-        return (
+        # Иконка не найдена — рисуем невидимую заглушку,
+        # чтобы в dev-режиме было видно в DevTools, какой файл отсутствует.
+        return mark_safe(
             f'<span class="ml-icon ml-icon--missing" '
-            f'data-icon="{_escape_attr(name)}" aria-hidden="true"></span>'
+            f'data-icon="{_escape_attr(str(name))}" aria-hidden="true"></span>'
         )
 
     svg, _path = found
-    prefix = _next_prefix(name)
+    prefix = _next_prefix(str(name))
 
     return mark_safe(
         _build_icon_html(
             svg,
-            name=name,
-            size=size,
-            variant=variant,
-            extra_class=extra_class,
-            label=label,
+            name=str(name),
+            size=int(size),
+            variant=variant or "",
+            extra_class=extra_class or "",
+            label=label or "",
             prefix=prefix,
         )
     )
 
 
-@register.simple_tag
+@register.simple_tag(name="illustration")
 def illustration(
-    name: str,
+    name: str = "",
     width: int = 480,
     height: int = 360,
     extra_class: str = "",
@@ -451,50 +464,53 @@ def illustration(
     Примеры:
         {% illustration "hero-matrix" %}
         {% illustration "determinant" width=480 height=360 label="Определитель" %}
+
+    Если name пустой или невалидный — возвращает пустую строку.
     """
-    if not _is_safe_name(name):
+    if not name or not _is_safe_name(str(name)):
         return ""
 
-    found = _find_illustration(name)
+    found = _find_illustration(str(name))
     if found is None:
-        return (
+        return mark_safe(
             f'<div class="ml-illustration ml-illustration--missing" '
-            f'data-illustration="{_escape_attr(name)}" aria-hidden="true"></div>'
+            f'data-illustration="{_escape_attr(str(name))}" '
+            f'aria-hidden="true"></div>'
         )
 
     svg, _path = found
-    prefix = _next_prefix(name)
+    prefix = _next_prefix(str(name))
 
     return mark_safe(
         _build_illustration_html(
             svg,
-            name=name,
-            width=width,
-            height=height,
-            extra_class=extra_class,
-            label=label,
+            name=str(name),
+            width=int(width),
+            height=int(height),
+            extra_class=extra_class or "",
+            label=label or "",
             prefix=prefix,
         )
     )
 
 
-@register.simple_tag
-def icon_exists(name: str) -> bool:
+@register.simple_tag(name="icon_exists")
+def icon_exists(name: str = "") -> bool:
     """Проверяет, существует ли иконка (с учётом подпапок)."""
-    if not _is_safe_name(name):
+    if not name or not _is_safe_name(str(name)):
         return False
-    return _find_icon(name) is not None
+    return _find_icon(str(name)) is not None
 
 
-@register.simple_tag
-def illustration_exists(name: str) -> bool:
+@register.simple_tag(name="illustration_exists")
+def illustration_exists(name: str = "") -> bool:
     """Проверяет, существует ли иллюстрация."""
-    if not _is_safe_name(name):
+    if not name or not _is_safe_name(str(name)):
         return False
-    return _find_illustration(name) is not None
+    return _find_illustration(str(name)) is not None
 
 
-@register.simple_tag
+@register.simple_tag(name="clear_icon_cache")
 def clear_icon_cache() -> str:
     """
     Сбрасывает кэш прочитанных SVG.
