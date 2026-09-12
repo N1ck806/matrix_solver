@@ -9,59 +9,10 @@
 <style>
 /* =============================================================================
    Сохранённые матрицы — единый стиль проекта
+   -----------------------------------------------------------------------------
+   Фон страницы НЕ переопределяем: глобальный фон из main.css + слой
+   .app-body::before. Здесь — только локальные стили секций.
    ============================================================================= */
-
-/* --- Фон на всю страницу --- */
-body {
-    background: #F7F8FC;
-    position: relative;
-    overflow-x: hidden;
-}
-
-body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: -2;
-    pointer-events: none;
-    background:
-        radial-gradient(ellipse 800px 600px at 15% 10%, rgba(99, 102, 241, 0.12), transparent 60%),
-        radial-gradient(ellipse 700px 500px at 85% 20%, rgba(139, 92, 246, 0.10), transparent 60%),
-        radial-gradient(ellipse 600px 500px at 50% 90%, rgba(6, 182, 212, 0.08), transparent 60%),
-        linear-gradient(180deg, #F7F8FC 0%, #F0F3FF 50%, #F7F8FC 100%);
-}
-
-body::after {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    background-image:
-        linear-gradient(to right, rgba(99, 102, 241, 0.05) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(99, 102, 241, 0.05) 1px, transparent 1px);
-    background-size: 56px 56px;
-    mask-image: radial-gradient(ellipse 100% 80% at 50% 20%, black 30%, transparent 90%);
-    -webkit-mask-image: radial-gradient(ellipse 100% 80% at 50% 20%, black 30%, transparent 90%);
-    opacity: 0.7;
-}
-
-[data-theme="dark"] body { background: var(--bg-page); }
-
-[data-theme="dark"] body::before {
-    background:
-        radial-gradient(ellipse 800px 600px at 15% 10%, rgba(99, 102, 241, 0.18), transparent 60%),
-        radial-gradient(ellipse 700px 500px at 85% 20%, rgba(139, 92, 246, 0.15), transparent 60%),
-        radial-gradient(ellipse 600px 500px at 50% 90%, rgba(6, 182, 212, 0.12), transparent 60%),
-        linear-gradient(180deg, #0B0E1A 0%, #10142A 50%, #0B0E1A 100%);
-}
-
-[data-theme="dark"] body::after {
-    background-image:
-        linear-gradient(to right, rgba(129, 140, 248, 0.06) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(129, 140, 248, 0.06) 1px, transparent 1px);
-    opacity: 0.6;
-}
 
 /* --- Заголовок страницы --- */
 .page-head { background: transparent; }
@@ -142,6 +93,10 @@ body::after {
     border-radius: 13px;
     box-shadow: 0 8px 18px -6px rgba(99, 102, 241, 0.5);
     flex-shrink: 0;
+}
+.saved-stat-icon .ml-icon,
+.saved-stat-icon svg {
+    width: 20px; height: 20px; color: #fff;
 }
 
 .saved-stat-body {
@@ -276,6 +231,11 @@ body::after {
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
 }
+.saved-card-shape .ml-icon,
+.saved-card-shape svg {
+    width: 12px; height: 12px;
+    color: inherit;
+}
 
 [data-theme="dark"] .saved-card-shape { color: #22D3EE; }
 
@@ -298,6 +258,11 @@ body::after {
     cursor: pointer;
     transition: all var(--t-fast);
     flex-shrink: 0;
+}
+.icon-btn .ml-icon,
+.icon-btn svg {
+    width: 14px; height: 14px;
+    color: inherit;
 }
 
 .icon-btn--sm { width: 34px; height: 34px; }
@@ -360,8 +325,9 @@ body::after {
     position: relative;
     z-index: 1;
 }
-
+.saved-card-preview-placeholder .ml-icon,
 .saved-card-preview-placeholder svg {
+    width: 20px; height: 20px;
     color: var(--accent);
     opacity: 0.6;
 }
@@ -380,8 +346,9 @@ body::after {
     border: 1px solid rgba(245, 158, 11, 0.18);
     border-radius: 10px;
 }
-
+.saved-card-notes .ml-icon,
 .saved-card-notes svg {
+    width: 12px; height: 12px;
     color: #F59E0B;
     flex-shrink: 0;
     margin-top: 2px;
@@ -407,13 +374,22 @@ body::after {
     color: var(--text-secondary);
     font-variant-numeric: tabular-nums;
 }
-
-.saved-card-time svg { opacity: 0.7; }
+.saved-card-time .ml-icon,
+.saved-card-time svg {
+    width: 12px; height: 12px;
+    opacity: 0.7;
+    color: inherit;
+}
 
 .btn-xs {
     padding: 6px 12px;
     font-size: 12px;
     border-radius: 9px;
+}
+.btn-xs .ml-icon,
+.btn-xs svg {
+    width: 12px; height: 12px;
+    color: inherit;
 }
 
 /* --- Пустое состояние --- */
@@ -445,6 +421,11 @@ body::after {
     background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(139, 92, 246, 0.12));
     border: 1px solid rgba(99, 102, 241, 0.2);
     border-radius: 24px;
+    color: var(--accent);
+}
+.saved-empty-icon .ml-icon,
+.saved-empty-icon svg {
+    width: 48px; height: 48px;
     color: var(--accent);
 }
 
@@ -565,6 +546,11 @@ body::after {
     box-shadow: 0 6px 14px -4px rgba(99, 102, 241, 0.5);
     flex-shrink: 0;
 }
+.modal-head-icon .ml-icon,
+.modal-head-icon svg {
+    width: 18px; height: 18px;
+    color: #fff;
+}
 
 .modal-head h3 {
     font-size: 16px;
@@ -586,6 +572,11 @@ body::after {
     cursor: pointer;
     transition: all var(--t-fast);
     flex-shrink: 0;
+}
+.modal-close .ml-icon,
+.modal-close svg {
+    width: 16px; height: 16px;
+    color: inherit;
 }
 
 .modal-close:hover {
@@ -626,8 +617,9 @@ body::after {
     line-height: 1.55;
     color: var(--text-secondary);
 }
-
+.modal-hint .ml-icon,
 .modal-hint svg {
+    width: 14px; height: 14px;
     color: #10B981;
     flex-shrink: 0;
     margin-top: 1px;
@@ -650,8 +642,11 @@ body::after {
     text-transform: uppercase;
     color: var(--text-secondary);
 }
-
-.field-label svg { color: var(--accent); }
+.field-label .ml-icon,
+.field-label svg {
+    width: 12px; height: 12px;
+    color: var(--accent);
+}
 
 .field-input {
     width: 100%;
@@ -745,7 +740,7 @@ body::after {
             </div>
             <div class="page-head-actions">
                 <a href="{% url 'matrix_app:calculator' %}" class="btn btn-primary btn-sm">
-                    {% icon "plus" size=14 %}
+                    {% icon "ui/plus" size=14 %}
                     <span>Новая матрица</span>
                 </a>
             </div>
@@ -766,7 +761,7 @@ body::after {
             <div class="saved-stats">
                 <div class="saved-stat">
                     <span class="saved-stat-icon">
-                        {% icon "square-matrix" size=20 %}
+                        {% icon "ui/square-matrix" size=20 %}
                     </span>
                     <div class="saved-stat-body">
                         <span class="saved-stat-value">{{ saved|length }}</span>
@@ -777,7 +772,7 @@ body::after {
                 </div>
                 <div class="saved-stat">
                     <span class="saved-stat-icon">
-                        {% icon "clock" size=20 %}
+                        {% icon "ui/clock" size=20 %}
                     </span>
                     <div class="saved-stat-body">
                         <span class="saved-stat-value">
@@ -801,7 +796,7 @@ body::after {
                                 <div class="saved-card-title-text">
                                     <h3>{{ item.name }}</h3>
                                     <span class="saved-card-shape">
-                                        {% icon "square-matrix" size=12 %}
+                                        {% icon "ui/square-matrix" size=12 %}
                                         <span>{{ item.shape_label }}</span>
                                     </span>
                                 </div>
@@ -813,14 +808,14 @@ body::after {
                                         data-saved-use="{{ item.pk }}"
                                         title="Использовать в калькуляторе"
                                         aria-label="Использовать в калькуляторе">
-                                    {% icon "arrow-right" size=14 %}
+                                    {% icon "ui/arrow-right" size=14 %}
                                 </button>
                                 <button type="button"
                                         class="icon-btn icon-btn--sm icon-btn--danger"
                                         data-saved-delete="{{ item.pk }}"
                                         title="Удалить"
                                         aria-label="Удалить матрицу">
-                                    {% icon "trash" size=14 %}
+                                    {% icon "ui/trash" size=14 %}
                                 </button>
                             </div>
                         </header>
@@ -828,27 +823,27 @@ body::after {
                         <!-- Превью матрицы (заполняется JS через MathJax) -->
                         <div class="saved-card-preview" data-saved-preview="{{ item.pk }}">
                             <span class="saved-card-preview-placeholder">
-                                {% icon "matrix-grid" size=20 %}
+                                {% icon "ui/matrix-grid" size=20 %}
                                 <span>Загрузка…</span>
                             </span>
                         </div>
 
                         {% if item.notes %}
                             <p class="saved-card-notes">
-                                {% icon "file-text" size=12 %}
+                                {% icon "ui/file-text" size=12 %}
                                 <span>{{ item.notes }}</span>
                             </p>
                         {% endif %}
 
                         <footer class="saved-card-foot">
                             <time class="saved-card-time" datetime="{{ item.updated_at|date:'c' }}">
-                                {% icon "clock" size=12 %}
+                                {% icon "ui/clock" size=12 %}
                                 <span>{{ item.updated_at|date:"d.m.Y H:i" }}</span>
                             </time>
                             <button type="button"
                                     class="btn btn-soft btn-xs"
                                     data-saved-use="{{ item.pk }}">
-                                {% icon "calculator" size=12 %}
+                                {% icon "ui/calculator" size=12 %}
                                 <span>Использовать</span>
                             </button>
                         </footer>
@@ -864,7 +859,7 @@ body::after {
             <!-- Пустое состояние -->
             <div class="saved-empty">
                 <div class="saved-empty-icon" aria-hidden="true">
-                    {% icon "square-matrix" size=48 %}
+                    {% icon "ui/square-matrix" size=48 %}
                 </div>
                 <h2>Сохранённых матриц пока нет</h2>
                 <p>
@@ -872,7 +867,7 @@ body::after {
                     Сохранённые матрицы доступны только в этом браузере.
                 </p>
                 <a href="{% url 'matrix_app:calculator' %}" class="btn btn-primary">
-                    {% icon "calculator" size=16 %}
+                    {% icon "ui/calculator" size=16 %}
                     <span>Открыть калькулятор</span>
                 </a>
             </div>
@@ -892,19 +887,19 @@ body::after {
         <header class="modal-head">
             <div class="modal-head-title">
                 <div class="modal-head-icon">
-                    {% icon "clipboard" size=18 %}
+                    {% icon "ui/clipboard" size=18 %}
                 </div>
                 <h3 id="saved-modal-title">Сохранить матрицу</h3>
             </div>
             <button type="button" class="modal-close" data-saved-modal-close aria-label="Закрыть">
-                {% icon "close" size=16 %}
+                {% icon "ui/close" size=16 %}
             </button>
         </header>
 
         <div class="modal-body">
             <label class="field">
                 <span class="field-label">
-                    {% icon "edit" size=12 %}
+                    {% icon "ui/edit" size=12 %}
                     <span>Название матрицы</span>
                 </span>
                 <input type="text"
@@ -917,7 +912,7 @@ body::after {
 
             <label class="field">
                 <span class="field-label">
-                    {% icon "file-text" size=12 %}
+                    {% icon "ui/file-text" size=12 %}
                     <span>Заметка (необязательно)</span>
                 </span>
                 <textarea class="field-input field-textarea"
@@ -927,7 +922,7 @@ body::after {
             </label>
 
             <p class="modal-hint">
-                {% icon "check-circle" size=14 %}
+                {% icon "ui/check-circle" size=14 %}
                 <span>Матрица сохраняется в точной форме — дроби, корни и комплексные числа не теряют точности.</span>
             </p>
         </div>
@@ -935,7 +930,7 @@ body::after {
         <footer class="modal-foot">
             <button type="button" class="btn btn-ghost" data-saved-modal-close>Отмена</button>
             <button type="button" class="btn btn-primary" data-saved-save>
-                {% icon "clipboard" size=14 %}
+                {% icon "ui/clipboard" size=14 %}
                 <span>Сохранить</span>
             </button>
         </footer>
