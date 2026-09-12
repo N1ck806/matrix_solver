@@ -9,10 +9,9 @@
 <link rel="stylesheet" href="{% static 'matrix_app/css/calculator.css' %}">
 <style>
 /* =============================================================================
-   Разложения — стили в стиле главной (единый фон, glassmorphism)
+   Разложения — единый стиль проекта
    ============================================================================= */
 
-/* --- ЕДИНЫЙ ФОН НА ВСЮ СТРАНИЦУ --- */
 body {
     background: #F7F8FC;
     position: relative;
@@ -64,7 +63,7 @@ body::after {
     opacity: 0.6;
 }
 
-/* --- Page head --- */
+/* --- Заголовок страницы --- */
 .page-head { background: transparent; }
 
 .page-title {
@@ -150,6 +149,15 @@ body::after {
     border-radius: 12px;
     flex-shrink: 0;
     transition: all 320ms;
+}
+
+.decomp-symbol .ml-icon,
+.decomp-symbol svg {
+    width: 22px;
+    height: 22px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
 }
 
 .decomp-btn.is-active .decomp-symbol {
@@ -312,9 +320,7 @@ body::after {
     color: var(--accent);
 }
 
-.matrix-input-body {
-    padding: 22px;
-}
+.matrix-input-body { padding: 22px; }
 
 .matrix-input-grid {
     display: grid;
@@ -364,10 +370,7 @@ body::after {
     border-radius: 10px;
 }
 
-.matrix-input-hint strong {
-    color: var(--accent);
-    font-weight: 700;
-}
+.matrix-input-hint strong { color: var(--accent); font-weight: 700; }
 
 /* --- Футер матрицы: chip-кнопки --- */
 .matrix-input-footer {
@@ -407,9 +410,15 @@ body::after {
     box-shadow: 0 4px 12px -3px rgba(99, 102, 241, 0.25);
 }
 
+.chip--button .ml-icon,
 .chip--button svg {
+    width: 14px;
+    height: 14px;
     color: var(--accent);
     flex-shrink: 0;
+    display: block;
+    stroke: currentColor;
+    fill: none;
 }
 
 /* --- Контролы разложения --- */
@@ -428,6 +437,16 @@ body::after {
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
+}
+
+.decomp-buttons .btn .ml-icon,
+.decomp-buttons .btn svg {
+    width: 16px;
+    height: 16px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+    flex-shrink: 0;
 }
 
 .decomp-buttons .btn-primary {
@@ -468,6 +487,15 @@ body::after {
     color: var(--accent);
     border-radius: 20px;
     margin-bottom: 20px;
+}
+
+.calc-placeholder-icon .ml-icon,
+.calc-placeholder-icon svg {
+    width: 40px;
+    height: 40px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
 }
 
 .calc-placeholder h3 {
@@ -513,7 +541,7 @@ body::after {
     box-shadow: 0 4px 10px -2px rgba(99, 102, 241, 0.4);
 }
 
-/* --- СЕКЦИЯ СПРАВКИ --- */
+/* --- Секция справки --- */
 .section--decomp-info {
     padding: 88px 0;
     background: transparent;
@@ -586,6 +614,15 @@ body::after {
     margin-bottom: 16px;
 }
 
+.decomp-info-icon .ml-icon,
+.decomp-info-icon svg {
+    width: 22px;
+    height: 22px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+}
+
 .decomp-info-icon--indigo  { background: linear-gradient(135deg, #6366F1, #4F46E5); box-shadow: 0 8px 16px -4px rgba(99, 102, 241, 0.4); }
 .decomp-info-icon--emerald { background: linear-gradient(135deg, #10B981, #059669); box-shadow: 0 8px 16px -4px rgba(16, 185, 129, 0.4); }
 .decomp-info-icon--violet  { background: linear-gradient(135deg, #8B5CF6, #7C3AED); box-shadow: 0 8px 16px -4px rgba(139, 92, 246, 0.4); }
@@ -610,6 +647,7 @@ body::after {
     color: var(--text-primary);
     margin: 0 0 14px;
     font-variant-numeric: tabular-nums;
+    overflow-x: auto;
 }
 
 .decomp-info-card p {
@@ -733,7 +771,7 @@ body::after {
             </button>
 
             <button type="button" class="decomp-btn" data-decomp="spectral">
-                <span class="decomp-symbol">{% icon "symmetric" size=22 %}</span>
+                <span class="decomp-symbol">{% icon "diagonalize" size=22 %}</span>
                 <div class="decomp-text">
                     <strong>$A = Q \cdot D \cdot Q^{T}$</strong>
                     <span>Спектральное разложение симметричной</span>
@@ -771,8 +809,11 @@ body::after {
                     <div class="matrix-input-grid" id="matrix-a-input" data-matrix-input data-rows="3" data-cols="3"></div>
                 </div>
                 <p class="matrix-input-hint">
-                    <strong>Замечание:</strong> QR требует <em>m ≥ n</em>, Холецкий — симметричную положительно определённую,
-                    спектральное — симметричную матрицу.
+                    <strong>Замечание:</strong> LU, Холецкий, диагонализация и
+                    спектральное требуют <em>квадратную</em> матрицу
+                    <em>n × n</em>. QR работает и для прямоугольных при
+                    <em>m ≥ n</em>. Холецкий и спектральное — только для
+                    <em>симметричных</em> матриц.
                 </p>
             </div>
 
@@ -784,8 +825,14 @@ body::after {
                     <button type="button" class="chip chip--button" data-matrix-action="identity" data-matrix-target="a">
                         {% icon "identity" size=14 %}<span>Единичная</span>
                     </button>
+                    <button type="button" class="chip chip--button" data-matrix-action="symmetric" data-matrix-target="a">
+                        {% icon "check-badge" size=14 %}<span>Симметричная</span>
+                    </button>
                     <button type="button" class="chip chip--button" data-matrix-action="random" data-matrix-target="a">
                         {% icon "sparkles" size=14 %}<span>Случайная</span>
+                    </button>
+                    <button type="button" class="chip chip--button" data-matrix-action="square" data-matrix-target="a">
+                        {% icon "square-matrix" size=14 %}<span>Квадратная</span>
                     </button>
                     <button type="button" class="chip chip--button" data-matrix-action="transpose" data-matrix-target="a">
                         {% icon "transpose" size=14 %}<span>Трансп.</span>
@@ -862,7 +909,6 @@ body::after {
                             <span>Копировать</span>
                         </button>
                         <button type="button" class="btn btn-soft btn-sm" data-export-result>
-                            {% icon "download" size=14 %}
                             <span>Скачать</span>
                         </button>
                     </div>
@@ -878,7 +924,7 @@ body::after {
         <!-- Заглушка -->
         <div class="calc-placeholder" data-decomp-placeholder>
             <div class="calc-placeholder-icon" aria-hidden="true">
-                {% icon "lu" size=48 %}
+                {% icon "lu" size=40 %}
             </div>
             <h3>Результат появится здесь</h3>
             <p>
@@ -961,7 +1007,7 @@ body::after {
 
             <article class="decomp-info-card">
                 <div class="decomp-info-icon decomp-info-icon--cyan">
-                    {% icon "symmetric" size=22 %}
+                    {% icon "diagonalize" size=22 %}
                 </div>
                 <h3>Спектральное</h3>
                 <p class="decomp-info-formula">$A = Q \cdot D \cdot Q^{T}$</p>

@@ -1,0 +1,185 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" fill="none"
+     role="img" aria-label="Разложение Холецкого"
+     class="ml-feature-svg ml-feature-svg--cholesky"
+     preserveAspectRatio="xMidYMid meet"
+     font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">
+
+  <defs>
+    <radialGradient id="cho-core" cx="0.38" cy="0.32" r="0.78">
+      <stop offset="0" stop-color="#99F6E4">
+        <animate attributeName="stop-color"
+                 values="#99F6E4;#5EEAD4;#14B8A6;#99F6E4"
+                 dur="14s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="0.45" stop-color="#14B8A6">
+        <animate attributeName="stop-color"
+                 values="#14B8A6;#0D9488;#115E59;#14B8A6"
+                 dur="14s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="1" stop-color="#042F2E"/>
+    </radialGradient>
+
+    <radialGradient id="cho-glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"    stop-color="#FFFFFF" stop-opacity="1"/>
+      <stop offset="0.35" stop-color="#CCFBF1" stop-opacity="0.7"/>
+      <stop offset="0.7"  stop-color="#5EEAD4" stop-opacity="0.3"/>
+      <stop offset="1"    stop-color="#0D9488" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="cho-hl" cx="0.34" cy="0.24" r="0.72">
+      <stop offset="0"   stop-color="#FFFFFF" stop-opacity="0.95"/>
+      <stop offset="0.4" stop-color="#FFFFFF" stop-opacity="0.18"/>
+      <stop offset="1"   stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="cho-orbit" x1="0" y1="0" x2="96" y2="96"
+                    gradientUnits="userSpaceOnUse">
+      <stop offset="0"   stop-color="#5EEAD4"/>
+      <stop offset="0.5" stop-color="#14B8A6"/>
+      <stop offset="1"   stop-color="#115E59"/>
+    </linearGradient>
+
+    <linearGradient id="cho-orbit-2" x1="96" y1="0" x2="0" y2="96"
+                    gradientUnits="userSpaceOnUse">
+      <stop offset="0"   stop-color="#FBCFE8"/>
+      <stop offset="1"   stop-color="#14B8A6"/>
+    </linearGradient>
+
+    <linearGradient id="cho-text" x1="0" y1="0" x2="96" y2="0"
+                    gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0F766E">
+        <animate attributeName="stop-color"
+                 values="#0F766E;#14B8A6;#5EEAD4;#0F766E"
+                 dur="8s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="1" stop-color="#14B8A6">
+        <animate attributeName="stop-color"
+                 values="#14B8A6;#5EEAD4;#99F6E4;#14B8A6"
+                 dur="8s" repeatCount="indefinite"/>
+      </stop>
+    </linearGradient>
+
+    <radialGradient id="cho-spark" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"   stop-color="#FFFFFF"/>
+      <stop offset="0.4" stop-color="#99F6E4"/>
+      <stop offset="1"   stop-color="#14B8A6" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="cho-spark-pink" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"   stop-color="#FFFFFF"/>
+      <stop offset="0.4" stop-color="#FBCFE8"/>
+      <stop offset="1"   stop-color="#EC4899" stop-opacity="0"/>
+    </radialGradient>
+
+    <filter id="cho-spark-glow" x="-400%" y="-400%" width="900%" height="900%">
+      <feGaussianBlur stdDeviation="1.8"/>
+    </filter>
+    <filter id="cho-core-shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2.2"/>
+      <feOffset dx="0" dy="1.6"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.38"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="cho-orbit-glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1"/>
+    </filter>
+
+    <clipPath id="cho-core-clip">
+      <circle cx="48" cy="46" r="13"/>
+    </clipPath>
+  </defs>
+
+  <circle cx="48" cy="48" r="46" fill="url(#cho-glow)" opacity="0.16">
+    <animate attributeName="r" values="46;48;46" dur="6s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.16;0.22;0.16" dur="6s" repeatCount="indefinite"/>
+  </circle>
+
+  <g transform="translate(48 46)">
+    <g>
+      <animateTransform attributeName="transform" type="rotate"
+                        from="0 0 0" to="360 0 0" dur="23s" repeatCount="indefinite"/>
+      <ellipse cx="0" cy="0" rx="32" ry="9.5"
+               fill="none" stroke="url(#cho-orbit)"
+               stroke-width="1.5" opacity="0.85"
+               transform="rotate(-28)"/>
+      <ellipse cx="0" cy="0" rx="32" ry="9.5"
+               fill="none" stroke="#14B8A6" stroke-width="3.2"
+               opacity="0.14" filter="url(#cho-orbit-glow)"
+               transform="rotate(-28)"/>
+      <g transform="rotate(-28)">
+        <circle cx="32" cy="0" r="2.4"
+                fill="url(#cho-spark)" filter="url(#cho-spark-glow)">
+          <animate attributeName="r" values="2.4;3;2.4" dur="2.4s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="32" cy="0" r="1.05" fill="#FFFFFF"/>
+      </g>
+    </g>
+
+    <g>
+      <animateTransform attributeName="transform" type="rotate"
+                        from="360 0 0" to="0 0 0" dur="34s" repeatCount="indefinite"/>
+      <ellipse cx="0" cy="0" rx="30" ry="8"
+               fill="none" stroke="url(#cho-orbit-2)"
+               stroke-width="0.9" opacity="0.55"
+               transform="rotate(38)"/>
+      <g transform="rotate(38)">
+        <circle cx="-30" cy="0" r="1.4"
+                fill="url(#cho-spark-pink)" filter="url(#cho-spark-glow)">
+          <animate attributeName="r" values="1.4;1.9;1.4" dur="3s" repeatCount="indefinite"/>
+        </circle>
+      </g>
+    </g>
+  </g>
+
+  <g filter="url(#cho-core-shadow)">
+    <circle cx="48" cy="46" r="17.5" fill="url(#cho-glow)" opacity="0.5">
+      <animate attributeName="r" values="17.5;19.5;17.5" dur="5s" repeatCount="indefinite"/>
+    </circle>
+
+    <circle cx="48" cy="46" r="13" fill="url(#cho-core)"/>
+    <circle cx="48" cy="46" r="13" fill="url(#cho-hl)"/>
+    <circle cx="48" cy="46" r="12.5" fill="none"
+            stroke="#FFFFFF" stroke-opacity="0.4" stroke-width="0.7"/>
+
+    <g clip-path="url(#cho-core-clip)">
+      <!-- L: нижняя треугольная -->
+      <path d="M40.5 40 h4 v4 h-4 Z" fill="#042F2E" fill-opacity="0.95"/>
+      <path d="M40.5 44.6 h4 v4 h-4 Z" fill="#042F2E" fill-opacity="0.95"/>
+      <path d="M45.1 44.6 h4 v4 h-4 Z" fill="#042F2E" fill-opacity="0.95"/>
+      <!-- пустая позиция -->
+      <path d="M45.1 40 h4 v4 h-4 Z" fill="#042F2E" fill-opacity="0.15"/>
+
+      <!-- Lᵀ: верхняя треугольная -->
+      <path d="M50.5 44.6 h4 v4 h-4 Z" fill="#042F2E" fill-opacity="0.95"/>
+      <path d="M55.1 40 h4 v4 h-4 Z" fill="#042F2E" fill-opacity="0.95"/>
+      <path d="M55.1 44.6 h4 v4 h-4 Z" fill="#042F2E" fill-opacity="0.95"/>
+      <!-- пустая позиция -->
+      <path d="M50.5 40 h4 v4 h-4 Z" fill="#042F2E" fill-opacity="0.15"/>
+
+      <!-- знак · между -->
+      <path d="M49 46 m-0.5 0 a0.5 0.5 0 1 0 1 0 a0.5 0.5 0 1 0 -1 0"
+            fill="#042F2E" fill-opacity="0.9"/>
+    </g>
+
+    <circle cx="48" cy="46" r="2.4" fill="url(#cho-glow)" opacity="0.85">
+      <animate attributeName="r" values="2.4;3.2;2.4" dur="3.6s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <circle cx="14" cy="14" r="1.3" fill="url(#cho-spark-pink)" filter="url(#cho-spark-glow)">
+    <animate attributeName="opacity" values="1;0.4;1" dur="4s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="82" cy="18" r="1.4" fill="url(#cho-spark)" filter="url(#cho-spark-glow)">
+    <animate attributeName="opacity" values="0.9;0.3;0.9" dur="5s" begin="0.8s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="84" cy="80" r="1.2" fill="url(#cho-spark-pink)" filter="url(#cho-spark-glow)">
+    <animate attributeName="opacity" values="1;0.4;1" dur="4.5s" begin="1.2s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="12" cy="82" r="1" fill="url(#cho-spark)" filter="url(#cho-spark-glow)">
+    <animate attributeName="opacity" values="0.7;0.2;0.7" dur="3.5s" begin="0.4s" repeatCount="indefinite"/>
+  </circle>
+
+  <text x="48" y="86" font-size="8" font-weight="700"
+        letter-spacing="0.06em" text-anchor="middle"
+        fill="url(#cho-text)">A = L · Lᵀ</text>
+</svg>

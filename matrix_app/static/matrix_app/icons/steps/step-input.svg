@@ -1,0 +1,372 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 280" fill="none"
+     role="img" aria-label="Ввод матрицы"
+     class="ml-step ml-step--input"
+     preserveAspectRatio="xMidYMid meet"
+     font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">
+
+  <defs>
+
+    <!-- ЯДРО: циан-бирюзовое -->
+    <radialGradient id="si-neon" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"    stop-color="#FFFFFF" stop-opacity="1"/>
+      <stop offset="0.25" stop-color="#A5F3FC" stop-opacity="0.95"/>
+      <stop offset="0.5"  stop-color="#22D3EE" stop-opacity="0.75"/>
+      <stop offset="0.78" stop-color="#0891B2" stop-opacity="0.45"/>
+      <stop offset="1"    stop-color="#0E7490" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="si-glass" cx="0.4" cy="0.32" r="0.72">
+      <stop offset="0"    stop-color="#FFFFFF" stop-opacity="0.35"/>
+      <stop offset="0.4"  stop-color="#CFFAFE" stop-opacity="0.18"/>
+      <stop offset="0.75" stop-color="#0891B2" stop-opacity="0.22"/>
+      <stop offset="1"    stop-color="#0E7490" stop-opacity="0.4"/>
+    </radialGradient>
+
+    <radialGradient id="si-fresnel" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"    stop-color="#FFFFFF" stop-opacity="0"/>
+      <stop offset="0.8"  stop-color="#FFFFFF" stop-opacity="0.05"/>
+      <stop offset="0.94" stop-color="#A5F3FC" stop-opacity="0.5"/>
+      <stop offset="1"    stop-color="#FFFFFF" stop-opacity="0.8"/>
+    </radialGradient>
+
+    <radialGradient id="si-key" cx="0.28" cy="0.18" r="0.42">
+      <stop offset="0"   stop-color="#FFFFFF" stop-opacity="0.95"/>
+      <stop offset="0.4" stop-color="#FFFFFF" stop-opacity="0.22"/>
+      <stop offset="1"   stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="si-fill" cx="0.78" cy="0.85" r="0.55">
+      <stop offset="0" stop-color="#67E8F9" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#67E8F9" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="si-rim" x1="0" y1="0" x2="0.7" y2="1">
+      <stop offset="0"    stop-color="#F0ABFC" stop-opacity="0"/>
+      <stop offset="0.55" stop-color="#F0ABFC" stop-opacity="0.5"/>
+      <stop offset="1"    stop-color="#E879F9" stop-opacity="0"/>
+    </linearGradient>
+
+    <radialGradient id="si-bounce" cx="0.5" cy="1" r="0.6">
+      <stop offset="0" stop-color="#06B6D4" stop-opacity="0.24"/>
+      <stop offset="1" stop-color="#06B6D4" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- ОРБИТЫ -->
+    <linearGradient id="si-orbit-1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0"   stop-color="#67E8F9" stop-opacity="0.95"/>
+      <stop offset="0.5" stop-color="#22D3EE" stop-opacity="0.85"/>
+      <stop offset="1"   stop-color="#0891B2" stop-opacity="0.9"/>
+    </linearGradient>
+
+    <linearGradient id="si-orbit-2" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0"   stop-color="#F0ABFC" stop-opacity="0.85"/>
+      <stop offset="0.5" stop-color="#D946EF" stop-opacity="0.75"/>
+      <stop offset="1"   stop-color="#A855F7" stop-opacity="0.8"/>
+    </linearGradient>
+
+    <!-- ЯЧЕЙКИ ТАБЛО -->
+    <linearGradient id="si-cell-empty" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#CFFAFE" stop-opacity="0.12"/>
+    </linearGradient>
+
+    <linearGradient id="si-cell-active" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#A5F3FC" stop-opacity="0.85"/>
+    </linearGradient>
+
+    <linearGradient id="si-cell-soft" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.65"/>
+      <stop offset="1" stop-color="#A5F3FC" stop-opacity="0.5"/>
+    </linearGradient>
+
+    <!-- ЧАСТИЦЫ -->
+    <radialGradient id="si-spark-white" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"   stop-color="#FFFFFF"/>
+      <stop offset="0.4" stop-color="#CFFAFE"/>
+      <stop offset="1"   stop-color="#22D3EE" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="si-spark-pink" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"   stop-color="#FFFFFF"/>
+      <stop offset="0.4" stop-color="#FBCFE8"/>
+      <stop offset="1"   stop-color="#EC4899" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="si-spark-warm" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"   stop-color="#FFFFFF"/>
+      <stop offset="0.4" stop-color="#FDE68A"/>
+      <stop offset="1"   stop-color="#F59E0B" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- ФИЛЬТРЫ -->
+    <filter id="si-bloom-sm" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1.4"/>
+    </filter>
+    <filter id="si-bloom-md" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3"/>
+    </filter>
+    <filter id="si-bloom-lg" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6.5"/>
+    </filter>
+    <filter id="si-shadow-floor" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="9"/>
+    </filter>
+    <filter id="si-core-shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="5"/>
+      <feOffset dx="0" dy="5"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.42"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+  </defs>
+
+  <!-- ================================================================
+       ФОН: ореол сцены
+       ================================================================ -->
+  <circle cx="140" cy="140" r="120"
+          fill="url(#si-neon)" opacity="0.1">
+    <animate attributeName="r" values="120;126;120" dur="8s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- ================================================================
+       ТЕНЬ НА ПОЛ
+       ================================================================ -->
+  <ellipse cx="140" cy="234" rx="72" ry="9"
+           fill="#0E7490" opacity="0.22"
+           filter="url(#si-shadow-floor)">
+    <animate attributeName="rx" values="72;78;72" dur="7s" repeatCount="indefinite"/>
+  </ellipse>
+
+  <!-- ================================================================
+       ДВЕ ОРБИТЫ: циановая и розовая
+       ================================================================ -->
+
+  <!-- Дальняя циановая -->
+  <g transform="translate(140 138)">
+    <g>
+      <animateTransform attributeName="transform" type="rotate"
+                        from="0 0 0" to="360 0 0" dur="34s" repeatCount="indefinite"/>
+      <ellipse cx="0" cy="0" rx="112" ry="24"
+               fill="none" stroke="url(#si-orbit-1)"
+               stroke-width="1.6" opacity="0.8"
+               transform="rotate(-22)"/>
+      <ellipse cx="0" cy="0" rx="112" ry="24"
+               fill="none" stroke="#22D3EE" stroke-width="5"
+               opacity="0.14" filter="url(#si-bloom-md)"
+               transform="rotate(-22)"/>
+
+      <!-- Точка-спутник циановая -->
+      <g transform="rotate(-22)">
+        <circle cx="112" cy="0" r="3.2"
+                fill="url(#si-spark-white)" filter="url(#si-bloom-sm)">
+          <animate attributeName="r" values="3.2;4.2;3.2" dur="2.6s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="112" cy="0" r="1.4" fill="#FFFFFF"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- Ближняя розовая (под другим углом, короче) -->
+  <g transform="translate(140 138)">
+    <g>
+      <animateTransform attributeName="transform" type="rotate"
+                        from="360 0 0" to="0 0 0" dur="26s" repeatCount="indefinite"/>
+      <ellipse cx="0" cy="0" rx="88" ry="20"
+               fill="none" stroke="url(#si-orbit-2)"
+               stroke-width="1.3" opacity="0.75"
+               transform="rotate(38)"/>
+      <ellipse cx="0" cy="0" rx="88" ry="20"
+               fill="none" stroke="#D946EF" stroke-width="4"
+               opacity="0.12" filter="url(#si-bloom-md)"
+               transform="rotate(38)"/>
+
+      <g transform="rotate(38)">
+        <circle cx="-88" cy="0" r="2.8"
+                fill="url(#si-spark-pink)" filter="url(#si-bloom-sm)">
+          <animate attributeName="r" values="2.8;3.6;2.8" dur="2.4s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="-88" cy="0" r="1.3" fill="#FFFFFF"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- ================================================================
+       ЛУЧ ВХОДА (слева) — световая дорожка к ядру
+       ================================================================ -->
+  <g opacity="0.8">
+    <path d="M20 138 L88 138"
+          stroke="#22D3EE" stroke-width="1.4"
+          stroke-linecap="round" stroke-dasharray="3 4"
+          opacity="0.7"/>
+    <circle cx="20" cy="138" r="3"
+            fill="url(#si-spark-white)" filter="url(#si-bloom-sm)">
+      <animate attributeName="opacity" values="1;0.3;1" dur="2.4s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="20" cy="138" r="1.4" fill="#FFFFFF"/>
+  </g>
+
+  <!-- ================================================================
+       ЛУЧ ВЫХОДА (справа) — уходит в следующий этап
+       ================================================================ -->
+  <g opacity="0.8">
+    <path d="M192 138 L260 138"
+          stroke="#A855F7" stroke-width="1.4"
+          stroke-linecap="round" stroke-dasharray="3 4"
+          opacity="0.7"/>
+    <circle cx="260" cy="138" r="3"
+            fill="url(#si-spark-pink)" filter="url(#si-bloom-sm)">
+      <animate attributeName="opacity" values="1;0.3;1" dur="2.4s" begin="1.2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="260" cy="138" r="1.4" fill="#FFFFFF"/>
+  </g>
+
+  <!-- ================================================================
+       ЯДРО: скруглённый квадрат — «табло ввода»
+       ================================================================ -->
+  <g filter="url(#si-core-shadow)">
+
+    <!-- Внешний ореол -->
+    <rect x="78" y="78" width="124" height="124" rx="40"
+          fill="url(#si-neon)" opacity="0.28"
+          filter="url(#si-bloom-lg)">
+      <animate attributeName="opacity" values="0.28;0.18;0.28" dur="5.6s" repeatCount="indefinite"/>
+    </rect>
+
+    <!-- Стеклянная подложка -->
+    <rect x="88" y="88" width="104" height="104" rx="32"
+          fill="url(#si-glass)"/>
+
+    <!-- Внутренний неон -->
+    <rect x="88" y="88" width="104" height="104" rx="32"
+          fill="url(#si-neon)" opacity="0.85"/>
+
+    <!-- Fresnel по краю -->
+    <rect x="88" y="88" width="104" height="104" rx="32"
+          fill="url(#si-fresnel)"/>
+
+    <!-- ============================================================
+         ТАБЛО 3×3: 9 ячеек
+         ============================================================ -->
+    <g>
+      <!-- Ряд 1: заполнено, пусто, заполнено (мягко) -->
+      <!-- 1 -->
+      <rect x="100" y="100" width="22" height="22" rx="6"
+            fill="url(#si-cell-soft)"
+            stroke="#FFFFFF" stroke-opacity="0.6" stroke-width="0.8"/>
+      <circle cx="111" cy="111" r="3" fill="#FFFFFF" fill-opacity="0.9"/>
+
+      <!-- 2 -->
+      <rect x="129" y="100" width="22" height="22" rx="6"
+            fill="url(#si-cell-empty)"
+            stroke="#FFFFFF" stroke-opacity="0.35" stroke-width="0.8"/>
+
+      <!-- 3 -->
+      <rect x="158" y="100" width="22" height="22" rx="6"
+            fill="url(#si-cell-soft)"
+            stroke="#FFFFFF" stroke-opacity="0.6" stroke-width="0.8"/>
+      <circle cx="169" cy="111" r="3" fill="#FFFFFF" fill-opacity="0.9"/>
+
+      <!-- Ряд 2 -->
+      <!-- 4 -->
+      <rect x="100" y="129" width="22" height="22" rx="6"
+            fill="url(#si-cell-empty)"
+            stroke="#FFFFFF" stroke-opacity="0.35" stroke-width="0.8"/>
+
+      <!-- 5 — активная, мигает -->
+      <rect x="129" y="129" width="22" height="22" rx="6"
+            fill="url(#si-cell-active)"
+            stroke="#FFFFFF" stroke-opacity="0.95" stroke-width="1.1"/>
+      <circle cx="140" cy="140" r="3.6" fill="#FFFFFF">
+        <animate attributeName="r" values="3.6;4.6;3.6" dur="1.6s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="1;0.6;1" dur="1.6s" repeatCount="indefinite"/>
+      </circle>
+
+      <!-- 6 -->
+      <rect x="158" y="129" width="22" height="22" rx="6"
+            fill="url(#si-cell-soft)"
+            stroke="#FFFFFF" stroke-opacity="0.6" stroke-width="0.8"/>
+      <circle cx="169" cy="140" r="3" fill="#FFFFFF" fill-opacity="0.9"/>
+
+      <!-- Ряд 3 -->
+      <!-- 7 -->
+      <rect x="100" y="158" width="22" height="22" rx="6"
+            fill="url(#si-cell-soft)"
+            stroke="#FFFFFF" stroke-opacity="0.6" stroke-width="0.8"/>
+      <circle cx="111" cy="169" r="3" fill="#FFFFFF" fill-opacity="0.9"/>
+
+      <!-- 8 -->
+      <rect x="129" y="158" width="22" height="22" rx="6"
+            fill="url(#si-cell-empty)"
+            stroke="#FFFFFF" stroke-opacity="0.35" stroke-width="0.8"/>
+
+      <!-- 9 -->
+      <rect x="158" y="158" width="22" height="22" rx="6"
+            fill="url(#si-cell-soft)"
+            stroke="#FFFFFF" stroke-opacity="0.6" stroke-width="0.8"/>
+      <circle cx="169" cy="169" r="3" fill="#FFFFFF" fill-opacity="0.9"/>
+    </g>
+
+    <!-- Курсор-каретка — за пределами табло, справа снизу -->
+    <rect x="186" y="180" width="2" height="10"
+          fill="#FFFFFF" rx="0.6">
+      <animate attributeName="opacity" values="1;0;1" dur="1.2s" repeatCount="indefinite"/>
+    </rect>
+
+    <!-- Key light: крупный мягкий блик сверху-слева -->
+    <ellipse cx="112" cy="102" rx="26" ry="14"
+             fill="url(#si-key)" transform="rotate(-24 112 102)"/>
+    <ellipse cx="108" cy="98" rx="8" ry="4.5"
+             fill="#FFFFFF" opacity="0.9"
+             transform="rotate(-28 108 98)"/>
+
+    <!-- Fill свет снизу-справа -->
+    <ellipse cx="172" cy="182" rx="28" ry="14"
+             fill="url(#si-fill)" transform="rotate(-20 172 182)"/>
+
+    <!-- Rim: розовая полоска по правому краю -->
+    <path d="M192 112 Q192 160 158 192"
+          fill="none" stroke="url(#si-rim)" stroke-width="1.8"
+          stroke-linecap="round" opacity="0.75"/>
+
+    <!-- Bounce от пола -->
+    <ellipse cx="140" cy="196" rx="38" ry="8"
+             fill="url(#si-bounce)"/>
+
+    <!-- Обводка ядра -->
+    <rect x="88" y="88" width="104" height="104" rx="32"
+          fill="none" stroke="#FFFFFF" stroke-opacity="0.3" stroke-width="0.8"/>
+
+    <!-- 4 неоновые точки по углам ядра -->
+    <circle cx="102" cy="102" r="1.8" fill="#FFFFFF" opacity="0.9">
+      <animate attributeName="r" values="1.8;2.4;1.8" dur="3.6s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="178" cy="102" r="1.8" fill="#FFFFFF" opacity="0.9">
+      <animate attributeName="r" values="1.8;2.4;1.8" dur="3.6s" begin="0.9s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="102" cy="178" r="1.8" fill="#FFFFFF" opacity="0.9">
+      <animate attributeName="r" values="1.8;2.4;1.8" dur="3.6s" begin="1.8s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="178" cy="178" r="1.8" fill="#FFFFFF" opacity="0.9">
+      <animate attributeName="r" values="1.8;2.4;1.8" dur="3.6s" begin="2.7s" repeatCount="indefinite"/>
+    </circle>
+
+  </g>
+
+  <!-- ================================================================
+       ЧАСТИЦЫ
+       ================================================================ -->
+  <circle cx="40" cy="52" r="1.8" fill="url(#si-spark-white)" filter="url(#si-bloom-sm)">
+    <animate attributeName="opacity" values="1;0.4;1" dur="5s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="242" cy="48" r="2" fill="url(#si-spark-pink)" filter="url(#si-bloom-sm)">
+    <animate attributeName="opacity" values="0.9;0.3;0.9" dur="6s" begin="0.6s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="40" cy="240" r="1.8" fill="url(#si-spark-warm)" filter="url(#si-bloom-sm)">
+    <animate attributeName="cy" values="240;234;240" dur="6.5s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="244" cy="234" r="2.2" fill="url(#si-spark-white)" filter="url(#si-bloom-sm)">
+    <animate attributeName="opacity" values="0.9;0.35;0.9" dur="5.6s" begin="1.2s" repeatCount="indefinite"/>
+  </circle>
+
+</svg>

@@ -1,131 +1,289 @@
 /* =============================================================================
    MatrixLab — matrix.js
    =============================================================================
-   Полностью переписанная версия.
+   Ядро редактора матриц и векторов.
+
+   Ввод:
+       • Каждая ячейка — <input type="text">. Кликнул → фокус → печатаешь.
+       • Ввод с физической клавиатуры работает нативно, курсор не сбивается.
+       • Цифровая клавиатура — только по явной кнопке (data-matrix-action="keypad").
+       • Автооткрытия цифровой клавиатуры НЕТ.
 
    Возможности:
-       • MatrixInput — сетка ячеек-кнопок (не <input>!) с кастомной клавиатурой;
-       • VectorInput — вектор-столбец (для СЛАУ);
-       • Цифровая клавиатура: тап по ячейке → popup 0–9, +/-, /, ., sqrt, pi, i;
-       • Тап вне клавиатуры → сохранить и закрыть;
-       • Клавиатура работает на ПК и на мобильном (на мобильном — снизу);
-       • Поддержка обоих стилей size-кнопок: data-size-incr-a-rows и data-size-incr="rows";
-       • Поддержка обоих стилей ручного ввода: data-a-rows и #rows-input;
-       • Динамические матрицы C, D, E… через <template id="matrix-template">;
-       • Работает и на calculator.html, и на operations.html.
+       • MatrixInput  — сетка инпутов;
+       • VectorInput  — вектор-столбец (для СЛАУ);
+       • Валидация ввода — через ML.validators.classifyInput;
+       • Undo/Redo (Ctrl+Z / Ctrl+Shift+Z / Ctrl+Y);
+       • Операции над строками/столбцами;
+       • Заполнение: zero, identity, diagonal, symmetric, triangular, scalar, random;
+       • Импорт: TSV, CSV, JSON, [[..],[..]], LaTeX;
+       • Экспорт: TSV, CSV, JSON, LaTeX, Markdown, plain;
+       • Буфер обмена — все форматы;
+       • Батчинг изменений + дебаунс matrix:change / vector:change;
+       • Событийная шина ML.on/off/emit;
+       • Динамические матрицы через <template id="matrix-template">;
+       • Доступность: role=grid, aria-*;
+       • localStorage — сохранение состояния редактора;
+       • Haptic через ML.haptic.
 
-   Структура:
-       1.  Константы
-       2.  Класс MatrixInput
-       3.  Класс VectorInput
-       4.  Цифровая клавиатура (DigitalKeyboard)
-       5.  Инициализация сеток
-       6.  Размерные контролы (+/−)
-       7.  Ручной ввод размеров
-       8.  Chip-кнопки (действия над матрицей)
-       9.  Синхронизация вектора с матрицей
-       10. Динамическое добавление/удаление матриц (chain)
-       11. Утилиты
-       12. Инициализация модуля
+   Зависимости (из main.js):
+       ML.$, ML.$$, ML.on/off/emit
+       ML.toast.{info,success,warning,error}
+       ML.copy.{text,latex,markdown,json}
+       ML.i18n.t
+       ML.prefs.get/set
+       ML.haptic
+       ML.debounce
+       ML.escapeHtml
+       ML.storage
+       ML.validators.{classifyInput,isEmptyMatrix,isEmptyVector}
    ============================================================================= */
 (function () {
     'use strict';
 
     var ML = window.MatrixLab;
     if (!ML) {
-        console.error('[matrix.js] window.MatrixLab не найден.');
+        console.error('[matrix.js] window.MatrixLab не найден — модуль не запущен.');
         return;
     }
 
     // =========================================================================
-    // 1. КОНСТАНТЫ
+    // 0. КОНСТАНТЫ И УТИЛИТЫ
     // =========================================================================
 
     var LETTERS = 'abcdefghijklmnopqrstuvwxyz'.split('');
 
-    // Клавиши цифровой клавиатуры — в порядке отображения
-    var KEYPAD_KEYS = [
-        { k: '7', t: '7' },
-        { k: '8', t: '8' },
-        { k: '9', t: '9' },
-        { k: '/', t: '/' },
-        { k: '4', t: '4' },
-        { k: '5', t: '5' },
-        { k: '6', t: '6' },
-        { k: '*', t: '×' },
-        { k: '1', t: '1' },
-        { k: '2', t: '2' },
-        { k: '3', t: '3' },
-        { k: '-', t: '−' },
-        { k: '0', t: '0' },
-        { k: '.', t: '.' },
-        { k: 'pi', t: 'π' },
-        { k: '+', t: '+' },
-        { k: 'i', t: 'i' },
-        { k: 'sqrt', t: '√' },
-        { k: '(', t: '(' },
-        { k: ')', t: ')' },
-        { k: 'C', t: 'C', kind: 'danger' },
-        { k: 'back', t: '⌫', kind: 'warning' },
-        { k: 'done', t: 'Готово', kind: 'primary', wide: true }
-    ];
+    function clamp(v, min, max) {
+        if (v < min) return min;
+        if (v > max) return max;
+        return v;
+    }
+
+    function deepCopyMatrix(m) {
+        return m.map(function (row) { return row.slice(); });
+    }
+
+    function isInputEl(el) {
+        return el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA');
+    }
 
     // =========================================================================
-    // 2. КЛАСС MatrixInput (сетка ячеек-кнопок)
+    // 1. ИМПОРТ / ЭКСПОРТ
+    // =========================================================================
+
+    function parseMatrixText(text) {
+        if (text == null) return null;
+        var s = String(text).trim();
+        if (s === '') return null;
+
+        if (/^\[/.test(s)) {
+            try {
+                var j = JSON.parse(s);
+                if (Array.isArray(j) && Array.isArray(j[0])) {
+                    return {
+                        matrix: j.map(function (row) {
+                            return row.map(function (v) { return String(v); });
+                        }),
+                        format: 'json'
+                    };
+                }
+            } catch (e) { /* not JSON */ }
+        }
+
+        var latexMatch = s.match(
+            /\\begin\{[pbv]?matrix\*?\}([\s\S]*?)\\end\{[pbv]?matrix\*?\}/
+        );
+        if (latexMatch) {
+            var body = latexMatch[1].trim();
+            var rows = body.split(/\\\\/)
+                .map(function (r) { return r.trim(); })
+                .filter(function (r) { return r !== ''; });
+            var parsed = rows.map(function (r) {
+                return r.split('&').map(function (x) { return x.trim(); });
+            });
+            return { matrix: parsed, format: 'latex' };
+        }
+
+        var lines = s.replace(/\r/g, '')
+            .split('\n')
+            .filter(function (l) { return l.trim() !== ''; });
+
+        if (lines.length === 1 && lines[0].indexOf(';') !== -1) {
+            lines = lines[0].split(';');
+        }
+
+        var format = 'tsv';
+        var result = lines.map(function (line) {
+            if (line.indexOf('\t') !== -1) {
+                return line.split('\t').map(function (x) { return x.trim(); });
+            }
+            if (line.indexOf(';') !== -1) {
+                format = 'csv';
+                return line.split(';').map(function (x) { return x.trim(); });
+            }
+            if (line.indexOf(',') !== -1) {
+                format = 'csv';
+                return line.split(',').map(function (x) { return x.trim(); });
+            }
+            return [line.trim()];
+        });
+
+        return { matrix: result, format: format };
+    }
+
+    function matrixToTSV(matrix) {
+        return matrix.map(function (row) { return row.join('\t'); }).join('\n');
+    }
+
+    function matrixToCSV(matrix) {
+        return matrix.map(function (row) {
+            return row.map(function (v) {
+                var s = String(v == null ? '' : v);
+                if (/[",;\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+                return s;
+            }).join(',');
+        }).join('\n');
+    }
+
+    function matrixToJSON(matrix) {
+        return JSON.stringify(matrix);
+    }
+
+    function matrixToLatex(matrix) {
+        var body = matrix.map(function (row) {
+            return row.map(function (v) {
+                var s = String(v == null ? '' : v).trim();
+                if (s === '') return '\\cdot';
+                s = s.replace(/sqrt\(([^)]+)\)/g, '\\sqrt{$1}');
+                s = s.replace(/\bpi\b/g, '\\pi');
+                s = s.replace(/\*/g, ' \\cdot ');
+                return s;
+            }).join(' & ');
+        }).join(' \\\\ ');
+        return '\\begin{pmatrix} ' + body + ' \\end{pmatrix}';
+    }
+
+    function matrixToMarkdown(matrix) {
+        if (!matrix.length) return '';
+        var head = '| ' + matrix[0].map(function (_, i) {
+            return 'c' + (i + 1);
+        }).join(' | ') + ' |';
+        var sep = '| ' + matrix[0].map(function () {
+            return '---';
+        }).join(' | ') + ' |';
+        var body = matrix.map(function (row) {
+            return '| ' + row.map(function (v) {
+                return v === '' ? '·' : v;
+            }).join(' | ') + ' |';
+        }).join('\n');
+        return head + '\n' + sep + '\n' + body;
+    }
+
+    function exportMatrix(matrix, format) {
+        switch ((format || 'tsv').toLowerCase()) {
+            case 'tsv':      return matrixToTSV(matrix);
+            case 'csv':      return matrixToCSV(matrix);
+            case 'json':     return matrixToJSON(matrix);
+            case 'latex':    return matrixToLatex(matrix);
+            case 'markdown':
+            case 'md':       return matrixToMarkdown(matrix);
+            case 'plain':
+            default:         return matrix.map(function (row) {
+                return row.join(' ');
+            }).join('\n');
+        }
+    }
+
+    // =========================================================================
+    // 2. КЛАСС MatrixInput
     // =========================================================================
 
     function MatrixInput(container, letter) {
         this.el = container;
         this.letter = String(letter || 'a').toLowerCase();
-        this.rows = parseInt(container.dataset.rows || '3', 10);
-        this.cols = parseInt(container.dataset.cols || '3', 10);
 
-        // Двумерный массив значений (строк)
+        var maxRows = ML.maxRows || 10;
+        var maxCols = ML.maxCols || 10;
+        this.rows = clamp(parseInt(container.dataset.rows || '3', 10) || 3, 1, maxRows);
+        this.cols = clamp(parseInt(container.dataset.cols || '3', 10) || 3, 1, maxCols);
+
         this.values = [];
-        // Двумерный массив DOM-элементов ячеек
         this.cells = [];
+
+        this._silent = false;
+        this._batchDepth = 0;
+        this._changeTimer = null;
+
+        this._undoStack = [];
+        this._redoStack = [];
+        this._undoLimit = 100;
 
         this._build();
         this._bindKeyboardNavigation();
+        this._bindFocusTracking();
     }
 
     MatrixInput.prototype._build = function () {
+        var old = this.values.length ? this.values : null;
         var self = this;
+
         this.el.innerHTML = '';
         this.el.style.gridTemplateColumns = 'repeat(' + this.cols + ', minmax(0, 1fr))';
         this.el.classList.add('matrix-grid');
-
-        // Сохраняем старые значения, если они есть
-        var old = this.values.length ? this.values : null;
+        this.el.setAttribute('role', 'grid');
+        this.el.setAttribute('aria-rowcount', String(this.rows));
+        this.el.setAttribute('aria-colcount', String(this.cols));
+        this.el.setAttribute('aria-label', 'Матрица ' + this.letter.toUpperCase());
 
         this.values = [];
         this.cells = [];
+
+        var frag = document.createDocumentFragment();
 
         for (var r = 0; r < this.rows; r++) {
             var valueRow = [];
             var cellRow = [];
             for (var c = 0; c < this.cols; c++) {
-                var cell = document.createElement('button');
-                cell.type = 'button';
+                var wrap = document.createElement('div');
+                wrap.className = 'matrix-cell-wrap';
+                wrap.setAttribute('role', 'gridcell');
+                wrap.setAttribute('aria-rowindex', String(r + 1));
+                wrap.setAttribute('aria-colindex', String(c + 1));
+
+                var cell = document.createElement('input');
+                cell.type = 'text';
                 cell.className = 'matrix-cell';
+                cell.autocomplete = 'off';
+                cell.autocapitalize = 'off';
+                cell.spellcheck = false;
+                cell.inputMode = 'text';
                 cell.dataset.row = String(r);
                 cell.dataset.col = String(c);
                 cell.setAttribute(
                     'aria-label',
-                    'Элемент ' + this.letter.toUpperCase() + (r + 1) + ',' + (c + 1)
+                    this.letter.toUpperCase() + (r + 1) + ',' + (c + 1)
                 );
 
                 var val = '';
-                if (old && old[r] && old[r][c] !== undefined) {
-                    val = old[r][c];
-                }
+                if (old && old[r] && old[r][c] !== undefined) val = old[r][c];
 
-                cell.textContent = val;
+                cell.value = val;
                 cell.dataset.value = val;
-
                 if (val !== '') cell.classList.add('is-filled');
 
-                this.el.appendChild(cell);
+                this._applyKindClass(cell, val);
+
+                // Единственный источник правды для ручного ввода:
+                // input-событие → _setFromInput → модель.
+                (function (cellRef, rr, cc) {
+                    cellRef.addEventListener('input', function () {
+                        self._setFromInput(rr, cc, cellRef.value);
+                    });
+                })(cell, r, c);
+
+                wrap.appendChild(cell);
+                frag.appendChild(wrap);
+
                 valueRow.push(val);
                 cellRow.push(cell);
             }
@@ -133,75 +291,74 @@
             this.cells.push(cellRow);
         }
 
+        this.el.appendChild(frag);
+
         this._updateBadge();
         this._updateSizeInputs();
+    };
+
+    MatrixInput.prototype._applyKindClass = function (cell, val) {
+        cell.classList.remove(
+            'is-invalid', 'is-fraction', 'is-complex', 'is-expr', 'is-sqrt'
+        );
+
+        var info = ML.validators.classifyInput(val);
+
+        if (!info.valid) {
+            cell.classList.add('is-invalid');
+            cell.setAttribute('aria-invalid', 'true');
+            cell.setAttribute('title', info.message);
+        } else {
+            cell.removeAttribute('aria-invalid');
+            cell.removeAttribute('title');
+            if (info.kind === 'fraction')   cell.classList.add('is-fraction');
+            if (info.kind === 'complex')    cell.classList.add('is-complex');
+            if (info.kind === 'sqrt')       cell.classList.add('is-sqrt');
+            if (info.kind === 'expression') cell.classList.add('is-expr');
+        }
     };
 
     MatrixInput.prototype._updateBadge = function () {
         var card = this.el.closest('[data-matrix-card]');
         if (!card) return;
-        var badge = card.querySelector('[data-matrix-shape-label="' + this.letter + '"]');
-        if (!badge) {
-            badge = card.querySelector('[data-matrix-shape-label]');
-        }
-        if (badge) {
-            badge.textContent = this.rows + ' × ' + this.cols;
-        }
+        var badge = card.querySelector(
+            '[data-matrix-shape-label="' + this.letter + '"]'
+        );
+        if (!badge) badge = card.querySelector('[data-matrix-shape-label]');
+        if (badge) badge.textContent = this.rows + ' × ' + this.cols;
     };
 
     MatrixInput.prototype._updateSizeInputs = function () {
         var card = this.el.closest('[data-matrix-card]');
-        if (!card) return;
         var L = this.letter;
+        var rowsVal = this.rows;
+        var colsVal = this.cols;
 
-        // Новый стиль: data-a-rows / data-a-cols
-        var rNew = card.querySelector('[data-' + L + '-rows]');
-        var cNew = card.querySelector('[data-' + L + '-cols]');
-        if (rNew) rNew.value = this.rows;
-        if (cNew) cNew.value = this.cols;
-
-        // Старый стиль: #rows-input / #cols-input
-        if (L === 'a') {
-            var rOld = document.querySelector('#rows-input');
-            var cOld = document.querySelector('#cols-input');
-            if (rOld) rOld.value = this.rows;
-            if (cOld) cOld.value = this.cols;
+        function setIfNotFocused(el, value) {
+            if (!el) return;
+            if (el === document.activeElement) return;
+            if (el.value !== String(value)) el.value = value;
         }
-    };
 
-    MatrixInput.prototype._bindKeyboardNavigation = function () {
-        var self = this;
-        this.el.addEventListener('keydown', function (e) {
-            var target = e.target;
-            if (!target.classList.contains('matrix-cell')) return;
-            var r = parseInt(target.dataset.row, 10);
-            var c = parseInt(target.dataset.col, 10);
-            var next = null;
-
-            switch (e.key) {
-                case 'ArrowUp':    next = self._at(r - 1, c); break;
-                case 'ArrowDown':  next = self._at(r + 1, c); break;
-                case 'ArrowLeft':  next = self._at(r, c - 1); break;
-                case 'ArrowRight': next = self._at(r, c + 1); break;
-                case 'Enter':
-                    next = self._at(r + 1, c) || self._at(0, c + 1);
-                    e.preventDefault();
-                    break;
-                case 'Backspace':
-                    self.setValue(r, c, '');
-                    e.preventDefault();
-                    return;
-                case 'Delete':
-                    self.setValue(r, c, '');
-                    e.preventDefault();
-                    return;
-            }
-
-            if (next) {
-                e.preventDefault();
-                ML.digitalKeyboard.openFor(next, self);
-            }
+        if (card) {
+            card.querySelectorAll('[data-' + L + '-rows]').forEach(function (el) {
+                setIfNotFocused(el, rowsVal);
+            });
+            card.querySelectorAll('[data-' + L + '-cols]').forEach(function (el) {
+                setIfNotFocused(el, colsVal);
+            });
+        }
+        document.querySelectorAll('[data-' + L + '-rows]').forEach(function (el) {
+            setIfNotFocused(el, rowsVal);
         });
+        document.querySelectorAll('[data-' + L + '-cols]').forEach(function (el) {
+            setIfNotFocused(el, colsVal);
+        });
+
+        if (L === 'a') {
+            setIfNotFocused(document.querySelector('#rows-input'), rowsVal);
+            setIfNotFocused(document.querySelector('#cols-input'), colsVal);
+        }
     };
 
     MatrixInput.prototype._at = function (r, c) {
@@ -210,53 +367,254 @@
         return this.cells[r][c];
     };
 
-    MatrixInput.prototype.setValue = function (r, c, value) {
-        if (r < 0 || r >= this.rows) return;
-        if (c < 0 || c >= this.cols) return;
-        var cell = this.cells[r][c];
-        var v = String(value == null ? '' : value);
-        this.values[r][c] = v;
-        cell.dataset.value = v;
-        cell.textContent = v;
-        cell.classList.toggle('is-filled', v !== '');
+    MatrixInput.prototype._bindKeyboardNavigation = function () {
+        var self = this;
+        this.el.addEventListener('keydown', function (e) {
+            var target = e.target;
+            if (!target.classList.contains('matrix-cell')) return;
+
+            var r = parseInt(target.dataset.row, 10);
+            var c = parseInt(target.dataset.col, 10);
+            var next = null;
+
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'z' || e.key === 'Z')) {
+                if (e.shiftKey) self.redo();
+                else self.undo();
+                e.preventDefault();
+                return;
+            }
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || e.key === 'Y')) {
+                self.redo();
+                e.preventDefault();
+                return;
+            }
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'a' || e.key === 'A')) {
+                e.preventDefault();
+                try { target.select(); } catch (err) { /* noop */ }
+                return;
+            }
+
+            switch (e.key) {
+                case 'ArrowUp':    next = self._at(r - 1, c); break;
+                case 'ArrowDown':  next = self._at(r + 1, c); break;
+                case 'ArrowLeft':
+                    if (target.selectionStart === 0
+                        && target.selectionEnd === 0) {
+                        next = self._at(r, c - 1);
+                    }
+                    break;
+                case 'ArrowRight':
+                    if (target.selectionStart === target.value.length
+                        && target.selectionEnd === target.value.length) {
+                        next = self._at(r, c + 1);
+                    }
+                    break;
+                case 'Tab':
+                    next = e.shiftKey
+                        ? (self._at(r, c - 1) || self._at(r - 1, self.cols - 1))
+                        : (self._at(r, c + 1) || self._at(r + 1, 0));
+                    e.preventDefault();
+                    break;
+                case 'Enter':
+                    next = self._at(r + 1, c) || self._at(0, c + 1);
+                    e.preventDefault();
+                    break;
+            }
+
+            if (next) {
+                e.preventDefault();
+                try { next.focus({ preventScroll: false }); } catch (err) { /* noop */ }
+                try { next.select(); } catch (err) { /* noop */ }
+            }
+        });
+    };
+
+    MatrixInput.prototype._bindFocusTracking = function () {
+        var self = this;
+        this.el.addEventListener('focusin', function () {
+            ML._activeMatrix = self;
+        });
+    };
+
+    MatrixInput.prototype._snapshot = function () {
+        return {
+            rows: this.rows,
+            cols: this.cols,
+            values: deepCopyMatrix(this.values)
+        };
+    };
+
+    MatrixInput.prototype._restore = function (snap) {
+        if (!snap) return;
+        this._silent = true;
+        this.rows = snap.rows;
+        this.cols = snap.cols;
+        this.el.dataset.rows = String(this.rows);
+        this.el.dataset.cols = String(this.cols);
+        this.values = [];
+        this.cells = [];
+        this._build();
+
+        for (var r = 0; r < this.rows; r++) {
+            for (var c = 0; c < this.cols; c++) {
+                var v = (snap.values[r] && snap.values[r][c]) || '';
+                this.setValue(r, c, v, true);
+            }
+        }
+        this._silent = false;
+        this._updateSizeInputs();
         this._dispatchChange();
     };
 
-    MatrixInput.prototype.getValue = function (r, c) {
-        if (r < 0 || r >= this.rows) return '';
-        if (c < 0 || c >= this.cols) return '';
-        return this.values[r][c];
+    MatrixInput.prototype.pushHistory = function () {
+        this._undoStack.push(this._snapshot());
+        if (this._undoStack.length > this._undoLimit) this._undoStack.shift();
+        this._redoStack.length = 0;
+    };
+
+    MatrixInput.prototype.undo = function () {
+        if (!this._undoStack.length) return;
+        var cur = this._snapshot();
+        var prev = this._undoStack.pop();
+        this._redoStack.push(cur);
+        this._restore(prev);
+        ML.toast.info('Отменено', '');
+    };
+
+    MatrixInput.prototype.redo = function () {
+        if (!this._redoStack.length) return;
+        var cur = this._snapshot();
+        var next = this._redoStack.pop();
+        this._undoStack.push(cur);
+        this._restore(next);
+        ML.toast.info('Повторено', '');
+    };
+
+    MatrixInput.prototype.beginBatch = function () {
+        this._batchDepth++;
+        if (this._batchDepth === 1) {
+            this.pushHistory();
+            this._silent = true;
+        }
+    };
+
+    MatrixInput.prototype.endBatch = function () {
+        this._batchDepth = Math.max(0, this._batchDepth - 1);
+        if (this._batchDepth === 0) {
+            this._silent = false;
+            this._updateSizeInputs();
+            this._dispatchChange();
+        }
+    };
+
+    /**
+     * Вызывается ТОЛЬКО из обработчика input на ячейке.
+     * Пишет в модель, НЕ трогая input.value (курсор не сбивается).
+     */
+    MatrixInput.prototype._setFromInput = function (r, c, value) {
+        if (r < 0 || r >= this.rows) return;
+        if (c < 0 || c >= this.cols) return;
+
+        var cell = this.cells[r][c];
+        var v = String(value == null ? '' : value);
+
+        if (this.values[r][c] === v) return;
+
+        // Один шаг undo на изменение ячейки (не на каждый символ —
+        // pushHistory вызывается здесь, но _silent блокирует вложенные).
+        if (!this._silent && this._batchDepth === 0) {
+            this.pushHistory();
+        }
+
+        this.values[r][c] = v;
+        cell.dataset.value = v;
+        cell.classList.toggle('is-filled', v !== '');
+        this._applyKindClass(cell, v);
+
+        if (!this._silent && this._batchDepth === 0) {
+            this._scheduleChange();
+        }
+    };
+
+    /**
+     * Программная установка значения (импорт, fillZero, restore, write).
+     * Не трогает input.value, если фокус сейчас в этой ячейке.
+     */
+    MatrixInput.prototype.setValue = function (r, c, value, silent) {
+        if (r < 0 || r >= this.rows) return;
+        if (c < 0 || c >= this.cols) return;
+
+        var cell = this.cells[r][c];
+        var v = String(value == null ? '' : value);
+
+        if (this.values[r][c] === v && cell.dataset.value === v) return;
+
+        if (!silent && !this._silent && this._batchDepth === 0) {
+            this.pushHistory();
+        }
+
+        this.values[r][c] = v;
+        cell.dataset.value = v;
+
+        if (isInputEl(cell)) {
+            // Не перетираем значение, если фокус в этой ячейке —
+            // иначе сбивается курсор при печати.
+            if (document.activeElement !== cell && cell.value !== v) {
+                cell.value = v;
+            }
+        } else {
+            cell.textContent = v;
+        }
+
+        cell.classList.toggle('is-filled', v !== '');
+        this._applyKindClass(cell, v);
+
+        if (!silent && !this._silent && this._batchDepth === 0) {
+            this._scheduleChange();
+        }
+    };
+
+    MatrixInput.prototype._scheduleChange = function () {
+        var self = this;
+        if (this._changeTimer) clearTimeout(this._changeTimer);
+        this._changeTimer = setTimeout(function () {
+            self._changeTimer = null;
+            self._dispatchChange();
+        }, 60);
     };
 
     MatrixInput.prototype._dispatchChange = function () {
         var ev = new CustomEvent('matrix:change', {
             bubbles: true,
-            detail: { matrix: this }
+            detail: { matrix: this, letter: this.letter }
         });
         this.el.dispatchEvent(ev);
+        ML.emit('matrix:change', { matrix: this, letter: this.letter });
     };
 
     MatrixInput.prototype.setSize = function (rows, cols, opts) {
         opts = opts || {};
         var preserve = opts.preserve !== false;
 
-        rows = Math.max(1, Math.min(rows, ML.maxRows));
-        cols = Math.max(1, Math.min(cols, ML.maxCols));
+        var maxRows = ML.maxRows || 10;
+        var maxCols = ML.maxCols || 10;
+        rows = clamp(parseInt(rows, 10) || 1, 1, maxRows);
+        cols = clamp(parseInt(cols, 10) || 1, 1, maxCols);
 
         if (rows === this.rows && cols === this.cols) return;
 
-        // Сохраняем значения, если нужно
-        var oldValues = this.values.map(function (row) {
-            return row.slice();
-        });
+        this.pushHistory();
+
+        var oldValues = deepCopyMatrix(this.values);
 
         this.rows = rows;
         this.cols = cols;
         this.el.dataset.rows = String(rows);
         this.el.dataset.cols = String(cols);
 
-        // Принудительно строим новую сетку, значения восстановим вручную
         var saved = preserve ? oldValues : null;
+
+        this._silent = true;
         this.values = [];
         this.cells = [];
         this._build();
@@ -266,79 +624,275 @@
             for (var r = 0; r < rMax; r++) {
                 var cMax = Math.min(saved[r].length, cols);
                 for (var c = 0; c < cMax; c++) {
-                    this.setValue(r, c, saved[r][c]);
+                    this.setValue(r, c, saved[r][c], true);
                 }
             }
         }
+        this._silent = false;
+
+        this._updateSizeInputs();
+        this._dispatchChange();
+    };
+
+    MatrixInput.prototype.addRow = function (index) {
+        var maxRows = ML.maxRows || 10;
+        if (this.rows >= maxRows) {
+            ML.toast.warning('Достигнут максимум',
+                'Максимум ' + maxRows + ' строк.');
+            return;
+        }
+        var at = (index == null) ? this.rows : clamp(index, 0, this.rows);
+        this.beginBatch();
+        this._insertRowAt(at);
+        this.endBatch();
+    };
+
+    MatrixInput.prototype.removeRow = function (index) {
+        if (this.rows <= 1) {
+            ML.toast.warning('Нельзя удалить',
+                'Должна остаться хотя бы одна строка.');
+            return;
+        }
+        var at = (index == null) ? this.rows - 1 : clamp(index, 0, this.rows - 1);
+        this.beginBatch();
+        this._deleteRowAt(at);
+        this.endBatch();
+    };
+
+    MatrixInput.prototype.addCol = function (index) {
+        var maxCols = ML.maxCols || 10;
+        if (this.cols >= maxCols) {
+            ML.toast.warning('Достигнут максимум',
+                'Максимум ' + maxCols + ' столбцов.');
+            return;
+        }
+        var at = (index == null) ? this.cols : clamp(index, 0, this.cols);
+        this.beginBatch();
+        this._insertColAt(at);
+        this.endBatch();
+    };
+
+    MatrixInput.prototype.removeCol = function (index) {
+        if (this.cols <= 1) {
+            ML.toast.warning('Нельзя удалить',
+                'Должен остаться хотя бы один столбец.');
+            return;
+        }
+        var at = (index == null) ? this.cols - 1 : clamp(index, 0, this.cols - 1);
+        this.beginBatch();
+        this._deleteColAt(at);
+        this.endBatch();
+    };
+
+    MatrixInput.prototype._rebuildWithValues = function (newValues) {
+        this.rows = newValues.length;
+        this.cols = newValues[0] ? newValues[0].length : 1;
+        this.el.dataset.rows = String(this.rows);
+        this.el.dataset.cols = String(this.cols);
+        this.values = [];
+        this.cells = [];
+        this._silent = true;
+        this._build();
+        for (var r = 0; r < this.rows; r++) {
+            for (var c = 0; c < this.cols; c++) {
+                this.setValue(r, c, newValues[r][c] || '', true);
+            }
+        }
+        this._silent = false;
+    };
+
+    MatrixInput.prototype._insertRowAt = function (at) {
+        var v = deepCopyMatrix(this.values);
+        v.splice(at, 0, new Array(this.cols).fill(''));
+        this._rebuildWithValues(v);
+        this._updateSizeInputs();
+    };
+
+    MatrixInput.prototype._deleteRowAt = function (at) {
+        var v = deepCopyMatrix(this.values);
+        v.splice(at, 1);
+        this._rebuildWithValues(v);
+        this._updateSizeInputs();
+    };
+
+    MatrixInput.prototype._insertColAt = function (at) {
+        var v = deepCopyMatrix(this.values);
+        v.forEach(function (row) { row.splice(at, 0, ''); });
+        this._rebuildWithValues(v);
+        this._updateSizeInputs();
+    };
+
+    MatrixInput.prototype._deleteColAt = function (at) {
+        var v = deepCopyMatrix(this.values);
+        v.forEach(function (row) { row.splice(at, 1); });
+        this._rebuildWithValues(v);
+        this._updateSizeInputs();
     };
 
     MatrixInput.prototype.makeSquare = function () {
         var n = Math.max(this.rows, this.cols);
         this.setSize(n, n);
-        if (ML.toast) {
-            ML.toast.info(
-                'Матрица ' + this.letter.toUpperCase() + ' приведена к квадратной',
-                n + ' × ' + n
-            );
-        }
+        ML.toast.info(
+            'Матрица ' + this.letter.toUpperCase() + ' приведена к квадратной',
+            n + ' × ' + n
+        );
         return this;
     };
 
     MatrixInput.prototype.read = function () {
-        return this.values.map(function (row) { return row.slice(); });
+        return deepCopyMatrix(this.values);
     };
 
     MatrixInput.prototype.write = function (data) {
         if (!Array.isArray(data)) return;
+        this.beginBatch();
         var rMax = Math.min(data.length, this.rows);
         for (var r = 0; r < rMax; r++) {
             if (!Array.isArray(data[r])) continue;
             var cMax = Math.min(data[r].length, this.cols);
             for (var c = 0; c < cMax; c++) {
                 var v = data[r][c];
-                this.setValue(r, c, v == null ? '' : String(v));
+                this.setValue(r, c, v == null ? '' : String(v), true);
             }
         }
+        this.endBatch();
     };
 
     MatrixInput.prototype.clear = function () {
+        this.beginBatch();
         for (var r = 0; r < this.rows; r++) {
             for (var c = 0; c < this.cols; c++) {
-                this.setValue(r, c, '');
+                this.setValue(r, c, '', true);
             }
         }
+        this.endBatch();
     };
 
     MatrixInput.prototype.fillZero = function () {
+        this.beginBatch();
         for (var r = 0; r < this.rows; r++) {
             for (var c = 0; c < this.cols; c++) {
-                this.setValue(r, c, '0');
+                this.setValue(r, c, '0', true);
             }
         }
+        this.endBatch();
     };
 
     MatrixInput.prototype.fillIdentity = function () {
         if (this.rows !== this.cols) this.makeSquare();
+        this.beginBatch();
         for (var r = 0; r < this.rows; r++) {
             for (var c = 0; c < this.cols; c++) {
-                this.setValue(r, c, r === c ? '1' : '0');
+                this.setValue(r, c, r === c ? '1' : '0', true);
             }
         }
+        this.endBatch();
     };
 
-    MatrixInput.prototype.fillRandom = function () {
+    MatrixInput.prototype.fillScalar = function (k) {
+        if (this.rows !== this.cols) this.makeSquare();
+        k = String(k == null ? '1' : k);
+        this.beginBatch();
         for (var r = 0; r < this.rows; r++) {
             for (var c = 0; c < this.cols; c++) {
-                this.setValue(r, c, String(Math.floor(Math.random() * 19) - 9));
+                this.setValue(r, c, r === c ? k : '0', true);
             }
         }
+        this.endBatch();
+    };
+
+    MatrixInput.prototype.fillDiagonal = function () {
+        if (this.rows !== this.cols) this.makeSquare();
+        this.beginBatch();
+        for (var r = 0; r < this.rows; r++) {
+            for (var c = 0; c < this.cols; c++) {
+                if (r === c) {
+                    var cur = this.values[r][c];
+                    if (cur === '' || cur === '0') {
+                        this.setValue(r, c, String(r + 1), true);
+                    }
+                } else {
+                    this.setValue(r, c, '0', true);
+                }
+            }
+        }
+        this.endBatch();
+    };
+
+    MatrixInput.prototype.fillSymmetric = function () {
+        if (this.rows !== this.cols) this.makeSquare();
+        this.beginBatch();
+        var n = this.rows;
+        for (var r = 0; r < n; r++) {
+            for (var c = r; c < n; c++) {
+                var v = this.values[r][c];
+                if (v === '') v = String(Math.floor(Math.random() * 19) - 9);
+                this.setValue(r, c, v, true);
+                this.setValue(c, r, v, true);
+            }
+        }
+        this.endBatch();
+    };
+
+    MatrixInput.prototype.fillUpperTriangular = function () {
+        this.beginBatch();
+        for (var r = 0; r < this.rows; r++) {
+            for (var c = 0; c < this.cols; c++) {
+                if (c < r) {
+                    this.setValue(r, c, '0', true);
+                } else if (this.values[r][c] === '') {
+                    this.setValue(r, c,
+                        String(Math.floor(Math.random() * 19) - 9), true);
+                }
+            }
+        }
+        this.endBatch();
+    };
+
+    MatrixInput.prototype.fillLowerTriangular = function () {
+        this.beginBatch();
+        for (var r = 0; r < this.rows; r++) {
+            for (var c = 0; c < this.cols; c++) {
+                if (c > r) {
+                    this.setValue(r, c, '0', true);
+                } else if (this.values[r][c] === '') {
+                    this.setValue(r, c,
+                        String(Math.floor(Math.random() * 19) - 9), true);
+                }
+            }
+        }
+        this.endBatch();
+    };
+
+    MatrixInput.prototype.fillRandom = function (opts) {
+        opts = opts || {};
+        var min = opts.min != null ? opts.min : -9;
+        var max = opts.max != null ? opts.max : 9;
+        var fractions = !!opts.fractions;
+        this.beginBatch();
+        for (var r = 0; r < this.rows; r++) {
+            for (var c = 0; c < this.cols; c++) {
+                var v;
+                if (fractions && Math.random() < 0.3) {
+                    var num = Math.floor(Math.random() * (max - min + 1)) + min;
+                    var den = Math.floor(Math.random() * 8) + 2;
+                    v = num + '/' + den;
+                } else {
+                    v = String(Math.floor(Math.random() * (max - min + 1)) + min);
+                }
+                this.setValue(r, c, v, true);
+            }
+        }
+        this.endBatch();
     };
 
     MatrixInput.prototype.transposeInPlace = function () {
+        this.pushHistory();
         var data = this.read();
         var newRows = this.cols;
         var newCols = this.rows;
 
+        this._silent = true;
         this.rows = newRows;
         this.cols = newCols;
         this.el.dataset.rows = String(newRows);
@@ -349,56 +903,105 @@
 
         for (var r = 0; r < newRows; r++) {
             for (var c = 0; c < newCols; c++) {
-                this.setValue(r, c, (data[c] && data[c][r]) || '');
+                this.setValue(r, c, (data[c] && data[c][r]) || '', true);
             }
         }
+        this._silent = false;
+        this._updateSizeInputs();
+        this._dispatchChange();
     };
 
     MatrixInput.prototype.isEmpty = function () {
+        return ML.validators.isEmptyMatrix(this.values);
+    };
+
+    MatrixInput.prototype.hasInvalid = function () {
         for (var r = 0; r < this.rows; r++) {
             for (var c = 0; c < this.cols; c++) {
-                if (this.values[r][c] !== '') return false;
+                if (!ML.validators.classifyInput(this.values[r][c]).valid) {
+                    return true;
+                }
             }
         }
+        return false;
+    };
+
+    MatrixInput.prototype.importFrom = function (text, startRow, startCol) {
+        startRow = startRow || 0;
+        startCol = startCol || 0;
+        var parsed = parseMatrixText(text);
+        if (!parsed) return false;
+        var data = parsed.matrix;
+
+        var neededRows = Math.max(this.rows, startRow + data.length);
+        var neededCols = Math.max(
+            this.cols,
+            startCol + (data[0] ? data[0].length : 0)
+        );
+
+        this.beginBatch();
+
+        if (neededRows !== this.rows || neededCols !== this.cols) {
+            var oldValues = deepCopyMatrix(this.values);
+            this.rows = neededRows;
+            this.cols = neededCols;
+            this.el.dataset.rows = String(neededRows);
+            this.el.dataset.cols = String(neededCols);
+            this.values = [];
+            this.cells = [];
+            this._build();
+            var rMax = Math.min(oldValues.length, neededRows);
+            for (var r = 0; r < rMax; r++) {
+                var cMax = Math.min(oldValues[r].length, neededCols);
+                for (var c = 0; c < cMax; c++) {
+                    this.setValue(r, c, oldValues[r][c], true);
+                }
+            }
+        }
+
+        for (var dr = 0; dr < data.length; dr++) {
+            for (var dc = 0; dc < data[dr].length; dc++) {
+                this.setValue(
+                    startRow + dr,
+                    startCol + dc,
+                    data[dr][dc],
+                    true
+                );
+            }
+        }
+
+        this.endBatch();
+        this._updateSizeInputs();
         return true;
     };
 
-    MatrixInput.prototype.pasteMatrix = function (text, startRow, startCol) {
-        startRow = startRow || 0;
-        startCol = startCol || 0;
-
-        var rowsRaw = String(text).replace(/\r/g, '').split('\n').filter(function (x) {
-            return x.trim() !== '';
-        });
-        if (!rowsRaw.length) return;
-
-        var rowList = rowsRaw;
-        if (rowsRaw.length === 1 && rowsRaw[0].indexOf(';') !== -1) {
-            rowList = rowsRaw[0].split(';');
-        }
-
-        var maxCols = 0;
-        var parsed = rowList.map(function (line) {
-            var cells = line.split(/\t|,|;/).map(function (x) { return x.trim(); });
-            if (cells.length > maxCols) maxCols = cells.length;
-            return cells;
-        });
-
-        var neededRows = Math.max(this.rows, startRow + parsed.length);
-        var neededCols = Math.max(this.cols, startCol + maxCols);
-        if (neededRows !== this.rows || neededCols !== this.cols) {
-            this.setSize(neededRows, neededCols, { preserve: true });
-        }
-
-        for (var dr = 0; dr < parsed.length; dr++) {
-            for (var dc = 0; dc < parsed[dr].length; dc++) {
-                this.setValue(startRow + dr, startCol + dc, parsed[dr][dc]);
-            }
-        }
+    MatrixInput.prototype.pasteMatrix = function (text, sr, sc) {
+        return this.importFrom(text, sr, sc);
     };
 
-    ML.MatrixInput = MatrixInput;
-    ML.matrixInputs = {};
+    MatrixInput.prototype.exportAs = function (format) {
+        return exportMatrix(this.read(), format);
+    };
+
+    MatrixInput.prototype.copyAs = function (format) {
+        var text = this.exportAs(format);
+        var label = 'Матрица ' + this.letter.toUpperCase() + ' скопирована';
+
+        if (format === 'latex') {
+            ML.copy.latex(text, label);
+        } else if (format === 'markdown' || format === 'md') {
+            ML.copy.markdown(text, label);
+        } else if (format === 'json') {
+            ML.copy.json(this.read(), label);
+        } else {
+            ML.copy.text(text, label);
+        }
+        return text;
+    };
+
+    MatrixInput.prototype.toLatex = function () {
+        return matrixToLatex(this.read());
+    };
 
     // =========================================================================
     // 3. КЛАСС VectorInput
@@ -406,61 +1009,252 @@
 
     function VectorInput(container) {
         this.el = container;
-        this.rows = parseInt(container.dataset.rows || '3', 10);
+        var maxRows = ML.maxRows || 10;
+        this.rows = clamp(
+            parseInt(container.dataset.rows || '3', 10) || 3,
+            1, maxRows
+        );
         this.values = [];
         this.cells = [];
+
+        this._silent = false;
+        this._changeTimer = null;
+
+        this._undoStack = [];
+        this._redoStack = [];
+        this._undoLimit = 100;
+
         this._build();
+        this._bindKeyboardNavigation();
+        this._bindFocusTracking();
     }
 
     VectorInput.prototype._build = function () {
+        var old = this.values.length ? this.values.slice() : null;
+        var self = this;
+
         this.el.innerHTML = '';
         this.el.classList.add('vector-grid');
-        var old = this.values.length ? this.values.slice() : null;
+        this.el.setAttribute('role', 'grid');
+        this.el.setAttribute('aria-rowcount', String(this.rows));
+        this.el.setAttribute('aria-colcount', '1');
+        this.el.setAttribute('aria-label', 'Вектор b');
 
         this.values = [];
         this.cells = [];
 
+        var frag = document.createDocumentFragment();
+
         for (var i = 0; i < this.rows; i++) {
-            var cell = document.createElement('button');
-            cell.type = 'button';
+            var cell = document.createElement('input');
+            cell.type = 'text';
             cell.className = 'matrix-cell';
+            cell.autocomplete = 'off';
+            cell.autocapitalize = 'off';
+            cell.spellcheck = false;
             cell.dataset.row = String(i);
             cell.dataset.col = '0';
+            cell.setAttribute('role', 'gridcell');
+            cell.setAttribute('aria-rowindex', String(i + 1));
+            cell.setAttribute('aria-colindex', '1');
             cell.setAttribute('aria-label', 'b' + (i + 1));
 
             var val = (old && old[i]) || '';
-            cell.textContent = val;
+            cell.value = val;
             cell.dataset.value = val;
             if (val !== '') cell.classList.add('is-filled');
+            this._applyKindClass(cell, val);
 
-            this.el.appendChild(cell);
+            (function (cellRef, ii) {
+                cellRef.addEventListener('input', function () {
+                    self._setFromInput(ii, cellRef.value);
+                });
+            })(cell, i);
+
+            frag.appendChild(cell);
             this.values.push(val);
             this.cells.push(cell);
         }
+
+        this.el.appendChild(frag);
     };
 
-    VectorInput.prototype.setValue = function (i, value) {
+    VectorInput.prototype._applyKindClass = MatrixInput.prototype._applyKindClass;
+
+    VectorInput.prototype._bindKeyboardNavigation = function () {
+        var self = this;
+        this.el.addEventListener('keydown', function (e) {
+            var target = e.target;
+            if (!target.classList.contains('matrix-cell')) return;
+
+            var i = parseInt(target.dataset.row, 10);
+            var next = null;
+
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'z' || e.key === 'Z')) {
+                if (e.shiftKey) self.redo();
+                else self.undo();
+                e.preventDefault();
+                return;
+            }
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || e.key === 'Y')) {
+                self.redo();
+                e.preventDefault();
+                return;
+            }
+
+            switch (e.key) {
+                case 'ArrowUp':   next = self.cells[i - 1]; break;
+                case 'ArrowDown': next = self.cells[i + 1]; break;
+                case 'Tab':
+                    next = e.shiftKey ? self.cells[i - 1] : self.cells[i + 1];
+                    e.preventDefault();
+                    break;
+                case 'Enter':
+                    next = self.cells[i + 1] || self.cells[0];
+                    e.preventDefault();
+                    break;
+            }
+
+            if (next) {
+                e.preventDefault();
+                try { next.focus({ preventScroll: false }); } catch (err) { /* noop */ }
+                try { next.select(); } catch (err) { /* noop */ }
+            }
+        });
+    };
+
+    VectorInput.prototype._bindFocusTracking = function () {
+        var self = this;
+        this.el.addEventListener('focusin', function () {
+            ML._activeMatrix = self;
+        });
+    };
+
+    VectorInput.prototype._snapshot = function () {
+        return { rows: this.rows, values: this.values.slice() };
+    };
+
+    VectorInput.prototype._restore = function (snap) {
+        if (!snap) return;
+        this._silent = true;
+        this.rows = snap.rows;
+        this.el.dataset.rows = String(this.rows);
+        this.values = [];
+        this.cells = [];
+        this._build();
+        for (var i = 0; i < this.rows; i++) {
+            this.setValue(i, snap.values[i] || '', true);
+        }
+        this._silent = false;
+        this._dispatchChange();
+    };
+
+    VectorInput.prototype.pushHistory = function () {
+        this._undoStack.push(this._snapshot());
+        if (this._undoStack.length > this._undoLimit) this._undoStack.shift();
+        this._redoStack.length = 0;
+    };
+
+    VectorInput.prototype.undo = function () {
+        if (!this._undoStack.length) return;
+        var cur = this._snapshot();
+        var prev = this._undoStack.pop();
+        this._redoStack.push(cur);
+        this._restore(prev);
+        ML.toast.info('Отменено', '');
+    };
+
+    VectorInput.prototype.redo = function () {
+        if (!this._redoStack.length) return;
+        var cur = this._snapshot();
+        var next = this._redoStack.pop();
+        this._undoStack.push(cur);
+        this._restore(next);
+        ML.toast.info('Повторено', '');
+    };
+
+    VectorInput.prototype._setFromInput = function (i, value) {
         if (i < 0 || i >= this.rows) return;
-        var v = String(value == null ? '' : value);
-        this.values[i] = v;
+
         var cell = this.cells[i];
+        var v = String(value == null ? '' : value);
+
+        if (this.values[i] === v) return;
+
+        if (!this._silent) {
+            this.pushHistory();
+        }
+
+        this.values[i] = v;
         cell.dataset.value = v;
-        cell.textContent = v;
         cell.classList.toggle('is-filled', v !== '');
+        this._applyKindClass(cell, v);
+
+        if (!this._silent) this._scheduleChange();
+    };
+
+    VectorInput.prototype.setValue = function (i, value, silent) {
+        if (i < 0 || i >= this.rows) return;
+        var cell = this.cells[i];
+        var v = String(value == null ? '' : value);
+        if (this.values[i] === v && cell.dataset.value === v) return;
+
+        if (!silent && !this._silent) {
+            this.pushHistory();
+        }
+
+        this.values[i] = v;
+        cell.dataset.value = v;
+
+        if (isInputEl(cell)) {
+            if (document.activeElement !== cell && cell.value !== v) {
+                cell.value = v;
+            }
+        } else {
+            cell.textContent = v;
+        }
+
+        cell.classList.toggle('is-filled', v !== '');
+        this._applyKindClass(cell, v);
+
+        if (!silent) this._scheduleChange();
+    };
+
+    VectorInput.prototype._scheduleChange = function () {
+        var self = this;
+        if (this._changeTimer) clearTimeout(this._changeTimer);
+        this._changeTimer = setTimeout(function () {
+            self._changeTimer = null;
+            self._dispatchChange();
+        }, 60);
+    };
+
+    VectorInput.prototype._dispatchChange = function () {
+        var ev = new CustomEvent('vector:change', {
+            bubbles: true,
+            detail: { vector: this }
+        });
+        this.el.dispatchEvent(ev);
+        ML.emit('vector:change', { vector: this });
     };
 
     VectorInput.prototype.setSize = function (rows) {
-        rows = Math.max(1, Math.min(rows, ML.maxRows));
+        var maxRows = ML.maxRows || 10;
+        rows = clamp(parseInt(rows, 10) || 1, 1, maxRows);
         if (rows === this.rows) return;
         var old = this.values.slice();
+        this.pushHistory();
         this.rows = rows;
         this.el.dataset.rows = String(rows);
+        this._silent = true;
         this.values = [];
         this.cells = [];
         this._build();
         for (var i = 0; i < Math.min(old.length, rows); i++) {
-            this.setValue(i, old[i]);
+            this.setValue(i, old[i], true);
         }
+        this._silent = false;
+        this._dispatchChange();
     };
 
     VectorInput.prototype.read = function () {
@@ -470,30 +1264,76 @@
     VectorInput.prototype.write = function (data) {
         if (!Array.isArray(data)) return;
         this.setSize(data.length);
+        this._silent = true;
         for (var i = 0; i < data.length; i++) {
-            this.setValue(i, data[i] == null ? '' : String(data[i]));
+            this.setValue(i, data[i] == null ? '' : String(data[i]), true);
         }
+        this._silent = false;
+        this._dispatchChange();
     };
 
     VectorInput.prototype.clear = function () {
-        for (var i = 0; i < this.rows; i++) this.setValue(i, '');
+        this.pushHistory();
+        this._silent = true;
+        for (var i = 0; i < this.rows; i++) this.setValue(i, '', true);
+        this._silent = false;
+        this._dispatchChange();
     };
 
     VectorInput.prototype.isEmpty = function () {
-        return this.values.every(function (v) { return v === ''; });
+        return ML.validators.isEmptyVector(this.values);
     };
 
-    ML.VectorInput = VectorInput;
-    ML.vectorInputs = {};
+    VectorInput.prototype.hasInvalid = function () {
+        for (var i = 0; i < this.rows; i++) {
+            if (!ML.validators.classifyInput(this.values[i]).valid) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    VectorInput.prototype.importFrom = function (text) {
+        var parsed = parseMatrixText(text);
+        if (!parsed) return false;
+
+        var data = parsed.matrix.map(function (row) { return row[0]; });
+
+        this.pushHistory();
+        this.setSize(data.length);
+        this._silent = true;
+        for (var i = 0; i < data.length; i++) {
+            this.setValue(i, data[i], true);
+        }
+        this._silent = false;
+        this._dispatchChange();
+        return true;
+    };
+
+    VectorInput.prototype.exportAs = function (format) {
+        var asMatrix = this.values.map(function (v) { return [v]; });
+        return exportMatrix(asMatrix, format);
+    };
 
     // =========================================================================
-    // 4. ЦИФРОВАЯ КЛАВИАТУРА
+    // 4. ЦИФРОВАЯ КЛАВИАТУРА — ТОЛЬКО ПО ЯВНОЙ КНОПКЕ
     // =========================================================================
+
+    var KEYPAD_KEYS = [
+        { k: '7', t: '7' }, { k: '8', t: '8' }, { k: '9', t: '9' }, { k: '/', t: '/' },
+        { k: '4', t: '4' }, { k: '5', t: '5' }, { k: '6', t: '6' }, { k: '*', t: '×' },
+        { k: '1', t: '1' }, { k: '2', t: '2' }, { k: '3', t: '3' }, { k: '-', t: '−' },
+        { k: '0', t: '0' }, { k: '.', t: '.' }, { k: 'pi', t: 'π' }, { k: '+', t: '+' },
+        { k: 'i', t: 'i' }, { k: 'sqrt', t: '√' }, { k: '(', t: '(' }, { k: ')', t: ')' },
+        { k: 'C', t: 'C', kind: 'danger' },
+        { k: 'back', t: '⌫', kind: 'warning' },
+        { k: 'done', t: 'Готово', kind: 'primary', wide: true }
+    ];
 
     var keyboardEl = null;
     var currentCell = null;
     var currentInput = null;
-    var currentKind = null;  // 'matrix' | 'vector'
+    var currentKind = null;
 
     function buildKeyboard() {
         if (keyboardEl) return keyboardEl;
@@ -520,63 +1360,62 @@
 
         keyboardEl.appendChild(grid);
 
-        // Превью текущего значения
         var preview = document.createElement('div');
         preview.className = 'digital-keyboard__preview';
-        preview.innerHTML = '<span class="digital-keyboard__preview-label">Значение:</span>' +
-                            '<span class="digital-keyboard__preview-value" data-keypad-preview>—</span>';
+        preview.innerHTML = ''
+            + '<span class="digital-keyboard__preview-label">Значение:</span>'
+            + '<span class="digital-keyboard__preview-value" data-keypad-preview>—</span>';
         keyboardEl.appendChild(preview);
 
         document.body.appendChild(keyboardEl);
 
-        // Обработка нажатий
         keyboardEl.addEventListener('click', function (e) {
             var btn = e.target.closest('[data-key]');
             if (!btn) return;
             var k = btn.dataset.key;
 
-            if (k === 'done') {
-                closeKeyboard();
-                return;
-            }
-            if (k === 'C') {
-                setCellValue('');
-                return;
-            }
+            ML.haptic('light');
+
+            if (k === 'done') { closeKeyboard(); return; }
+            if (k === 'C')    { applyToCell(''); return; }
             if (k === 'back') {
-                var cur = getCellValue();
-                setCellValue(cur.slice(0, -1));
+                var cur = currentCell && currentCell.value
+                    ? currentCell.value : '';
+                applyToCell(cur.slice(0, -1));
                 return;
             }
 
             var insert = k;
             if (k === 'sqrt') insert = 'sqrt(';
-            if (k === 'pi') insert = 'pi';
-            if (k === '*') insert = '*';
 
-            var cur2 = getCellValue();
-            setCellValue(cur2 + insert);
+            var prev = currentCell && currentCell.value
+                ? currentCell.value : '';
+            applyToCell(prev + insert);
         });
 
         return keyboardEl;
     }
 
-    function getCellValue() {
-        if (!currentCell) return '';
-        return currentCell.dataset.value || '';
-    }
-
-    function setCellValue(v) {
+    function applyToCell(newValue) {
         if (!currentCell || !currentInput) return;
+
+        // Обновляем сам input, чтобы курсор остался в нём
+        if (isInputEl(currentCell)) {
+            currentCell.value = newValue;
+        }
+
         var r = parseInt(currentCell.dataset.row, 10);
         var c = parseInt(currentCell.dataset.col, 10);
         if (currentKind === 'matrix') {
-            currentInput.setValue(r, c, v);
+            currentInput._setFromInput(r, c, newValue);
         } else {
-            currentInput.setValue(r, v);
+            currentInput._setFromInput(r, newValue);
         }
-        var prev = keyboardEl.querySelector('[data-keypad-preview]');
-        if (prev) prev.textContent = v || '—';
+
+        if (keyboardEl) {
+            var pv = keyboardEl.querySelector('[data-keypad-preview]');
+            if (pv) pv.textContent = newValue || '—';
+        }
     }
 
     function positionKeyboard(cell) {
@@ -587,7 +1426,6 @@
         var vh = window.innerHeight;
         var margin = 12;
 
-        // На мобильном — фиксированная нижняя панель
         if (vw <= 768) {
             keyboardEl.classList.add('digital-keyboard--bottom');
             keyboardEl.style.left = '';
@@ -602,11 +1440,9 @@
         var left = rect.left + rect.width / 2 - kbRect.width / 2;
         var top = rect.bottom + margin;
 
-        // Если снизу не влезает — открываем сверху
         if (top + kbRect.height > vh - margin) {
             top = rect.top - kbRect.height - margin;
         }
-
         if (left < margin) left = margin;
         if (left + kbRect.width > vw - margin) {
             left = vw - kbRect.width - margin;
@@ -628,23 +1464,18 @@
 
         keyboardEl.hidden = false;
 
-        // Позиционируем после отображения
         requestAnimationFrame(function () {
             positionKeyboard(cell);
             keyboardEl.classList.add('is-visible');
         });
 
-        // Подсветка активной ячейки
         ML.$$('.matrix-cell.is-active').forEach(function (c) {
             c.classList.remove('is-active');
         });
         cell.classList.add('is-active');
 
-        // Фокус на ячейку (для доступности)
-        try { cell.focus({ preventScroll: true }); } catch (e) { /* noop */ }
-
         var prev = keyboardEl.querySelector('[data-keypad-preview]');
-        if (prev) prev.textContent = cell.dataset.value || '—';
+        if (prev) prev.textContent = cell.value || '—';
     }
 
     function closeKeyboard() {
@@ -663,59 +1494,33 @@
     }
 
     function initKeyboard() {
-        buildKeyboard();
-
-        // Делегирование клика по ячейкам
-        document.addEventListener('click', function (e) {
-            var cell = e.target.closest('.matrix-cell');
-            if (cell) {
-                var grid = cell.closest('[data-matrix-input]');
-                var vecGrid = cell.closest('[data-vector-input]');
-                if (grid) {
-                    var mi = ML.matrixInputs[grid.id];
-                    if (mi) {
-                        openKeyboardFor(cell, mi, 'matrix');
-                        return;
-                    }
-                }
-                if (vecGrid) {
-                    var vi = ML.vectorInputs[vecGrid.id];
-                    if (vi) {
-                        openKeyboardFor(cell, vi, 'vector');
-                        return;
-                    }
-                }
-            }
-
-            // Клик вне клавиатуры и вне ячейки — закрыть
-            if (keyboardEl && !keyboardEl.hidden) {
-                if (!e.target.closest('.digital-keyboard') && !e.target.closest('.matrix-cell')) {
-                    closeKeyboard();
-                }
-            }
-        });
-
-        // Escape
+        // Автооткрытие ОТКЛЮЧЕНО. Клавиатура открывается только по кнопке.
         document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape') closeKeyboard();
         });
 
-        // Скролл/ресайз — перепозиционировать или закрыть
         window.addEventListener('resize', function () {
             if (keyboardEl && !keyboardEl.hidden && currentCell) {
                 positionKeyboard(currentCell);
             }
         });
+
+        window.addEventListener('scroll', function () {
+            if (keyboardEl && !keyboardEl.hidden && currentCell
+                && window.innerWidth > 768) {
+                positionKeyboard(currentCell);
+            }
+        }, { passive: true });
+
+        var startY = 0;
+        // keyboardEl ещё не создан на этом этапе — создадим лениво
+        // в openKeyboardFor через buildKeyboard().
     }
 
     ML.digitalKeyboard = {
-        openFor: function (cell, input) {
-            openKeyboardFor(cell, input, 'matrix');
-        },
-        openForVector: function (cell, input) {
-            openKeyboardFor(cell, input, 'vector');
-        },
-        close: closeKeyboard,
+        openFor: function (cell, input) { openKeyboardFor(cell, input, 'matrix'); },
+        openForVector: function (cell, input) { openKeyboardFor(cell, input, 'vector'); },
+        close: closeKeyboard
     };
 
     // =========================================================================
@@ -724,11 +1529,13 @@
 
     function initMatrixInputs() {
         ML.$$('[data-matrix-input]').forEach(function (el) {
-            // Уникальный ключ: id или сгенерированный
             var key = el.id || ('matrix-' + Object.keys(ML.matrixInputs).length);
             el.id = key;
+            if (ML.matrixInputs[key]) return;
+
             var card = el.closest('[data-matrix-card]');
-            var letter = (card && card.dataset.matrixCard) || el.dataset.matrixLetter || 'a';
+            var letter = (card && card.dataset.matrixCard)
+                || el.dataset.matrixLetter || 'a';
             ML.matrixInputs[key] = new MatrixInput(el, letter);
         });
     }
@@ -737,16 +1544,19 @@
         ML.$$('[data-vector-input]').forEach(function (el) {
             var key = el.id || 'vector';
             el.id = key;
+            if (ML.vectorInputs[key]) return;
             ML.vectorInputs[key] = new VectorInput(el);
         });
     }
 
+    ML.matrixInputs = ML.matrixInputs || {};
+    ML.vectorInputs = ML.vectorInputs || {};
+
     ML.getMatrixByLetter = function (letter) {
         letter = String(letter || 'a').toLowerCase();
         var card = document.querySelector('[data-matrix-card="' + letter + '"]');
-        if (!card) {
-            // fallback: первая карточка
-            if (letter === 'a') card = document.querySelector('[data-matrix-card]');
+        if (!card && letter === 'a') {
+            card = document.querySelector('[data-matrix-card]');
         }
         if (!card) return null;
         var grid = card.querySelector('[data-matrix-input]');
@@ -760,18 +1570,29 @@
         return ML.matrixInputs[grid.id] || null;
     };
 
+    ML.getAllMatrices = function () {
+        var result = [];
+        ML.$$('[data-matrix-card]').forEach(function (card) {
+            var letter = card.dataset.matrixCard;
+            var grid = card.querySelector('[data-matrix-input]');
+            if (!grid) return;
+            var mi = ML.matrixInputs[grid.id];
+            if (mi) result.push({ letter: letter, mi: mi, card: card });
+        });
+        return result;
+    };
+
+    ML.forEachMatrix = function (cb) {
+        ML.getAllMatrices().forEach(function (item) {
+            cb(item.mi, item.letter, item.card);
+        });
+    };
+
     // =========================================================================
-    // 6. РАЗМЕРНЫЕ КОНТРОЛЫ (+/−)
+    // 6. РАЗМЕРНЫЕ КОНТРОЛЫ
     // =========================================================================
 
-    /**
-     * Разбирает dataset кнопки и возвращает {direction, axis, target} или null.
-     * Поддерживает оба стиля:
-     *   • data-size-incr-a-rows  → dataset.sizeIncrARows
-     *   • data-size-incr="rows"  → dataset.sizeIncr = "rows" (target = 'a' по умолчанию)
-     */
     function parseSizeAttr(dataset) {
-        // Новый стиль: sizeIncrARows / sizeDecrBCols / ...
         var keys = Object.keys(dataset);
         for (var i = 0; i < keys.length; i++) {
             var key = keys[i];
@@ -784,15 +1605,12 @@
                 };
             }
         }
-
-        // Старый стиль: data-size-incr="rows" / data-size-decr="cols"
         if (dataset.sizeIncr === 'rows' || dataset.sizeIncr === 'cols') {
             return { direction: 'incr', target: 'a', axis: dataset.sizeIncr };
         }
         if (dataset.sizeDecr === 'rows' || dataset.sizeDecr === 'cols') {
             return { direction: 'decr', target: 'a', axis: dataset.sizeDecr };
         }
-
         return null;
     }
 
@@ -806,7 +1624,6 @@
 
         var rows = mi.rows;
         var cols = mi.cols;
-
         if (info.axis === 'rows') {
             rows += (info.direction === 'incr' ? 1 : -1);
         } else {
@@ -817,9 +1634,12 @@
         if (info.target === 'a') syncVectorToMatrix();
     }
 
-    function initSizeControls() {
-        // Перепривязываем при каждом вызове — на случай новых матриц
-        ML.$$('.size-btn, [data-size-incr], [data-size-decr]').forEach(function (btn) {
+    function initSizeControls(root) {
+        var scope = root || document;
+        var selector = '.size-btn, [data-size-incr], [data-size-decr], '
+            + '[data-size-incr-a-rows], [data-size-decr-a-rows], '
+            + '[data-size-incr-a-cols], [data-size-decr-a-cols]';
+        scope.querySelectorAll(selector).forEach(function (btn) {
             if (btn.dataset.sizeBound === '1') return;
             btn.dataset.sizeBound = '1';
             btn.addEventListener('click', handleSizeBtn);
@@ -831,33 +1651,89 @@
     // =========================================================================
 
     function bindSizeInputsForCard(card) {
-        if (!card || card.dataset.sizeInputsBound === '1') return;
-        card.dataset.sizeInputsBound = '1';
-
+        if (!card) return;
         var letter = (card.dataset.matrixCard || 'a').toLowerCase();
-        var rInp = card.querySelector('[data-' + letter + '-rows]');
-        var cInp = card.querySelector('[data-' + letter + '-cols]');
 
-        function apply() {
-            var mi = ML.getMatrixByLetter(letter);
-            if (!mi) return;
-            var r = parseInt(rInp && rInp.value, 10);
-            var c = parseInt(cInp && cInp.value, 10);
-            if (isNaN(r)) r = mi.rows;
-            if (isNaN(c)) c = mi.cols;
-            mi.setSize(r, c);
-            if (letter === 'a') syncVectorToMatrix();
-        }
+        card.querySelectorAll('[data-' + letter + '-rows]').forEach(function (rInp) {
+            if (rInp.dataset.sizeInputBound === '1') return;
+            rInp.dataset.sizeInputBound = '1';
+            rInp.addEventListener('change', function () {
+                var mi = ML.getMatrixByLetter(letter);
+                if (!mi) return;
+                var r = parseInt(rInp.value, 10);
+                if (isNaN(r)) r = mi.rows;
+                var c = mi.cols;
+                var cInp = card.querySelector('[data-' + letter + '-cols]');
+                if (cInp) {
+                    var cv = parseInt(cInp.value, 10);
+                    if (!isNaN(cv)) c = cv;
+                }
+                mi.setSize(r, c);
+                if (letter === 'a') syncVectorToMatrix();
+            });
+        });
 
-        if (rInp) rInp.addEventListener('change', apply);
-        if (cInp) cInp.addEventListener('change', apply);
+        card.querySelectorAll('[data-' + letter + '-cols]').forEach(function (cInp) {
+            if (cInp.dataset.sizeInputBound === '1') return;
+            cInp.dataset.sizeInputBound = '1';
+            cInp.addEventListener('change', function () {
+                var mi = ML.getMatrixByLetter(letter);
+                if (!mi) return;
+                var c = parseInt(cInp.value, 10);
+                if (isNaN(c)) c = mi.cols;
+                var r = mi.rows;
+                var rInp = card.querySelector('[data-' + letter + '-rows]');
+                if (rInp) {
+                    var rv = parseInt(rInp.value, 10);
+                    if (!isNaN(rv)) r = rv;
+                }
+                mi.setSize(r, c);
+                if (letter === 'a') syncVectorToMatrix();
+            });
+        });
     }
 
-    function initSizeInputs() {
-        // Новый стиль — data-a-rows / data-a-cols на карточке A
-        ML.$$('[data-matrix-card]').forEach(bindSizeInputsForCard);
+    function bindGlobalSizeInputs() {
+        document.querySelectorAll('[data-a-rows]').forEach(function (rInp) {
+            if (rInp.dataset.sizeInputBound === '1') return;
+            rInp.dataset.sizeInputBound = '1';
+            rInp.addEventListener('change', function () {
+                var mi = ML.getMatrixByLetter('a');
+                if (!mi) return;
+                var r = parseInt(rInp.value, 10);
+                if (isNaN(r)) r = mi.rows;
+                var cInp = rInp.parentElement.querySelector('[data-a-cols]')
+                    || document.querySelector('[data-a-cols]');
+                var c = mi.cols;
+                if (cInp) {
+                    var cv = parseInt(cInp.value, 10);
+                    if (!isNaN(cv)) c = cv;
+                }
+                mi.setSize(r, c);
+                syncVectorToMatrix();
+            });
+        });
 
-        // Старый стиль — #rows-input / #cols-input (глобально на странице)
+        document.querySelectorAll('[data-a-cols]').forEach(function (cInp) {
+            if (cInp.dataset.sizeInputBound === '1') return;
+            cInp.dataset.sizeInputBound = '1';
+            cInp.addEventListener('change', function () {
+                var mi = ML.getMatrixByLetter('a');
+                if (!mi) return;
+                var c = parseInt(cInp.value, 10);
+                if (isNaN(c)) c = mi.cols;
+                var rInp = cInp.parentElement.querySelector('[data-a-rows]')
+                    || document.querySelector('[data-a-rows]');
+                var r = mi.rows;
+                if (rInp) {
+                    var rv = parseInt(rInp.value, 10);
+                    if (!isNaN(rv)) r = rv;
+                }
+                mi.setSize(r, c);
+                syncVectorToMatrix();
+            });
+        });
+
         var rOld = document.querySelector('#rows-input');
         var cOld = document.querySelector('#cols-input');
         if (rOld || cOld) {
@@ -868,7 +1744,6 @@
                 var c = parseInt(cOld && cOld.value, 10);
                 if (isNaN(r)) r = mi.rows;
                 if (isNaN(c)) c = mi.cols;
-                if (rOld === cOld) c = r;
                 mi.setSize(r, c);
                 syncVectorToMatrix();
             }
@@ -883,8 +1758,13 @@
         }
     }
 
+    function initSizeInputs() {
+        ML.$$('[data-matrix-card]').forEach(bindSizeInputsForCard);
+        bindGlobalSizeInputs();
+    }
+
     // =========================================================================
-    // 8. CHIP-КНОПКИ
+    // 8. КНОПКИ ДЕЙСТВИЙ НАД МАТРИЦЕЙ
     // =========================================================================
 
     function initMatrixTools() {
@@ -907,46 +1787,88 @@
             switch (action) {
                 case 'zero':
                     mi.fillZero();
-                    if (ML.toast) ML.toast.info(label + ': нули', '');
+                    ML.toast.info(label + ': нули', '');
                     break;
                 case 'identity':
                     mi.fillIdentity();
-                    if (ML.toast) ML.toast.info(label + ': единичная', '');
+                    ML.toast.info(label + ': единичная', '');
+                    break;
+                case 'diagonal':
+                    mi.fillDiagonal();
+                    ML.toast.info(label + ': диагональная', '');
+                    break;
+                case 'symmetric':
+                    mi.fillSymmetric();
+                    ML.toast.info(label + ': симметричная', '');
+                    break;
+                case 'upper':
+                    mi.fillUpperTriangular();
+                    ML.toast.info(label + ': верхнетреугольная', '');
+                    break;
+                case 'lower':
+                    mi.fillLowerTriangular();
+                    ML.toast.info(label + ': нижнетреугольная', '');
                     break;
                 case 'random':
                     mi.fillRandom();
-                    if (ML.toast) ML.toast.info(label + ': случайные значения', '');
+                    ML.toast.info(label + ': случайные значения', '');
                     break;
                 case 'transpose':
                     mi.transposeInPlace();
-                    if (ML.toast) ML.toast.success(label + ' транспонирована', '');
+                    ML.toast.success(label + ' транспонирована', '');
                     break;
-                case 'copy':
-                    var text = mi.read().map(function (row) {
-                        return row.join('\t');
-                    }).join('\n');
-                    ML.copy.text(text, 'Матрица ' + label + ' скопирована');
-                    break;
+                case 'copy':       mi.copyAs('tsv'); break;
+                case 'copy-latex': mi.copyAs('latex'); break;
+                case 'copy-md':    mi.copyAs('markdown'); break;
+                case 'copy-json':  mi.copyAs('json'); break;
                 case 'paste':
                     if (navigator.clipboard && navigator.clipboard.readText) {
                         navigator.clipboard.readText().then(function (t) {
-                            if (!t) { ML.toast.warning('Буфер пуст', ''); return; }
-                            mi.pasteMatrix(t, 0, 0);
+                            if (!t) {
+                                ML.toast.warning('Буфер пуст', '');
+                                return;
+                            }
+                            mi.importFrom(t, 0, 0);
                             ML.toast.success('Вставлено в ' + label, '');
                         }).catch(function () {
-                            ML.toast.warning('Доступ запрещён', 'Разрешите чтение буфера.');
+                            ML.toast.warning('Доступ запрещён',
+                                'Разрешите чтение буфера.');
                         });
                     } else {
-                        ML.toast.warning('Не поддерживается', 'Браузер не даёт доступ к буферу.');
+                        ML.toast.warning('Не поддерживается',
+                            'Браузер не даёт доступ к буферу.');
                     }
                     break;
-                case 'square':
-                    mi.makeSquare();
+                case 'keypad':
+                    // Открыть цифровую клавиатуру для активной ячейки
+                    var active = document.activeElement;
+                    if (active && active.classList
+                        && active.classList.contains('matrix-cell')) {
+                        var grid = active.closest('[data-matrix-input]');
+                        var vecGrid = active.closest('[data-vector-input]');
+                        if (grid && ML.matrixInputs[grid.id]) {
+                            openKeyboardFor(active, ML.matrixInputs[grid.id], 'matrix');
+                            return;
+                        }
+                        if (vecGrid && ML.vectorInputs[vecGrid.id]) {
+                            openKeyboardFor(active, ML.vectorInputs[vecGrid.id], 'vector');
+                            return;
+                        }
+                    }
+                    ML.toast.info('Клавиатура',
+                        'Сначала выберите ячейку.');
                     break;
+                case 'square':     mi.makeSquare(); break;
                 case 'clear':
                     mi.clear();
-                    if (ML.toast) ML.toast.info(label + ' очищена', '');
+                    ML.toast.info(label + ' очищена', '');
                     break;
+                case 'undo':       mi.undo(); break;
+                case 'redo':       mi.redo(); break;
+                case 'add-row':    mi.addRow(); break;
+                case 'remove-row': mi.removeRow(); break;
+                case 'add-col':    mi.addCol(); break;
+                case 'remove-col': mi.removeCol(); break;
             }
         });
     }
@@ -956,7 +1878,9 @@
     // =========================================================================
 
     function syncVectorToMatrix() {
-        var gridA = document.querySelector('[data-matrix-card="a"] [data-matrix-input]');
+        var gridA = document.querySelector(
+            '[data-matrix-card="a"] [data-matrix-input]'
+        );
         if (!gridA) gridA = document.querySelector('[data-matrix-input]');
         var vecEl = document.querySelector('[data-vector-input]');
         if (!gridA || !vecEl) return;
@@ -999,7 +1923,8 @@
             var card = node.querySelector('[data-matrix-card]');
             card.dataset.matrixCard = letter;
 
-            // Заменяем data-x-* на data-<letter>-*
+            var upperLetter = letter.toUpperCase();
+
             card.querySelectorAll('[data-x-rows]').forEach(function (el) {
                 el.dataset[letter + 'Rows'] = el.dataset.xRows;
                 delete el.dataset.xRows;
@@ -1009,42 +1934,43 @@
                 delete el.dataset.xCols;
             });
 
-            // data-size-incr-x-rows → data-size-incr-<letter>-rows
             card.querySelectorAll('[data-size-incr-x-rows]').forEach(function (el) {
-                el.dataset['sizeIncr' + letter.toUpperCase() + 'Rows'] = '';
+                el.dataset['sizeIncr' + upperLetter + 'Rows'] = '';
                 delete el.dataset.sizeIncrXRows;
+                delete el.dataset.sizeBound;
             });
             card.querySelectorAll('[data-size-decr-x-rows]').forEach(function (el) {
-                el.dataset['sizeDecr' + letter.toUpperCase() + 'Rows'] = '';
+                el.dataset['sizeDecr' + upperLetter + 'Rows'] = '';
                 delete el.dataset.sizeDecrXRows;
+                delete el.dataset.sizeBound;
             });
             card.querySelectorAll('[data-size-incr-x-cols]').forEach(function (el) {
-                el.dataset['sizeIncr' + letter.toUpperCase() + 'Cols'] = '';
+                el.dataset['sizeIncr' + upperLetter + 'Cols'] = '';
                 delete el.dataset.sizeIncrXCols;
+                delete el.dataset.sizeBound;
             });
             card.querySelectorAll('[data-size-decr-x-cols]').forEach(function (el) {
-                el.dataset['sizeDecr' + letter.toUpperCase() + 'Cols'] = '';
+                el.dataset['sizeDecr' + upperLetter + 'Cols'] = '';
                 delete el.dataset.sizeDecrXCols;
+                delete el.dataset.sizeBound;
             });
 
-            // Буквы
-            card.querySelectorAll('[data-matrix-letter], [data-matrix-label]').forEach(function (el) {
-                el.textContent = letter.toUpperCase();
-            });
+            card.querySelectorAll('[data-matrix-letter], [data-matrix-label]')
+                .forEach(function (el) {
+                    el.textContent = upperLetter;
+                });
 
-            // Бейдж размера
             card.querySelectorAll('[data-matrix-shape-label]').forEach(function (el) {
                 el.dataset.matrixShapeLabel = letter;
             });
 
-            // Chip-кнопки
             card.querySelectorAll('[data-matrix-action]').forEach(function (el) {
-                if (el.dataset.matrixTarget === '' || el.dataset.matrixTarget === undefined) {
+                if (el.dataset.matrixTarget === ''
+                    || el.dataset.matrixTarget === undefined) {
                     el.dataset.matrixTarget = letter;
                 }
             });
 
-            // Сетка — назначаем ID и обнуляем размеры
             var grid = card.querySelector('[data-matrix-input]');
             if (grid) {
                 grid.id = 'matrix-' + letter + '-input';
@@ -1053,7 +1979,6 @@
                 grid.dataset.matrixLetter = letter;
             }
 
-            // Вставка
             var anchor = document.querySelector('[data-add-matrix]');
             if (anchor && anchor.parentNode) {
                 anchor.parentNode.insertBefore(card, anchor);
@@ -1062,13 +1987,14 @@
                 if (cont) cont.appendChild(card);
             }
 
-            // Инициализация
             if (grid) {
                 ML.matrixInputs[grid.id] = new MatrixInput(grid, letter);
             }
-            initSizeControls();
+
+            initSizeControls(card);
             bindSizeInputsForCard(card);
 
+            ML.emit('matrix:added', { letter: letter });
             return letter;
         },
 
@@ -1077,56 +2003,208 @@
                 ML.toast.warning('Матрицу A удалить нельзя', '');
                 return;
             }
-            var card = document.querySelector('[data-matrix-card="' + letter + '"]');
+            var card = document.querySelector(
+                '[data-matrix-card="' + letter + '"]'
+            );
             if (!card) return;
             var grid = card.querySelector('[data-matrix-input]');
             if (grid && ML.matrixInputs[grid.id]) {
                 delete ML.matrixInputs[grid.id];
             }
             card.remove();
-            ML.toast.info('Матрица ' + letter.toUpperCase() + ' удалена', '');
-        },
+            ML.emit('matrix:removed', { letter: letter });
+            ML.toast.info(
+                'Матрица ' + letter.toUpperCase() + ' удалена', ''
+            );
+        }
     };
 
     function initAddMatrixButton() {
-        var btn = document.querySelector('[data-add-matrix]');
-        if (!btn) return;
-        btn.addEventListener('click', function () {
+        document.addEventListener('click', function (e) {
+            var btn = e.target.closest('[data-add-matrix]');
+            if (!btn) return;
             ML.chain.add();
         });
     }
 
     // =========================================================================
-    // 11. УТИЛИТЫ
+    // 11. ВАЛИДАЦИЯ ОПЕРАЦИЙ
     // =========================================================================
 
-    ML.isMatrixEmpty = function (m) {
-        if (!Array.isArray(m) || !m.length) return true;
-        return m.every(function (row) {
-            return row.every(function (v) { return v === ''; });
-        });
+    ML.validateMatrixFor = function (op, matrices) {
+        matrices = matrices || {};
+        var A = matrices.a;
+        var B = matrices.b;
+
+        switch (op) {
+            case 'add':
+            case 'subtract':
+                if (!A || !B) {
+                    return { ok: false, message: 'Нужны обе матрицы', hint: '' };
+                }
+                if (A.rows !== B.rows || A.cols !== B.cols) {
+                    return {
+                        ok: false,
+                        message: 'Матрицы несовместимы для сложения',
+                        hint: 'У A размер ' + A.rows + '×' + A.cols
+                            + ', у B — ' + B.rows + '×' + B.cols
+                            + '. Размеры должны совпадать.'
+                    };
+                }
+                return { ok: true, message: '', hint: '' };
+
+            case 'multiply':
+                if (!A || !B) {
+                    return { ok: false, message: 'Нужны обе матрицы', hint: '' };
+                }
+                if (A.cols !== B.rows) {
+                    return {
+                        ok: false,
+                        message: 'Матрицы несовместимы для умножения',
+                        hint: 'У A размер ' + A.rows + '×' + A.cols
+                            + ', у B — ' + B.rows + '×' + B.cols
+                            + '. Для A×B нужно cols(A) = rows(B).'
+                    };
+                }
+                return { ok: true, message: '', hint: '' };
+
+            case 'determinant':
+            case 'inverse':
+            case 'trace':
+            case 'eigenvalues':
+            case 'eigenvectors':
+            case 'char_poly':
+            case 'lu':
+            case 'cholesky':
+            case 'diagonalize':
+                if (!A) return { ok: false, message: 'Нужна матрица A', hint: '' };
+                if (A.rows !== A.cols) {
+                    return {
+                        ok: false,
+                        message: 'Операция требует квадратной матрицы',
+                        hint: 'У A размер ' + A.rows + '×' + A.cols
+                            + '. Приведите к квадратной.'
+                    };
+                }
+                return { ok: true, message: '', hint: '' };
+
+            case 'transpose':
+            case 'rref':
+            case 'echelon':
+            case 'properties':
+            case 'rank':
+            case 'qr':
+                if (!A) return { ok: false, message: 'Нужна матрица A', hint: '' };
+                return { ok: true, message: '', hint: '' };
+
+            default:
+                return { ok: true, message: '', hint: '' };
+        }
     };
 
-    ML.getAllMatrices = function () {
-        var result = [];
-        ML.$$('[data-matrix-card]').forEach(function (card) {
-            var letter = card.dataset.matrixCard;
-            var grid = card.querySelector('[data-matrix-input]');
-            if (!grid) return;
-            var mi = ML.matrixInputs[grid.id];
-            if (mi) result.push({ letter: letter, mi: mi, card: card });
-        });
-        return result;
+    ML.verifyResult = function (op, payload, result) {
+        if (!result) return { ok: false, message: 'Пустой результат' };
+        if (op === 'inverse' && result.status === 'singular') {
+            return {
+                ok: false,
+                message: 'Матрица вырождена, обратной не существует'
+            };
+        }
+        return { ok: true, message: '' };
     };
 
     // =========================================================================
-    // 12. ИНИЦИАЛИЗАЦИЯ МОДУЛЯ
+    // 12. РАБОЧЕЕ ПРОСТРАНСТВО
     // =========================================================================
+
+    ML.workspace = ML.workspace || {
+        _items: {},
+        set: function (name, mi) {
+            this._items[name] = mi;
+            ML.emit('workspace:change', { name: name, mi: mi });
+        },
+        get: function (name) { return this._items[name] || null; },
+        remove: function (name) {
+            delete this._items[name];
+            ML.emit('workspace:change', { name: name });
+        },
+        list: function () {
+            var self = this;
+            return Object.keys(this._items).map(function (k) {
+                return { name: k, mi: self._items[k] };
+            });
+        },
+        clear: function () { this._items = {}; }
+    };
+
+    ML.on('matrix:added', function (d) {
+        var mi = ML.getMatrixByLetter(d.letter);
+        if (mi) ML.workspace.set(d.letter.toUpperCase(), mi);
+    });
+
+    // =========================================================================
+    // 13. СОХРАНЕНИЕ СОСТОЯНИЯ
+    // =========================================================================
+
+    var STORAGE_KEY = 'editor.v1';
+
+    function saveToStorage() {
+        try {
+            var data = {};
+            ML.getAllMatrices().forEach(function (item) {
+                data[item.letter] = {
+                    rows: item.mi.rows,
+                    cols: item.mi.cols,
+                    values: item.mi.read()
+                };
+            });
+            ML.storage.setJSON(STORAGE_KEY, data);
+        } catch (e) { /* noop */ }
+    }
+
+    function loadFromStorage() {
+        try {
+            var data = ML.storage.getJSON(STORAGE_KEY, null);
+            if (!data) return;
+            Object.keys(data).forEach(function (letter) {
+                var mi = ML.getMatrixByLetter(letter);
+                if (!mi) return;
+                var d = data[letter];
+                if (!d || !Array.isArray(d.values)) return;
+                if (d.rows !== mi.rows || d.cols !== mi.cols) {
+                    mi.setSize(d.rows, d.cols, { preserve: false });
+                }
+                mi.write(d.values);
+            });
+        } catch (e) { /* noop */ }
+    }
+
+    ML.saveState = saveToStorage;
+    ML.loadState = loadFromStorage;
+
+    ML.on('matrix:change', ML.debounce(saveToStorage, 400));
+
+    // =========================================================================
+    // 14. ИНИЦИАЛИЗАЦИЯ МОДУЛЯ
+    // =========================================================================
+
+    var _initialized = false;
 
     ML.initMatrixModule = function () {
+        if (_initialized) return;
+
         var body = document.body;
-        ML.maxRows = parseInt(body.dataset.maxRows || window.MATRIXLAB_MAX_ROWS || '10', 10);
-        ML.maxCols = parseInt(body.dataset.maxCols || window.MATRIXLAB_MAX_COLS || '10', 10);
+        ML.maxRows = parseInt(
+            body.dataset.maxRows || window.MATRIXLAB_MAX_ROWS || '10',
+            10
+        ) || 10;
+        ML.maxCols = parseInt(
+            body.dataset.maxCols || window.MATRIXLAB_MAX_COLS || '10',
+            10
+        ) || 10;
+
+        ML.matrixInputs = ML.matrixInputs || {};
+        ML.vectorInputs = ML.vectorInputs || {};
 
         initMatrixInputs();
         initVectorInputs();
@@ -1136,6 +2214,13 @@
         initSizeInputs();
         initAddMatrixButton();
         syncVectorToMatrix();
+
+        if (!ML.prefs || ML.prefs.get('editorPersist') !== false) {
+            loadFromStorage();
+        }
+
+        _initialized = true;
+        ML.emit('matrix:module-ready', {});
     };
 
     if (document.readyState === 'loading') {

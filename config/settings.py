@@ -33,6 +33,7 @@ from pathlib import Path
 
 import dj_database_url
 
+
 # =============================================================================
 # 1. ПУТИ ПРОЕКТА
 # =============================================================================
@@ -103,6 +104,8 @@ ALLOWED_HOSTS: list[str] = env_list(
 ) + _extra_hosts
 
 # --- CSRF ---
+# ВАЖНО: Django НЕ поддерживает wildcard-поддомены в CSRF_TRUSTED_ORIGINS.
+# Указывайте точные origin'ы (схема + хост + опционально порт).
 CSRF_TRUSTED_ORIGINS: list[str] = env_list(
     "DJANGO_CSRF_TRUSTED_ORIGINS",
     [
@@ -110,7 +113,6 @@ CSRF_TRUSTED_ORIGINS: list[str] = env_list(
         "http://localhost:8000",
         "http://127.0.0.1",
         "http://127.0.0.1:8000",
-        "https://*.onrender.com",
     ],
 )
 
@@ -122,7 +124,6 @@ CSRF_COOKIE_SAMESITE = "Lax"
 
 # --- Защита ---
 SECURE_CONTENT_TYPE_NOSNIFF = True
-SECURE_BROWSER_XSS_FILTER = True
 X_FRAME_OPTIONS = "DENY"
 
 # --- HTTPS (включается только на проде) ---
@@ -133,9 +134,9 @@ CSRF_COOKIE_SECURE = env_bool("DJANGO_CSRF_COOKIE_SECURE", default=not DEBUG)
 # --- HSTS ---
 SECURE_HSTS_SECONDS = env_int("DJANGO_SECURE_HSTS_SECONDS", 0)
 SECURE_HSTS_INCLUDE_SUBDOMAINS = env_bool(
-    "DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS", default=False
+    "DJANGO_HSTS_INCLUDE_SUBDOMAINS", default=False
 )
-SECURE_HSTS_PRELOAD = env_bool("DJANGO_SECURE_HSTS_PRELOAD", default=False)
+SECURE_HSTS_PRELOAD = env_bool("DJANGO_HSTS_PRELOAD", default=False)
 
 SECURE_REFERRER_POLICY = "same-origin"
 
@@ -161,9 +162,7 @@ LOCAL_APPS: list[str] = [
     "matrix_app",
 ]
 
-THIRD_PARTY_APPS: list[str] = [
-    # Пока не требуется
-]
+THIRD_PARTY_APPS: list[str] = []
 
 INSTALLED_APPS: list[str] = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
@@ -174,7 +173,6 @@ INSTALLED_APPS: list[str] = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 MIDDLEWARE: list[str] = [
     "django.middleware.security.SecurityMiddleware",
-    # WhiteNoise — раздача статики на Render
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -195,11 +193,19 @@ ROOT_URLCONF: str = "config.urls"
 WSGI_APPLICATION: str = "config.wsgi.application"
 ASGI_APPLICATION: str = "config.asgi.application"
 
-APPEND_SLASH = True
-
 
 # =============================================================================
 # 7. ШАБЛОНЫ
+# =============================================================================
+# context_processors: стандартные Django + процессоры matrix_app.
+#
+# ВАЖНО: список должен совпадать с функциями в matrix_app/context_processors.py.
+# Сейчас должны быть определены:
+#   • app_meta          — APP_NAME, APP_DESCRIPTION, APP_AUTHOR, CURRENT_YEAR
+#   • limits            — MAX_MATRIX_ROWS, MAX_MATRIX_COLS, MAX_SLAU_*, ...
+#   • cdn               — CDN.mathjax, CDN.chartjs + CDN_PRECONNECT
+#   • navigation        — NAV_ITEMS, ACTIVE_PAGE, ACTIVE_GROUP
+#   • matrixlab_config  — MATRIXLAB_CONFIG (для json_script)
 # =============================================================================
 
 TEMPLATES: list[dict] = [
@@ -212,6 +218,7 @@ TEMPLATES: list[dict] = [
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
+                # --- Django ---
                 "django.template.context_processors.debug",
                 "django.template.context_processors.request",
                 "django.template.context_processors.i18n",
@@ -219,17 +226,22 @@ TEMPLATES: list[dict] = [
                 "django.template.context_processors.media",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+
+                # --- MatrixLab ---
                 "matrix_app.context_processors.app_meta",
                 "matrix_app.context_processors.limits",
                 "matrix_app.context_processors.cdn",
                 "matrix_app.context_processors.navigation",
-                "matrix_app.context_processors.footer_year",
+                # FIX: без этого в шапке светилось «‹не найдено: MATRIXLAB_CONFIG›»
+                "matrix_app.context_processors.matrixlab_config",
             ],
             "builtins": [
                 "django.templatetags.static",
             ],
             "debug": DEBUG,
-            "string_if_invalid": "‹не найдено: %s›",
+            # В проде лучше поставить "" — иначе в шаблонах будут
+            # видны заглушки "‹не найдено: ...›".
+            "string_if_invalid": "‹не найдено: %s›" if DEBUG else "",
         },
     },
 ]
@@ -290,7 +302,6 @@ AUTH_PASSWORD_VALIDATORS: list[dict] = [
 LANGUAGE_CODE: str = env_str("DJANGO_LANGUAGE_CODE", "ru-ru")
 TIME_ZONE: str = env_str("DJANGO_TIME_ZONE", "Europe/Moscow")
 USE_I18N: bool = True
-USE_L10N: bool = True
 USE_TZ: bool = True
 
 LANGUAGES: list[tuple[str, str]] = [
@@ -318,8 +329,8 @@ STATICFILES_FINDERS: list[str] = [
 ]
 
 # Хранилище статики:
-# - DEBUG=True  → обычное
-# - DEBUG=False → WhiteNoise CompressedManifest (хеши, gzip)
+#   DEBUG=True  → обычное
+#   DEBUG=False → WhiteNoise CompressedManifest (хеши, gzip)
 if DEBUG:
     _static_backend = "django.contrib.staticfiles.storage.StaticFilesStorage"
 else:
@@ -450,16 +461,28 @@ LOGGING: dict = {
 # 15. ПАРАМЕТРЫ MATRIXLAB
 # =============================================================================
 
+# Метаданные приложения (используются в context_processors.app_meta)
+APP_AUTHOR: str = env_str("MATRIXLAB_AUTHOR", "MatrixLab")
+
+# --- Лимиты матриц ---
 MAX_MATRIX_ROWS: int = env_int("MATRIXLAB_MAX_ROWS", 10)
 MAX_MATRIX_COLS: int = env_int("MATRIXLAB_MAX_COLS", 10)
 
+# Для СЛАУ: расширенная матрица [A | b] имеет размер n × (m + 1).
+# Поэтому отдельные лимиты — иначе получаем ошибку "10×11 превышает 10×10".
+MAX_SLAU_ROWS: int = env_int("MATRIXLAB_MAX_SLAU_ROWS", MAX_MATRIX_ROWS)
+MAX_SLAU_COLS: int = env_int("MATRIXLAB_MAX_SLAU_COLS", MAX_MATRIX_COLS + 1)
+
+# Символьные вычисления
 MAX_SYMBOLIC_SIZE: int = env_int("MATRIXLAB_MAX_SYMBOLIC", 5)
 MAX_PARAMETERS_SLAU: int = env_int("MATRIXLAB_MAX_PARAMETERS", 20)
 MAX_MATRIX_POWER: int = env_int("MATRIXLAB_MAX_POWER", 100)
 
+# История и сохранённые матрицы
 HISTORY_LIMIT: int = env_int("MATRIXLAB_HISTORY_LIMIT", 200)
 SAVED_MATRICES_LIMIT: int = env_int("MATRIXLAB_SAVED_LIMIT", 100)
 
+# Формат вывода
 DEFAULT_OUTPUT_FORMAT: str = env_str("MATRIXLAB_OUTPUT_FORMAT", "exact")
 DECIMAL_PRECISION: int = env_int("MATRIXLAB_DECIMAL_PRECISION", 6)
 SYMBOLIC_TERM_LIMIT: int = env_int("MATRIXLAB_SYMBOLIC_LIMIT", 500)
@@ -496,9 +519,7 @@ SITE_URL: str = env_str(
 # 18. ДОПОЛНИТЕЛЬНО
 # =============================================================================
 
-APPEND_SLASH = True
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 5000
-DEFAULT_CHARSET = "utf-8"
 INTERNAL_IPS: list[str] = ["127.0.0.1", "localhost"]
 TEST_RUNNER = "django.test.runner.DiscoverRunner"
 

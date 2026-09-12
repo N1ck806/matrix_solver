@@ -11,7 +11,6 @@
    Виды матриц — единый стиль проекта
    ============================================================================= */
 
-/* --- Фон на всю страницу --- */
 body {
     background: #F7F8FC;
     position: relative;
@@ -122,6 +121,15 @@ body::after {
     border-radius: 14px;
     box-shadow: 0 10px 20px -6px rgba(99, 102, 241, 0.5);
     flex-shrink: 0;
+}
+
+.types-category-icon .ml-icon,
+.types-category-icon svg {
+    width: 22px;
+    height: 22px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
 }
 
 .types-category-text { flex: 1; min-width: 0; }
@@ -244,6 +252,16 @@ body::after {
     flex-shrink: 0;
 }
 
+.type-card-toggle .ml-icon,
+.type-card-toggle svg {
+    width: 16px;
+    height: 16px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+    transition: transform 320ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 .type-card-toggle:hover {
     background: linear-gradient(135deg, #6366F1, #8B5CF6);
     color: #fff;
@@ -252,9 +270,10 @@ body::after {
     box-shadow: 0 6px 14px -4px rgba(99, 102, 241, 0.5);
 }
 
-.type-card-toggle svg { transition: transform 320ms cubic-bezier(0.16, 1, 0.3, 1); }
-
-.type-card.is-open .type-card-toggle svg { transform: rotate(180deg); }
+.type-card.is-open .type-card-toggle .ml-icon,
+.type-card.is-open .type-card-toggle svg {
+    transform: rotate(180deg);
+}
 
 /* --- Определение --- */
 .type-card-definition {
@@ -286,6 +305,15 @@ body::after {
     color: var(--accent);
 }
 
+.type-card-formula-label .ml-icon,
+.type-card-formula-label svg {
+    width: 12px;
+    height: 12px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+}
+
 .type-card-formula-body {
     display: block;
     font-size: 14px;
@@ -303,6 +331,8 @@ body::after {
     border-top: 1px dashed rgba(99, 102, 241, 0.2);
     animation: typeCardOpen 320ms cubic-bezier(0.16, 1, 0.3, 1);
 }
+
+.type-card-body[hidden] { display: none; }
 
 @keyframes typeCardOpen {
     from { opacity: 0; transform: translateY(-4px); }
@@ -326,7 +356,15 @@ body::after {
     color: var(--text-secondary);
 }
 
-.type-card-section-label svg { color: var(--accent); }
+.type-card-section-label .ml-icon,
+.type-card-section-label svg {
+    width: 12px;
+    height: 12px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+    color: var(--accent);
+}
 
 .type-card-section p {
     font-size: 13px;
@@ -366,6 +404,17 @@ body::after {
     transition: all var(--t-fast);
 }
 
+.type-card-link .ml-icon,
+.type-card-link svg {
+    width: 14px;
+    height: 14px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+    color: currentColor;
+    transition: transform var(--t-fast);
+}
+
 .type-card-link:hover {
     background: linear-gradient(135deg, #6366F1, #8B5CF6);
     color: #fff;
@@ -374,9 +423,10 @@ body::after {
     box-shadow: 0 12px 24px -8px rgba(99, 102, 241, 0.5);
 }
 
+.type-card-link:hover .ml-icon,
 .type-card-link:hover svg { color: #fff; }
 
-.type-card-link svg { transition: transform var(--t-fast); }
+.type-card-link:hover .ml-icon,
 .type-card-link:hover svg { transform: translateX(3px); }
 
 /* --- CTA --- */
@@ -434,6 +484,15 @@ body::after {
     z-index: 1;
 }
 
+.types-cta-icon .ml-icon,
+.types-cta-icon svg {
+    width: 32px;
+    height: 32px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+}
+
 .types-cta-content {
     flex: 1;
     min-width: 0;
@@ -455,6 +514,16 @@ body::after {
     color: var(--text-secondary);
     margin: 0 0 18px;
     max-width: 640px;
+}
+
+.types-cta-content .btn .ml-icon,
+.types-cta-content .btn svg {
+    width: 16px;
+    height: 16px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+    flex-shrink: 0;
 }
 
 .types-cta-content .btn-primary {
@@ -480,12 +549,8 @@ body::after {
 
 @media (max-width: 640px) {
     .types-grid { grid-template-columns: 1fr; }
-    .types-category-head {
-        flex-wrap: wrap;
-    }
-    .types-category-count {
-        margin-left: auto;
-    }
+    .types-category-head { flex-wrap: wrap; }
+    .types-category-count { margin-left: auto; }
     .types-cta {
         flex-direction: column;
         text-align: center;
@@ -574,7 +639,7 @@ body::after {
                                         aria-expanded="false"
                                         aria-controls="body-{{ t.slug }}"
                                         aria-label="Развернуть описание">
-                                    {% icon "arrow-down" size=16 %}
+                                    {% icon "arrow-right" size=16 %}
                                 </button>
                             </header>
 
@@ -592,7 +657,7 @@ body::after {
 
                                 <div class="type-card-section">
                                     <span class="type-card-section-label">
-                                        {% icon "code" size=12 %}
+                                        {% icon "matrix-grid" size=12 %}
                                         <span>Пример</span>
                                     </span>
                                     <code class="type-card-example">{{ t.example }}</code>
@@ -651,9 +716,46 @@ body::after {
    Логика страницы типов матриц:
        • раскрытие/сворачивание карточек описания;
        • кнопка «Развернуть всё» / «Свернуть всё»;
-       • плавная прокрутка при переходе по якорю.
+       • плавная прокрутка при переходе по якорю;
+       • авто-раскрытие карточки при загрузке с #hash;
+       • очистка битых иконок ml-icon--missing.
    ============================================================================= */
 document.addEventListener('DOMContentLoaded', function () {
+
+    // --- Очистка битых иконок ------------------------------------------------
+    (function cleanupMissingIcons(scope) {
+        var s = scope || document;
+
+        // 1. Удаляем все .ml-icon--missing
+        s.querySelectorAll('.ml-icon--missing').forEach(function (el) {
+            el.remove();
+        });
+
+        // 2. Ищем текстовые узлы с "ml-icon--missing" — "утекший" HTML
+        var walker = document.createTreeWalker(
+            s.body || s,
+            NodeFilter.SHOW_TEXT,
+            {
+                acceptNode: function (node) {
+                    var t = node.nodeValue || '';
+                    if (t.indexOf('ml-icon--missing') !== -1
+                        || t.indexOf('ml-icon ml-icon--') !== -1) {
+                        return NodeFilter.FILTER_ACCEPT;
+                    }
+                    return NodeFilter.FILTER_SKIP;
+                }
+            }
+        );
+
+        var toRemove = [];
+        while (walker.nextNode()) toRemove.push(walker.currentNode);
+        toRemove.forEach(function (node) {
+            node.nodeValue = (node.nodeValue || '')
+                .replace(/<span[^>]*ml-icon[^>]*>[\s\S]*?<\/span>/g, '')
+                .replace(/&lt;span[^&]*ml-icon[\s\S]*?&lt;\/span&gt;/g, '')
+                .trim();
+        });
+    })();
 
     // --- Раскрытие одной карточки --------------------------------------------
     document.querySelectorAll('[data-type-toggle]').forEach(function (btn) {
@@ -691,7 +793,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 card.classList.toggle('is-open', allExpanded);
             });
 
-            // Обновляем текст кнопки
             var label = expandBtn.querySelector('span');
             if (label) {
                 label.textContent = allExpanded ? 'Свернуть всё' : 'Развернуть всё';
@@ -699,14 +800,12 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // --- Плавная прокрутка к якорю (если в URL есть #slug) -------------------
+    // --- Плавная прокрутка и авто-раскрытие при загрузке с #hash -------------
     if (window.location.hash) {
         var target = document.querySelector(window.location.hash);
         if (target) {
-            // Небольшая задержка для завершения раскладки
             setTimeout(function () {
                 target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                // Автоматически раскрываем карточку, к которой пришли по ссылке
                 var card = target.closest('.type-card');
                 if (card) {
                     var toggle = card.querySelector('[data-type-toggle]');

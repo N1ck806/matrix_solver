@@ -12,7 +12,6 @@
    Спектр матрицы — единый стиль проекта
    ============================================================================= */
 
-/* --- Фон на всю страницу --- */
 body {
     background: #F7F8FC;
     position: relative;
@@ -324,7 +323,16 @@ body::after {
     box-shadow: 0 4px 12px -3px rgba(99, 102, 241, 0.25);
 }
 
-.chip--button svg { color: var(--accent); flex-shrink: 0; }
+.chip--button .ml-icon,
+.chip--button svg {
+    width: 14px;
+    height: 14px;
+    color: var(--accent);
+    flex-shrink: 0;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+}
 
 /* --- Табы операций спектра --- */
 .eigen-controls {
@@ -375,6 +383,15 @@ body::after {
     transition: all var(--t-fast);
 }
 
+.eigen-op-symbol .ml-icon,
+.eigen-op-symbol svg {
+    width: 16px;
+    height: 16px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+}
+
 .eigen-op:hover {
     border-color: rgba(99, 102, 241, 0.35);
     color: var(--accent);
@@ -397,6 +414,16 @@ body::after {
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
+}
+
+.eigen-buttons .btn .ml-icon,
+.eigen-buttons .btn svg {
+    width: 16px;
+    height: 16px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+    flex-shrink: 0;
 }
 
 .eigen-buttons .btn-primary {
@@ -454,6 +481,15 @@ body::after {
     color: var(--accent);
     opacity: 0.5;
     margin-bottom: 16px;
+}
+
+.calc-placeholder-icon .ml-icon,
+.calc-placeholder-icon svg {
+    width: 48px;
+    height: 48px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
 }
 
 .calc-placeholder h3 {
@@ -572,6 +608,15 @@ body::after {
     border-radius: 13px;
     margin-bottom: 16px;
     box-shadow: 0 8px 18px -6px rgba(99, 102, 241, 0.4);
+}
+
+.eigen-info-icon .ml-icon,
+.eigen-info-icon svg {
+    width: 22px;
+    height: 22px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
 }
 
 .eigen-info-icon--violet {
@@ -702,13 +747,20 @@ body::after {
     flex: 1;
 }
 
-.example-card-head > svg:last-child {
+.example-card-head .ml-icon,
+.example-card-head svg {
     color: var(--accent);
     transition: transform var(--t-fast);
     flex-shrink: 0;
+    width: 14px;
+    height: 14px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
 }
 
-.example-card:hover .example-card-head > svg:last-child {
+.example-card:hover .example-card-head .ml-icon,
+.example-card:hover .example-card-head svg {
     transform: translateX(4px);
 }
 
@@ -721,6 +773,15 @@ body::after {
     color: var(--accent);
     border-radius: 9px;
     flex-shrink: 0;
+}
+
+.example-card-icon .ml-icon,
+.example-card-icon svg {
+    width: 16px;
+    height: 16px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
 }
 
 .example-card-icon--violet {
@@ -861,6 +922,9 @@ body::after {
                     </button>
                     <button type="button" class="chip chip--button" data-matrix-action="identity" data-matrix-target="a">
                         {% icon "identity" size=14 %}<span>Единичная</span>
+                    </button>
+                    <button type="button" class="chip chip--button" data-matrix-action="symmetric" data-matrix-target="a">
+                        {% icon "check-badge" size=14 %}<span>Симметричная</span>
                     </button>
                     <button type="button" class="chip chip--button" data-matrix-action="random" data-matrix-target="a">
                         {% icon "sparkles" size=14 %}<span>Случайная</span>
@@ -1053,7 +1117,7 @@ body::after {
 
             <article class="eigen-info-card">
                 <div class="eigen-info-icon eigen-info-icon--emerald">
-                    {% icon "hash" size=22 %}
+                    {% icon "matrix-grid" size=22 %}
                 </div>
                 <h3>Кратности</h3>
                 <p><strong>Алгебраическая кратность</strong> — кратность $\lambda$ как корня характеристического многочлена.</p>
@@ -1104,7 +1168,7 @@ body::after {
             <button type="button" class="example-card" data-load-example="symmetric">
                 <div class="example-card-head">
                     <span class="example-card-icon example-card-icon--violet">
-                        {% icon "symmetric" size=16 %}
+                        {% icon "check-badge" size=16 %}
                     </span>
                     <strong>Симметричная 3×3</strong>
                     {% icon "arrow-right" size=14 %}

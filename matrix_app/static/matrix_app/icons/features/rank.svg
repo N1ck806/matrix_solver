@@ -1,0 +1,193 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" fill="none"
+     role="img" aria-label="Ранг матрицы"
+     class="ml-feature-svg ml-feature-svg--rank"
+     preserveAspectRatio="xMidYMid meet"
+     font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">
+
+  <defs>
+    <radialGradient id="rkn-core" cx="0.38" cy="0.32" r="0.78">
+      <stop offset="0" stop-color="#DDD6FE">
+        <animate attributeName="stop-color"
+                 values="#DDD6FE;#C4B5FD;#A78BFA;#DDD6FE"
+                 dur="14s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="0.45" stop-color="#8B5CF6">
+        <animate attributeName="stop-color"
+                 values="#8B5CF6;#7C3AED;#6D28D9;#8B5CF6"
+                 dur="14s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="1" stop-color="#4C1D95"/>
+    </radialGradient>
+
+    <radialGradient id="rkn-glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"    stop-color="#FFFFFF" stop-opacity="1"/>
+      <stop offset="0.35" stop-color="#DDD6FE" stop-opacity="0.7"/>
+      <stop offset="0.7"  stop-color="#A78BFA" stop-opacity="0.3"/>
+      <stop offset="1"    stop-color="#7C3AED" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="rkn-hl" cx="0.34" cy="0.24" r="0.72">
+      <stop offset="0"   stop-color="#FFFFFF" stop-opacity="0.95"/>
+      <stop offset="0.4" stop-color="#FFFFFF" stop-opacity="0.18"/>
+      <stop offset="1"   stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="rkn-orbit" x1="0" y1="0" x2="96" y2="96"
+                    gradientUnits="userSpaceOnUse">
+      <stop offset="0"   stop-color="#C4B5FD"/>
+      <stop offset="0.5" stop-color="#8B5CF6"/>
+      <stop offset="1"   stop-color="#7C3AED"/>
+    </linearGradient>
+
+    <linearGradient id="rkn-orbit-2" x1="96" y1="0" x2="0" y2="96"
+                    gradientUnits="userSpaceOnUse">
+      <stop offset="0"   stop-color="#F0ABFC"/>
+      <stop offset="1"   stop-color="#8B5CF6"/>
+    </linearGradient>
+
+    <linearGradient id="rkn-text" x1="0" y1="0" x2="96" y2="0"
+                    gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7C3AED">
+        <animate attributeName="stop-color"
+                 values="#7C3AED;#A78BFA;#C4B5FD;#7C3AED"
+                 dur="8s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="1" stop-color="#A78BFA">
+        <animate attributeName="stop-color"
+                 values="#A78BFA;#C4B5FD;#DDD6FE;#A78BFA"
+                 dur="8s" repeatCount="indefinite"/>
+      </stop>
+    </linearGradient>
+
+    <radialGradient id="rkn-spark" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"   stop-color="#FFFFFF"/>
+      <stop offset="0.4" stop-color="#DDD6FE"/>
+      <stop offset="1"   stop-color="#8B5CF6" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="rkn-spark-pink" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"   stop-color="#FFFFFF"/>
+      <stop offset="0.4" stop-color="#FBCFE8"/>
+      <stop offset="1"   stop-color="#EC4899" stop-opacity="0"/>
+    </radialGradient>
+
+    <filter id="rkn-spark-glow" x="-400%" y="-400%" width="900%" height="900%">
+      <feGaussianBlur stdDeviation="1.8"/>
+    </filter>
+    <filter id="rkn-core-shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2.2"/>
+      <feOffset dx="0" dy="1.6"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.38"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="rkn-orbit-glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1"/>
+    </filter>
+
+    <clipPath id="rkn-core-clip">
+      <circle cx="48" cy="46" r="13"/>
+    </clipPath>
+  </defs>
+
+  <circle cx="48" cy="48" r="46" fill="url(#rkn-glow)" opacity="0.16">
+    <animate attributeName="r" values="46;48;46" dur="6s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.16;0.22;0.16" dur="6s" repeatCount="indefinite"/>
+  </circle>
+
+  <g transform="translate(48 46)">
+    <g>
+      <animateTransform attributeName="transform" type="rotate"
+                        from="0 0 0" to="360 0 0" dur="26s" repeatCount="indefinite"/>
+      <ellipse cx="0" cy="0" rx="32" ry="9.5"
+               fill="none" stroke="url(#rkn-orbit)"
+               stroke-width="1.5" opacity="0.85"
+               transform="rotate(-28)"/>
+      <ellipse cx="0" cy="0" rx="32" ry="9.5"
+               fill="none" stroke="#8B5CF6" stroke-width="3.2"
+               opacity="0.14" filter="url(#rkn-orbit-glow)"
+               transform="rotate(-28)"/>
+      <g transform="rotate(-28)">
+        <circle cx="32" cy="0" r="2.4"
+                fill="url(#rkn-spark)" filter="url(#rkn-spark-glow)">
+          <animate attributeName="r" values="2.4;3;2.4" dur="2.4s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="32" cy="0" r="1.05" fill="#FFFFFF"/>
+      </g>
+    </g>
+
+    <g>
+      <animateTransform attributeName="transform" type="rotate"
+                        from="360 0 0" to="0 0 0" dur="34s" repeatCount="indefinite"/>
+      <ellipse cx="0" cy="0" rx="30" ry="8"
+               fill="none" stroke="url(#rkn-orbit-2)"
+               stroke-width="0.9" opacity="0.55"
+               transform="rotate(38)"/>
+      <g transform="rotate(38)">
+        <circle cx="-30" cy="0" r="1.4"
+                fill="url(#rkn-spark-pink)" filter="url(#rkn-spark-glow)">
+          <animate attributeName="r" values="1.4;1.9;1.4" dur="3s" repeatCount="indefinite"/>
+        </circle>
+      </g>
+    </g>
+  </g>
+
+  <g filter="url(#rkn-core-shadow)">
+    <circle cx="48" cy="46" r="17.5" fill="url(#rkn-glow)" opacity="0.5">
+      <animate attributeName="r" values="17.5;19.5;17.5" dur="5s" repeatCount="indefinite"/>
+    </circle>
+
+    <circle cx="48" cy="46" r="13" fill="url(#rkn-core)"/>
+    <circle cx="48" cy="46" r="13" fill="url(#rkn-hl)"/>
+    <circle cx="48" cy="46" r="12.5" fill="none"
+            stroke="#FFFFFF" stroke-opacity="0.4" stroke-width="0.7"/>
+
+    <g clip-path="url(#rkn-core-clip)">
+      <!-- Общее начало -->
+      <circle cx="43" cy="52" r="1.1" fill="#1E1B4B" fill-opacity="0.9"/>
+
+      <!-- Вектор 1 -->
+      <path d="M43 52 L54 52"
+            stroke="#1E1B4B" stroke-opacity="0.9" stroke-width="1.5"
+            stroke-linecap="round"/>
+      <circle cx="54" cy="52" r="1.2" fill="#1E1B4B" fill-opacity="0.9"/>
+
+      <!-- Вектор 2 -->
+      <path d="M43 52 L51 40"
+            stroke="#1E1B4B" stroke-opacity="0.9" stroke-width="1.5"
+            stroke-linecap="round"/>
+      <circle cx="51" cy="40" r="1.2" fill="#1E1B4B" fill-opacity="0.9"/>
+
+      <!-- Вектор 3 (зависимый) — пунктир -->
+      <path d="M43 52 L54 45"
+            stroke="#1E1B4B" stroke-opacity="0.45" stroke-width="1.1"
+            stroke-linecap="round" stroke-dasharray="1.8 2.2"/>
+      <circle cx="54" cy="45" r="1" fill="#1E1B4B" fill-opacity="0.45"/>
+
+      <!-- Параллелограмм на независимых векторах -->
+      <path d="M43 52 L54 52 L51 40 Z"
+            fill="#1E1B4B" fill-opacity="0.12"
+            stroke="none"/>
+    </g>
+
+    <circle cx="48" cy="46" r="2.4" fill="url(#rkn-glow)" opacity="0.85">
+      <animate attributeName="r" values="2.4;3.2;2.4" dur="3.6s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <circle cx="14" cy="14" r="1.3" fill="url(#rkn-spark)" filter="url(#rkn-spark-glow)">
+    <animate attributeName="opacity" values="1;0.4;1" dur="4s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="82" cy="18" r="1.4" fill="url(#rkn-spark-pink)" filter="url(#rkn-spark-glow)">
+    <animate attributeName="opacity" values="0.9;0.3;0.9" dur="5s" begin="0.8s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="84" cy="80" r="1.2" fill="url(#rkn-spark)" filter="url(#rkn-spark-glow)">
+    <animate attributeName="opacity" values="1;0.4;1" dur="4.5s" begin="1.2s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="12" cy="82" r="1" fill="url(#rkn-spark-pink)" filter="url(#rkn-spark-glow)">
+    <animate attributeName="opacity" values="0.7;0.2;0.7" dur="3.5s" begin="0.4s" repeatCount="indefinite"/>
+  </circle>
+
+  <text x="48" y="86" font-size="8" font-weight="700"
+        letter-spacing="0.06em" text-anchor="middle"
+        fill="url(#rkn-text)">rank A</text>
+</svg>

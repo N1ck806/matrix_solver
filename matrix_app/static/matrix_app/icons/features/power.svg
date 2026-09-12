@@ -1,0 +1,179 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" fill="none"
+     role="img" aria-label="Возведение в степень"
+     class="ml-feature-svg ml-feature-svg--power"
+     preserveAspectRatio="xMidYMid meet"
+     font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">
+
+  <defs>
+    <radialGradient id="pow-core" cx="0.38" cy="0.32" r="0.78">
+      <stop offset="0" stop-color="#FECACA">
+        <animate attributeName="stop-color"
+                 values="#FECACA;#F87171;#EF4444;#FECACA"
+                 dur="14s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="0.45" stop-color="#EF4444">
+        <animate attributeName="stop-color"
+                 values="#EF4444;#DC2626;#B91C1C;#EF4444"
+                 dur="14s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="1" stop-color="#450A0A"/>
+    </radialGradient>
+
+    <radialGradient id="pow-glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"    stop-color="#FFFFFF" stop-opacity="1"/>
+      <stop offset="0.35" stop-color="#FEE2E2" stop-opacity="0.7"/>
+      <stop offset="0.7"  stop-color="#FCA5A5" stop-opacity="0.3"/>
+      <stop offset="1"    stop-color="#DC2626" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="pow-hl" cx="0.34" cy="0.24" r="0.72">
+      <stop offset="0"   stop-color="#FFFFFF" stop-opacity="0.95"/>
+      <stop offset="0.4" stop-color="#FFFFFF" stop-opacity="0.18"/>
+      <stop offset="1"   stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="pow-orbit" x1="0" y1="0" x2="96" y2="96"
+                    gradientUnits="userSpaceOnUse">
+      <stop offset="0"   stop-color="#FCA5A5"/>
+      <stop offset="0.5" stop-color="#EF4444"/>
+      <stop offset="1"   stop-color="#B91C1C"/>
+    </linearGradient>
+
+    <linearGradient id="pow-orbit-2" x1="96" y1="0" x2="0" y2="96"
+                    gradientUnits="userSpaceOnUse">
+      <stop offset="0"   stop-color="#A5F3FC"/>
+      <stop offset="1"   stop-color="#EF4444"/>
+    </linearGradient>
+
+    <linearGradient id="pow-text" x1="0" y1="0" x2="96" y2="0"
+                    gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#B91C1C">
+        <animate attributeName="stop-color"
+                 values="#B91C1C;#EF4444;#F87171;#B91C1C"
+                 dur="8s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="1" stop-color="#EF4444">
+        <animate attributeName="stop-color"
+                 values="#EF4444;#F87171;#FCA5A5;#EF4444"
+                 dur="8s" repeatCount="indefinite"/>
+      </stop>
+    </linearGradient>
+
+    <radialGradient id="pow-spark" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"   stop-color="#FFFFFF"/>
+      <stop offset="0.4" stop-color="#FECACA"/>
+      <stop offset="1"   stop-color="#EF4444" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="pow-spark-cool" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"   stop-color="#FFFFFF"/>
+      <stop offset="0.4" stop-color="#A5F3FC"/>
+      <stop offset="1"   stop-color="#06B6D4" stop-opacity="0"/>
+    </radialGradient>
+
+    <filter id="pow-spark-glow" x="-400%" y="-400%" width="900%" height="900%">
+      <feGaussianBlur stdDeviation="1.8"/>
+    </filter>
+    <filter id="pow-core-shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2.2"/>
+      <feOffset dx="0" dy="1.6"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.38"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="pow-orbit-glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1"/>
+    </filter>
+
+    <clipPath id="pow-core-clip">
+      <circle cx="48" cy="46" r="13"/>
+    </clipPath>
+  </defs>
+
+  <circle cx="48" cy="48" r="46" fill="url(#pow-glow)" opacity="0.16">
+    <animate attributeName="r" values="46;48;46" dur="6s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.16;0.22;0.16" dur="6s" repeatCount="indefinite"/>
+  </circle>
+
+  <g transform="translate(48 46)">
+    <g>
+      <animateTransform attributeName="transform" type="rotate"
+                        from="0 0 0" to="360 0 0" dur="24s" repeatCount="indefinite"/>
+      <ellipse cx="0" cy="0" rx="32" ry="9.5"
+               fill="none" stroke="url(#pow-orbit)"
+               stroke-width="1.5" opacity="0.85"
+               transform="rotate(-28)"/>
+      <ellipse cx="0" cy="0" rx="32" ry="9.5"
+               fill="none" stroke="#EF4444" stroke-width="3.2"
+               opacity="0.14" filter="url(#pow-orbit-glow)"
+               transform="rotate(-28)"/>
+      <g transform="rotate(-28)">
+        <circle cx="32" cy="0" r="2.4"
+                fill="url(#pow-spark)" filter="url(#pow-spark-glow)">
+          <animate attributeName="r" values="2.4;3;2.4" dur="2.4s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="32" cy="0" r="1.05" fill="#FFFFFF"/>
+      </g>
+    </g>
+
+    <g>
+      <animateTransform attributeName="transform" type="rotate"
+                        from="360 0 0" to="0 0 0" dur="34s" repeatCount="indefinite"/>
+      <ellipse cx="0" cy="0" rx="30" ry="8"
+               fill="none" stroke="url(#pow-orbit-2)"
+               stroke-width="0.9" opacity="0.55"
+               transform="rotate(38)"/>
+      <g transform="rotate(38)">
+        <circle cx="-30" cy="0" r="1.4"
+                fill="url(#pow-spark-cool)" filter="url(#pow-spark-glow)">
+          <animate attributeName="r" values="1.4;1.9;1.4" dur="3s" repeatCount="indefinite"/>
+        </circle>
+      </g>
+    </g>
+  </g>
+
+  <g filter="url(#pow-core-shadow)">
+    <circle cx="48" cy="46" r="17.5" fill="url(#pow-glow)" opacity="0.5">
+      <animate attributeName="r" values="17.5;19.5;17.5" dur="5s" repeatCount="indefinite"/>
+    </circle>
+
+    <circle cx="48" cy="46" r="13" fill="url(#pow-core)"/>
+    <circle cx="48" cy="46" r="13" fill="url(#pow-hl)"/>
+    <circle cx="48" cy="46" r="12.5" fill="none"
+            stroke="#FFFFFF" stroke-opacity="0.4" stroke-width="0.7"/>
+
+    <g clip-path="url(#pow-core-clip)">
+      <!-- A -->
+      <path d="M41 43 L48 39 L48 48 L41 52 Z"
+            stroke="#450A0A" stroke-opacity="0.9" stroke-width="1.3"
+            stroke-linejoin="round" fill="none"/>
+      <path d="M41 47.5 L48 43.5"
+            stroke="#450A0A" stroke-opacity="0.55" stroke-width="0.9"/>
+
+      <!-- степень n (2 черты) -->
+      <path d="M51.5 40 L54.5 40 M51.5 43 L54.5 43"
+            stroke="#450A0A" stroke-opacity="0.95" stroke-width="1.3"
+            stroke-linecap="round"/>
+    </g>
+
+    <circle cx="48" cy="46" r="2.4" fill="url(#pow-glow)" opacity="0.85">
+      <animate attributeName="r" values="2.4;3.2;2.4" dur="3.6s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <circle cx="14" cy="14" r="1.3" fill="url(#pow-spark-cool)" filter="url(#pow-spark-glow)">
+    <animate attributeName="opacity" values="1;0.4;1" dur="4s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="82" cy="18" r="1.4" fill="url(#pow-spark)" filter="url(#pow-spark-glow)">
+    <animate attributeName="opacity" values="0.9;0.3;0.9" dur="5s" begin="0.8s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="84" cy="80" r="1.2" fill="url(#pow-spark-cool)" filter="url(#pow-spark-glow)">
+    <animate attributeName="opacity" values="1;0.4;1" dur="4.5s" begin="1.2s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="12" cy="82" r="1" fill="url(#pow-spark)" filter="url(#pow-spark-glow)">
+    <animate attributeName="opacity" values="0.7;0.2;0.7" dur="3.5s" begin="0.4s" repeatCount="indefinite"/>
+  </circle>
+
+  <text x="48" y="86" font-size="8" font-weight="700"
+        letter-spacing="0.06em" text-anchor="middle"
+        fill="url(#pow-text)">Aⁿ</text>
+</svg>

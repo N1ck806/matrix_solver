@@ -149,6 +149,17 @@ body::after {
     color: var(--text-secondary);
     display: inline-flex;
     pointer-events: none;
+    width: 16px;
+    height: 16px;
+}
+
+.theory-toc-search-icon .ml-icon,
+.theory-toc-search-icon svg {
+    width: 16px;
+    height: 16px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
 }
 
 .theory-toc-search-input {
@@ -192,7 +203,15 @@ body::after {
     margin: 4px 0 0;
 }
 
-.theory-toc-title svg { color: var(--accent); }
+.theory-toc-title .ml-icon,
+.theory-toc-title svg {
+    color: var(--accent);
+    width: 16px;
+    height: 16px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+}
 
 /* --- Группы категорий --- */
 .theory-toc-group {
@@ -212,7 +231,16 @@ body::after {
     margin: 6px 0 4px;
 }
 
-.theory-toc-category svg { color: var(--accent); flex-shrink: 0; }
+.theory-toc-category .ml-icon,
+.theory-toc-category svg {
+    color: var(--accent);
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+}
 
 .theory-toc-group ul {
     list-style: none;
@@ -280,7 +308,15 @@ body::after {
     font-size: 13px;
 }
 
-.theory-toc-empty svg { opacity: 0.5; }
+.theory-toc-empty .ml-icon,
+.theory-toc-empty svg {
+    opacity: 0.5;
+    width: 24px;
+    height: 24px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+}
 
 /* --- Контент --- */
 .theory-content {
@@ -337,6 +373,15 @@ body::after {
     border-radius: 13px;
     box-shadow: 0 10px 20px -6px rgba(99, 102, 241, 0.5);
     flex-shrink: 0;
+}
+
+.theory-article-icon .ml-icon,
+.theory-article-icon svg {
+    width: 22px;
+    height: 22px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
 }
 
 .theory-category {
@@ -507,6 +552,16 @@ body::after {
     border-bottom: 1px solid rgba(6, 182, 212, 0.18);
 }
 
+.theory-example-head .ml-icon,
+.theory-example-head svg {
+    width: 14px;
+    height: 14px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+    color: inherit;
+}
+
 [data-theme="dark"] .theory-example-head { color: #67E8F9; }
 
 .theory-example-body {
@@ -579,6 +634,17 @@ body::after {
     transition: all var(--t-fast);
 }
 
+.theory-link-more .ml-icon,
+.theory-link-more svg {
+    width: 14px;
+    height: 14px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+    color: currentColor;
+    transition: transform var(--t-fast);
+}
+
 .theory-link-more:hover {
     background: linear-gradient(135deg, #6366F1, #8B5CF6);
     color: #fff;
@@ -587,9 +653,10 @@ body::after {
     box-shadow: 0 12px 24px -8px rgba(99, 102, 241, 0.5);
 }
 
+.theory-link-more:hover .ml-icon,
 .theory-link-more:hover svg { color: #fff; }
 
-.theory-link-more svg { transition: transform var(--t-fast); }
+.theory-link-more:hover .ml-icon,
 .theory-link-more:hover svg { transform: translateX(3px); }
 
 /* --- Адаптив --- */
@@ -668,7 +735,7 @@ body::after {
                             {% elif category == "СЛАУ" %}{% icon "system" size=14 %}
                             {% elif category == "Спектр" %}{% icon "lambda" size=14 %}
                             {% elif category == "Разложения" %}{% icon "lu" size=14 %}
-                            {% elif category == "Специальные" %}{% icon "sparkles" size=14 %}
+                            {% else %}{% icon "sparkles" size=14 %}
                             {% endif %}
                             <span>{{ category }}</span>
                         </h3>
@@ -707,7 +774,7 @@ body::after {
             <article class="theory-article" id="matrix-basics">
                 <header class="theory-article-head">
                     <div class="theory-article-icon">
-                        {% icon "matrix-grid" size=20 %}
+                        {% icon "matrix-grid" size=22 %}
                     </div>
                     <div>
                         <span class="theory-category">Основы</span>
@@ -756,7 +823,7 @@ body::after {
             <article class="theory-article" id="matrix-types">
                 <header class="theory-article-head">
                     <div class="theory-article-icon">
-                        {% icon "grid" size=20 %}
+                        {% icon "grid" size=22 %}
                     </div>
                     <div>
                         <span class="theory-category">Основы</span>
@@ -807,7 +874,7 @@ body::after {
             <article class="theory-article" id="matrix-size">
                 <header class="theory-article-head">
                     <div class="theory-article-icon">
-                        {% icon "square-matrix" size=20 %}
+                        {% icon "square-matrix" size=22 %}
                     </div>
                     <div>
                         <span class="theory-category">Основы</span>
@@ -852,7 +919,7 @@ body::after {
             <article class="theory-article" id="addition">
                 <header class="theory-article-head">
                     <div class="theory-article-icon">
-                        {% icon "plus" size=20 %}
+                        {% icon "plus" size=22 %}
                     </div>
                     <div>
                         <span class="theory-category">Операции</span>
@@ -892,7 +959,7 @@ body::after {
             <article class="theory-article" id="multiplication">
                 <header class="theory-article-head">
                     <div class="theory-article-icon">
-                        {% icon "close" size=20 %}
+                        {% icon "close" size=22 %}
                     </div>
                     <div>
                         <span class="theory-category">Операции</span>
@@ -938,7 +1005,7 @@ body::after {
             <article class="theory-article" id="transpose">
                 <header class="theory-article-head">
                     <div class="theory-article-icon">
-                        {% icon "transpose" size=20 %}
+                        {% icon "transpose" size=22 %}
                     </div>
                     <div>
                         <span class="theory-category">Операции</span>
@@ -980,7 +1047,7 @@ body::after {
             <article class="theory-article" id="determinant">
                 <header class="theory-article-head">
                     <div class="theory-article-icon">
-                        {% icon "determinant" size=20 %}
+                        {% icon "determinant" size=22 %}
                     </div>
                     <div>
                         <span class="theory-category">Определители</span>
@@ -1037,7 +1104,7 @@ body::after {
             <article class="theory-article" id="inverse">
                 <header class="theory-article-head">
                     <div class="theory-article-icon">
-                        {% icon "inverse" size=20 %}
+                        {% icon "inverse" size=22 %}
                     </div>
                     <div>
                         <span class="theory-category">Определители</span>
@@ -1089,7 +1156,7 @@ body::after {
             <article class="theory-article" id="rank">
                 <header class="theory-article-head">
                     <div class="theory-article-icon">
-                        {% icon "rank" size=20 %}
+                        {% icon "rank" size=22 %}
                     </div>
                     <div>
                         <span class="theory-category">Ранг</span>
@@ -1131,7 +1198,7 @@ body::after {
             <article class="theory-article" id="slau">
                 <header class="theory-article-head">
                     <div class="theory-article-icon">
-                        {% icon "system" size=20 %}
+                        {% icon "system" size=22 %}
                     </div>
                     <div>
                         <span class="theory-category">СЛАУ</span>
@@ -1166,7 +1233,7 @@ body::after {
             <article class="theory-article" id="gauss">
                 <header class="theory-article-head">
                     <div class="theory-article-icon">
-                        {% icon "layers" size=20 %}
+                        {% icon "layers" size=22 %}
                     </div>
                     <div>
                         <span class="theory-category">СЛАУ</span>
@@ -1204,7 +1271,7 @@ body::after {
             <article class="theory-article" id="gauss-jordan">
                 <header class="theory-article-head">
                     <div class="theory-article-icon">
-                        {% icon "layers" size=20 %}
+                        {% icon "layers" size=22 %}
                     </div>
                     <div>
                         <span class="theory-category">СЛАУ</span>
@@ -1238,7 +1305,7 @@ body::after {
             <article class="theory-article" id="cramer">
                 <header class="theory-article-head">
                     <div class="theory-article-icon">
-                        {% icon "determinant" size=20 %}
+                        {% icon "determinant" size=22 %}
                     </div>
                     <div>
                         <span class="theory-category">СЛАУ</span>
@@ -1270,7 +1337,7 @@ body::after {
             <article class="theory-article" id="eigenvalues">
                 <header class="theory-article-head">
                     <div class="theory-article-icon">
-                        {% icon "lambda" size=20 %}
+                        {% icon "lambda" size=22 %}
                     </div>
                     <div>
                         <span class="theory-category">Спектр</span>
@@ -1305,7 +1372,7 @@ body::after {
             <article class="theory-article" id="eigenvectors">
                 <header class="theory-article-head">
                     <div class="theory-article-icon">
-                        {% icon "vector" size=20 %}
+                        {% icon "vector" size=22 %}
                     </div>
                     <div>
                         <span class="theory-category">Спектр</span>
@@ -1339,7 +1406,7 @@ body::after {
             <article class="theory-article" id="char-poly">
                 <header class="theory-article-head">
                     <div class="theory-article-icon">
-                        {% icon "sigma" size=20 %}
+                        {% icon "sigma" size=22 %}
                     </div>
                     <div>
                         <span class="theory-category">Спектр</span>
@@ -1369,7 +1436,7 @@ body::after {
             <article class="theory-article" id="diagonalization">
                 <header class="theory-article-head">
                     <div class="theory-article-icon">
-                        {% icon "diagonalize" size=20 %}
+                        {% icon "diagonalize" size=22 %}
                     </div>
                     <div>
                         <span class="theory-category">Спектр</span>
@@ -1412,7 +1479,7 @@ body::after {
             <article class="theory-article" id="lu">
                 <header class="theory-article-head">
                     <div class="theory-article-icon">
-                        {% icon "lu" size=20 %}
+                        {% icon "lu" size=22 %}
                     </div>
                     <div>
                         <span class="theory-category">Разложения</span>
@@ -1443,7 +1510,7 @@ body::after {
             <article class="theory-article" id="qr">
                 <header class="theory-article-head">
                     <div class="theory-article-icon">
-                        {% icon "qr" size=20 %}
+                        {% icon "qr" size=22 %}
                     </div>
                     <div>
                         <span class="theory-category">Разложения</span>
@@ -1470,7 +1537,7 @@ body::after {
             <article class="theory-article" id="cholesky">
                 <header class="theory-article-head">
                     <div class="theory-article-icon">
-                        {% icon "diagonal" size=20 %}
+                        {% icon "diagonal" size=22 %}
                     </div>
                     <div>
                         <span class="theory-category">Разложения</span>
@@ -1509,7 +1576,7 @@ body::after {
             <article class="theory-article" id="symmetric">
                 <header class="theory-article-head">
                     <div class="theory-article-icon">
-                        {% icon "symmetric" size=20 %}
+                        {% icon "check-badge" size=22 %}
                     </div>
                     <div>
                         <span class="theory-category">Специальные</span>
@@ -1543,7 +1610,7 @@ body::after {
             <article class="theory-article" id="positive-definite">
                 <header class="theory-article-head">
                     <div class="theory-article-icon">
-                        {% icon "check-badge" size=20 %}
+                        {% icon "check-badge" size=22 %}
                     </div>
                     <div>
                         <span class="theory-category">Специальные</span>
@@ -1589,9 +1656,42 @@ body::after {
    Логика страницы теории:
        • подсветка активной темы в оглавлении при скролле (IntersectionObserver);
        • плавная прокрутка при клике по ссылке;
-       • фильтр поиска по темам в реальном времени.
+       • фильтр поиска по темам в реальном времени;
+       • очистка битых иконок ml-icon--missing (на всякий случай).
    ============================================================================= */
 document.addEventListener('DOMContentLoaded', function () {
+
+    // --- Очистка битых иконок ------------------------------------------------
+    (function cleanupMissingIcons(scope) {
+        var s = scope || document;
+        // 1. Удаляем все .ml-icon--missing
+        s.querySelectorAll('.ml-icon--missing').forEach(function (el) {
+            el.remove();
+        });
+        // 2. Ищем текстовые узлы с "ml-icon--missing" — это "утекший" HTML
+        var walker = document.createTreeWalker(
+            s.body || s,
+            NodeFilter.SHOW_TEXT,
+            {
+                acceptNode: function (node) {
+                    var t = node.nodeValue || '';
+                    if (t.indexOf('ml-icon--missing') !== -1
+                        || t.indexOf('ml-icon ml-icon--') !== -1) {
+                        return NodeFilter.FILTER_ACCEPT;
+                    }
+                    return NodeFilter.FILTER_SKIP;
+                }
+            }
+        );
+        var toRemove = [];
+        while (walker.nextNode()) toRemove.push(walker.currentNode);
+        toRemove.forEach(function (node) {
+            node.nodeValue = (node.nodeValue || '')
+                .replace(/<span[^>]*ml-icon[^>]*>[\s\S]*?<\/span>/g, '')
+                .replace(/&lt;span[^&]*ml-icon[\s\S]*?&lt;\/span&gt;/g, '')
+                .trim();
+        });
+    })();
 
     // --- Подсветка активной темы ---------------------------------------------
     var links = document.querySelectorAll('[data-theory-link]');
@@ -1658,15 +1758,12 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 });
 
-                // Скрыть категорию, если все темы отфильтрованы
                 cat.hidden = (catVisible === 0);
             });
 
-            // Показать пустое состояние
             if (emptyState) emptyState.hidden = (totalVisible !== 0);
         };
 
-        // Безопасный debounce: если ML.debounce нет — свой
         var debounce = (window.ML && typeof ML.debounce === 'function')
             ? ML.debounce
             : function (fn, wait) {

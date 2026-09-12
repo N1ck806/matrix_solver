@@ -1,41 +1,63 @@
-{% load static %}
-{% load matrix_icons %}
+{% load static matrix_icons %}
 <!DOCTYPE html>
 <html lang="ru" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5.0">
-    <meta name="description" content="{{ APP_DESCRIPTION }}">
+
+    <!-- SEO -->
+    <title>{% block title %}{{ APP_NAME }}{% endblock %} — {{ APP_NAME }}</title>
+    <meta name="description" content="{% block meta_description %}{{ APP_DESCRIPTION }}{% endblock %}">
+    {% block canonical %}{% endblock %}
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{% block og_title %}{{ APP_NAME }}{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}{{ APP_DESCRIPTION }}{% endblock %}">
+    <meta property="og:site_name" content="{{ APP_NAME }}">
+    {% if SITE_URL %}<meta property="og:url" content="{{ SITE_URL }}{{ request.path }}">{% endif %}
+
+    <!-- PWA / mobile -->
     <meta name="theme-color" content="#F7F8FC" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#0B0E1A" media="(prefers-color-scheme: dark)">
     <meta name="color-scheme" content="light dark">
-    <meta name="csrf-token" content="{{ csrf_token }}">
-
-    <!-- PWA / мобильное приложение -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="{{ APP_NAME }}">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="format-detection" content="telephone=no">
 
-    <title>{% block title %}{{ APP_NAME }}{% endblock %} — {{ APP_NAME }}</title>
+    <!-- CSRF для JS -->
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <meta name="csrf-header" content="X-CSRFToken">
+    <meta name="api-prefix" content="/api/">
 
-    <link rel="icon" type="image/svg+xml" sizes="any" href="{% static 'matrix_app/icons/favicon.svg' %}">
-    <link rel="apple-touch-icon" href="{% static 'matrix_app/icons/favicon.svg' %}">
+    <!-- Иконки вкладки -->
+    <link rel="icon" type="image/svg+xml" sizes="any"
+          href="{% static 'matrix_app/icons/brand/favicon.svg' %}">
+    <link rel="alternate icon" type="image/x-icon"
+          href="{% static 'matrix_app/icons/brand/favicon.ico' %}">
+    <link rel="apple-touch-icon"
+          href="{% static 'matrix_app/icons/brand/favicon.svg' %}">
 
-    <!-- Стили -->
+    <!-- Preconnect к CDN -->
+    {% for origin in CDN_PRECONNECT %}
+        <link rel="preconnect" href="{{ origin }}" crossorigin>
+        <link rel="dns-prefetch" href="{{ origin }}">
+    {% endfor %}
+
+    <!-- Общие стили -->
     <link rel="stylesheet" href="{% static 'matrix_app/css/main.css' %}">
-    <link rel="stylesheet" href="{% static 'matrix_app/css/calculator.css' %}">
     <link rel="stylesheet" href="{% static 'matrix_app/css/animations.css' %}">
     <link rel="stylesheet" href="{% static 'matrix_app/css/responsive.css' %}">
-
-    <!-- Мобильные улучшения — только на узких экранах -->
-    <link rel="stylesheet"
-          href="{% static 'matrix_app/css/mobile.css' %}"
+    <link rel="stylesheet" href="{% static 'matrix_app/css/mobile.css' %}"
           media="(max-width: 992px)">
 
-    <!-- Тема: применяется до отрисовки -->
+    <!-- Единый конфиг для window.MatrixLab (безопасно через json_script) -->
+    {{ MATRIXLAB_CONFIG|json_script:"ml-config" }}
+
+    <!-- Тема и признаки устройства — до отрисовки, без FOUC -->
     <script>
         (function () {
             try {
@@ -45,13 +67,9 @@
                 if (saved === 'dark' || (!saved && prefersDark)) {
                     document.documentElement.setAttribute('data-theme', 'dark');
                 }
-                // Определяем «мобильность» для CSS-хуков
                 var isTouch = ('ontouchstart' in window) ||
                               (navigator.maxTouchPoints > 0);
-                if (isTouch) {
-                    document.documentElement.classList.add('is-touch');
-                }
-                // Отдельный флаг для узких экранов
+                if (isTouch) document.documentElement.classList.add('is-touch');
                 if (window.matchMedia('(max-width: 992px)').matches) {
                     document.documentElement.classList.add('is-mobile');
                 }
@@ -62,7 +80,11 @@
     <!-- MathJax -->
     <script>
         window.MathJax = {
+            loader: {
+                load: ['[tex]/ams', '[tex]/boldsymbol']
+            },
             tex: {
+                packages: {'[+]': ['ams', 'boldsymbol']},
                 inlineMath: [['$', '$'], ['\\(', '\\)']],
                 displayMath: [['$$', '$$'], ['\\[', '\\]']],
                 processEscapes: true,
@@ -70,23 +92,24 @@
                 tags: 'none',
                 macros: {
                     rank: '\\operatorname{rank}',
-                    tr: '\\operatorname{tr}',
-                    adj: '\\operatorname{adj}',
-                    det: '\\operatorname{det}',
+                    tr:   '\\operatorname{tr}',
+                    adj:  '\\operatorname{adj}',
+                    det:  '\\operatorname{det}',
                     diag: '\\operatorname{diag}',
-                    Ker: '\\operatorname{Ker}',
-                    Im: '\\operatorname{Im}',
-                    R: '\\mathbb{R}',
-                    C: '\\mathbb{C}',
-                    N: '\\mathbb{N}',
-                    Z: '\\mathbb{Z}',
-                    Q: '\\mathbb{Q}'
+                    Ker:  '\\operatorname{Ker}',
+                    Im:   '\\operatorname{Im}',
+                    R:    '\\mathbb{R}',
+                    C:    '\\mathbb{C}',
+                    N:    '\\mathbb{N}',
+                    Z:    '\\mathbb{Z}',
+                    Q:    '\\mathbb{Q}'
                 }
             },
             svg: { fontCache: 'global' },
             options: {
                 skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
-                ignoreHtmlClass: 'no-mathjax'
+                ignoreHtmlClass: 'no-mathjax',
+                enableMenu: false
             },
             startup: {
                 typeset: true,
@@ -99,39 +122,35 @@
             }
         };
     </script>
-    <script defer src="{{ CDN.mathjax }}"></script>
+    {% if CDN.mathjax %}
+        <script defer src="{{ CDN.mathjax }}"></script>
+    {% endif %}
 
     {% block extra_head %}{% endblock %}
 </head>
-<body class="app-body">
 
-    <!-- Skip-link для доступности -->
+<body class="app-body {% block body_class %}{% endblock %}"
+      data-page="{% block page_id %}{{ ACTIVE_PAGE|default:'' }}{% endblock %}"
+      data-active-group="{{ ACTIVE_GROUP|default:'' }}">
+
     <a href="#main-content" class="skip-link">Перейти к содержимому</a>
 
+    {% block body_start %}{% endblock %}
+
     <!-- ================================================================
-         Шапка
+         ШАПКА
          ================================================================ -->
-    <header class="app-header" data-app-header>
+    <header class="app-header {% block header_class %}{% endblock %}" data-app-header>
+
+        <div class="app-header__accent-line" aria-hidden="true"></div>
+
         <div class="container header-inner">
 
-            <!-- Логотип -->
-            <a href="{% url 'matrix_app:home' %}" class="logo" aria-label="{{ APP_NAME }} — на главную">
+            <!-- ЛОГОТИП -->
+            <a href="{% url 'matrix_app:home' %}" class="logo"
+               aria-label="{{ APP_NAME }} — на главную">
                 <span class="logo-mark" aria-hidden="true">
-                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <defs>
-                            <linearGradient id="logoGradHeader" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-                                <stop stop-color="#6366F1"/>
-                                <stop offset="1" stop-color="#8B5CF6"/>
-                            </linearGradient>
-                        </defs>
-                        <rect x="0" y="0" width="32" height="32" rx="8" fill="url(#logoGradHeader)"/>
-                        <g stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none">
-                            <path d="M9 8v16M23 8v16"/>
-                            <line x1="13" y1="13" x2="19" y2="13"/>
-                            <line x1="13" y1="19" x2="19" y2="19"/>
-                            <line x1="16" y1="10" x2="16" y2="22"/>
-                        </g>
-                    </svg>
+                    {% icon "logo-mark" size=40 %}
                 </span>
                 <span class="logo-text">
                     <strong>{{ APP_NAME }}</strong>
@@ -139,38 +158,62 @@
                 </span>
             </a>
 
-            <!-- Основная навигация (desktop) -->
+            <!-- ОСНОВНАЯ НАВИГАЦИЯ — только текст -->
             <nav class="main-nav" aria-label="Основная навигация">
-                <ul>
+                <ul class="main-nav__list">
                     {% for item in NAV_ITEMS %}
-                        <li>
+                        <li class="main-nav__item">
                             <a href="{% url item.url_name %}"
                                class="nav-link {% if ACTIVE_PAGE == item.url_name %}is-active{% endif %}"
                                {% if ACTIVE_PAGE == item.url_name %}aria-current="page"{% endif %}>
-                                {% icon item.icon size=16 %}
-                                <span>{{ item.label }}</span>
+                                <span class="nav-link__label">{{ item.label }}</span>
                             </a>
                         </li>
                     {% endfor %}
                 </ul>
             </nav>
 
-            <!-- Действия -->
+            <!-- ДЕЙСТВИЯ СПРАВА -->
             <div class="header-actions">
+
+                <!-- Поиск -->
+                <button type="button"
+                        class="header-action header-action--search"
+                        data-search-toggle
+                        aria-label="Поиск по сайту"
+                        aria-expanded="false"
+                        aria-controls="header-search"
+                        title="Поиск">
+                    {% icon "search" size=22 %}
+                </button>
+
+                <!-- Переключатель темы -->
                 <button type="button"
                         class="theme-toggle"
                         data-theme-toggle
                         aria-label="Переключить тему"
                         title="Переключить тему">
-                    <span class="theme-icon theme-icon--sun">{% icon "sun" size=20 %}</span>
-                    <span class="theme-icon theme-icon--moon">{% icon "moon" size=20 %}</span>
+                    <span class="theme-toggle-track" aria-hidden="true">
+                        <span class="theme-toggle-icon theme-toggle-icon--sun">
+                            {% icon "sun" size=14 %}
+                        </span>
+                        <span class="theme-toggle-icon theme-toggle-icon--moon">
+                            {% icon "moon" size=14 %}
+                        </span>
+                        <span class="theme-toggle-thumb"></span>
+                    </span>
                 </button>
 
-                <a href="{% url 'matrix_app:calculator' %}" class="btn btn-primary btn-sm header-cta">
-                    {% icon "calculator" size=14 %}
+                <!-- CTA -->
+                <a href="{% url 'matrix_app:calculator' %}"
+                   class="btn btn-primary btn-sm header-cta">
                     <span>Начать решение</span>
+                    <span class="header-cta__icon" aria-hidden="true">
+                        {% icon "arrow-right" size=14 %}
+                    </span>
                 </a>
 
+                <!-- Бургер -->
                 <button type="button"
                         class="nav-toggle"
                         data-nav-toggle
@@ -181,118 +224,167 @@
                 </button>
             </div>
         </div>
+
+        <!-- РАСКРЫВАЮЩИЙСЯ ПОИСК -->
+        <div class="header-search" id="header-search" data-header-search hidden>
+            <div class="container">
+                <form class="header-search__form"
+                      action="{% url 'matrix_app:search' %}"
+                      method="get"
+                      role="search">
+                    <span class="header-search__icon" aria-hidden="true">
+                        {% icon "search" size=20 %}
+                    </span>
+                    <input type="search"
+                           name="q"
+                           class="header-search__input"
+                           placeholder="Определитель, обратная, LU, СЛАУ…"
+                           autocomplete="off"
+                           data-search-input>
+                    <button type="button"
+                            class="header-search__close"
+                            data-search-close
+                            aria-label="Закрыть поиск">
+                        {% icon "close" size=16 %}
+                    </button>
+                </form>
+            </div>
+        </div>
     </header>
 
     <!-- ================================================================
-         Мобильное меню (bottom-sheet)
+         МОБИЛЬНОЕ МЕНЮ
          ================================================================ -->
     <div class="mobile-nav-backdrop" data-mobile-nav-backdrop hidden></div>
 
-    <div class="mobile-nav-sheet" id="mobile-nav" data-mobile-nav hidden>
-        <!-- Ручка для свайпа -->
+    <div class="mobile-nav-sheet" id="mobile-nav" data-mobile-nav hidden
+         role="dialog" aria-modal="true" aria-label="Меню">
+
         <div class="mobile-nav-handle" data-sheet-handle aria-hidden="true">
             <span></span>
         </div>
 
-        <!-- Шапка листа -->
         <div class="mobile-nav-header">
             <div class="mobile-nav-greeting">
-                <span class="mobile-nav-greeting-title">Меню</span>
-                <span class="mobile-nav-greeting-sub">{{ APP_NAME }} · v{{ APP_VERSION }}</span>
+                <span class="mobile-nav-greeting-title">Разделы</span>
+                <span class="mobile-nav-greeting-sub">{{ APP_NAME }}</span>
             </div>
             <button type="button"
                     class="mobile-nav-close"
                     data-mobile-nav-close
                     aria-label="Закрыть меню">
-                {% icon "close" size=20 %}
+                {% icon "close" size=18 %}
             </button>
         </div>
 
-        <!-- Основные ссылки — крупные плитки -->
         <nav class="mobile-nav-tiles" aria-label="Разделы">
             {% for item in NAV_ITEMS %}
                 <a href="{% url item.url_name %}"
                    class="mobile-nav-tile {% if ACTIVE_PAGE == item.url_name %}is-active{% endif %}"
                    {% if ACTIVE_PAGE == item.url_name %}aria-current="page"{% endif %}>
-                    <span class="mobile-nav-tile-icon">
-                        {% icon item.icon size=22 %}
+                    <span class="mobile-nav-tile-num" aria-hidden="true">
+                        {{ forloop.counter|stringformat:"02d" }}
                     </span>
                     <span class="mobile-nav-tile-text">
                         <span class="mobile-nav-tile-title">{{ item.label }}</span>
-                        <span class="mobile-nav-tile-sub">
-                            {% if item.url_name == 'calculator' %}Решать матрицы{% endif %}
-                        </span>
+                        {% if item.description %}
+                            <span class="mobile-nav-tile-sub">{{ item.description }}</span>
+                        {% endif %}
                     </span>
-                    <span class="mobile-nav-tile-arrow">
-                        {% icon "arrow-right" size=16 %}
+                    <span class="mobile-nav-tile-arrow" aria-hidden="true">
+                        {% icon "arrow-right" size=14 %}
                     </span>
                 </a>
             {% endfor %}
         </nav>
 
-        <!-- Дополнительные ссылки -->
         <div class="mobile-nav-extra">
+            <a href="{% url 'matrix_app:saved_matrices' %}" class="mobile-nav-extra-link">
+                <span>Сохранённые матрицы</span>
+                {% icon "arrow-right" size=14 %}
+            </a>
             <a href="{% url 'matrix_app:history' %}" class="mobile-nav-extra-link">
-                {% icon "history" size=16 %}
                 <span>История вычислений</span>
+                {% icon "arrow-right" size=14 %}
             </a>
             <a href="{% url 'matrix_app:about' %}" class="mobile-nav-extra-link">
-                {% icon "info" size=16 %}
                 <span>О проекте</span>
+                {% icon "arrow-right" size=14 %}
             </a>
         </div>
 
-        <!-- Большая CTA-кнопка -->
         <a href="{% url 'matrix_app:calculator' %}" class="mobile-nav-cta">
-            {% icon "calculator" size=18 %}
             <span>Начать решение</span>
+            {% icon "arrow-right" size=16 %}
         </a>
     </div>
 
     <!-- ================================================================
-         Основной контент
+         FLASH-СООБЩЕНИЯ
+         ================================================================ -->
+    {% if messages %}
+        <div class="flash-messages container" role="status" aria-live="polite">
+            {% for message in messages %}
+                <div class="flash flash--{{ message.tags|default:'info' }}">
+                    <span class="flash-text">{{ message }}</span>
+                    <button type="button" class="flash-close" aria-label="Закрыть">×</button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- ================================================================
+         ХЛЕБНЫЕ КРОШКИ
+         ================================================================ -->
+    {% block breadcrumbs %}{% endblock %}
+
+    <!-- ================================================================
+         ОСНОВНОЙ КОНТЕНТ
          ================================================================ -->
     <main class="app-main" id="main-content" tabindex="-1">
         {% block content %}{% endblock %}
     </main>
 
     <!-- ================================================================
-         FAB (мобильная плавающая кнопка)
+         FAB
          ================================================================ -->
-    <button type="button"
-            class="mobile-fab"
-            data-mobile-fab
-            aria-label="Быстрые действия"
-            data-haptic="light">
-        {% icon "calculator" size=22 %}
-    </button>
+    {% block fab %}
+        <button type="button"
+                class="mobile-fab"
+                data-mobile-fab
+                aria-label="Открыть калькулятор"
+                data-haptic="light">
+            <span class="mobile-fab__orbit" aria-hidden="true"></span>
+            <span class="mobile-fab-symbol" aria-hidden="true">λ</span>
+        </button>
+    {% endblock %}
 
     <!-- ================================================================
-         Нижняя навигация (мобильная)
+         НИЖНЯЯ НАВИГАЦИЯ (мобильная)
          ================================================================ -->
     <nav class="mobile-tabbar" data-mobile-tabbar aria-label="Быстрая навигация">
         <a href="{% url 'matrix_app:home' %}"
-           class="mobile-tabbar-item {% if ACTIVE_PAGE == 'home' %}is-active{% endif %}"
+           class="mobile-tabbar-item {% if ACTIVE_PAGE == 'matrix_app:home' %}is-active{% endif %}"
            data-haptic="light">
-            {% icon "grid" size=20 %}
+            <span class="mobile-tabbar-symbol" aria-hidden="true">◆</span>
             <span>Главная</span>
         </a>
         <a href="{% url 'matrix_app:calculator' %}"
-           class="mobile-tabbar-item {% if ACTIVE_PAGE == 'calculator' %}is-active{% endif %}"
+           class="mobile-tabbar-item {% if ACTIVE_PAGE == 'matrix_app:calculator' %}is-active{% endif %}"
            data-haptic="light">
-            {% icon "calculator" size=20 %}
+            <span class="mobile-tabbar-symbol" aria-hidden="true">=</span>
             <span>Считать</span>
         </a>
         <a href="{% url 'matrix_app:operations' %}"
-           class="mobile-tabbar-item {% if ACTIVE_PAGE == 'operations' %}is-active{% endif %}"
+           class="mobile-tabbar-item {% if ACTIVE_PAGE == 'matrix_app:operations' %}is-active{% endif %}"
            data-haptic="light">
-            {% icon "layers" size=20 %}
+            <span class="mobile-tabbar-symbol" aria-hidden="true">×</span>
             <span>Операции</span>
         </a>
         <a href="{% url 'matrix_app:saved_matrices' %}"
-           class="mobile-tabbar-item {% if ACTIVE_PAGE == 'saved_matrices' %}is-active{% endif %}"
+           class="mobile-tabbar-item {% if ACTIVE_PAGE == 'matrix_app:saved_matrices' %}is-active{% endif %}"
            data-haptic="light">
-            {% icon "clipboard" size=20 %}
+            <span class="mobile-tabbar-symbol" aria-hidden="true">★</span>
             <span>Мои</span>
         </a>
         <button type="button"
@@ -300,96 +392,78 @@
                 data-mobile-tabbar-more
                 aria-label="Ещё"
                 data-haptic="light">
-            {% icon "list" size=20 %}
+            <span class="mobile-tabbar-symbol" aria-hidden="true">⋯</span>
             <span>Ещё</span>
         </button>
     </nav>
 
     <!-- ================================================================
-         Футер
+         РАЗДЕЛИТЕЛЬ ПЕРЕД ФУТЕРОМ
+         ================================================================ -->
+    <div class="footer-divider" aria-hidden="true">
+        <span class="footer-divider__line"></span>
+        <span class="footer-divider__dot"></span>
+    </div>
+
+    <!-- ================================================================
+         ФУТЕР
          ================================================================ -->
     <footer class="app-footer">
+        <div class="app-footer__grid-bg" aria-hidden="true"></div>
+
         <div class="container footer-inner">
 
             <div class="footer-col footer-col--brand">
                 <div class="footer-logo">
+                    <span class="footer-logo-mark" aria-hidden="true">
+                        {% icon "logo-mark" size=28 %}
+                    </span>
                     <strong>{{ APP_NAME }}</strong>
-                    <span class="footer-version">v{{ APP_VERSION }}</span>
                 </div>
                 <p class="footer-desc">
                     Инструмент для изучения матриц и линейной алгебры.
                     Точные вычисления, пошаговые решения, интерактивный интерфейс.
                 </p>
+                <div class="footer-tags">
+                    <span class="footer-tag">SymPy</span>
+                    <span class="footer-tag">Django</span>
+                    <span class="footer-tag">MathJax</span>
+                </div>
             </div>
 
             <div class="footer-col">
                 <h4>Инструменты</h4>
                 <ul>
-                    <li>
-                        <a href="{% url 'matrix_app:calculator' %}">
-                            {% icon "calculator" size=14 %}<span>Калькулятор</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{% url 'matrix_app:operations' %}">
-                            {% icon "layers" size=14 %}<span>Операции</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{% url 'matrix_app:properties' %}">
-                            {% icon "check-badge" size=14 %}<span>Свойства</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{% url 'matrix_app:systems' %}">
-                            {% icon "system" size=14 %}<span>СЛАУ</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{% url 'matrix_app:decompositions' %}">
-                            {% icon "grid" size=14 %}<span>Разложения</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{% url 'matrix_app:eigen' %}">
-                            {% icon "lambda" size=14 %}<span>Спектр</span>
-                        </a>
-                    </li>
+                    <li><a href="{% url 'matrix_app:calculator' %}"><span>Калькулятор</span></a></li>
+                    <li><a href="{% url 'matrix_app:operations' %}"><span>Операции</span></a></li>
+                    <li><a href="{% url 'matrix_app:properties' %}"><span>Свойства</span></a></li>
+                    <li><a href="{% url 'matrix_app:systems' %}"><span>СЛАУ</span></a></li>
+                    <li><a href="{% url 'matrix_app:decompositions' %}"><span>Разложения</span></a></li>
+                    <li><a href="{% url 'matrix_app:eigen' %}"><span>Спектр</span></a></li>
                 </ul>
             </div>
 
             <div class="footer-col">
                 <h4>Обучение</h4>
                 <ul>
-                    <li>
-                        <a href="{% url 'matrix_app:theory' %}">
-                            {% icon "book-open" size=14 %}<span>Теория</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{% url 'matrix_app:types' %}">
-                            {% icon "matrix-grid" size=14 %}<span>Виды матриц</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{% url 'matrix_app:history' %}">
-                            {% icon "history" size=14 %}<span>История</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{% url 'matrix_app:about' %}">
-                            {% icon "info" size=14 %}<span>О проекте</span>
-                        </a>
-                    </li>
+                    <li><a href="{% url 'matrix_app:theory' %}"><span>Теория</span></a></li>
+                    <li><a href="{% url 'matrix_app:types' %}"><span>Виды матриц</span></a></li>
+                    <li><a href="{% url 'matrix_app:saved_matrices' %}"><span>Сохранённые</span></a></li>
+                    <li><a href="{% url 'matrix_app:history' %}"><span>История</span></a></li>
+                    <li><a href="{% url 'matrix_app:about' %}"><span>О проекте</span></a></li>
                 </ul>
             </div>
 
             <div class="footer-col">
-                <h4>О проекте</h4>
+                <h4>О вычислениях</h4>
                 <p class="footer-note">
                     Все вычисления выполняются в точной арифметике SymPy.
                     Дроби, корни и символьные выражения сохраняются без потерь.
                 </p>
+                <div class="footer-tags">
+                    <span class="footer-tag">Точная арифметика</span>
+                    <span class="footer-tag">Символьные вычисления</span>
+                </div>
             </div>
         </div>
 
@@ -402,34 +476,76 @@
     </footer>
 
     <!-- ================================================================
-         Уведомления, загрузчик, haptic
+         УВЕДОМЛЕНИЯ, ЗАГРУЗЧИК
          ================================================================ -->
-    <div class="toast-container" data-toast-container aria-live="polite" aria-atomic="false"></div>
+    <div class="toast-container"
+         data-toast-container
+         aria-live="polite"
+         aria-atomic="false"></div>
 
-    <div class="global-loader" data-global-loader role="status" aria-live="polite" hidden>
-        <div class="loader-spinner" aria-hidden="true"></div>
+    <div class="global-loader"
+         data-global-loader
+         role="status"
+         aria-live="polite"
+         hidden>
+        <div class="loader-spinner" aria-hidden="true">
+            <span></span><span></span><span></span>
+        </div>
         <span class="loader-text">Вычисляем…</span>
     </div>
 
     <!-- ================================================================
-         Скрипты
+         МОДАЛЬНОЕ ОКНО
          ================================================================ -->
+    <div class="modal-backdrop" data-modal-backdrop hidden></div>
+
+    <dialog class="modal" data-modal aria-labelledby="modal-title">
+        <header class="modal__header">
+            <h3 class="modal__title" id="modal-title" data-modal-title>Заголовок</h3>
+            <button type="button" class="modal__close"
+                    data-modal-close aria-label="Закрыть">
+                {% icon "close" size=18 %}
+            </button>
+        </header>
+        <div class="modal__body" data-modal-body></div>
+        <footer class="modal__footer" data-modal-footer></footer>
+    </dialog>
+
+    <!-- ================================================================
+         СКРИПТЫ
+         ================================================================ -->
+    <noscript>
+        <div class="noscript-warning">
+            Для работы MatrixLab требуется JavaScript.
+            Пожалуйста, включите его в настройках браузера.
+        </div>
+    </noscript>
+
+    {# Инициализация window.MatrixLab.config из json_script — до main.js #}
+    <script>
+        window.MatrixLab = window.MatrixLab || {};
+        try {
+            var cfgEl = document.getElementById('ml-config');
+            window.MatrixLab.config = cfgEl
+                ? JSON.parse(cfgEl.textContent)
+                : {};
+        } catch (e) {
+            window.MatrixLab.config = {};
+        }
+    </script>
+
     <script src="{% static 'matrix_app/js/main.js' %}"></script>
     <script src="{% static 'matrix_app/js/matrix.js' %}"></script>
     <script src="{% static 'matrix_app/js/steps.js' %}"></script>
     <script src="{% static 'matrix_app/js/export.js' %}"></script>
 
-    <!-- Мобильная логика — только на узких экранах -->
-    <script>
-        if (window.matchMedia('(max-width: 992px)').matches) {
-            var s = document.createElement('script');
-            s.src = "{% static 'matrix_app/js/mobile.js' %}";
-            s.defer = true;
-            document.body.appendChild(s);
-        }
-    </script>
+    {% if request.META.HTTP_USER_AGENT %}
+        {# mobile.js подключается всегда, но внутри сам проверяет media #}
+    {% endif %}
+    <script defer src="{% static 'matrix_app/js/mobile.js' %}"></script>
 
     {% block extra_scripts %}{% endblock %}
+    {% block body_end %}{% endblock %}
 
 </body>
 </html>

@@ -1,0 +1,429 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 80" fill="none"
+     role="img" aria-label="Поиск"
+     class="ml-icon-svg ml-icon-svg--search"
+     preserveAspectRatio="xMidYMid meet"
+     font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">
+
+  <!-- ============================================================
+       ОПРЕДЕЛЕНИЯ
+       ============================================================ -->
+  <defs>
+
+    <!-- ГЛАВНЫЙ ГРАДИЕНТ ЯДРА — дышит -->
+    <radialGradient id="srch-core-grad" cx="0.38" cy="0.32" r="0.75">
+      <stop offset="0" stop-color="#F0ABFC">
+        <animate attributeName="stop-color"
+                 values="#F0ABFC;#D946EF;#C084FC;#F0ABFC"
+                 dur="14s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="0.35" stop-color="#D946EF">
+        <animate attributeName="stop-color"
+                 values="#D946EF;#A855F7;#8B5CF6;#D946EF"
+                 dur="14s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="0.72" stop-color="#A855F7">
+        <animate attributeName="stop-color"
+                 values="#A855F7;#7C3AED;#9333EA;#A855F7"
+                 dur="14s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="1" stop-color="#5B21B6">
+        <animate attributeName="stop-color"
+                 values="#5B21B6;#4C1D95;#6D28D9;#5B21B6"
+                 dur="14s" repeatCount="indefinite"/>
+      </stop>
+    </radialGradient>
+
+    <!-- СВЕЧЕНИЕ ЯДРА -->
+    <radialGradient id="srch-core-glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"    stop-color="#FFFFFF" stop-opacity="1"/>
+      <stop offset="0.24" stop-color="#FCE7F3" stop-opacity="0.75"/>
+      <stop offset="0.5"  stop-color="#F5D0FE" stop-opacity="0.4"/>
+      <stop offset="0.75" stop-color="#D946EF" stop-opacity="0.15"/>
+      <stop offset="1"    stop-color="#A855F7" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- БЛИК СВЕРХУ -->
+    <radialGradient id="srch-highlight" cx="0.3" cy="0.2" r="0.7">
+      <stop offset="0"    stop-color="#FFFFFF" stop-opacity="0.7"/>
+      <stop offset="0.4"  stop-color="#FFFFFF" stop-opacity="0.15"/>
+      <stop offset="0.75" stop-color="#FFFFFF" stop-opacity="0.03"/>
+      <stop offset="1"    stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- ЯДРО ЛУПЫ -->
+    <radialGradient id="srch-lens" cx="0.38" cy="0.32" r="0.75">
+      <stop offset="0"   stop-color="#F0ABFC"/>
+      <stop offset="0.4" stop-color="#A855F7"/>
+      <stop offset="1"   stop-color="#7C3AED"/>
+    </radialGradient>
+
+    <!-- ОРБИТА РОЗОВАЯ -->
+    <linearGradient id="srch-orbit-pink" x1="0" y1="0" x2="280" y2="80"
+                    gradientUnits="userSpaceOnUse">
+      <stop offset="0"   stop-color="#F0ABFC"/>
+      <stop offset="0.5" stop-color="#EC4899"/>
+      <stop offset="1"   stop-color="#D946EF"/>
+    </linearGradient>
+
+    <!-- ОРБИТА ГОЛУБАЯ -->
+    <linearGradient id="srch-orbit-cyan" x1="0" y1="80" x2="280" y2="0"
+                    gradientUnits="userSpaceOnUse">
+      <stop offset="0"   stop-color="#67E8F9"/>
+      <stop offset="0.5" stop-color="#22D3EE"/>
+      <stop offset="1"   stop-color="#06B6D4"/>
+    </linearGradient>
+
+    <!-- РУЧКА -->
+    <linearGradient id="srch-handle" x1="60" y1="60" x2="74" y2="74"
+                    gradientUnits="userSpaceOnUse">
+      <stop offset="0"   stop-color="#A855F7"/>
+      <stop offset="0.5" stop-color="#D946EF"/>
+      <stop offset="1"   stop-color="#22D3EE"/>
+    </linearGradient>
+
+    <!-- ГРАДИЕНТ ТЕКСТА «Поиск» -->
+    <linearGradient id="srch-text-main" x1="110" y1="28" x2="230" y2="52"
+                    gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7C3AED">
+        <animate attributeName="stop-color"
+                 values="#7C3AED;#A855F7;#D946EF;#7C3AED"
+                 dur="10s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="0.5" stop-color="#A855F7">
+        <animate attributeName="stop-color"
+                 values="#A855F7;#D946EF;#EC4899;#A855F7"
+                 dur="10s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="1" stop-color="#EC4899">
+        <animate attributeName="stop-color"
+                 values="#EC4899;#A855F7;#7C3AED;#EC4899"
+                 dur="10s" repeatCount="indefinite"/>
+      </stop>
+    </linearGradient>
+
+    <!-- ГРАДИЕНТ ЛИНИЙ -->
+    <linearGradient id="srch-line" x1="82" y1="40" x2="108" y2="40"
+                    gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#A855F7" stop-opacity="0"/>
+      <stop offset="0.5" stop-color="#EC4899" stop-opacity="0.8"/>
+      <stop offset="1" stop-color="#A855F7" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- ЧАСТИЦЫ -->
+    <radialGradient id="srch-spark-warm" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"   stop-color="#FFFFFF"/>
+      <stop offset="0.4" stop-color="#FBBF24"/>
+      <stop offset="1"   stop-color="#F97316" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="srch-spark-cool" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"   stop-color="#FFFFFF"/>
+      <stop offset="0.4" stop-color="#22D3EE"/>
+      <stop offset="1"   stop-color="#06B6D4" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="srch-spark-pink" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"   stop-color="#FFFFFF"/>
+      <stop offset="0.4" stop-color="#FBCFE8"/>
+      <stop offset="1"   stop-color="#EC4899" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- ФИЛЬТРЫ -->
+    <filter id="srch-spark-glow" x="-300%" y="-300%" width="700%" height="700%">
+      <feGaussianBlur stdDeviation="1.4"/>
+    </filter>
+
+    <filter id="srch-core-shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
+      <feOffset dx="0" dy="1.6"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.4"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="srch-text-glow" x="-20%" y="-30%" width="140%" height="160%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="3"/>
+    </filter>
+
+    <filter id="srch-orbit-glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="0.8"/>
+    </filter>
+
+    <!-- МАСКИ -->
+    <clipPath id="srch-core-clip">
+      <circle cx="40" cy="40" r="14"/>
+    </clipPath>
+  </defs>
+
+  <!-- ================================================================
+       ФОН СЦЕНЫ
+       ================================================================ -->
+  <circle class="srch-scene-halo"
+          cx="140" cy="40" r="130"
+          fill="url(#srch-core-glow)" opacity="0.08">
+    <animate attributeName="r" values="130;135;130" dur="9s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.08;0.04;0.08" dur="9s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- ================================================================
+       ЛЕВАЯ ЧАСТЬ: ЛУПА (0–80)
+       ================================================================ -->
+  <g transform="translate(0 0)">
+
+    <!-- Свечение под лупой -->
+    <circle class="srch-lens-halo"
+            cx="40" cy="40" r="30"
+            fill="url(#srch-core-glow)" opacity="0.45">
+      <animate attributeName="r" values="30;32;30" dur="5.5s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.45;0.28;0.45" dur="5.5s" repeatCount="indefinite"/>
+    </circle>
+
+    <!-- Голубая орбита за стеклом -->
+    <g class="srch-orbit srch-orbit--cyan" transform="translate(40 40)">
+      <g>
+        <animateTransform attributeName="transform" type="rotate"
+                          from="0 0 0" to="360 0 0"
+                          dur="26s" repeatCount="indefinite"/>
+
+        <ellipse cx="0" cy="0" rx="26" ry="8"
+                 fill="none" stroke="url(#srch-orbit-cyan)"
+                 stroke-width="1.4" opacity="0.85"
+                 transform="rotate(-28)"/>
+
+        <ellipse cx="0" cy="0" rx="26" ry="8"
+                 fill="none" stroke="#22D3EE" stroke-width="3"
+                 opacity="0.14" filter="url(#srch-orbit-glow)"
+                 transform="rotate(-28)"/>
+
+        <g>
+          <animateTransform attributeName="transform" type="rotate"
+                            from="0 0 0" to="360 0 0"
+                            dur="26s" repeatCount="indefinite"/>
+          <circle class="srch-orbit-dot" cx="26" cy="0" r="2.2"
+                  fill="url(#srch-spark-cool)" filter="url(#srch-spark-glow)">
+            <animate attributeName="r" values="2.2;2.8;2.2"
+                     dur="2.4s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="26" cy="0" r="1" fill="#FFFFFF"/>
+        </g>
+      </g>
+    </g>
+
+    <!-- Ядро стекла (лупа) -->
+    <g class="srch-lens" filter="url(#srch-core-shadow)">
+      <circle cx="40" cy="40" r="18" fill="url(#srch-lens)"/>
+      <circle cx="40" cy="40" r="18" fill="url(#srch-highlight)"/>
+      <circle cx="40" cy="40" r="17.5" fill="none"
+              stroke="#FFFFFF" stroke-opacity="0.4" stroke-width="0.7"/>
+
+      <!-- Сетка внутри -->
+      <g clip-path="url(#srch-core-clip)" opacity="0.16">
+        <path d="M26 33H54M26 40H54M26 47H54"
+              stroke="#FFFFFF" stroke-width="0.5"/>
+        <path d="M33 26V54M40 26V54M47 26V54"
+              stroke="#FFFFFF" stroke-width="0.5"/>
+      </g>
+
+      <!-- Центр — 3 слоя -->
+      <circle class="srch-lens-center"
+              cx="40" cy="40" r="6" fill="url(#srch-core-glow)" opacity="0.9">
+        <animate attributeName="r" values="6;7;6" dur="3.6s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="40" cy="40" r="3.4" fill="#FFFFFF" opacity="0.75">
+        <animate attributeName="r" values="3.4;4;3.4" dur="3.6s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="40" cy="40" r="1.6" fill="#FFFFFF"/>
+    </g>
+
+    <!-- Обводка стекла -->
+    <circle class="srch-lens-ring"
+            cx="40" cy="40" r="24"
+            stroke="currentColor" stroke-width="2.2"
+            fill="none" stroke-linecap="round"/>
+
+    <!-- Блики на стекле -->
+    <path d="M22 28 A 20 20 0 0 1 34 18"
+          stroke="#FFFFFF" stroke-opacity="0.6"
+          stroke-width="1.4" stroke-linecap="round" fill="none"/>
+    <path d="M27 33 A 15 15 0 0 1 33 26"
+          stroke="#FFFFFF" stroke-opacity="0.3"
+          stroke-width="0.9" stroke-linecap="round" fill="none"/>
+
+    <!-- Ручка -->
+    <g class="srch-handle">
+      <line x1="60" y1="60" x2="74" y2="74"
+            stroke="url(#srch-handle)" stroke-width="4"
+            stroke-linecap="round"/>
+      <line x1="60" y1="60" x2="74" y2="74"
+            stroke="#FFFFFF" stroke-opacity="0.35" stroke-width="1.2"
+            stroke-linecap="round"/>
+      <circle class="srch-handle-dot" cx="74" cy="74" r="2.4"
+              fill="url(#srch-spark-cool)" filter="url(#srch-spark-glow)">
+        <animate attributeName="r" values="2.4;3;2.4" dur="2.4s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="1;0.6;1" dur="2.4s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="74" cy="74" r="1.1" fill="#FFFFFF"/>
+    </g>
+  </g>
+
+  <!-- ================================================================
+       СОЕДИНИТЕЛЬНАЯ ЛИНИЯ
+       ================================================================ -->
+  <g class="srch-connector">
+    <path d="M82 40 L108 40"
+          stroke="url(#srch-line)"
+          stroke-width="1.2" stroke-linecap="round"
+          stroke-dasharray="2 4">
+      <animate attributeName="stroke-dashoffset"
+               values="0;-12;0" dur="5s" repeatCount="indefinite"/>
+    </path>
+    <circle cx="82" cy="40" r="1.6" fill="#EC4899">
+      <animate attributeName="cx" values="82;108;82" dur="5s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;1;1;0" dur="5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="95" cy="40" r="1.4" fill="#A855F7" opacity="0.6">
+      <animate attributeName="r" values="1.4;2;1.4" dur="2.6s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.6;0.3;0.6" dur="2.6s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <!-- ================================================================
+       ПРАВАЯ ЧАСТЬ: ТЕКСТ «Поиск»
+       ================================================================ -->
+  <g class="srch-text-group">
+
+    <!-- Glow-подложка -->
+    <text x="110" y="48"
+          font-size="32"
+          font-weight="900"
+          letter-spacing="-0.4"
+          fill="url(#srch-text-main)"
+          filter="url(#srch-text-glow)"
+          opacity="0.35">Поиск</text>
+
+    <!-- Основной текст -->
+    <text x="110" y="48"
+          font-size="32"
+          font-weight="900"
+          letter-spacing="-0.4"
+          fill="url(#srch-text-main)">Поиск</text>
+
+    <!-- Верхняя линия над текстом -->
+    <g class="srch-topline">
+      <line x1="110" y1="16" x2="200" y2="16"
+            stroke="url(#srch-text-main)"
+            stroke-width="0.8" stroke-linecap="round" opacity="0.5"/>
+      <line x1="110" y1="16" x2="126" y2="16"
+            stroke="#FFFFFF" stroke-opacity="0.7"
+            stroke-width="1.2" stroke-linecap="round">
+        <animate attributeName="x1" values="110;190;110" dur="6s" repeatCount="indefinite"/>
+        <animate attributeName="x2" values="126;206;126" dur="6s" repeatCount="indefinite"/>
+        <animate attributeName="stroke-opacity" values="0;0.9;0" dur="6s" repeatCount="indefinite"/>
+      </line>
+      <circle cx="200" cy="16" r="1.4" fill="url(#srch-text-main)">
+        <animate attributeName="r" values="1.4;2;1.4" dur="3s" repeatCount="indefinite"/>
+      </circle>
+    </g>
+
+    <!-- Пульсирующая точка над «о» -->
+    <circle cx="172" cy="20" r="2.2" fill="url(#srch-text-main)">
+      <animate attributeName="r" values="2.2;3;2.2" dur="3.2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="172" cy="20" r="4.4" fill="url(#srch-text-main)" opacity="0.3">
+      <animate attributeName="r" values="4.4;6;4.4" dur="3.2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.3;0.08;0.3" dur="3.2s" repeatCount="indefinite"/>
+    </circle>
+
+    <!-- Подпись «НАЙТИ В МАТРИЦАХ» с декором -->
+    <g transform="translate(110 66)">
+      <!-- Левая скобка -->
+      <path d="M0 -7V0H4"
+            stroke="url(#srch-text-main)"
+            stroke-width="1.2" stroke-linecap="round" fill="none"
+            opacity="0.7"/>
+
+      <!-- Текст -->
+      <text x="10" y="2"
+            font-size="8"
+            font-weight="700"
+            letter-spacing="2.4"
+            fill="url(#srch-text-main)"
+            opacity="0.7">НАЙТИ В МАТРИЦАХ</text>
+
+      <!-- Пульсирующая точка-разделитель -->
+      <circle cx="120" cy="-2" r="1.2" fill="url(#srch-text-main)">
+        <animate attributeName="r" values="1.2;1.8;1.2" dur="2.4s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="1;0.5;1" dur="2.4s" repeatCount="indefinite"/>
+      </circle>
+
+      <!-- Правая скобка -->
+      <path d="M130 -7V0H126"
+            stroke="url(#srch-text-main)"
+            stroke-width="1.2" stroke-linecap="round" fill="none"
+            opacity="0.7"/>
+
+      <!-- Микро-искра слева -->
+      <circle cx="-10" cy="-2" r="1" fill="url(#srch-text-main)" opacity="0.5">
+        <animate attributeName="opacity" values="0.5;1;0.5" dur="3s" repeatCount="indefinite"/>
+      </circle>
+
+      <!-- Микро-искра справа -->
+      <circle cx="140" cy="-2" r="1" fill="url(#srch-text-main)" opacity="0.5">
+        <animate attributeName="opacity" values="0.5;1;0.5" dur="3.4s" begin="0.6s" repeatCount="indefinite"/>
+      </circle>
+    </g>
+
+    <!-- Тонкая линия под подписью -->
+    <g transform="translate(110 74)">
+      <line x1="0" y1="0" x2="140" y2="0"
+            stroke="url(#srch-text-main)"
+            stroke-width="0.6" stroke-linecap="round" opacity="0.4"/>
+      <line x1="0" y1="0" x2="18" y2="0"
+            stroke="#FFFFFF" stroke-opacity="0.7"
+            stroke-width="1" stroke-linecap="round">
+        <animate attributeName="x1" values="0;122;0" dur="7s" repeatCount="indefinite"/>
+        <animate attributeName="x2" values="18;140;18" dur="7s" repeatCount="indefinite"/>
+        <animate attributeName="stroke-opacity" values="0;0.9;0" dur="7s" repeatCount="indefinite"/>
+      </line>
+    </g>
+  </g>
+
+  <!-- ================================================================
+       СВОБОДНЫЕ ЧАСТИЦЫ
+       ================================================================ -->
+
+  <!-- Верх-лево -->
+  <circle class="srch-spark srch-spark--1" cx="14" cy="12" r="1.8"
+          fill="url(#srch-spark-cool)" filter="url(#srch-spark-glow)">
+    <animate attributeName="cx" values="14;11;14" dur="6s" repeatCount="indefinite"/>
+    <animate attributeName="cy" values="12;9;12" dur="6s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="1;0.5;1" dur="4s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Верх-право -->
+  <circle class="srch-spark srch-spark--2" cx="260" cy="14" r="2"
+          fill="url(#srch-spark-warm)" filter="url(#srch-spark-glow)">
+    <animate attributeName="cx" values="260;262;260" dur="7s" repeatCount="indefinite"/>
+    <animate attributeName="cy" values="14;11;14" dur="7s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="1;0.55;1" dur="5s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Низ-право -->
+  <circle class="srch-spark srch-spark--3" cx="252" cy="70" r="1.6"
+          fill="url(#srch-spark-pink)" filter="url(#srch-spark-glow)">
+    <animate attributeName="cx" values="252;250;252" dur="5.5s" repeatCount="indefinite"/>
+    <animate attributeName="cy" values="70;72;70" dur="5.5s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Микро-точка над текстом -->
+  <circle class="srch-spark srch-spark--4" cx="220" cy="6" r="1.2"
+          fill="url(#srch-spark-cool)" filter="url(#srch-spark-glow)">
+    <animate attributeName="opacity" values="1;0.4;1" dur="4.2s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Микро-точка под текстом -->
+  <circle class="srch-spark srch-spark--5" cx="230" cy="76" r="1.3"
+          fill="url(#srch-spark-warm)" filter="url(#srch-spark-glow)">
+    <animate attributeName="opacity" values="0.9;0.3;0.9" dur="3.8s" begin="0.8s" repeatCount="indefinite"/>
+  </circle>
+
+</svg>

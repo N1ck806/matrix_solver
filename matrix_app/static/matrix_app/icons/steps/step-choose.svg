@@ -1,0 +1,302 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 280" fill="none"
+     role="img" aria-label="Выбор операции"
+     class="ml-step ml-step--choose"
+     preserveAspectRatio="xMidYMid meet"
+     font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">
+
+  <defs>
+
+    <radialGradient id="sc-neon" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"    stop-color="#FFFFFF" stop-opacity="1"/>
+      <stop offset="0.25" stop-color="#F5D0FE" stop-opacity="0.95"/>
+      <stop offset="0.5"  stop-color="#D946EF" stop-opacity="0.75"/>
+      <stop offset="0.78" stop-color="#A855F7" stop-opacity="0.45"/>
+      <stop offset="1"    stop-color="#7C3AED" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="sc-glass" cx="0.4" cy="0.32" r="0.72">
+      <stop offset="0"    stop-color="#FFFFFF" stop-opacity="0.35"/>
+      <stop offset="0.4"  stop-color="#E9D5FF" stop-opacity="0.18"/>
+      <stop offset="0.75" stop-color="#A855F7" stop-opacity="0.22"/>
+      <stop offset="1"    stop-color="#4C1D95" stop-opacity="0.4"/>
+    </radialGradient>
+
+    <radialGradient id="sc-fresnel" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"    stop-color="#FFFFFF" stop-opacity="0"/>
+      <stop offset="0.8"  stop-color="#FFFFFF" stop-opacity="0.05"/>
+      <stop offset="0.94" stop-color="#E9D5FF" stop-opacity="0.5"/>
+      <stop offset="1"    stop-color="#FFFFFF" stop-opacity="0.8"/>
+    </radialGradient>
+
+    <radialGradient id="sc-key" cx="0.28" cy="0.18" r="0.42">
+      <stop offset="0"   stop-color="#FFFFFF" stop-opacity="0.95"/>
+      <stop offset="0.4" stop-color="#FFFFFF" stop-opacity="0.22"/>
+      <stop offset="1"   stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="sc-fill" cx="0.78" cy="0.85" r="0.55">
+      <stop offset="0" stop-color="#22D3EE" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#22D3EE" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="sc-rim" x1="0" y1="0" x2="0.7" y2="1">
+      <stop offset="0"    stop-color="#22D3EE" stop-opacity="0"/>
+      <stop offset="0.55" stop-color="#22D3EE" stop-opacity="0.55"/>
+      <stop offset="1"    stop-color="#67E8F9" stop-opacity="0"/>
+    </linearGradient>
+
+    <radialGradient id="sc-bounce" cx="0.5" cy="1" r="0.6">
+      <stop offset="0" stop-color="#7C3AED" stop-opacity="0.24"/>
+      <stop offset="1" stop-color="#7C3AED" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="sc-orbit-1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0"   stop-color="#F0ABFC" stop-opacity="0.95"/>
+      <stop offset="0.5" stop-color="#D946EF" stop-opacity="0.85"/>
+      <stop offset="1"   stop-color="#A855F7" stop-opacity="0.9"/>
+    </linearGradient>
+
+    <linearGradient id="sc-orbit-2" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0"   stop-color="#67E8F9" stop-opacity="0.85"/>
+      <stop offset="0.5" stop-color="#22D3EE" stop-opacity="0.75"/>
+      <stop offset="1"   stop-color="#0891B2" stop-opacity="0.8"/>
+    </linearGradient>
+
+    <linearGradient id="sc-arrow" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#F5D0FE" stop-opacity="0.85"/>
+    </linearGradient>
+
+    <radialGradient id="sc-spark-white" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"   stop-color="#FFFFFF"/>
+      <stop offset="0.4" stop-color="#F5D0FE"/>
+      <stop offset="1"   stop-color="#D946EF" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="sc-spark-cyan" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"   stop-color="#FFFFFF"/>
+      <stop offset="0.4" stop-color="#A5F3FC"/>
+      <stop offset="1"   stop-color="#06B6D4" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="sc-spark-warm" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"   stop-color="#FFFFFF"/>
+      <stop offset="0.4" stop-color="#FDE68A"/>
+      <stop offset="1"   stop-color="#F59E0B" stop-opacity="0"/>
+    </radialGradient>
+
+    <filter id="sc-bloom-sm" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1.4"/>
+    </filter>
+    <filter id="sc-bloom-md" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3"/>
+    </filter>
+    <filter id="sc-bloom-lg" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6.5"/>
+    </filter>
+    <filter id="sc-shadow-floor" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="9"/>
+    </filter>
+    <filter id="sc-core-shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="5"/>
+      <feOffset dx="0" dy="5"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.42"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+  </defs>
+
+  <!-- Фоновый ореол -->
+  <circle cx="140" cy="140" r="120" fill="url(#sc-neon)" opacity="0.1">
+    <animate attributeName="r" values="120;126;120" dur="8s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Тень на пол -->
+  <ellipse cx="140" cy="234" rx="72" ry="9"
+           fill="#4C1D95" opacity="0.22"
+           filter="url(#sc-shadow-floor)">
+    <animate attributeName="rx" values="72;78;72" dur="7s" repeatCount="indefinite"/>
+  </ellipse>
+
+  <!-- Орбита 1 (violet) -->
+  <g transform="translate(140 138)">
+    <g>
+      <animateTransform attributeName="transform" type="rotate"
+                        from="0 0 0" to="360 0 0" dur="34s" repeatCount="indefinite"/>
+      <ellipse cx="0" cy="0" rx="112" ry="24"
+               fill="none" stroke="url(#sc-orbit-1)"
+               stroke-width="1.6" opacity="0.8"
+               transform="rotate(-22)"/>
+      <ellipse cx="0" cy="0" rx="112" ry="24"
+               fill="none" stroke="#D946EF" stroke-width="5"
+               opacity="0.14" filter="url(#sc-bloom-md)"
+               transform="rotate(-22)"/>
+      <g transform="rotate(-22)">
+        <circle cx="112" cy="0" r="3.2"
+                fill="url(#sc-spark-white)" filter="url(#sc-bloom-sm)">
+          <animate attributeName="r" values="3.2;4.2;3.2" dur="2.6s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="112" cy="0" r="1.4" fill="#FFFFFF"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- Орбита 2 (cyan) -->
+  <g transform="translate(140 138)">
+    <g>
+      <animateTransform attributeName="transform" type="rotate"
+                        from="360 0 0" to="0 0 0" dur="26s" repeatCount="indefinite"/>
+      <ellipse cx="0" cy="0" rx="88" ry="20"
+               fill="none" stroke="url(#sc-orbit-2)"
+               stroke-width="1.3" opacity="0.75"
+               transform="rotate(38)"/>
+      <ellipse cx="0" cy="0" rx="88" ry="20"
+               fill="none" stroke="#22D3EE" stroke-width="4"
+               opacity="0.12" filter="url(#sc-bloom-md)"
+               transform="rotate(38)"/>
+      <g transform="rotate(38)">
+        <circle cx="-88" cy="0" r="2.8"
+                fill="url(#sc-spark-cyan)" filter="url(#sc-bloom-sm)">
+          <animate attributeName="r" values="2.8;3.6;2.8" dur="2.4s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="-88" cy="0" r="1.3" fill="#FFFFFF"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- Луч входа (слева) -->
+  <g opacity="0.8">
+    <path d="M20 138 L88 138"
+          stroke="#D946EF" stroke-width="1.4"
+          stroke-linecap="round" stroke-dasharray="3 4"
+          opacity="0.7"/>
+    <circle cx="20" cy="138" r="3"
+            fill="url(#sc-spark-white)" filter="url(#sc-bloom-sm)">
+      <animate attributeName="opacity" values="1;0.3;1" dur="2.4s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="20" cy="138" r="1.4" fill="#FFFFFF"/>
+  </g>
+
+  <!-- Луч выхода (справа) -->
+  <g opacity="0.8">
+    <path d="M192 138 L260 138"
+          stroke="#22D3EE" stroke-width="1.4"
+          stroke-linecap="round" stroke-dasharray="3 4"
+          opacity="0.7"/>
+    <circle cx="260" cy="138" r="3"
+            fill="url(#sc-spark-cyan)" filter="url(#sc-bloom-sm)">
+      <animate attributeName="opacity" values="1;0.3;1" dur="2.4s" begin="1.2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="260" cy="138" r="1.4" fill="#FFFFFF"/>
+  </g>
+
+  <!-- ЯДРО: скруглённый квадрат — «развилка выбора» -->
+  <g filter="url(#sc-core-shadow)">
+
+    <rect x="78" y="78" width="124" height="124" rx="40"
+          fill="url(#sc-neon)" opacity="0.28"
+          filter="url(#sc-bloom-lg)">
+      <animate attributeName="opacity" values="0.28;0.18;0.28" dur="5.6s" repeatCount="indefinite"/>
+    </rect>
+
+    <rect x="88" y="88" width="104" height="104" rx="32"
+          fill="url(#sc-glass)"/>
+    <rect x="88" y="88" width="104" height="104" rx="32"
+          fill="url(#sc-neon)" opacity="0.85"/>
+    <rect x="88" y="88" width="104" height="104" rx="32"
+          fill="url(#sc-fresnel)"/>
+
+    <!-- ============================================================
+         СИМВОЛ: развилка выбора
+         Одна точка входа → две ветки: левая (активная) и правая
+         ============================================================ -->
+    <g stroke-linecap="round" stroke-linejoin="round" fill="none">
+
+      <!-- Входная нода -->
+      <circle cx="102" cy="140" r="6"
+              fill="#FFFFFF" fill-opacity="0.95"
+              stroke="#FFFFFF" stroke-opacity="0.8" stroke-width="0.8"/>
+
+      <!-- Ствол от входа к точке ветвления -->
+      <path d="M108 140 L124 140"
+            stroke="url(#sc-arrow)" stroke-width="2.4"/>
+
+      <!-- Точка ветвления -->
+      <circle cx="126" cy="140" r="2.4" fill="#FFFFFF"/>
+
+      <!-- Верхняя ветка (активная — фиолетовая) -->
+      <path d="M126 140 C 138 140, 144 124, 156 124"
+            stroke="#D946EF" stroke-width="2.6" opacity="0.95"/>
+      <path d="M156 124 L162 121 L162 127 Z"
+            fill="#D946EF" stroke="none"/>
+
+      <!-- Нижняя ветка (альтернатива — циановая, мягче) -->
+      <path d="M126 140 C 138 140, 144 156, 156 156"
+            stroke="#22D3EE" stroke-width="2.2" opacity="0.7"/>
+      <path d="M156 156 L162 153 L162 159 Z"
+            fill="#22D3EE" stroke="none" opacity="0.7"/>
+
+      <!-- Точки-выборы на концах веток -->
+      <circle cx="166" cy="124" r="3.6"
+              fill="#FFFFFF" opacity="0.95">
+        <animate attributeName="opacity" values="0.95;0.5;0.95" dur="2s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="166" cy="156" r="3.6"
+              fill="#FFFFFF" opacity="0.55"/>
+    </g>
+
+    <!-- Key light -->
+    <ellipse cx="112" cy="102" rx="26" ry="14"
+             fill="url(#sc-key)" transform="rotate(-24 112 102)"/>
+    <ellipse cx="108" cy="98" rx="8" ry="4.5"
+             fill="#FFFFFF" opacity="0.9"
+             transform="rotate(-28 108 98)"/>
+
+    <!-- Fill снизу-справа (cyan) -->
+    <ellipse cx="172" cy="182" rx="28" ry="14"
+             fill="url(#sc-fill)" transform="rotate(-20 172 182)"/>
+
+    <!-- Rim: циановая полоска по правому краю -->
+    <path d="M192 112 Q192 160 158 192"
+          fill="none" stroke="url(#sc-rim)" stroke-width="1.8"
+          stroke-linecap="round" opacity="0.75"/>
+
+    <!-- Bounce -->
+    <ellipse cx="140" cy="196" rx="38" ry="8"
+             fill="url(#sc-bounce)"/>
+
+    <!-- Обводка ядра -->
+    <rect x="88" y="88" width="104" height="104" rx="32"
+          fill="none" stroke="#FFFFFF" stroke-opacity="0.3" stroke-width="0.8"/>
+
+    <!-- 4 неоновые точки по углам -->
+    <circle cx="102" cy="102" r="1.8" fill="#FFFFFF" opacity="0.9">
+      <animate attributeName="r" values="1.8;2.4;1.8" dur="3.6s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="178" cy="102" r="1.8" fill="#FFFFFF" opacity="0.9">
+      <animate attributeName="r" values="1.8;2.4;1.8" dur="3.6s" begin="0.9s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="102" cy="178" r="1.8" fill="#FFFFFF" opacity="0.9">
+      <animate attributeName="r" values="1.8;2.4;1.8" dur="3.6s" begin="1.8s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="178" cy="178" r="1.8" fill="#FFFFFF" opacity="0.9">
+      <animate attributeName="r" values="1.8;2.4;1.8" dur="3.6s" begin="2.7s" repeatCount="indefinite"/>
+    </circle>
+
+  </g>
+
+  <!-- Частицы -->
+  <circle cx="40" cy="52" r="1.8" fill="url(#sc-spark-white)" filter="url(#sc-bloom-sm)">
+    <animate attributeName="opacity" values="1;0.4;1" dur="5s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="242" cy="48" r="2" fill="url(#sc-spark-cyan)" filter="url(#sc-bloom-sm)">
+    <animate attributeName="opacity" values="0.9;0.3;0.9" dur="6s" begin="0.6s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="40" cy="240" r="1.8" fill="url(#sc-spark-warm)" filter="url(#sc-bloom-sm)">
+    <animate attributeName="cy" values="240;234;240" dur="6.5s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="244" cy="234" r="2.2" fill="url(#sc-spark-white)" filter="url(#sc-bloom-sm)">
+    <animate attributeName="opacity" values="0.9;0.35;0.9" dur="5.6s" begin="1.2s" repeatCount="indefinite"/>
+  </circle>
+
+</svg>

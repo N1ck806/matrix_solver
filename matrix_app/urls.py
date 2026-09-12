@@ -1,7 +1,7 @@
 """
 URL-маршруты приложения MatrixLab.
 
-Разделены на пять групп:
+Разделены на группы:
     • HTML-страницы   — отдаются через views.py;
     • Сохранение      — saved/, history/;
     • Генерация       — примеры, случайные матрицы;
@@ -49,6 +49,9 @@ urlpatterns = [
     path("types/", views.types, name="types"),
     path("history/", views.history, name="history"),
     path("about/", views.about, name="about"),
+
+    # Поиск по сайту
+    path("search/", views.search, name="search"),
 ]
 
 

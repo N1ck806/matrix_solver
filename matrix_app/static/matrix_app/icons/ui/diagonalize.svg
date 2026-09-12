@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+     stroke="currentColor" stroke-width="1.7"
+     stroke-linecap="round" stroke-linejoin="round">
+  <!-- P — левая скобка -->
+  <path d="M7 4 L4.5 4 L4.5 20 L7 20"/>
+  <!-- D — диагональ -->
+  <path d="M9 8 L11 8 L11 16 L9 16"/>
+  <path d="M13 8 L15 8 L15 16 L13 16"/>
+  <!-- P⁻¹ — правая скобка -->
+  <path d="M19.5 4 L17 4 L17 20 L19.5 20"/>
+</svg>

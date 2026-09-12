@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+     stroke="currentColor" stroke-width="1.7"
+     stroke-linecap="round" stroke-linejoin="round">
+  <path d="M7 4 L4.5 4 L4.5 20 L7 20"/>
+  <path d="M17 4 L19.5 4 L19.5 20 L17 20"/>
+  <!-- Диагональные единицы -->
+  <path d="M9.5 8.5 L11 8.5 L11 15.5 L9.5 15.5"/>
+  <path d="M13 8.5 L14.5 8.5 L14.5 15.5 L13 15.5"/>
+  <!-- Нули в углах -->
+  <circle cx="10.2" cy="15" r="0.9"/>
+  <circle cx="13.8" cy="9" r="0.9"/>
+</svg>

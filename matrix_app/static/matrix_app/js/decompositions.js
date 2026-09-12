@@ -3,295 +3,638 @@
    =============================================================================
    Страница /decompositions/ — LU, QR, Холецкий, диагонализация, спектральное.
 
-   Отвечает за:
-       • выбор типа разложения (5 кнопок);
-       • отправку матрицы на соответствующий endpoint;
-       • рендер 3 секций: Задание / Построение / Результат;
-       • отображение частей разложения (L, U, Q, R, P, D…);
-       • проверку восстановления исходной матрицы;
-       • обработку случая, когда разложение неприменимо
-         (не тот тип матрицы, отсутствие симметрии и т.п.).
+   Публичный API:
+       ML.decompositions.mount(root)
+       ML.decompositions.run(root, ctx)
+       ML.decompositions.runOperation(op, ctx)
+       ML.decompositions.updateRunButtonState(root)
+       ML.decompositions.setOperation(op, root)
+       ML.decompositions.getOperation()
+       ML.decompositions.list()
 
    Зависимости: main.js, matrix.js, steps.js.
    ============================================================================= */
 (function () {
     'use strict';
 
-    var ML = window.MatrixLab;
-    if (!ML) return;
+    const ML = window.MatrixLab;
+    if (!ML) {
+        console.error('[decompositions.js] window.MatrixLab не найден — модуль не запущен.');
+        return;
+    }
 
-    var API = {
-        lu:          '/api/matrix/lu/',
-        qr:          '/api/matrix/qr/',
-        cholesky:    '/api/matrix/cholesky/',
-        diagonalize: '/api/matrix/diagonalize/',
-        spectral:    '/api/matrix/spectral/',
+    // =========================================================================
+    // 1. РЕЕСТР РАЗЛОЖЕНИЙ
+    // =========================================================================
+
+    const DECOMPS = {
+        lu: {
+            url: '/api/matrix/lu/',
+            label: 'LU-разложение',
+            equation: 'A = L \\cdot U',
+            square: true,
+            autoSquare: true
+        },
+        qr: {
+            url: '/api/matrix/qr/',
+            label: 'QR-разложение',
+            equation: 'A = Q \\cdot R',
+            square: false,
+            autoSquare: false
+        },
+        cholesky: {
+            url: '/api/matrix/cholesky/',
+            label: 'Разложение Холецкого',
+            equation: 'A = L \\cdot L^{T}',
+            square: true,
+            autoSquare: true,
+            symmetric: true
+        },
+        diagonalize: {
+            url: '/api/matrix/diagonalize/',
+            label: 'Диагонализация',
+            equation: 'A = P \\cdot D \\cdot P^{-1}',
+            square: true,
+            autoSquare: true
+        },
+        spectral: {
+            url: '/api/matrix/spectral/',
+            label: 'Спектральное разложение',
+            equation: 'A = Q \\cdot D \\cdot Q^{T}',
+            square: true,
+            autoSquare: true,
+            symmetric: true
+        }
     };
 
-    var DECOMP_TITLES = {
-        lu:          'LU-разложение',
-        qr:          'QR-разложение',
-        cholesky:    'Разложение Холецкого',
-        diagonalize: 'Диагонализация',
-        spectral:    'Спектральное разложение',
-    };
+    function decompInfo(op) {
+        return DECOMPS[op] || { url: null, label: op };
+    }
 
-    var DECOMP_EQUATIONS = {
-        lu:          'A = L \\cdot U',
-        qr:          'A = Q \\cdot R',
-        cholesky:    'A = L \\cdot L^{T}',
-        diagonalize: 'A = P \\cdot D \\cdot P^{-1}',
-        spectral:    'A = Q \\cdot D \\cdot Q^{T}',
-    };
+    // =========================================================================
+    // 2. УТИЛИТЫ
+    // =========================================================================
+
+    function tr(key, fallback) {
+        return ML.i18n.t(key, fallback);
+    }
+
+    function isArr(v) { return Array.isArray(v); }
 
     function isEmptyMatrix(m) {
-        if (!Array.isArray(m) || m.length === 0) return true;
-        return m.every(function (row) {
-            return row.every(function (v) { return v === ''; });
+        return ML.validators.isEmptyMatrix(m);
+    }
+
+    /**
+     * Проверка симметричности матрицы на фронте.
+     * Сравнивает как строки (без вычислений), с trim и регистром.
+     * Возвращает true, если матрица квадратная и симметрична.
+     */
+    function isSymmetric(matrix) {
+        if (!isArr(matrix) || !matrix.length) return false;
+        const n = matrix.length;
+        for (let i = 0; i < n; i++) {
+            if (!isArr(matrix[i]) || matrix[i].length !== n) return false;
+        }
+        for (let i = 0; i < n; i++) {
+            for (let j = i + 1; j < n; j++) {
+                const a = String(matrix[i][j] || '').trim();
+                const b = String(matrix[j][i] || '').trim();
+                if (a !== b) return false;
+            }
+        }
+        return true;
+    }
+
+    function findMatrixInput(root) {
+        const scope = root || document;
+        const grid = scope.querySelector('[data-matrix-input]');
+        if (!grid) return null;
+        return ML.matrixInputs[grid.id] || null;
+    }
+
+    function findResultBlock(root) {
+        const scope = root || document;
+        return scope.querySelector('[data-result-block]')
+            || scope.querySelector('[data-decomp-result]');
+    }
+
+    function findRunBtn(root) {
+        const scope = root || document;
+        return scope.querySelector('[data-decomp-run]');
+    }
+
+    function findResetBtn(root) {
+        const scope = root || document;
+        return scope.querySelector('[data-decomp-reset]');
+    }
+
+    function closeModalIfAny(btn) {
+        const modal = btn && btn.closest('.modal');
+        if (modal && ML.modal) {
+            setTimeout(function () {
+                ML.modal.close('#' + modal.id);
+            }, 200);
+        }
+    }
+
+    /**
+     * FIX: убираем "сырой HTML" вида &lt;span class="ml-icon--missing"&gt;
+     * и сами пустые .ml-icon--missing. Если иконки нет — она просто исчезает.
+     * Плюс — ищем текст, который похож на "утекший" HTML, и удаляем его.
+     */
+    function cleanupMissingIcons(scope) {
+        const s = scope || document;
+
+        // 1. Удаляем все .ml-icon--missing
+        ML.$$('.ml-icon--missing', s).forEach(function (el) {
+            el.remove();
+        });
+
+        // 2. Ищем текстовые узлы, которые содержат "<span class=\"ml-icon"
+        //    или "ml-icon--missing" — это "утекший" HTML. Удаляем.
+        const walker = document.createTreeWalker(
+            s.body || s,
+            NodeFilter.SHOW_TEXT,
+            {
+                acceptNode: function (node) {
+                    const t = node.nodeValue || '';
+                    if (t.indexOf('ml-icon--missing') !== -1
+                        || t.indexOf('ml-icon ml-icon--') !== -1) {
+                        return NodeFilter.FILTER_ACCEPT;
+                    }
+                    return NodeFilter.FILTER_SKIP;
+                }
+            }
+        );
+
+        const toRemove = [];
+        while (walker.nextNode()) toRemove.push(walker.currentNode);
+        toRemove.forEach(function (node) {
+            node.nodeValue = (node.nodeValue || '')
+                .replace(/<span[^>]*ml-icon[^>]*><\/span>/g, '')
+                .replace(/&lt;span[^&]*ml-icon[^&]*&gt;&lt;\/span&gt;/g, '')
+                .trim();
         });
     }
 
-    function matrixToLatex(data) {
-        if (!Array.isArray(data) || !data.length) return '';
-        var rows = data.map(function (row) {
-            return row.map(function (v) { return String(v); }).join(' & ');
+    // =========================================================================
+    // 3. ТЕКУЩАЯ ОПЕРАЦИЯ
+    // =========================================================================
+
+    let currentOp = 'lu';
+
+    function setOperation(op, root) {
+        if (!DECOMPS[op]) return;
+        currentOp = op;
+        const scope = root || document;
+
+        ML.$$('[data-decomp]', scope).forEach(function (b) {
+            const active = b.dataset.decomp === op;
+            b.classList.toggle('is-active', active);
+            b.setAttribute('aria-selected', active ? 'true' : 'false');
         });
-        return '\\begin{bmatrix}' + rows.join(' \\\\ ') + '\\end{bmatrix}';
+
+        // При смене разложения — авто-подгонка размера
+        autoResizeForCurrent(scope);
+
+        updateRunButtonState(scope);
+        ML.emit('decomposition:operation', { op: op });
+    }
+
+    function getOperation() { return currentOp; }
+
+    function listOperations() { return Object.keys(DECOMPS); }
+
+    // =========================================================================
+    // 4. АВТО-ПОДГОНКА РАЗМЕРА
+    // =========================================================================
+
+    /**
+     * Если текущее разложение требует квадратной матрицы, а матрица не
+     * квадратная — приводим к n × n (n = max(rows, cols)).
+     * Сохраняем данные, где можно.
+     */
+    function autoResizeForCurrent(scope) {
+        const info = decompInfo(currentOp);
+        if (!info.autoSquare) return;
+
+        const mi = findMatrixInput(scope);
+        if (!mi) return;
+
+        if (mi.rows !== mi.cols) {
+            const n = Math.max(mi.rows, mi.cols);
+            mi.setSize(n, n, { preserve: true });
+
+            ML.toast.info(
+                tr('decomp.sizeAdjusted', 'Размер подстроен'),
+                tr('decomp.matrix', 'Матрица') + ' ' + n + ' × ' + n
+            );
+        }
     }
 
     // =========================================================================
-    // Рендер результата
+    // 5. ОБНОВЛЕНИЕ КНОПКИ
     // =========================================================================
 
-    function renderDecomposition(block, payload, op, matrix) {
-        if (!block) return;
+    function updateRunButtonState(root) {
+        const scope = root || document;
+        const runBtn = findRunBtn(scope);
+        if (!runBtn) return;
 
-        // Показать блок, скрыть ошибку
-        block.hidden = false;
-        block.classList.remove('is-error');
-
-        block.querySelectorAll('[data-result-section]').forEach(function (el) {
-            el.style.display = '';
-            el.hidden = false;
-        });
-
-        var errorEl = block.querySelector('[data-decomp-error]');
-        if (errorEl) {
-            errorEl.hidden = true;
-            errorEl.style.display = 'none';
+        const mi = findMatrixInput(scope);
+        if (!mi) {
+            runBtn.disabled = true;
+            runBtn.title = tr('decomp.editorNotFound',
+                'Редактор матрицы не найден');
+            runBtn.setAttribute('aria-disabled', 'true');
+            return;
         }
 
-        var result = payload.result || {};
-        var extra = payload.extra || {};
-        var task = payload.task || {};
+        const info = decompInfo(currentOp);
+        const matrix = mi.read();
+        const empty = isEmptyMatrix(matrix);
+        const invalid = mi.hasInvalid && mi.hasInvalid();
+        const notSquare = info.square && mi.rows !== mi.cols;
+        const notSymmetric = info.symmetric && !empty && !isSymmetric(matrix);
 
-        // --- Секция 1. Задание ---
-        var taskText = block.querySelector('[data-decomp-task-text]');
-        var taskFormula = block.querySelector('[data-decomp-task-formula]');
+        runBtn.disabled = empty || invalid || notSquare || notSymmetric;
 
-        if (taskText) {
-            taskText.textContent = 'Выполнить ' + (DECOMP_TITLES[op] || op)
-                + ' для матрицы A.';
+        if (invalid) {
+            runBtn.title = tr('decomp.invalidValues',
+                'Некорректные значения в матрице');
+        } else if (empty) {
+            runBtn.title = tr('decomp.fillMatrix', 'Заполните матрицу');
+        } else if (notSquare) {
+            runBtn.title = tr('decomp.needSquareFor',
+                'Нужна квадратная матрица для') + ' «'
+                + info.label + '»';
+        } else if (notSymmetric) {
+            runBtn.title = tr('decomp.needSymmetric',
+                'Нужна симметричная матрица (A = Aᵀ)');
+        } else {
+            runBtn.title = tr('decomp.run', 'Выполнить') + ' ' + info.label;
         }
-        if (taskFormula) {
-            var matrixLatex = task.matrix_latex || matrixToLatex(matrix);
-            var equation = DECOMP_EQUATIONS[op] || '';
-            taskFormula.innerHTML = '$$A = ' + matrixLatex + ',\\quad ' + equation + '$$';
+
+        runBtn.setAttribute('aria-disabled', String(runBtn.disabled));
+    }
+
+    // =========================================================================
+    // 6. ЗАПУСК РАЗЛОЖЕНИЯ
+    // =========================================================================
+
+    async function runOperation(op, ctx) {
+        ctx = ctx || {};
+        const scope = ctx.root || document;
+        const resultBlock = ctx.resultBlock || findResultBlock(scope);
+        const placeholder = ctx.placeholder
+            || scope.querySelector(
+                '[data-decomp-placeholder], [data-calc-placeholder]'
+            );
+
+        const mi = ctx.mi || findMatrixInput(scope);
+        if (!mi) {
+            ML.toast.warning(
+                tr('decomp.noMatrix', 'Нет матрицы'),
+                tr('decomp.editorNotFound',
+                    'Редактор матрицы не найден.')
+            );
+            return null;
         }
 
-        // --- Секция 2. Построение (если есть steps) ---
-        var stepsContainer = block.querySelector('[data-decomp-steps]');
-        if (stepsContainer) {
-            stepsContainer.innerHTML = '';
+        const info = decompInfo(op);
+        if (!info.url) {
+            ML.toast.error(
+                tr('common.error', 'Ошибка'),
+                tr('decomp.notSupported', 'Разложение не поддерживается.')
+                    + ' «' + info.label + '»'
+            );
+            return null;
+        }
 
-            var steps = Array.isArray(payload.steps) ? payload.steps : [];
-            if (steps.length > 0) {
-                steps.forEach(function (step, idx) {
-                    var stepEl = document.createElement('article');
-                    stepEl.className = 'step';
-                    stepEl.innerHTML = ''
-                        + '<div class="step-marker"><span class="step-number">' + (idx + 1) + '</span></div>'
-                        + '<div class="step-content">'
-                        + (step.title ? '<h4 class="step-title">' + ML.escapeHtml(step.title) + '</h4>' : '')
-                        + (step.text ? '<p class="step-text">' + ML.escapeHtml(step.text) + '</p>' : '')
-                        + (step.latex ? '<div class="step-formula">$$' + step.latex + '$$</div>' : '')
-                        + '</div>';
-                    stepsContainer.appendChild(stepEl);
+        // --- Проверки
+        if (isEmptyMatrix(mi.read())) {
+            ML.toast.warning(
+                tr('decomp.emptyMatrix', 'Пустая матрица'),
+                tr('decomp.fillMatrix', 'Заполните матрицу.')
+            );
+            return null;
+        }
+        if (mi.hasInvalid && mi.hasInvalid()) {
+            ML.toast.warning(
+                tr('decomp.invalidInput', 'Некорректный ввод'),
+                tr('decomp.fixCells', 'Исправьте подсвеченные ячейки.')
+            );
+            return null;
+        }
+
+        // --- AutoSquare
+        if (info.autoSquare && mi.rows !== mi.cols) {
+            const n = Math.max(mi.rows, mi.cols);
+            mi.setSize(n, n, { preserve: true });
+            ML.toast.info(
+                tr('decomp.sizeAdjusted', 'Размер подстроен'),
+                tr('decomp.matrix', 'Матрица') + ' ' + n + ' × ' + n
+            );
+        }
+
+        if (info.square && mi.rows !== mi.cols) {
+            ML.toast.warning(
+                tr('decomp.needSquare', 'Нужна квадратная матрица'),
+                tr('decomp.needSquareHint', 'Для') + ' «' + info.label
+                    + '» ' + tr('decomp.needSquareHint2',
+                        'требуется матрица n × n.')
+            );
+            return null;
+        }
+
+        // --- Симметрия
+        const matrix = mi.read();
+        if (info.symmetric && !isSymmetric(matrix)) {
+            ML.toast.warning(
+                tr('decomp.needSymmetric', 'Нужна симметричная матрица'),
+                tr('decomp.needSymmetricHint',
+                    'Выбранное разложение требует симметричной матрицы '
+                    + '(A = Aᵀ).')
+            );
+            return null;
+        }
+
+        // --- Валидация через ядро
+        const validation = ML.validateMatrixFor(op, { a: mi });
+        if (!validation.ok) {
+            ML.toast.warning(validation.message, validation.hint || '');
+            return null;
+        }
+
+        const payload = {
+            matrix: matrix,
+            show_steps: true
+        };
+        const snapshot = JSON.parse(JSON.stringify(payload));
+
+        // --- Loading
+        ML.loader.show(
+            tr('common.computing', 'Разлагаем…')
+        );
+        if (resultBlock && ML.resultBlock) {
+            ML.resultBlock.renderSkeleton(resultBlock);
+        }
+
+        try {
+            const response = await ML.api.post(info.url, payload);
+
+            let verification = { ok: true };
+            if (ML.verifyResult) {
+                verification = ML.verifyResult(op, snapshot, response);
+            }
+
+            const valid = !(response && response.extra
+                && response.extra.valid === false);
+
+            if (resultBlock && ML.resultBlock) {
+                ML.resultBlock.render(resultBlock, response, {
+                    taskText: tr('decomp.taskText',
+                        'Выполнить разложение для матрицы A.')
+                        + ' ' + info.label + '.',
+                    taskLatex: 'A = ' + ML.format.matrixToLatex(matrix)
+                        + ', \\quad ' + (info.equation || ''),
+                    verified: verification.ok
+                });
+            }
+            if (placeholder) placeholder.hidden = true;
+
+            // --- Toast по применимости
+            if (!valid) {
+                const reason = (response.extra && response.extra.reason) || '';
+                ML.toast.warning(
+                    tr('decomp.notApplicable', 'Разложение неприменимо'),
+                    reason || tr('decomp.notApplicableHint',
+                        'Матрица не подходит для выбранного разложения.')
+                );
+                ML.emit('decomposition:not-applicable', {
+                    op: op,
+                    reason: reason
                 });
             } else {
-                stepsContainer.innerHTML = '<p class="result-empty-note">Пошаговое построение не предусмотрено для этой операции.</p>';
-            }
-        }
-
-        // --- Секция 3. Результат ---
-        var partsContainer = block.querySelector('[data-decomp-parts]');
-        var checksBlock = block.querySelector('[data-decomp-checks]');
-        var checksList = block.querySelector('[data-decomp-checks-list]');
-        var reasonBlock = block.querySelector('[data-decomp-reason]');
-
-        // Если разложение неприменимо
-        if (extra.valid === false) {
-            if (partsContainer) partsContainer.innerHTML = '';
-            if (checksBlock) checksBlock.hidden = true;
-            if (reasonBlock) {
-                reasonBlock.hidden = false;
-                reasonBlock.textContent = extra.reason || 'Разложение неприменимо для этой матрицы.';
-            }
-        } else {
-            if (reasonBlock) reasonBlock.hidden = true;
-
-            // Части разложения
-            if (partsContainer) {
-                partsContainer.innerHTML = '';
-                var partsLatex = extra.parts_latex || {};
-
-                Object.keys(result).forEach(function (name) {
-                    var latex = partsLatex[name] || matrixToLatex(result[name]);
-
-                    var part = document.createElement('div');
-                    part.className = 'decomp-part';
-                    part.innerHTML = ''
-                        + '<div class="decomp-part-label">' + ML.escapeHtml(name) + ' =</div>'
-                        + '<div class="decomp-part-body">$$' + latex + '$$</div>';
-                    partsContainer.appendChild(part);
-                });
+                ML.toast.success(
+                    tr('common.ok', 'Готово'),
+                    info.label + ' ' + tr('decomp.done', 'выполнено.')
+                );
             }
 
-            // Проверки
-            if (checksBlock && checksList) {
-                checksList.innerHTML = '';
-                var checks = [];
-
-                if (extra.checks && typeof extra.checks === 'object') {
-                    Object.keys(extra.checks).forEach(function (key) {
-                        var val = extra.checks[key];
-                        if (typeof val === 'boolean') {
-                            checks.push({
-                                name: key === 'reconstruction_ok'
-                                    ? 'A восстановлена из частей'
-                                    : (key === 'determinant_ok'
-                                        ? 'Определитель совпадает'
-                                        : (key === 'orthogonality_ok'
-                                            ? 'Q ортогональна'
-                                            : key)),
-                                ok: val,
-                            });
-                        }
-                    });
-                }
-
-                if (checks.length > 0) {
-                    checks.forEach(function (c) {
-                        var li = document.createElement('li');
-                        li.innerHTML = '<span style="color:'
-                            + (c.ok ? 'var(--success)' : 'var(--danger)')
-                            + ';font-weight:700;">'
-                            + (c.ok ? '✓' : '✗')
-                            + '</span> <span>'
-                            + ML.escapeHtml(c.name)
-                            + '</span>';
-                        checksList.appendChild(li);
-                    });
-                    checksBlock.hidden = false;
-                } else {
-                    checksBlock.hidden = true;
-                }
-            }
-        }
-
-        // MathJax + скролл
-        ML.mathjax.typeset(block).then(function () {
-            try {
-                block.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            } catch (e) { /* noop */ }
-        });
-    }
-
-    function renderError(block, message) {
-        if (!block) return;
-        block.hidden = false;
-        block.classList.add('is-error');
-
-        block.querySelectorAll('[data-result-section]').forEach(function (el) {
-            el.style.display = 'none';
-        });
-
-        var errorEl = block.querySelector('[data-decomp-error]');
-        var errMsg = block.querySelector('[data-decomp-error-message]');
-        if (errorEl) {
-            errorEl.hidden = false;
-            errorEl.style.display = '';
-        }
-        if (errMsg) errMsg.textContent = message || 'Не удалось выполнить разложение.';
-    }
-
-    // =========================================================================
-    // Инициализация
-    // =========================================================================
-    function init() {
-        var runBtn = document.querySelector('[data-decomp-run]');
-        var resetBtn = document.querySelector('[data-decomp-reset]');
-        var resultBlock = document.querySelector('[data-decomp-result]');
-        if (!runBtn || !resultBlock) return;
-
-        var grid = document.querySelector('[data-matrix-input]');
-        var matrixInput = grid ? ML.matrixInputs[grid.id] : null;
-
-        var currentOp = 'lu';
-
-        // Переключение кнопок выбора разложения
-        ML.$$('[data-decomp]').forEach(function (btn) {
-            btn.addEventListener('click', function () {
-                ML.$$('[data-decomp]').forEach(function (b) {
-                    b.classList.toggle('is-active', b === btn);
-                });
-                currentOp = btn.dataset.decomp;
+            // --- История
+            ML.history.push({
+                op: op,
+                label: info.label,
+                matrix: snapshot.matrix,
+                result: response,
+                size: mi.rows + '×' + mi.cols
             });
-        });
 
-        // Запуск
-        runBtn.addEventListener('click', async function () {
-            if (!matrixInput) return;
+            ML.emit('decomposition:done', {
+                op: op,
+                payload: snapshot,
+                result: response,
+                valid: valid
+            });
 
-            var matrix = matrixInput.read();
-            if (isEmptyMatrix(matrix)) {
-                ML.toast.warning('Пустая матрица', 'Заполните матрицу.');
-                return;
+            return response;
+        } catch (err) {
+            if (resultBlock && ML.resultBlock) {
+                ML.resultBlock.renderError(
+                    resultBlock, err.message, err.code
+                );
             }
+            ML.toast.error(
+                tr('decomp.failed', 'Не удалось выполнить'),
+                err.message || ''
+            );
+            ML.emit('decomposition:error', { op: op, error: err });
+            return null;
+        } finally {
+            ML.loader.hide();
+        }
+    }
 
-            var url = API[currentOp];
-            if (!url) {
-                ML.toast.error('Ошибка', 'Разложение «' + currentOp + '» не поддерживается.');
-                return;
-            }
+    function run(root, ctx) {
+        return runOperation(currentOp, Object.assign({}, ctx, {
+            root: (ctx && ctx.root) || root || document
+        }));
+    }
 
-            ML.loader.show('Разлагаем…');
+    // =========================================================================
+    // 7. ПРИМЕРЫ
+    // =========================================================================
+
+    function initExamples() {
+        document.addEventListener('click', async function (e) {
+            const btn = e.target.closest('[data-load-decomp]');
+            if (!btn) return;
+
+            const slug = btn.dataset.loadDecomp;
+            if (!slug) return;
+
+            const mi = findMatrixInput(btn.closest('section'))
+                || findMatrixInput(document);
+
+            ML.loader.show(
+                tr('decomp.loadingExample', 'Загружаем пример…')
+            );
+
             try {
-                var resp = await ML.api.post(url, { matrix: matrix });
-                renderDecomposition(resultBlock, resp, currentOp, matrix);
+                const resp = await ML.api.post(
+                    '/api/example/' + slug + '/', {}
+                );
+                const data = (resp && resp.result) || {};
 
-                if (resp.extra && resp.extra.valid === false) {
-                    ML.toast.warning('Разложение неприменимо', resp.extra.reason || '');
-                } else {
-                    ML.toast.success('Готово', DECOMP_TITLES[currentOp] + ' выполнено.');
+                if (data.matrix && mi) {
+                    mi.setSize(
+                        data.matrix.length,
+                        data.matrix[0].length,
+                        { preserve: false }
+                    );
+                    mi.write(data.matrix);
                 }
+                if (data.op && DECOMPS[data.op]) {
+                    setOperation(data.op, document);
+                }
+
+                closeModalIfAny(btn);
+                ML.toast.success(
+                    tr('decomp.exampleLoaded', 'Пример загружен'),
+                    data.title || slug
+                );
+
+                ML.emit('decompositions:example-loaded', { slug: slug });
             } catch (err) {
-                renderError(resultBlock, err.message);
-                ML.toast.error('Ошибка', err.message);
+                ML.toast.error(
+                    tr('decomp.exampleFailed', 'Не удалось загрузить'),
+                    err.message
+                );
             } finally {
                 ML.loader.hide();
             }
         });
+    }
 
-        // Сброс
-        if (resetBtn) {
-            resetBtn.addEventListener('click', function () {
-                if (matrixInput) matrixInput.clear();
-                if (resultBlock) resultBlock.hidden = true;
-                var placeholder = document.querySelector('[data-decomp-placeholder]');
-                if (placeholder) placeholder.hidden = false;
+    // =========================================================================
+    // 8. МОНТИРОВАНИЕ
+    // =========================================================================
+
+    function mount(root) {
+        root = root || document;
+        const runBtn = findRunBtn(root);
+        if (!runBtn) return false;
+
+        const section = runBtn.closest('section') || document;
+        const resultBlock = findResultBlock(section);
+        const resetBtn = findResetBtn(section);
+        const placeholder = section.querySelector(
+            '[data-decomp-placeholder], [data-calc-placeholder]'
+        );
+
+        const mi = findMatrixInput(section);
+
+        // FIX: убираем битые/пустые ml-icon--missing и "утекший" HTML
+        cleanupMissingIcons(document);
+
+        // --- Debounce
+        const updateDebounced = ML.debounce(function () {
+            updateRunButtonState(section);
+        }, 80);
+
+        if (mi) {
+            mi.el.addEventListener('matrix:change', function () {
+                // На лету: авто-подгонка под текущее разложение
+                autoResizeForCurrent(section);
+                updateDebounced();
             });
         }
+        ML.on('matrix:change', updateDebounced);
+
+        // --- Переключение разложений
+        ML.$$('[data-decomp]', section).forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                setOperation(btn.dataset.decomp, section);
+            });
+        });
+
+        // --- Начальная операция
+        const initialBtn = section.querySelector('[data-decomp].is-active')
+            || section.querySelector('[data-decomp]');
+        if (initialBtn && initialBtn.dataset.decomp) {
+            currentOp = initialBtn.dataset.decomp;
+        }
+        setOperation(currentOp, section);
+
+        // --- Запуск
+        runBtn.addEventListener('click', function () {
+            runOperation(currentOp, {
+                root: section,
+                resultBlock: resultBlock,
+                placeholder: placeholder,
+                mi: mi
+            });
+        });
+
+        // --- Сброс
+        if (resetBtn) {
+            resetBtn.addEventListener('click', function () {
+                if (mi) mi.clear();
+                if (resultBlock && ML.resultBlock) {
+                    ML.resultBlock.clear(resultBlock);
+                } else if (resultBlock) {
+                    resultBlock.hidden = true;
+                }
+                if (placeholder) placeholder.hidden = false;
+                updateRunButtonState(section);
+
+                ML.emit('decompositions:reset', {});
+            });
+        }
+
+        // --- Публичный API
+        ML.decompositions = ML.decompositions || {};
+        ML.decompositions.mount = mount;
+        ML.decompositions.run = run;
+        ML.decompositions.runOperation = runOperation;
+        ML.decompositions.updateRunButtonState = updateRunButtonState;
+        ML.decompositions.setOperation = setOperation;
+        ML.decompositions.getOperation = getOperation;
+        ML.decompositions.list = listOperations;
+        ML.decompositions.cleanupMissingIcons = cleanupMissingIcons;
+
+        ML.emit('decompositions:ready', {});
+        return true;
+    }
+
+    // =========================================================================
+    // 9. ИНИЦИАЛИЗАЦИЯ
+    // =========================================================================
+
+    let _initialized = false;
+
+    function init() {
+        if (_initialized) return;
+        _initialized = true;
+
+        // FIX: чистим DOM от "сырого HTML" сразу после загрузки
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function () {
+                cleanupMissingIcons(document);
+            });
+        } else {
+            cleanupMissingIcons(document);
+        }
+
+        if (document.querySelector('[data-decomp-run]')) {
+            mount(document);
+        }
+
+        initExamples();
+
+        ML.emit('decompositions:module-ready', {});
     }
 
     if (document.readyState === 'loading') {

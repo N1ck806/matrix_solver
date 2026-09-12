@@ -1,12 +1,63 @@
 """
-Template tags для SVG-иконок MatrixLab.
+Шаблонные теги для вставки SVG-иконок и иллюстраций MatrixLab.
 
 Использование:
     {% load matrix_icons %}
-    {% icon "calculator" %}
-    {% icon "matrix" size=32 class="my-class" %}
+
+    {# Иконка — плоская (ищется во всех папках) #}
+    {% icon "plus" size=18 %}
+    {% icon "lambda" size=22 variant="cyan" %}
+    {% icon "refresh" size=16 extra_class="ml-icon--spin" %}
+    {% icon "determinant" size=20 label="Определитель" %}
+
+    {# Логотип из brand/ #}
+    {% icon "logo-mark" size=40 %}
+    {% icon "logo" size=160 %}
+    {% icon "favicon" size=32 %}
+
+    {# Иконка с явным путём (подпапка внутри icons/) #}
+    {% icon "features/determinant" size=96 %}
+    {% icon "math/lambda" size=22 %}
+    {% icon "ui/arrow-right" size=14 %}
+    {% icon "hero/hero-transform" size=320 %}
+
+    {# Большая иллюстрация #}
+    {% illustration "hero-matrix" width=480 height=360 %}
+    {% illustration "determinant" width=480 height=360 label="Определитель как площадь" %}
+
+Поиск {% icon "name" %}:
+    1) icons/<name>.svg
+    2) icons/brand/<name>.svg
+    3) icons/math/<name>.svg
+    4) icons/ui/<name>.svg
+    5) icons/features/<name>.svg
+    6) icons/hero/<name>.svg
+    7) icons/steps/<name>.svg
+    8) icons/theory/<name>.svg
+    9) icons/cta/<name>.svg
+
+Поиск {% icon "sub/name" %}:
+    icons/sub/name.svg  — ровно по указанному пути,
+    без перебора папок (чтобы не было неоднозначностей).
+
+Поиск {% illustration "name" %}:
+    illustrations/name.svg
+
+Особенности:
+    • SVG вставляется inline — работает currentColor, темы, CSS-анимации.
+    • Все id внутри SVG получают уникальный префикс (чтобы не конфликтовали
+      градиенты при нескольких копиях на странице).
+    • Файлы кэшируются в памяти процесса после первого чтения.
+    • Имена валидируются: разрешены буквы, цифры, дефис, подчёркивание
+      и один уровень вложенности через слэш. Никаких ../, абсолютных путей,
+      пробелов, точек.
 """
+
 from __future__ import annotations
+
+import re
+from functools import lru_cache
+from pathlib import Path
 
 from django import template
 from django.utils.safestring import mark_safe
@@ -14,118 +65,440 @@ from django.utils.safestring import mark_safe
 register = template.Library()
 
 
-_ICONS: dict[str, str] = {
-    # Навигация
-    "home": '<path d="M3 10l9-7 9 7v10a1 1 0 0 1-1 1h-5v-7h-6v7H4a1 1 0 0 1-1-1z"/>',
-    "calculator": '<rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8"/><path d="M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/>',
-    "layers": '<path d="M12 2L2 7l10 5 10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>',
-    "check": '<path d="M20 6L9 17l-5-5"/>',
-    "check-circle": '<circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/>',
-    "list": '<line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="4" cy="6" r="1.5"/><circle cx="4" cy="12" r="1.5"/><circle cx="4" cy="18" r="1.5"/>',
-    "grid": '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
-    "activity": '<polyline points="3 12 7 12 10 4 14 20 17 12 21 12"/>',
-    "book": '<path d="M4 4h12a4 4 0 0 1 4 4v12H8a4 4 0 0 0-4 4z"/><path d="M4 4v16"/>',
-    "book-open": '<path d="M2 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H2z"/><path d="M22 4h-7a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h8z"/>',
-    "hash": '<line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/>',
-    "history": '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><polyline points="3 3 3 8 8 8"/><polyline points="12 7 12 12 15 14"/>',
-    "info": '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>',
-    "clock": '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
-    "menu": '<line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>',
-    "close": '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+# =============================================================================
+# Пути
+# =============================================================================
 
-    # Тема
-    "sun": '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>',
-    "moon": '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>',
+# .../matrix_app/templatetags/matrix_icons.py
+# → .../matrix_app/
+_APP_DIR = Path(__file__).resolve().parent.parent
 
-    # Действия
-    "arrow-right": '<line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/>',
-    "arrow-left": '<line x1="19" y1="12" x2="5" y2="12"/><polyline points="11 6 5 12 11 18"/>',
-    "arrow-down": '<line x1="12" y1="5" x2="12" y2="19"/><polyline points="6 13 12 19 18 13"/>',
-    "copy": '<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
-    "clipboard": '<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/>',
-    "download": '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
-    "upload": '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>',
-    "trash": '<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/>',
-    "edit": '<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4z"/>',
-    "refresh": '<polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>',
-    "search": '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
-    "plus": '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
-    "minus": '<line x1="5" y1="12" x2="19" y2="12"/>',
-    "settings": '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
+# → .../matrix_app/static/matrix_app/
+_STATIC_DIR = _APP_DIR / "static" / "matrix_app"
 
-    # Математика — матрицы
-    "matrix": '<path d="M3 4h3v16H3zM21 4h-3v16h3z"/><circle cx="10" cy="9" r="1"/><circle cx="14" cy="9" r="1"/><circle cx="10" cy="15" r="1"/><circle cx="14" cy="15" r="1"/>',
-    "matrix-grid": '<rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/>',
-    "brackets": '<path d="M7 4H4v16h3M17 4h3v16h-3"/>',
+_ICONS_DIR         = _STATIC_DIR / "icons"
+_ILLUSTRATIONS_DIR = _STATIC_DIR / "illustrations"
 
-    # Математика — операции
-    "determinant": '<path d="M4 3v18M20 3v18"/><path d="M8 7l8 10M8 17l8-10"/>',
-    "rank": '<rect x="4" y="4" width="16" height="4" rx="0.5"/><rect x="4" y="10" width="10" height="4" rx="0.5"/><rect x="4" y="16" width="6" height="4" rx="0.5"/>',
-    "inverse": '<path d="M4 3v18M20 3v18"/><text x="12" y="17" font-size="13" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">-1</text>',
-    "transpose": '<rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/><path d="M11 11l2 2"/>',
-    "trace": '<path d="M4 3v18M20 3v18"/><line x1="7" y1="7" x2="17" y2="17" stroke-dasharray="2 2"/>',
-    "lambda": '<path d="M8 20L14 4M14 4l6 16M9 15h6"/>',
-    "vector": '<line x1="4" y1="20" x2="20" y2="4"/><polyline points="14 4 20 4 20 10"/>',
-    "sigma": '<path d="M19 4H5l8 8-8 8h14"/>',
-    "system": '<path d="M4 6h16M4 12h16M4 18h16"/><circle cx="20" cy="6" r="0.6"/><circle cx="20" cy="12" r="0.6"/><circle cx="20" cy="18" r="0.6"/>',
-    "equation": '<path d="M4 8h16M4 16h16"/><path d="M9 4v4M9 16v4M15 4v4M15 16v4"/>',
+# Известные подпапки icons/ (используются для «плоского» поиска по имени).
+_ICON_SUBDIRS = (
+    "brand",
+    "math",
+    "ui",
+    "features",
+    "hero",
+    "steps",
+    "theory",
+    "cta",
+)
 
-    # Разложения
-    "lu": '<path d="M3 3h4v18H3z"/><path d="M3 3h18v4H3z"/><circle cx="12" cy="12" r="1"/><circle cx="17" cy="12" r="1"/><circle cx="12" cy="17" r="1"/><circle cx="17" cy="17" r="1"/>',
-    "qr": '<circle cx="8" cy="8" r="5"/><rect x="13" y="13" width="8" height="8" rx="1"/>',
-    "diagonalize": '<path d="M4 20V4l16 16V4"/>',
+# Порядок поиска для {% icon "name" %} (без слэша):
+# сначала корень icons/, затем известные подпапки.
+_ICON_SEARCH_PATHS: tuple[Path, ...] = (
+    _ICONS_DIR,
+    *(_ICONS_DIR / sub for sub in _ICON_SUBDIRS),
+)
 
-    # Свойства
-    "zero-matrix": '<path d="M3 4h2v16H3zM21 4h-2v16h2z"/><circle cx="12" cy="12" r="3.5"/>',
-    "identity": '<path d="M3 4h2v16H3zM21 4h-2v16h2z"/><circle cx="9" cy="9" r="1.2"/><circle cx="15" cy="15" r="1.2"/>',
-    "diagonal": '<path d="M3 4h2v16H3zM21 4h-2v16h2z"/><circle cx="9" cy="9" r="1.2"/><circle cx="15" cy="15" r="1.2"/>',
-    "symmetric": '<path d="M12 3v18M3 12h18"/><circle cx="7" cy="7" r="1.5"/><circle cx="17" cy="17" r="1.5"/>',
-    "orthogonal": '<rect x="4" y="4" width="16" height="16" rx="2"/><line x1="4" y1="4" x2="20" y2="20"/><line x1="20" y1="4" x2="4" y2="20"/>',
 
-    # Статусы
-    "check-badge": '<circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/>',
-    "alert-circle": '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',
-    "alert-triangle": '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
-    "x-circle": '<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>',
-    "sparkles": '<path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z"/><path d="M19 15l.7 2.1L22 18l-2.3.9L19 21l-.7-2.1L16 18l2.3-.9z"/>',
+# =============================================================================
+# Валидация имён
+# =============================================================================
 
-    # Прочее
-    "users": '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
-    "graduation": '<path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/>',
-    "code": '<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>',
-    "rocket": '<path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>',
-    "shield": '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
-    "eye": '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>',
-    "repeat": '<polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>',
-    "file-text": '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>',
-    "file-tex": '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><text x="12" y="17" font-size="9" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">TeX</text>',
-    "file-json": '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><text x="12" y="17" font-size="8" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">{}</text>',
-}
+# Разрешено:
+#   name          — буквы, цифры, дефис, подчёркивание
+#   sub/name      — один уровень вложенности через слэш
+# Запрещено: .., / в начале/конце, //, точки, пробелы.
+_NAME_RE = re.compile(
+    r"""
+    ^
+    [a-z0-9][a-z0-9_-]*              # первый сегмент
+    (?: / [a-z0-9][a-z0-9_-]* )?     # опционально: /второй_сегмент
+    $
+    """,
+    re.IGNORECASE | re.VERBOSE,
+)
 
+
+def _is_safe_name(name: str) -> bool:
+    if not name or not _NAME_RE.match(name):
+        return False
+    # Дополнительные страховки от обхода путей
+    if ".." in name or "//" in name:
+        return False
+    if name.startswith("/") or name.endswith("/"):
+        return False
+    return True
+
+
+# =============================================================================
+# Чтение файлов (с кэшем)
+# =============================================================================
+
+@lru_cache(maxsize=1024)
+def _read_svg(path_str: str) -> str | None:
+    """Читает SVG-файл и кэширует содержимое. None — если файла нет."""
+    path = Path(path_str)
+    if not path.is_file():
+        return None
+    try:
+        return path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
+        return None
+
+
+def _read_svg_at(base: Path, name: str) -> tuple[str, str] | None:
+    """
+    Пробует прочитать <base>/<name>.svg.
+    Возвращает (содержимое, путь) или None.
+    """
+    path = base / f"{name}.svg"
+    content = _read_svg(str(path))
+    if content is None:
+        return None
+    return content, str(path)
+
+
+def _find_svg(
+    name: str,
+    search_paths: tuple[Path, ...],
+) -> tuple[str, str] | None:
+    """
+    Ищет SVG по имени в указанных директориях.
+
+    • Если name содержит слэш ('hero/hero-transform') — ищет ровно
+      по пути icons/hero/hero-transform.svg (первая и единственная попытка).
+    • Иначе перебирает search_paths по очереди.
+
+    Возвращает (содержимое, путь) или None.
+    """
+    if not _is_safe_name(name):
+        return None
+
+    if "/" in name:
+        # Явный путь — ищем только относительно корня icons/.
+        # search_paths[0] — это _ICONS_DIR.
+        root = search_paths[0] if search_paths else None
+        if root is None:
+            return None
+        return _read_svg_at(root, name)
+
+    for base in search_paths:
+        found = _read_svg_at(base, name)
+        if found is not None:
+            return found
+
+    return None
+
+
+def _find_icon(name: str) -> tuple[str, str] | None:
+    """Ищет иконку в icons/ и известных подпапках."""
+    return _find_svg(name, _ICON_SEARCH_PATHS)
+
+
+def _find_illustration(name: str) -> tuple[str, str] | None:
+    """Ищет иллюстрацию в illustrations/ (плоско, без подпапок)."""
+    # Для иллюстраций слэш не поддерживаем — только имя файла.
+    if "/" in name:
+        return None
+    return _find_svg(name, (_ILLUSTRATIONS_DIR,))
+
+
+# =============================================================================
+# Постобработка SVG
+# =============================================================================
+
+_ID_ATTR_RE    = re.compile(r'\bid="([^"]+)"')
+_URL_REF_RE    = re.compile(r'url\(#([^)]+)\)')
+_HREF_REF_RE   = re.compile(r'\bxlink:href="#([^"]+)"')
+_HREF_PLAIN_RE = re.compile(r'\bhref="#([^"]+)"')
+
+
+def _prefix_svg_ids(svg: str, prefix: str) -> str:
+    """
+    Добавляет префикс ко всем id и ссылкам на них (url(#id), href="#id").
+
+    Нужно, чтобы несколько копий одной иконки на странице
+    не конфликтовали за градиенты и маски.
+
+    Пример:
+        id="ml-plus-bg"  →  id="i7-plus-ml-plus-bg"
+        url(#ml-plus-bg) →  url(#i7-plus-ml-plus-bg)
+    """
+    if not prefix:
+        return svg
+
+    ids = set(_ID_ATTR_RE.findall(svg))
+    if not ids:
+        return svg
+
+    # 1. Сначала ссылки
+    def _sub_url(m: re.Match) -> str:
+        ref = m.group(1)
+        return f"url(#{prefix}{ref})" if ref in ids else m.group(0)
+
+    def _sub_href(m: re.Match) -> str:
+        ref = m.group(1)
+        if ref in ids:
+            return m.group(0).replace(f"#{ref}", f"#{prefix}{ref}")
+        return m.group(0)
+
+    svg = _URL_REF_RE.sub(_sub_url, svg)
+    svg = _HREF_REF_RE.sub(_sub_href, svg)
+    svg = _HREF_PLAIN_RE.sub(_sub_href, svg)
+
+    # 2. Потом сами id
+    def _sub_id(m: re.Match) -> str:
+        return f'id="{prefix}{m.group(1)}"'
+
+    return _ID_ATTR_RE.sub(_sub_id, svg)
+
+
+def _strip_xml_declaration(svg: str) -> str:
+    """Убирает <?xml ...?> и <!DOCTYPE ...> — они ломают inline SVG."""
+    svg = svg.lstrip()
+
+    if svg.startswith("<?xml"):
+        end = svg.find("?>")
+        if end != -1:
+            svg = svg[end + 2:].lstrip()
+
+    if svg.startswith("<!DOCTYPE"):
+        end = svg.find(">")
+        if end != -1:
+            svg = svg[end + 1:].lstrip()
+
+    return svg
+
+
+def _inject_title(svg: str, label: str) -> str:
+    """Вставляет <title> сразу после открывающего тега <svg>."""
+    if not label:
+        return svg
+
+    open_end = svg.find(">")
+    if open_end == -1:
+        return svg
+
+    title = f"<title>{label}</title>"
+    return svg[: open_end + 1] + title + svg[open_end + 1:]
+
+
+def _escape_attr(value: str) -> str:
+    """Минимальное экранирование для значений HTML-атрибутов."""
+    return (
+        value.replace("&", "&amp;")
+             .replace('"', "&quot;")
+             .replace("<", "&lt;")
+             .replace(">", "&gt;")
+    )
+
+
+# =============================================================================
+# Сборка HTML
+# =============================================================================
+
+def _build_icon_html(
+    svg: str,
+    *,
+    name: str,
+    size: int,
+    variant: str,
+    extra_class: str,
+    label: str,
+    prefix: str,
+) -> str:
+    svg = _strip_xml_declaration(svg)
+    svg = _prefix_svg_ids(svg, prefix)
+
+    classes = ["ml-icon"]
+    if variant:
+        classes.append(f"ml-icon--{variant}")
+    if extra_class:
+        classes.extend(extra_class.split())
+
+    style = f"--icon-size:{size}px;font-size:{size}px;"
+
+    if label:
+        safe_label = _escape_attr(label)
+        a11y = f'role="img" aria-label="{safe_label}"'
+        svg = _inject_title(svg, safe_label)
+    else:
+        a11y = 'aria-hidden="true"'
+
+    return (
+        f'<span class="{" ".join(classes)}" '
+        f'style="{style}" '
+        f'data-icon="{_escape_attr(name)}" {a11y}>'
+        f"{svg}"
+        f"</span>"
+    )
+
+
+def _build_illustration_html(
+    svg: str,
+    *,
+    name: str,
+    width: int,
+    height: int,
+    extra_class: str,
+    label: str,
+    prefix: str,
+) -> str:
+    svg = _strip_xml_declaration(svg)
+    svg = _prefix_svg_ids(svg, prefix)
+
+    classes = ["ml-illustration"]
+    if extra_class:
+        classes.extend(extra_class.split())
+
+    if label:
+        safe_label = _escape_attr(label)
+        a11y = f'role="img" aria-label="{safe_label}"'
+        svg = _inject_title(svg, safe_label)
+    else:
+        a11y = 'aria-hidden="true"'
+
+    style = f"max-width:{width}px;width:100%;height:auto;"
+
+    return (
+        f'<div class="{" ".join(classes)}" '
+        f'style="{style}" '
+        f'data-illustration="{_escape_attr(name)}" {a11y}>'
+        f"{svg}"
+        f"</div>"
+    )
+
+
+# =============================================================================
+# Уникальный префикс для id
+# =============================================================================
+
+_icon_counter = {"n": 0}
+
+
+def _next_prefix(name: str) -> str:
+    """
+    Уникальный префикс для id внутри SVG.
+
+    Формат: 'i<N>-<name>-', например 'i7-plus-'.
+    Слэши и прочие небезопасные символы из имени удаляются.
+    """
+    _icon_counter["n"] += 1
+    safe_name = re.sub(r"[^a-z0-9]", "", name.lower()) or "icon"
+    return f"i{_icon_counter['n']}-{safe_name}-"
+
+
+# =============================================================================
+# Публичные теги
+# =============================================================================
 
 @register.simple_tag
-def icon(name: str, size: int = 24, stroke: float = 2.0, css_class: str = "", title: str = "") -> str:
-    """Встроить SVG-иконку."""
-    content = _ICONS.get(name)
-    if content is None:
-        content = '<circle cx="12" cy="12" r="9"/>'
+def icon(
+    name: str,
+    size: int = 20,
+    variant: str = "",
+    extra_class: str = "",
+    label: str = "",
+) -> str:
+    """
+    Вставляет SVG-иконку inline.
 
-    classes = f"icon icon--{name}"
-    if css_class:
-        classes += f" {css_class}"
+    Примеры:
+        {% icon "plus" size=18 %}
+        {% icon "logo-mark" size=40 %}
+        {% icon "math/lambda" size=22 variant="cyan" %}
+        {% icon "ui/refresh" size=16 extra_class="ml-icon--spin" %}
+        {% icon "features/determinant" size=96 %}
+        {% icon "hero/hero-transform" size=320 %}
+        {% icon "determinant" size=20 label="Определитель" %}
+    """
+    if not _is_safe_name(name):
+        return ""
 
-    title_el = f'<title>{title}</title>' if title else ""
-    aria = 'aria-hidden="true"' if not title else 'role="img"'
+    found = _find_icon(name)
+    if found is None:
+        return (
+            f'<span class="ml-icon ml-icon--missing" '
+            f'data-icon="{_escape_attr(name)}" aria-hidden="true"></span>'
+        )
+
+    svg, _path = found
+    prefix = _next_prefix(name)
 
     return mark_safe(
-        f'<svg class="{classes}" width="{size}" height="{size}" '
-        f'viewBox="0 0 24 24" fill="none" stroke="currentColor" '
-        f'stroke-width="{stroke}" stroke-linecap="round" stroke-linejoin="round" '
-        f'{aria}>{title_el}{content}</svg>'
+        _build_icon_html(
+            svg,
+            name=name,
+            size=size,
+            variant=variant,
+            extra_class=extra_class,
+            label=label,
+            prefix=prefix,
+        )
     )
 
 
 @register.simple_tag
-def icon_names() -> list[str]:
-    """Список всех иконок."""
-    return sorted(_ICONS.keys())
+def illustration(
+    name: str,
+    width: int = 480,
+    height: int = 360,
+    extra_class: str = "",
+    label: str = "",
+) -> str:
+    """
+    Вставляет большую SVG-иллюстрацию inline.
+
+    Примеры:
+        {% illustration "hero-matrix" %}
+        {% illustration "determinant" width=480 height=360 label="Определитель" %}
+    """
+    if not _is_safe_name(name):
+        return ""
+
+    found = _find_illustration(name)
+    if found is None:
+        return (
+            f'<div class="ml-illustration ml-illustration--missing" '
+            f'data-illustration="{_escape_attr(name)}" aria-hidden="true"></div>'
+        )
+
+    svg, _path = found
+    prefix = _next_prefix(name)
+
+    return mark_safe(
+        _build_illustration_html(
+            svg,
+            name=name,
+            width=width,
+            height=height,
+            extra_class=extra_class,
+            label=label,
+            prefix=prefix,
+        )
+    )
+
+
+@register.simple_tag
+def icon_exists(name: str) -> bool:
+    """Проверяет, существует ли иконка (с учётом подпапок)."""
+    if not _is_safe_name(name):
+        return False
+    return _find_icon(name) is not None
+
+
+@register.simple_tag
+def illustration_exists(name: str) -> bool:
+    """Проверяет, существует ли иллюстрация."""
+    if not _is_safe_name(name):
+        return False
+    return _find_illustration(name) is not None
+
+
+@register.simple_tag
+def clear_icon_cache() -> str:
+    """
+    Сбрасывает кэш прочитанных SVG.
+    Полезно в dev: {% clear_icon_cache %} после добавления новых иконок.
+    """
+    _read_svg.cache_clear()
+    return ""

@@ -22,11 +22,12 @@ from django.http import (
     JsonResponse,
 )
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods, require_POST
 
 from .forms import SaveMatrixForm
-from .models import CalculationHistory, SavedMatrix
+from .models import CalculationHistory, SavedMatrix, generate_session_key
 from .services import parse_matrix, ValidationError
 from .services.explanations import list_operations
 from .telegram_bot import process_update
@@ -46,8 +47,6 @@ def ensure_session_key(request: HttpRequest) -> str:
     """
     key = request.session.get("matrixlab_key")
     if not key:
-        from .models import generate_session_key
-
         key = generate_session_key()
         request.session["matrixlab_key"] = key
         request.session.modified = True
@@ -126,6 +125,122 @@ EXAMPLES: dict[str, dict[str, Any]] = {
 
 
 # =============================================================================
+# Данные для главной страницы
+# =============================================================================
+
+HOME_FEATURES: list[dict[str, str]] = [
+    {
+        "slug": "determinant",
+        "name": "Определитель",
+        "desc": "det A, миноры, разложение по строке",
+    },
+    {
+        "slug": "inverse",
+        "name": "Обратная",
+        "desc": "A · A⁻¹ = I",
+    },
+    {
+        "slug": "rank",
+        "name": "Ранг",
+        "desc": "rank A, базис образа",
+    },
+    {
+        "slug": "transpose",
+        "name": "Транспонирование",
+        "desc": "Aᵀ",
+    },
+    {
+        "slug": "systems",
+        "name": "СЛАУ",
+        "desc": "Ax = b",
+    },
+    {
+        "slug": "eigen",
+        "name": "Собственные",
+        "desc": "λ и собственные векторы",
+    },
+    {
+        "slug": "decompositions",
+        "name": "Разложения",
+        "desc": "LU, QR, Холецкий",
+    },
+    {
+        "slug": "step-by-step",
+        "name": "Пошагово",
+        "desc": "Каждый шаг с обоснованием",
+    },
+]
+
+HOME_PROCESS: list[dict[str, str]] = [
+    {
+        "slug": "input",
+        "title": "Ввод",
+        "desc": "Матрица или система",
+    },
+    {
+        "slug": "choose",
+        "title": "Выбор",
+        "desc": "Операция и метод",
+    },
+    {
+        "slug": "result",
+        "title": "Решение",
+        "desc": "Пошагово, с проверкой",
+    },
+    {
+        "slug": "learn",
+        "title": "Изучение",
+        "desc": "Теория и интуиция",
+    },
+]
+
+HOME_POPULAR: list[dict[str, Any]] = [
+    {
+        "slug": "determinant",
+        "title": "Определитель",
+        "desc": "det A — площадь, объём, обратимость",
+        "url_name": "matrix_app:properties",
+        "size": "large",
+    },
+    {
+        "slug": "inverse",
+        "title": "Обратная",
+        "desc": "A · A⁻¹ = I",
+        "url_name": "matrix_app:operations",
+        "size": "tall",
+    },
+    {
+        "slug": "rank",
+        "title": "Ранг",
+        "desc": "размерность образа",
+        "url_name": "matrix_app:properties",
+        "size": "",
+    },
+    {
+        "slug": "systems",
+        "title": "СЛАУ",
+        "desc": "Ax = b",
+        "url_name": "matrix_app:systems",
+        "size": "",
+    },
+    {
+        "slug": "eigen",
+        "title": "Собственные значения",
+        "desc": "λ и v — оси, которые не меняются",
+        "url_name": "matrix_app:eigen",
+        "size": "wide",
+    },
+    {
+        "slug": "decompositions",
+        "title": "LU-разложение",
+        "desc": "A = L · U",
+        "url_name": "matrix_app:decompositions",
+        "size": "wide",
+    },
+]
+
+
+# =============================================================================
 # Главная
 # =============================================================================
 
@@ -141,6 +256,46 @@ def home(request: HttpRequest) -> HttpResponse:
                 EXAMPLES["determinant"],
                 EXAMPLES["inverse"],
             ],
+            "features": HOME_FEATURES,
+            "process": HOME_PROCESS,
+            "popular": HOME_POPULAR,
+        },
+    )
+
+
+# =============================================================================
+# Поиск
+# =============================================================================
+
+def search(request: HttpRequest) -> HttpResponse:
+    """Поиск по сайту.
+
+    Пока — заглушка: если запрос пустой, ведём на калькулятор.
+    Если запрос непустой — показываем страницу с результатами
+    (позже подключим реальный индекс: операции, теория, примеры).
+    """
+    q = request.GET.get("q", "").strip()
+
+    if not q:
+        return redirect("matrix_app:calculator")
+
+    # Заготовка под будущий поиск. Сейчас — простая фильтрация
+    # по названиям операций.
+    operations = list_operations()
+    query_lower = q.lower()
+    matched_operations = [
+        op for op in operations
+        if query_lower in op.get("label", "").lower()
+        or query_lower in op.get("code", "").lower()
+    ]
+
+    return render(
+        request,
+        "matrix_app/search.html",
+        {
+            "query": q,
+            "operations": matched_operations,
+            "results_count": len(matched_operations),
         },
     )
 

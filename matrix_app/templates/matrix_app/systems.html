@@ -12,7 +12,6 @@
    СЛАУ — единый стиль проекта
    ============================================================================= */
 
-/* --- Фон на всю страницу --- */
 body {
     background: #F7F8FC;
     position: relative;
@@ -314,6 +313,7 @@ body::after {
     box-shadow: 0 4px 12px -3px rgba(99, 102, 241, 0.25);
 }
 
+.chip--button .ml-icon,
 .chip--button svg { color: var(--accent); flex-shrink: 0; }
 
 /* --- Вектор b --- */
@@ -347,6 +347,55 @@ body::after {
     flex-direction: column;
     gap: 8px;
     align-items: center;
+    justify-content: center;
+    min-height: 0;
+    padding: 4px 0;
+}
+
+/* --- Заглушка под вектор, пока пусто --- */
+.vector-input-grid:empty {
+    min-height: 120px;
+}
+
+.vector-input-grid:empty::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border: 1.5px dashed rgba(139, 92, 246, 0.35);
+    border-radius: 12px;
+    background: rgba(139, 92, 246, 0.04);
+    pointer-events: none;
+    transition: border-color var(--t-fast), background var(--t-fast);
+}
+
+.vector-input-grid:empty::after {
+    content: "Введите свободные члены\A— по одному в каждой строке";
+    white-space: pre-line;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px 16px;
+    color: var(--text-mute);
+    font-size: 12.5px;
+    line-height: 1.6;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    min-height: 120px;
+    width: 100%;
+    max-width: 260px;
+    margin: 0 auto;
+}
+
+[data-theme="dark"] .vector-input-grid:empty::before {
+    border-color: rgba(167, 139, 250, 0.4);
+    background: rgba(167, 139, 250, 0.06);
+}
+
+.vector-input-grid {
+    position: relative;
 }
 
 .vector-input-grid input {
@@ -404,6 +453,7 @@ body::after {
     color: var(--text-primary);
 }
 
+.systems-methods-title .ml-icon,
 .systems-methods-title svg { color: var(--accent); }
 
 .methods-row {
@@ -452,7 +502,6 @@ body::after {
     box-shadow: 0 8px 20px -6px rgba(99, 102, 241, 0.5);
 }
 
-/* --- Управление --- */
 .systems-controls {
     display: flex;
     align-items: center;
@@ -483,7 +532,7 @@ body::after {
         0 0 0 1px rgba(99, 102, 241, 0.2);
 }
 
-/* --- Заглушка --- */
+/* --- Заглушка результата --- */
 .calc-placeholder {
     display: flex;
     flex-direction: column;
@@ -595,6 +644,12 @@ body::after {
     flex-shrink: 0;
 }
 
+.kronecker-head-icon .ml-icon,
+.kronecker-head-icon svg {
+    width: 26px;
+    height: 26px;
+}
+
 .kronecker-head h2 {
     font-size: clamp(20px, 2vw, 24px);
     font-weight: 800;
@@ -633,6 +688,9 @@ body::after {
     font-size: 15px;
     color: var(--text-primary);
     margin: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    max-width: 100%;
 }
 
 .kronecker-cases {
@@ -674,6 +732,12 @@ body::after {
     flex-shrink: 0;
 }
 
+.kronecker-case-icon .ml-icon,
+.kronecker-case-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
 .kronecker-case-icon--green {
     background: rgba(16, 185, 129, 0.12);
     color: #10B981;
@@ -694,6 +758,8 @@ body::after {
     flex-direction: column;
     gap: 4px;
     min-width: 0;
+    flex: 1;
+    overflow: visible;
 }
 
 .kronecker-badge {
@@ -725,7 +791,12 @@ body::after {
 .kronecker-condition {
     font-size: 13.5px;
     color: var(--text-secondary);
-    overflow-x: auto;
+    overflow: visible;
+    white-space: nowrap;
+    font-family: var(--font-mono, 'JetBrains Mono', monospace);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.01em;
+    padding-top: 2px;
 }
 
 /* --- Секция примеров --- */
@@ -791,13 +862,17 @@ body::after {
     flex: 1;
 }
 
-.example-card-head > svg:last-child {
+.example-card-head .ml-icon,
+.example-card-head svg {
     color: var(--accent);
     transition: transform var(--t-fast);
     flex-shrink: 0;
+    width: 14px;
+    height: 14px;
 }
 
-.example-card:hover .example-card-head > svg:last-child {
+.example-card:hover .example-card-head .ml-icon,
+.example-card:hover .example-card-head svg {
     transform: translateX(4px);
 }
 
@@ -878,10 +953,11 @@ body::after {
 </style>
 {% endblock %}
 
+
 {% block content %}
 
 <!-- ================================================================
-     Заголовок
+     Заголовок страницы
      ================================================================ -->
 <section class="page-head">
     <div class="container">
@@ -930,13 +1006,13 @@ body::after {
                     <div class="mini-size">
                         <span>Уравнений</span>
                         <button type="button" class="size-btn size-btn--mini" data-size-decr-a-rows aria-label="Уменьшить уравнений">−</button>
-                        <input type="number" class="size-input size-input--mini" value="3" min="1" max="{{ MAX_MATRIX_ROWS }}" data-a-rows data-rows-input aria-label="Уравнений">
+                        <input type="number" class="size-input size-input--mini" value="3" min="1" max="10" data-a-rows data-rows-input aria-label="Уравнений">
                         <button type="button" class="size-btn size-btn--mini" data-size-incr-a-rows aria-label="Увеличить уравнений">+</button>
                     </div>
                     <div class="mini-size">
                         <span>Неизвестных</span>
                         <button type="button" class="size-btn size-btn--mini" data-size-decr-a-cols aria-label="Уменьшить неизвестных">−</button>
-                        <input type="number" class="size-input size-input--mini" value="3" min="1" max="{{ MAX_MATRIX_COLS }}" data-a-cols data-cols-input aria-label="Неизвестных">
+                        <input type="number" class="size-input size-input--mini" value="3" min="1" max="10" data-a-cols data-cols-input aria-label="Неизвестных">
                         <button type="button" class="size-btn size-btn--mini" data-size-incr-a-cols aria-label="Увеличить неизвестных">+</button>
                     </div>
                 </div>
@@ -974,22 +1050,13 @@ body::after {
 
 
         <!-- ========================================================
-             Вектор b
+             Вектор b — без бейджа, без tools
              ======================================================== -->
         <div class="vector-input-card">
             <div class="matrix-input-head">
                 <div class="matrix-input-title">
                     <span class="matrix-letter matrix-letter--b" aria-hidden="true">b</span>
                     <h2>Свободные члены</h2>
-                    <span class="matrix-shape-badge" data-vector-shape-label>3 × 1</span>
-                </div>
-                <div class="matrix-input-tools">
-                    <div class="mini-size">
-                        <span>Строк</span>
-                        <button type="button" class="size-btn size-btn--mini" data-size-decr-b-rows aria-label="Уменьшить">−</button>
-                        <input type="number" class="size-input size-input--mini" value="3" min="1" max="{{ MAX_MATRIX_ROWS }}" data-b-rows aria-label="Строк">
-                        <button type="button" class="size-btn size-btn--mini" data-size-incr-b-rows aria-label="Увеличить">+</button>
-                    </div>
                 </div>
             </div>
             <div class="matrix-input-body">
@@ -1047,7 +1114,7 @@ body::after {
              ======================================================== -->
         {% include "matrix_app/partials/_result_block.html" with result_id="system-result" show_steps=True show_actions=True %}
 
-        <!-- Заглушка до первого вычисления -->
+        <!-- Заглушка -->
         <div class="calc-placeholder" data-system-placeholder>
             <div class="calc-placeholder-icon" aria-hidden="true">
                 {% icon "system" size=48 %}
@@ -1079,14 +1146,14 @@ body::after {
 
 
 <!-- ================================================================
-     Теорема Кронекера-Капелли — справка
+     Теорема Кронекера-Капелли
      ================================================================ -->
 <section class="section section--kronecker" id="kronecker">
     <div class="container">
         <div class="kronecker-card">
             <header class="kronecker-head">
                 <div class="kronecker-head-icon">
-                    {% icon "book-open" size=22 %}
+                    {% icon "features/kronecker" size=26 %}
                 </div>
                 <div>
                     <h2>Теорема Кронекера-Капелли</h2>
@@ -1103,7 +1170,7 @@ body::after {
                 <ul class="kronecker-cases">
                     <li>
                         <span class="kronecker-case-icon kronecker-case-icon--green">
-                            {% icon "check-circle" size=18 %}
+                            {% icon "check-circle" size=20 %}
                         </span>
                         <div class="kronecker-case-body">
                             <span class="kronecker-badge kronecker-badge--green">Единственное решение</span>
@@ -1112,7 +1179,7 @@ body::after {
                     </li>
                     <li>
                         <span class="kronecker-case-icon kronecker-case-icon--blue">
-                            {% icon "info" size=18 %}
+                            {% icon "info" size=20 %}
                         </span>
                         <div class="kronecker-case-body">
                             <span class="kronecker-badge kronecker-badge--blue">Бесконечно много решений</span>
@@ -1121,7 +1188,7 @@ body::after {
                     </li>
                     <li>
                         <span class="kronecker-case-icon kronecker-case-icon--red">
-                            {% icon "alert-circle" size=18 %}
+                            {% icon "alert-circle" size=20 %}
                         </span>
                         <div class="kronecker-case-body">
                             <span class="kronecker-badge kronecker-badge--red">Решений нет</span>
@@ -1136,7 +1203,7 @@ body::after {
 
 
 <!-- ================================================================
-     Быстрые примеры СЛАУ
+     Примеры систем
      ================================================================ -->
 <section class="section section--examples">
     <div class="container">

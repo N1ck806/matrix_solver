@@ -1,0 +1,755 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 480" fill="none"
+     role="img" aria-label="Определитель матрицы как площадь"
+     class="ml-popular ml-popular--determinant"
+     preserveAspectRatio="xMidYMid meet"
+     font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">
+
+  <defs>
+
+    <!-- ============================================================
+         ЯДРО: стекло, свет
+         ============================================================ -->
+    <radialGradient id="dt-neon" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"    stop-color="#FFFFFF" stop-opacity="1"/>
+      <stop offset="0.18" stop-color="#F5D0FE" stop-opacity="0.95"/>
+      <stop offset="0.42" stop-color="#D946EF" stop-opacity="0.85"/>
+      <stop offset="0.72" stop-color="#A855F7" stop-opacity="0.55"/>
+      <stop offset="1"    stop-color="#5B21B6" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="dt-glass" cx="0.4" cy="0.32" r="0.72">
+      <stop offset="0"    stop-color="#FFFFFF" stop-opacity="0.35"/>
+      <stop offset="0.35" stop-color="#E9D5FF" stop-opacity="0.18"/>
+      <stop offset="0.7"  stop-color="#A855F7" stop-opacity="0.22"/>
+      <stop offset="1"    stop-color="#4C1D95" stop-opacity="0.38"/>
+    </radialGradient>
+
+    <radialGradient id="dt-fresnel" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"    stop-color="#FFFFFF" stop-opacity="0"/>
+      <stop offset="0.72" stop-color="#FFFFFF" stop-opacity="0.05"/>
+      <stop offset="0.92" stop-color="#F5D0FE" stop-opacity="0.55"/>
+      <stop offset="1"    stop-color="#FFFFFF" stop-opacity="0.85"/>
+    </radialGradient>
+
+    <radialGradient id="dt-key" cx="0.28" cy="0.18" r="0.42">
+      <stop offset="0"   stop-color="#FFFFFF" stop-opacity="0.95"/>
+      <stop offset="0.35" stop-color="#FFFFFF" stop-opacity="0.25"/>
+      <stop offset="1"   stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="dt-fill" cx="0.75" cy="0.85" r="0.55">
+      <stop offset="0"   stop-color="#FBCFE8" stop-opacity="0.4"/>
+      <stop offset="1"   stop-color="#FBCFE8" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="dt-rim" x1="0" y1="0" x2="0.6" y2="1">
+      <stop offset="0"   stop-color="#22D3EE" stop-opacity="0"/>
+      <stop offset="0.55" stop-color="#22D3EE" stop-opacity="0.55"/>
+      <stop offset="1"   stop-color="#67E8F9" stop-opacity="0"/>
+    </linearGradient>
+
+    <radialGradient id="dt-bounce" cx="0.5" cy="1" r="0.6">
+      <stop offset="0"   stop-color="#EC4899" stop-opacity="0.28"/>
+      <stop offset="1"   stop-color="#EC4899" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- ============================================================
+         ОРБИТЫ: три слоя
+         ============================================================ -->
+    <linearGradient id="dt-orbit-rose" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0"   stop-color="#F0ABFC" stop-opacity="0.95"/>
+      <stop offset="0.5" stop-color="#EC4899" stop-opacity="0.85"/>
+      <stop offset="1"   stop-color="#BE185D" stop-opacity="0.9"/>
+    </linearGradient>
+
+    <linearGradient id="dt-orbit-cyan" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0"   stop-color="#67E8F9" stop-opacity="0.95"/>
+      <stop offset="0.5" stop-color="#22D3EE" stop-opacity="0.85"/>
+      <stop offset="1"   stop-color="#0891B2" stop-opacity="0.9"/>
+    </linearGradient>
+
+    <linearGradient id="dt-orbit-violet" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0"   stop-color="#A855F7" stop-opacity="0.75"/>
+      <stop offset="0.5" stop-color="#D946EF" stop-opacity="0.7"/>
+      <stop offset="1"   stop-color="#7C3AED" stop-opacity="0.75"/>
+    </linearGradient>
+
+    <!-- ============================================================
+         ЯЧЕЙКИ МАТРИЦЫ: объёмные плитки
+         ============================================================ -->
+    <linearGradient id="dt-cell-front" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.95"/>
+      <stop offset="0.5" stop-color="#F5D0FE" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#D946EF" stop-opacity="0.75"/>
+    </linearGradient>
+
+    <linearGradient id="dt-cell-top" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.98"/>
+      <stop offset="1" stop-color="#F0ABFC" stop-opacity="0.9"/>
+    </linearGradient>
+
+    <linearGradient id="dt-cell-side" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#A855F7" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#7C3AED" stop-opacity="0.75"/>
+    </linearGradient>
+
+    <!-- ============================================================
+         ПЛОЩАДЬ: параллелограммы
+         ============================================================ -->
+    <linearGradient id="dt-area-out" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#22D3EE" stop-opacity="0.28"/>
+      <stop offset="0.5" stop-color="#A855F7" stop-opacity="0.32"/>
+      <stop offset="1" stop-color="#EC4899" stop-opacity="0.28"/>
+    </linearGradient>
+
+    <linearGradient id="dt-area-in" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#22D3EE" stop-opacity="0.14"/>
+      <stop offset="1" stop-color="#A855F7" stop-opacity="0.14"/>
+    </linearGradient>
+
+    <!-- ============================================================
+         ФОРМУЛА: панель
+         ============================================================ -->
+    <linearGradient id="dt-panel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.08"/>
+      <stop offset="1" stop-color="#A855F7" stop-opacity="0.12"/>
+    </linearGradient>
+
+    <linearGradient id="dt-panel-edge" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#F0ABFC"/>
+      <stop offset="0.5" stop-color="#D946EF"/>
+      <stop offset="1" stop-color="#22D3EE"/>
+    </linearGradient>
+
+    <!-- ============================================================
+         ЧИПЫ
+         ============================================================ -->
+    <linearGradient id="dt-chip-pink" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#F0ABFC"/>
+      <stop offset="1" stop-color="#EC4899"/>
+    </linearGradient>
+
+    <linearGradient id="dt-chip-cyan" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#67E8F9"/>
+      <stop offset="1" stop-color="#0891B2"/>
+    </linearGradient>
+
+    <linearGradient id="dt-chip-violet" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#C4B5FD"/>
+      <stop offset="1" stop-color="#7C3AED"/>
+    </linearGradient>
+
+    <linearGradient id="dt-chip-gold" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#FDE68A"/>
+      <stop offset="1" stop-color="#F59E0B"/>
+    </linearGradient>
+
+    <linearGradient id="dt-chip-mint" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#6EE7B7"/>
+      <stop offset="1" stop-color="#059669"/>
+    </linearGradient>
+
+    <!-- ============================================================
+         ЧАСТИЦЫ
+         ============================================================ -->
+    <radialGradient id="dt-spark-white" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"   stop-color="#FFFFFF"/>
+      <stop offset="0.4" stop-color="#F5D0FE"/>
+      <stop offset="1"   stop-color="#D946EF" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="dt-spark-cyan" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"   stop-color="#FFFFFF"/>
+      <stop offset="0.4" stop-color="#A5F3FC"/>
+      <stop offset="1"   stop-color="#06B6D4" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="dt-spark-pink" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"   stop-color="#FFFFFF"/>
+      <stop offset="0.4" stop-color="#FBCFE8"/>
+      <stop offset="1"   stop-color="#EC4899" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="dt-spark-gold" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"   stop-color="#FFFFFF"/>
+      <stop offset="0.4" stop-color="#FDE68A"/>
+      <stop offset="1"   stop-color="#F59E0B" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- ============================================================
+         ФИЛЬТРЫ
+         ============================================================ -->
+    <filter id="dt-bloom-sm" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1.6"/>
+    </filter>
+    <filter id="dt-bloom-md" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3.2"/>
+    </filter>
+    <filter id="dt-bloom-lg" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="7"/>
+    </filter>
+    <filter id="dt-dof-far" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1.1"/>
+    </filter>
+    <filter id="dt-shadow-floor" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="12"/>
+    </filter>
+    <filter id="dt-core-shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="6"/>
+      <feOffset dx="0" dy="6"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.45"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="dt-chip-shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2.4"/>
+      <feOffset dx="0" dy="3"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.35"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="dt-flare" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="1.4"/>
+    </filter>
+    <filter id="dt-text-glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1.2"/>
+    </filter>
+
+    <!-- ============================================================
+         МАСКИ
+         ============================================================ -->
+    <clipPath id="dt-core-clip">
+      <circle cx="280" cy="240" r="72"/>
+    </clipPath>
+
+    <clipPath id="dt-front-top">
+      <rect x="0" y="0" width="560" height="240"/>
+    </clipPath>
+
+    <clipPath id="dt-front-bottom">
+      <rect x="0" y="240" width="560" height="240"/>
+    </clipPath>
+
+  </defs>
+
+  <!-- ================================================================
+       ФОНОВЫЙ ОРЕОЛ СЦЕНЫ
+       ================================================================ -->
+  <circle cx="280" cy="240" r="220" fill="url(#dt-neon)" opacity="0.1">
+    <animate attributeName="r" values="220;228;220" dur="9s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- ================================================================
+       ТЕНЬ НА ПОЛ
+       ================================================================ -->
+  <ellipse cx="280" cy="400" rx="200" ry="16"
+           fill="#4C1D95" opacity="0.28"
+           filter="url(#dt-shadow-floor)">
+    <animate attributeName="rx" values="200;212;200" dur="7s" repeatCount="indefinite"/>
+  </ellipse>
+
+  <!-- ================================================================
+       ДАЛЬНЯЯ ОРБИТА (циан) — за ядром, DOP-размыта
+       ================================================================ -->
+  <g filter="url(#dt-dof-far)" transform="translate(280 240)">
+    <g>
+      <animateTransform attributeName="transform" type="rotate"
+                        from="0 0 0" to="360 0 0" dur="38s" repeatCount="indefinite"/>
+      <ellipse cx="0" cy="0" rx="200" ry="48"
+               fill="none" stroke="url(#dt-orbit-cyan)"
+               stroke-width="2.2" opacity="0.75" transform="rotate(-24)"/>
+      <ellipse cx="0" cy="0" rx="200" ry="48"
+               fill="none" stroke="#22D3EE" stroke-width="6"
+               opacity="0.14" filter="url(#dt-bloom-md)" transform="rotate(-24)"/>
+    </g>
+  </g>
+
+  <!-- ================================================================
+       ПЛОЩАДЬ ВХОДА (слева, S=1): маленький единичный квадрат
+       ================================================================ -->
+  <g opacity="0.85" transform="translate(72 320)">
+    <!-- Заливка квадрата -->
+    <path d="M0 0 L34 0 L34 34 L0 34 Z"
+          fill="url(#dt-area-in)"
+          stroke="#22D3EE" stroke-opacity="0.55" stroke-width="1.1"/>
+    <!-- Сетка -->
+    <g stroke="#FFFFFF" stroke-opacity="0.18" stroke-width="0.5">
+      <line x1="11" y1="0" x2="11" y2="34"/>
+      <line x1="23" y1="0" x2="23" y2="34"/>
+      <line x1="0" y1="11" x2="34" y2="11"/>
+      <line x1="0" y1="23" x2="34" y2="23"/>
+    </g>
+    <!-- Углы -->
+    <circle cx="0" cy="0" r="1.6" fill="#67E8F9"/>
+    <circle cx="34" cy="0" r="1.6" fill="#67E8F9"/>
+    <circle cx="0" cy="34" r="1.6" fill="#67E8F9"/>
+    <circle cx="34" cy="34" r="1.6" fill="#67E8F9"/>
+    <!-- Подпись -->
+    <text x="17" y="52" font-size="11" font-weight="700"
+          fill="#67E8F9" text-anchor="middle" letter-spacing="0.05em">S = 1</text>
+    <text x="17" y="68" font-size="10" font-weight="500"
+          fill="#67E8F9" opacity="0.7" text-anchor="middle">единичный</text>
+  </g>
+
+  <!-- ================================================================
+       ПЛОЩАДЬ ВЫХОДА (справа, S=5): растянутый параллелограмм
+       ================================================================ -->
+  <g opacity="0.95" transform="translate(388 300)">
+    <!-- Заливка -->
+    <path d="M0 40 L70 0 L120 0 L50 40 Z"
+          fill="url(#dt-area-out)"
+          stroke="#EC4899" stroke-opacity="0.7" stroke-width="1.3"/>
+    <!-- Сетка-миллиметровка (5×5) -->
+    <g stroke="#FFFFFF" stroke-opacity="0.14" stroke-width="0.5">
+      <line x1="14" y1="32" x2="84" y2="-8"/>
+      <line x1="28" y1="24" x2="98" y2="-16"/>
+      <line x1="42" y1="16" x2="112" y2="-24"/>
+      <line x1="14" y1="8" x2="64" y2="8"/>
+      <line x1="28" y1="0" x2="78" y2="0"/>
+      <line x1="42" y1="-8" x2="92" y2="-8"/>
+    </g>
+    <!-- Углы -->
+    <circle cx="0" cy="40" r="2" fill="#F0ABFC"/>
+    <circle cx="70" cy="0" r="2" fill="#F0ABFC"/>
+    <circle cx="120" cy="0" r="2" fill="#F0ABFC"/>
+    <circle cx="50" cy="40" r="2" fill="#F0ABFC"/>
+    <!-- Подпись -->
+    <text x="60" y="62" font-size="13" font-weight="800"
+          fill="#FDE68A" text-anchor="middle" letter-spacing="0.06em">S = 5</text>
+    <text x="60" y="78" font-size="10" font-weight="500"
+          fill="#FDE68A" opacity="0.75" text-anchor="middle">площадь × 5</text>
+    <!-- Искры -->
+    <circle cx="60" cy="20" r="2.4" fill="url(#dt-spark-gold)" filter="url(#dt-bloom-sm)">
+      <animate attributeName="opacity" values="1;0.4;1" dur="3s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <!-- ================================================================
+       ДУГА-СТРЕЛКА: S=1 → S=5 (преобразование)
+       ================================================================ -->
+  <path d="M120 355 Q 250 470 380 355"
+        fill="none" stroke="#A855F7" stroke-width="1.2"
+        opacity="0.45" stroke-dasharray="4 6" stroke-linecap="round"/>
+  <path d="M373 361 L380 355 L378 364"
+        stroke="#A855F7" stroke-width="1.2" opacity="0.65"
+        stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+  <!-- ================================================================
+       ФОРМУЛА-ПАНЕЛЬ СВЕРХУ: det A = ad − bc = 5
+       ================================================================ -->
+  <g filter="url(#dt-chip-shadow)" transform="translate(280 56)">
+    <rect x="-180" y="-26" width="360" height="52" rx="14"
+          fill="url(#dt-panel)"/>
+    <rect x="-180" y="-26" width="360" height="52" rx="14"
+          fill="none" stroke="url(#dt-panel-edge)" stroke-width="1.2"/>
+
+    <!-- Левая часть: det A = -->
+    <text x="-140" y="6" font-size="18" font-weight="800"
+          fill="#F5D0FE" text-anchor="middle" letter-spacing="0.02em">
+      det A
+    </text>
+    <text x="-92" y="6" font-size="16" font-weight="600"
+          fill="#FFFFFF" opacity="0.7" text-anchor="middle">=</text>
+
+    <!-- ad − bc -->
+    <text x="-40" y="6" font-size="18" font-weight="700"
+          fill="#A5F3FC" text-anchor="middle" font-style="italic">
+      ad − bc
+    </text>
+    <text x="14" y="6" font-size="16" font-weight="600"
+          fill="#FFFFFF" opacity="0.7" text-anchor="middle">=</text>
+
+    <!-- Реальные числа -->
+    <text x="80" y="6" font-size="18" font-weight="700"
+          fill="#FDE68A" text-anchor="middle">
+      2·3 − 1·1
+    </text>
+    <text x="150" y="6" font-size="16" font-weight="600"
+          fill="#FFFFFF" opacity="0.7" text-anchor="middle">=</text>
+    <text x="172" y="8" font-size="22" font-weight="900"
+          fill="#F59E0B" text-anchor="middle"
+          filter="url(#dt-text-glow)">5</text>
+  </g>
+
+  <!-- ================================================================
+       РОЗОВАЯ ОРБИТА — нижняя половина ЗА ядром
+       ================================================================ -->
+  <g clip-path="url(#dt-front-bottom)" transform="translate(280 240)">
+    <g>
+      <animateTransform attributeName="transform" type="rotate"
+                        from="0 0 0" to="360 0 0" dur="26s" repeatCount="indefinite"/>
+      <ellipse cx="0" cy="0" rx="160" ry="38"
+               fill="none" stroke="url(#dt-orbit-rose)"
+               stroke-width="2.6" opacity="0.95" transform="rotate(22)"/>
+      <ellipse cx="0" cy="0" rx="160" ry="38"
+               fill="none" stroke="#EC4899" stroke-width="7"
+               opacity="0.16" filter="url(#dt-bloom-md)" transform="rotate(22)"/>
+      <ellipse cx="0" cy="0" rx="160" ry="38"
+               fill="none" stroke="#FBCFE8" stroke-width="0.8"
+               opacity="0.4" transform="rotate(22)"/>
+    </g>
+  </g>
+
+  <!-- ================================================================
+       ЯДРО
+       ================================================================ -->
+  <g filter="url(#dt-core-shadow)">
+
+    <!-- Ореол -->
+    <circle cx="280" cy="240" r="96" fill="url(#dt-neon)" opacity="0.35"
+            filter="url(#dt-bloom-lg)">
+      <animate attributeName="r" values="96;104;96" dur="5.6s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.35;0.22;0.35" dur="5.6s" repeatCount="indefinite"/>
+    </circle>
+
+    <!-- Стекло -->
+    <circle cx="280" cy="240" r="72" fill="url(#dt-glass)"/>
+    <circle cx="280" cy="240" r="72" fill="url(#dt-neon)" opacity="0.85">
+      <animate attributeName="opacity" values="0.85;0.7;0.85" dur="4.8s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="280" cy="240" r="72" fill="url(#dt-fresnel)"/>
+
+    <!-- Внутренний пульс -->
+    <circle cx="280" cy="240" r="38" fill="url(#dt-neon)" opacity="0.9">
+      <animate attributeName="r" values="38;44;38" dur="4s" repeatCount="indefinite"/>
+    </circle>
+
+    <!-- ============================================================
+         МАТРИЦА 2×2 ВНУТРИ СФЕРЫ — объёмные плитки с числами
+         Расположение: 2 × 2, центр в (280, 240)
+         Размер плитки: 26 × 26, зазор 6, смещение по z = 6
+         ============================================================ -->
+    <g transform="translate(280 240)">
+
+      <!-- ЛЕВАЯ ВЕРХНЯЯ ПЛИТКА: 2 -->
+      <g transform="translate(-30 -30)">
+        <path d="M0 6 L6 0 L32 0 L26 6 Z" fill="url(#dt-cell-top)"/>
+        <path d="M26 6 L32 0 L32 26 L26 32 Z" fill="url(#dt-cell-side)"/>
+        <rect x="0" y="6" width="26" height="26" rx="4" fill="url(#dt-cell-front)"
+              stroke="#FFFFFF" stroke-opacity="0.85" stroke-width="0.9"/>
+        <text x="13" y="25" font-size="16" font-weight="800"
+              fill="#7C3AED" text-anchor="middle">2</text>
+      </g>
+
+      <!-- ПРАВАЯ ВЕРХНЯЯ ПЛИТКА: 1 -->
+      <g transform="translate(4 -30)">
+        <path d="M0 6 L6 0 L32 0 L26 6 Z" fill="url(#dt-cell-top)"/>
+        <path d="M26 6 L32 0 L32 26 L26 32 Z" fill="url(#dt-cell-side)"/>
+        <rect x="0" y="6" width="26" height="26" rx="4" fill="url(#dt-cell-front)"
+              stroke="#FFFFFF" stroke-opacity="0.85" stroke-width="0.9"/>
+        <text x="13" y="25" font-size="16" font-weight="800"
+              fill="#7C3AED" text-anchor="middle">1</text>
+      </g>
+
+      <!-- ЛЕВАЯ НИЖНЯЯ ПЛИТКА: 1 -->
+      <g transform="translate(-30 4)">
+        <path d="M0 6 L6 0 L32 0 L26 6 Z" fill="url(#dt-cell-top)"/>
+        <path d="M26 6 L32 0 L32 26 L26 32 Z" fill="url(#dt-cell-side)"/>
+        <rect x="0" y="6" width="26" height="26" rx="4" fill="url(#dt-cell-front)"
+              stroke="#FFFFFF" stroke-opacity="0.85" stroke-width="0.9"/>
+        <text x="13" y="25" font-size="16" font-weight="800"
+              fill="#7C3AED" text-anchor="middle">1</text>
+      </g>
+
+      <!-- ПРАВАЯ НИЖНЯЯ ПЛИТКА: 3 -->
+      <g transform="translate(4 4)">
+        <path d="M0 6 L6 0 L32 0 L26 6 Z" fill="url(#dt-cell-top)"/>
+        <path d="M26 6 L32 0 L32 26 L26 32 Z" fill="url(#dt-cell-side)"/>
+        <rect x="0" y="6" width="26" height="26" rx="4" fill="url(#dt-cell-front)"
+              stroke="#FFFFFF" stroke-opacity="0.85" stroke-width="0.9"/>
+        <text x="13" y="25" font-size="16" font-weight="800"
+              fill="#7C3AED" text-anchor="middle">3</text>
+      </g>
+
+      <!-- Скобки матрицы [ ] -->
+      <path d="M-46 -34 L-52 -34 L-52 38 L-46 38"
+            fill="none" stroke="#F5D0FE" stroke-opacity="0.9"
+            stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M46 -34 L52 -34 L52 38 L46 38"
+            fill="none" stroke="#F5D0FE" stroke-opacity="0.9"
+            stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+
+      <!-- Подсветка главной диагонали (2 и 3) -->
+      <line x1="-17" y1="-17" x2="30" y2="30"
+            stroke="#FDE68A" stroke-width="1.2" opacity="0.55"
+            stroke-dasharray="3 4" stroke-linecap="round"/>
+    </g>
+
+    <!-- Сетка внутри стекла (только если не перекрывает матрицу) -->
+    <g clip-path="url(#dt-core-clip)" opacity="0.1">
+      <path d="M208 220 H352 M208 260 H352"
+            stroke="#FFFFFF" stroke-width="0.6"/>
+    </g>
+
+    <!-- 4 неоновые точки по квадрату -->
+    <circle cx="240" cy="200" r="4.5" fill="#FFFFFF" opacity="0.9">
+      <animate attributeName="r" values="4.5;6;4.5" dur="3.6s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="1;0.55;1" dur="3.6s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="320" cy="200" r="4.5" fill="#FFFFFF" opacity="0.9">
+      <animate attributeName="r" values="4.5;6;4.5" dur="3.6s" begin="0.9s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="1;0.55;1" dur="3.6s" begin="0.9s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="240" cy="280" r="4.5" fill="#FFFFFF" opacity="0.9">
+      <animate attributeName="r" values="4.5;6;4.5" dur="3.6s" begin="1.8s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="1;0.55;1" dur="3.6s" begin="1.8s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="320" cy="280" r="4.5" fill="#FFFFFF" opacity="0.9">
+      <animate attributeName="r" values="4.5;6;4.5" dur="3.6s" begin="2.7s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="1;0.55;1" dur="3.6s" begin="2.7s" repeatCount="indefinite"/>
+    </circle>
+
+    <!-- Лучи-вспышки -->
+    <g stroke="#FFFFFF" stroke-width="1.2" stroke-linecap="round" opacity="0.55">
+      <path d="M280 156 V174">
+        <animate attributeName="opacity" values="0.55;0.95;0.55" dur="3.2s" repeatCount="indefinite"/>
+      </path>
+      <path d="M280 324 V306">
+        <animate attributeName="opacity" values="0.55;0.95;0.55" dur="3.2s" begin="0.8s" repeatCount="indefinite"/>
+      </path>
+      <path d="M196 240 H214">
+        <animate attributeName="opacity" values="0.55;0.95;0.55" dur="3.2s" begin="1.6s" repeatCount="indefinite"/>
+      </path>
+      <path d="M364 240 H346">
+        <animate attributeName="opacity" values="0.55;0.95;0.55" dur="3.2s" begin="2.4s" repeatCount="indefinite"/>
+      </path>
+    </g>
+
+    <!-- Key light -->
+    <ellipse cx="252" cy="206" rx="26" ry="18"
+             fill="url(#dt-key)" transform="rotate(-24 252 206)"/>
+    <ellipse cx="246" cy="200" rx="7" ry="4.5"
+             fill="#FFFFFF" opacity="0.9"
+             transform="rotate(-28 246 200)"/>
+
+    <!-- Fill -->
+    <ellipse cx="316" cy="288" rx="34" ry="22"
+             fill="url(#dt-fill)" transform="rotate(-20 316 288)"/>
+
+    <!-- Rim: циановая полоска -->
+    <path d="M352 220 A72 72 0 0 1 320 300"
+          fill="none" stroke="url(#dt-rim)" stroke-width="2"
+          stroke-linecap="round" opacity="0.75"/>
+
+    <!-- Bounce -->
+    <ellipse cx="280" cy="308" rx="46" ry="14"
+             fill="url(#dt-bounce)"/>
+
+    <!-- Тонкая обводка сферы -->
+    <circle cx="280" cy="240" r="72" fill="none"
+            stroke="#FFFFFF" stroke-opacity="0.28" stroke-width="0.9"/>
+
+  </g>
+
+  <!-- ================================================================
+       РОЗОВАЯ ОРБИТА — ВЕРХНЯЯ половина ПЕРЕД ядром
+       ================================================================ -->
+  <g clip-path="url(#dt-front-top)" transform="translate(280 240)">
+    <g>
+      <animateTransform attributeName="transform" type="rotate"
+                        from="0 0 0" to="360 0 0" dur="26s" repeatCount="indefinite"/>
+      <ellipse cx="0" cy="0" rx="160" ry="38"
+               fill="none" stroke="url(#dt-orbit-rose)"
+               stroke-width="2.6" opacity="0.95" transform="rotate(22)"/>
+      <ellipse cx="0" cy="0" rx="160" ry="38"
+               fill="none" stroke="#FBCFE8" stroke-width="0.8"
+               opacity="0.35" transform="rotate(22)"/>
+      <g transform="rotate(22)">
+        <circle cx="-160" cy="0" r="4.5"
+                fill="url(#dt-spark-pink)" filter="url(#dt-bloom-sm)">
+          <animate attributeName="r" values="4.5;5.6;4.5" dur="2.8s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="-160" cy="0" r="2" fill="#FFFFFF"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- ================================================================
+       ВНУТРЕННЯЯ ФИОЛЕТОВАЯ ОРБИТА
+       ================================================================ -->
+  <g transform="translate(280 240)">
+    <g>
+      <animateTransform attributeName="transform" type="rotate"
+                        from="360 0 0" to="0 0 0" dur="44s" repeatCount="indefinite"/>
+      <ellipse cx="0" cy="0" rx="120" ry="26"
+               fill="none" stroke="url(#dt-orbit-violet)"
+               stroke-width="1.4" opacity="0.7" transform="rotate(-52)"/>
+      <g transform="rotate(-52)">
+        <circle cx="120" cy="0" r="3"
+                fill="url(#dt-spark-cyan)" filter="url(#dt-bloom-sm)">
+          <animate attributeName="r" values="3;4;3" dur="2.4s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="120" cy="0" r="1.4" fill="#FFFFFF"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- ================================================================
+       ЧИПЫ ПО 4 УГЛАМ
+       ================================================================ -->
+
+  <!-- Чип A = [[2,1],[1,3]] (левый верх) -->
+  <g transform="translate(72 104)" filter="url(#dt-chip-shadow)">
+    <rect x="-56" y="-22" width="112" height="44" rx="12"
+          fill="#FFFFFF" fill-opacity="0.04"/>
+    <rect x="-56" y="-22" width="112" height="44" rx="12"
+          fill="none" stroke="url(#dt-chip-pink)" stroke-width="1.2"/>
+    <circle cx="-44" cy="0" r="2.2" fill="#EC4899">
+      <animate attributeName="r" values="2.2;3;2.2" dur="2.8s" repeatCount="indefinite"/>
+    </circle>
+    <text x="4" y="-2" font-size="11" font-weight="800"
+          fill="#F5D0FE" text-anchor="middle">A =</text>
+    <text x="4" y="10" font-size="10" font-weight="700"
+          fill="#F5D0FE" text-anchor="middle">[[2,1],[1,3]]</text>
+    <animateTransform attributeName="transform" type="translate"
+                      values="72 104; 72 98; 72 104"
+                      dur="5s" repeatCount="indefinite"/>
+  </g>
+
+  <!-- Чип det A (правый верх) -->
+  <g transform="translate(488 104)" filter="url(#dt-chip-shadow)">
+    <rect x="-60" y="-22" width="120" height="44" rx="12"
+          fill="#FFFFFF" fill-opacity="0.04"/>
+    <rect x="-60" y="-22" width="120" height="44" rx="12"
+          fill="none" stroke="url(#dt-chip-violet)" stroke-width="1.2"/>
+    <circle cx="-48" cy="0" r="2.2" fill="#7C3AED">
+      <animate attributeName="r" values="2.2;3;2.2" dur="2.8s" begin="0.6s" repeatCount="indefinite"/>
+    </circle>
+    <text x="6" y="5" font-size="17" font-weight="800" font-style="italic"
+          fill="#C4B5FD" text-anchor="middle">det A</text>
+    <animateTransform attributeName="transform" type="translate"
+                      values="488 104; 488 96; 488 104"
+                      dur="6s" repeatCount="indefinite"/>
+  </g>
+
+  <!-- Чип S = 5 (левый низ) -->
+  <g transform="translate(72 400)" filter="url(#dt-chip-shadow)">
+    <rect x="-52" y="-22" width="104" height="44" rx="12"
+          fill="#FFFFFF" fill-opacity="0.04"/>
+    <rect x="-52" y="-22" width="104" height="44" rx="12"
+          fill="none" stroke="url(#dt-chip-gold)" stroke-width="1.2"/>
+    <circle cx="-40" cy="0" r="2.2" fill="#F59E0B">
+      <animate attributeName="r" values="2.2;3;2.2" dur="2.8s" begin="1.2s" repeatCount="indefinite"/>
+    </circle>
+    <text x="6" y="7" font-size="18" font-weight="900"
+          fill="#FDE68A" text-anchor="middle">S = 5</text>
+    <animateTransform attributeName="transform" type="translate"
+                      values="72 400; 72 392; 72 400"
+                      dur="5.6s" repeatCount="indefinite"/>
+  </g>
+
+  <!-- Чип A⁻¹ ✔ (правый низ) -->
+  <g transform="translate(488 400)" filter="url(#dt-chip-shadow)">
+    <rect x="-56" y="-22" width="112" height="44" rx="12"
+          fill="#FFFFFF" fill-opacity="0.04"/>
+    <rect x="-56" y="-22" width="112" height="44" rx="12"
+          fill="none" stroke="url(#dt-chip-mint)" stroke-width="1.2"/>
+    <circle cx="-44" cy="0" r="2.2" fill="#059669">
+      <animate attributeName="r" values="2.2;3;2.2" dur="2.8s" begin="1.8s" repeatCount="indefinite"/>
+    </circle>
+    <text x="0" y="5" font-size="14" font-weight="800" font-style="italic"
+          fill="#6EE7B7" text-anchor="middle">A⁻¹ ✓</text>
+    <animateTransform attributeName="transform" type="translate"
+                      values="488 400; 488 392; 488 400"
+                      dur="6.4s" repeatCount="indefinite"/>
+  </g>
+
+  <!-- ================================================================
+       ЧАСТИЦЫ: 22 штуки на 3 уровнях
+       ================================================================ -->
+
+  <!-- Дальний план: маленькие, приглушённые -->
+  <g opacity="0.5" filter="url(#dt-dof-far)">
+    <circle cx="86" cy="46" r="1.6" fill="url(#dt-spark-cyan)">
+      <animate attributeName="opacity" values="0.8;0.3;0.8" dur="6s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="470" cy="40" r="1.4" fill="url(#dt-spark-pink)">
+      <animate attributeName="opacity" values="0.7;0.2;0.7" dur="7s" begin="1s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="40" cy="220" r="1.2" fill="url(#dt-spark-white)">
+      <animate attributeName="opacity" values="0.6;0.15;0.6" dur="5.5s" begin="2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="520" cy="240" r="1.5" fill="url(#dt-spark-gold)">
+      <animate attributeName="opacity" values="0.75;0.25;0.75" dur="6.8s" begin="0.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="120" cy="456" r="1.4" fill="url(#dt-spark-cyan)">
+      <animate attributeName="opacity" values="0.65;0.2;0.65" dur="6.2s" begin="1.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="440" cy="450" r="1.3" fill="url(#dt-spark-pink)">
+      <animate attributeName="opacity" values="0.7;0.2;0.7" dur="5.8s" begin="2.4s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <!-- Средний план -->
+  <circle cx="54" cy="140" r="2.4" fill="url(#dt-spark-cyan)" filter="url(#dt-bloom-sm)">
+    <animate attributeName="cx" values="54;48;54" dur="7s" repeatCount="indefinite"/>
+    <animate attributeName="cy" values="140;132;140" dur="7s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="1;0.5;1" dur="4.5s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="54" cy="140" r="1.1" fill="#FFFFFF"/>
+
+  <circle cx="512" cy="176" r="2.6" fill="url(#dt-spark-gold)" filter="url(#dt-bloom-sm)">
+    <animate attributeName="cx" values="512;518;512" dur="8s" repeatCount="indefinite"/>
+    <animate attributeName="cy" values="176;168;176" dur="8s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="1;0.55;1" dur="5.5s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="512" cy="176" r="1.2" fill="#FFFFFF"/>
+
+  <circle cx="46" cy="316" r="2.2" fill="url(#dt-spark-pink)" filter="url(#dt-bloom-sm)">
+    <animate attributeName="cx" values="46;40;46" dur="7.5s" repeatCount="indefinite"/>
+    <animate attributeName="cy" values="316;322;316" dur="7.5s" repeatCount="indefinite"/>
+  </circle>
+
+  <circle cx="524" cy="320" r="2.4" fill="url(#dt-spark-cyan)" filter="url(#dt-bloom-sm)">
+    <animate attributeName="opacity" values="0.95;0.35;0.95" dur="5s" repeatCount="indefinite"/>
+  </circle>
+
+  <circle cx="280" cy="24" r="2.2" fill="url(#dt-spark-white)" filter="url(#dt-bloom-sm)">
+    <animate attributeName="opacity" values="1;0.4;1" dur="4.8s" repeatCount="indefinite"/>
+  </circle>
+
+  <circle cx="200" cy="464" r="2.4" fill="url(#dt-spark-cyan)" filter="url(#dt-bloom-sm)">
+    <animate attributeName="opacity" values="0.9;0.3;0.9" dur="5.2s" begin="0.8s" repeatCount="indefinite"/>
+  </circle>
+
+  <circle cx="360" cy="460" r="2" fill="url(#dt-spark-pink)" filter="url(#dt-bloom-sm)">
+    <animate attributeName="opacity" values="0.85;0.25;0.85" dur="5.6s" begin="1.4s" repeatCount="indefinite"/>
+  </circle>
+
+  <circle cx="404" cy="128" r="2.2" fill="url(#dt-spark-white)" filter="url(#dt-bloom-sm)">
+    <animate attributeName="cx" values="404;410;404" dur="6s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="1;0.4;1" dur="3.8s" repeatCount="indefinite"/>
+  </circle>
+
+  <circle cx="160" cy="308" r="1.8" fill="url(#dt-spark-gold)" filter="url(#dt-bloom-sm)">
+    <animate attributeName="cy" values="308;300;308" dur="6.5s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Крупный ближний план -->
+  <circle cx="94" cy="42" r="8" fill="url(#dt-spark-pink)" opacity="0.35" filter="url(#dt-bloom-md)">
+    <animate attributeName="opacity" values="0.35;0.15;0.35" dur="7s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="94" cy="42" r="2.2" fill="#FFFFFF"/>
+
+  <circle cx="480" cy="438" r="9" fill="url(#dt-spark-cyan)" opacity="0.4" filter="url(#dt-bloom-md)">
+    <animate attributeName="opacity" values="0.4;0.18;0.4" dur="6.4s" begin="1.2s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="480" cy="438" r="2.4" fill="#FFFFFF"/>
+
+  <circle cx="155" cy="365" r="7" fill="url(#dt-spark-gold)" opacity="0.42" filter="url(#dt-bloom-md)">
+    <animate attributeName="opacity" values="0.42;0.18;0.42" dur="5.4s" begin="0.6s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="155" cy="365" r="1.8" fill="#FFFFFF"/>
+
+  <circle cx="455" cy="290" r="8" fill="url(#dt-spark-gold)" opacity="0.45" filter="url(#dt-bloom-md)">
+    <animate attributeName="opacity" values="0.45;0.2;0.45" dur="5.8s" begin="1.8s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="455" cy="290" r="2" fill="#FFFFFF"/>
+
+  <!-- ================================================================
+       ЛИНЗОВЫЕ ВСПЫШКИ НА ЯДРЕ
+       ================================================================ -->
+  <g opacity="0.8" filter="url(#dt-flare)">
+    <circle cx="248" cy="204" r="14" fill="#FFFFFF" opacity="0.35"/>
+    <circle cx="244" cy="200" r="5" fill="#FFFFFF" opacity="0.9"/>
+  </g>
+
+</svg>
