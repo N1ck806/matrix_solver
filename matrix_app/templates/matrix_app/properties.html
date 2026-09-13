@@ -10,59 +10,10 @@
 <style>
 /* =============================================================================
    Свойства матриц — стили в едином стиле
+   -----------------------------------------------------------------------------
+   Фон страницы НЕ переопределяем: глобальный фон из main.css + слой
+   .app-body::before. Здесь — только локальные стили секций.
    ============================================================================= */
-
-/* --- ЕДИНЫЙ ФОН НА ВСЮ СТРАНИЦУ --- */
-body {
-    background: #F7F8FC;
-    position: relative;
-    overflow-x: hidden;
-}
-
-body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: -2;
-    pointer-events: none;
-    background:
-        radial-gradient(ellipse 800px 600px at 15% 10%, rgba(99, 102, 241, 0.12), transparent 60%),
-        radial-gradient(ellipse 700px 500px at 85% 20%, rgba(139, 92, 246, 0.10), transparent 60%),
-        radial-gradient(ellipse 600px 500px at 50% 90%, rgba(6, 182, 212, 0.08), transparent 60%),
-        linear-gradient(180deg, #F7F8FC 0%, #F0F3FF 50%, #F7F8FC 100%);
-}
-
-body::after {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    background-image:
-        linear-gradient(to right, rgba(99, 102, 241, 0.05) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(99, 102, 241, 0.05) 1px, transparent 1px);
-    background-size: 56px 56px;
-    mask-image: radial-gradient(ellipse 100% 80% at 50% 20%, black 30%, transparent 90%);
-    -webkit-mask-image: radial-gradient(ellipse 100% 80% at 50% 20%, black 30%, transparent 90%);
-    opacity: 0.7;
-}
-
-[data-theme="dark"] body { background: var(--bg-page); }
-
-[data-theme="dark"] body::before {
-    background:
-        radial-gradient(ellipse 800px 600px at 15% 10%, rgba(99, 102, 241, 0.18), transparent 60%),
-        radial-gradient(ellipse 700px 500px at 85% 20%, rgba(139, 92, 246, 0.15), transparent 60%),
-        radial-gradient(ellipse 600px 500px at 50% 90%, rgba(6, 182, 212, 0.12), transparent 60%),
-        linear-gradient(180deg, #0B0E1A 0%, #10142A 50%, #0B0E1A 100%);
-}
-
-[data-theme="dark"] body::after {
-    background-image:
-        linear-gradient(to right, rgba(129, 140, 248, 0.06) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(129, 140, 248, 0.06) 1px, transparent 1px);
-    opacity: 0.6;
-}
 
 /* --- Page head --- */
 .page-head { background: transparent; }
@@ -302,7 +253,13 @@ body::after {
     box-shadow: 0 4px 12px -3px rgba(99, 102, 241, 0.25);
 }
 
-.chip--button svg { color: var(--accent); flex-shrink: 0; }
+.chip--button .ml-icon,
+.chip--button svg {
+    width: 14px;
+    height: 14px;
+    color: var(--accent);
+    flex-shrink: 0;
+}
 
 /* --- Кнопки анализа --- */
 .props-actions {
@@ -320,6 +277,13 @@ body::after {
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
+}
+
+.props-buttons .btn .ml-icon,
+.props-buttons .btn svg {
+    width: 16px;
+    height: 16px;
+    color: inherit;
 }
 
 .props-buttons .btn-primary {
@@ -423,7 +387,10 @@ body::after {
     color: var(--accent);
 }
 
+.props-toc-link .ml-icon,
 .props-toc-link svg {
+    width: 14px;
+    height: 14px;
     color: var(--accent);
     flex-shrink: 0;
 }
@@ -453,6 +420,12 @@ body::after {
     border-radius: 14px;
     box-shadow: 0 10px 20px -6px rgba(99, 102, 241, 0.5);
     flex-shrink: 0;
+}
+.props-category-icon .ml-icon,
+.props-category-icon svg {
+    width: 22px;
+    height: 22px;
+    color: #fff;
 }
 
 .props-category-head h3 {
@@ -656,7 +629,7 @@ body::after {
             </div>
             <div class="page-head-actions">
                 <a href="#cat-form" class="btn btn-soft btn-sm">
-                    {% icon "book-open" size=14 %}
+                    {% icon "ui/book-open" size=14 %}
                     <span>К справочнику</span>
                 </a>
             </div>
@@ -703,22 +676,22 @@ body::after {
             <div class="matrix-input-footer matrix-input-footer--compact">
                 <div class="matrix-input-chips">
                     <button type="button" class="chip chip--button" data-matrix-action="zero" data-matrix-target="a">
-                        {% icon "zero-matrix" size=14 %}<span>Нули</span>
+                        {% icon "ui/zero-matrix" size=14 %}<span>Нули</span>
                     </button>
                     <button type="button" class="chip chip--button" data-matrix-action="identity" data-matrix-target="a">
-                        {% icon "identity" size=14 %}<span>Единичная</span>
+                        {% icon "ui/identity" size=14 %}<span>Единичная</span>
                     </button>
                     <button type="button" class="chip chip--button" data-matrix-action="random" data-matrix-target="a">
-                        {% icon "sparkles" size=14 %}<span>Случайная</span>
+                        {% icon "ui/sparkles" size=14 %}<span>Случайная</span>
                     </button>
                     <button type="button" class="chip chip--button" data-matrix-action="transpose" data-matrix-target="a">
-                        {% icon "transpose" size=14 %}<span>Трансп.</span>
+                        {% icon "ui/transpose" size=14 %}<span>Трансп.</span>
                     </button>
                     <button type="button" class="chip chip--button" data-matrix-action="copy" data-matrix-target="a">
-                        {% icon "copy" size=14 %}<span>Копировать</span>
+                        {% icon "ui/copy" size=14 %}<span>Копировать</span>
                     </button>
                     <button type="button" class="chip chip--button" data-matrix-action="paste" data-matrix-target="a">
-                        {% icon "clipboard" size=14 %}<span>Вставить</span>
+                        {% icon "ui/clipboard" size=14 %}<span>Вставить</span>
                     </button>
                 </div>
             </div>
@@ -731,11 +704,11 @@ body::after {
                 </label>
                 <div class="props-buttons">
                     <button type="button" class="btn btn-primary" data-props-run>
-                        {% icon "check-badge" size=16 %}
+                        {% icon "ui/check-badge" size=16 %}
                         <span>Определить свойства</span>
                     </button>
                     <button type="button" class="btn btn-ghost" data-props-reset>
-                        {% icon "trash" size=14 %}
+                        {% icon "ui/trash" size=14 %}
                         <span>Очистить</span>
                     </button>
                 </div>
@@ -799,25 +772,25 @@ body::after {
 
         <nav class="props-toc" aria-label="Категории свойств">
             <a href="#cat-form" class="props-toc-link">
-                {% icon "square-matrix" size=14 %}<span>Форма</span>
+                {% icon "ui/square-matrix" size=14 %}<span>Форма</span>
             </a>
             <a href="#cat-structure" class="props-toc-link">
-                {% icon "matrix-grid" size=14 %}<span>Структура</span>
+                {% icon "ui/matrix-grid" size=14 %}<span>Структура</span>
             </a>
             <a href="#cat-symmetry" class="props-toc-link">
-                {% icon "symmetric" size=14 %}<span>Симметрия</span>
+                {% icon "ui/symmetric" size=14 %}<span>Симметрия</span>
             </a>
             <a href="#cat-definiteness" class="props-toc-link">
-                {% icon "check-badge" size=14 %}<span>Определённость</span>
+                {% icon "ui/check-badge" size=14 %}<span>Определённость</span>
             </a>
             <a href="#cat-special" class="props-toc-link">
-                {% icon "sparkles" size=14 %}<span>Особые виды</span>
+                {% icon "ui/sparkles" size=14 %}<span>Особые виды</span>
             </a>
             <a href="#cat-numbers" class="props-toc-link">
-                {% icon "sigma" size=14 %}<span>Числовые характеристики</span>
+                {% icon "math/sigma" size=14 %}<span>Числовые характеристики</span>
             </a>
             <a href="#cat-degeneracy" class="props-toc-link">
-                {% icon "alert-circle" size=14 %}<span>Вырожденность</span>
+                {% icon "ui/alert-circle" size=14 %}<span>Вырожденность</span>
             </a>
         </nav>
 
@@ -827,7 +800,7 @@ body::after {
              ============================================================ -->
         <div class="props-category" id="cat-form">
             <header class="props-category-head">
-                <span class="props-category-icon">{% icon "square-matrix" size=22 %}</span>
+                <span class="props-category-icon">{% icon "ui/square-matrix" size=22 %}</span>
                 <div>
                     <h3>Форма матрицы</h3>
                     <p>Определяется соотношением числа строк и столбцов.</p>
@@ -905,7 +878,7 @@ body::after {
              ============================================================ -->
         <div class="props-category" id="cat-structure">
             <header class="props-category-head">
-                <span class="props-category-icon">{% icon "matrix-grid" size=22 %}</span>
+                <span class="props-category-icon">{% icon "ui/matrix-grid" size=22 %}</span>
                 <div>
                     <h3>Структура матрицы</h3>
                     <p>Расположение нулевых и ненулевых элементов.</p>
@@ -1016,7 +989,7 @@ body::after {
              ============================================================ -->
         <div class="props-category" id="cat-symmetry">
             <header class="props-category-head">
-                <span class="props-category-icon">{% icon "symmetric" size=22 %}</span>
+                <span class="props-category-icon">{% icon "ui/symmetric" size=22 %}</span>
                 <div>
                     <h3>Симметрия</h3>
                     <p>Свойства, связанные с равенством элементов относительно диагонали.</p>
@@ -1110,7 +1083,7 @@ body::after {
              ============================================================ -->
         <div class="props-category" id="cat-definiteness">
             <header class="props-category-head">
-                <span class="props-category-icon">{% icon "check-badge" size=22 %}</span>
+                <span class="props-category-icon">{% icon "ui/check-badge" size=22 %}</span>
                 <div>
                     <h3>Определённость</h3>
                     <p>Знак квадратичной формы, порождаемой симметричной матрицей.</p>
@@ -1182,7 +1155,7 @@ body::after {
              ============================================================ -->
         <div class="props-category" id="cat-special">
             <header class="props-category-head">
-                <span class="props-category-icon">{% icon "sparkles" size=22 %}</span>
+                <span class="props-category-icon">{% icon "ui/sparkles" size=22 %}</span>
                 <div>
                     <h3>Особые виды матриц</h3>
                     <p>Матрицы с дополнительными алгебраическими свойствами.</p>
@@ -1269,7 +1242,7 @@ body::after {
              ============================================================ -->
         <div class="props-category" id="cat-numbers">
             <header class="props-category-head">
-                <span class="props-category-icon">{% icon "sigma" size=22 %}</span>
+                <span class="props-category-icon">{% icon "math/sigma" size=22 %}</span>
                 <div>
                     <h3>Числовые характеристики</h3>
                     <p>Скалярные величины, связанные с матрицей.</p>
@@ -1355,7 +1328,7 @@ body::after {
              ============================================================ -->
         <div class="props-category" id="cat-degeneracy">
             <header class="props-category-head">
-                <span class="props-category-icon">{% icon "alert-circle" size=22 %}</span>
+                <span class="props-category-icon">{% icon "ui/alert-circle" size=22 %}</span>
                 <div>
                     <h3>Вырожденность</h3>
                     <p>Свойства, связанные с обратимостью и линейной зависимостью.</p>
