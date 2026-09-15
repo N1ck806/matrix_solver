@@ -294,8 +294,6 @@
 
                 this._applyKindClass(cell, val);
 
-                // Единственный источник правды для ручного ввода:
-                // input-событие → _setFromInput → модель.
                 (function (cellRef, rr, cc) {
                     cellRef.addEventListener('input', function () {
                         self._setFromInput(rr, cc, cellRef.value);
@@ -528,10 +526,6 @@
         }
     };
 
-    /**
-     * Вызывается ТОЛЬКО из обработчика input на ячейке.
-     * Пишет в модель, НЕ трогая input.value (курсор не сбивается).
-     */
     MatrixInput.prototype._setFromInput = function (r, c, value) {
         if (r < 0 || r >= this.rows) return;
         if (c < 0 || c >= this.cols) return;
@@ -541,8 +535,6 @@
 
         if (this.values[r][c] === v) return;
 
-        // Один шаг undo на изменение ячейки (не на каждый символ —
-        // pushHistory вызывается здесь, но _silent блокирует вложенные).
         if (!this._silent && this._batchDepth === 0) {
             this.pushHistory();
         }
@@ -557,10 +549,6 @@
         }
     };
 
-    /**
-     * Программная установка значения (импорт, fillZero, restore, write).
-     * Не трогает input.value, если фокус сейчас в этой ячейке.
-     */
     MatrixInput.prototype.setValue = function (r, c, value, silent) {
         if (r < 0 || r >= this.rows) return;
         if (c < 0 || c >= this.cols) return;
@@ -578,8 +566,6 @@
         cell.dataset.value = v;
 
         if (isInputEl(cell)) {
-            // Не перетираем значение, если фокус в этой ячейке —
-            // иначе сбивается курсор при печати.
             if (document.activeElement !== cell && cell.value !== v) {
                 cell.value = v;
             }
@@ -1420,7 +1406,6 @@
     function applyToCell(newValue) {
         if (!currentCell || !currentInput) return;
 
-        // Обновляем сам input, чтобы курсор остался в нём
         if (isInputEl(currentCell)) {
             currentCell.value = newValue;
         }
@@ -1515,7 +1500,6 @@
     }
 
     function initKeyboard() {
-        // Автооткрытие ОТКЛЮЧЕНО. Клавиатура открывается только по кнопке.
         document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape') closeKeyboard();
         });
@@ -1544,17 +1528,44 @@
     // 5. ИНИЦИАЛИЗАЦИЯ СЕТОК
     // =========================================================================
 
-    function initMatrixInputs() {
-        ML.$$('[data-matrix-input]').forEach(function (el) {
-            var key = el.id || ('matrix-' + Object.keys(ML.matrixInputs).length);
-            el.id = key;
-            if (ML.matrixInputs[key]) return;
+    /**
+     * Найти карточку и букву матрицы для элемента.
+     */
+    function resolveCardAndLetter(el) {
+        var card = el.closest('[data-matrix-card]');
+        var letter = (card && card.dataset.matrixCard)
+            || el.dataset.matrixLetter
+            || 'a';
+        return { card: card, letter: String(letter).toLowerCase() };
+    }
 
-            var card = el.closest('[data-matrix-card]');
-            var letter = (card && card.dataset.matrixCard)
-                || el.dataset.matrixLetter || 'a';
-            ML.matrixInputs[key] = new MatrixInput(el, letter);
-        });
+    /**
+     * Создать MatrixInput для одного [data-matrix-input], если ещё не создан.
+     * Возвращает созданный (или уже существующий) экземпляр.
+     */
+    function ensureMatrixInput(el) {
+        if (!el) return null;
+
+        // ID обязателен для ML.matrixInputs
+        var key = el.id;
+        if (!key) {
+            key = 'matrix-' + Math.random().toString(36).slice(2, 8);
+            el.id = key;
+        }
+
+        // Уже создан? Возвращаем.
+        if (ML.matrixInputs[key]) return ML.matrixInputs[key];
+
+        var info = resolveCardAndLetter(el);
+
+        // Создаём MatrixInput (он сам пересоберёт ячейки)
+        var mi = new MatrixInput(el, info.letter);
+        ML.matrixInputs[key] = mi;
+        return mi;
+    }
+
+    function initMatrixInputs() {
+        ML.$$('[data-matrix-input]').forEach(ensureMatrixInput);
     }
 
     function initVectorInputs() {
@@ -1857,7 +1868,6 @@
                     }
                     break;
                 case 'keypad':
-                    // Открыть цифровую клавиатуру для активной ячейки
                     var active = document.activeElement;
                     if (active && active.classList
                         && active.classList.contains('matrix-cell')) {
@@ -2005,7 +2015,7 @@
             }
 
             if (grid) {
-                ML.matrixInputs[grid.id] = new MatrixInput(grid, letter);
+                ensureMatrixInput(grid);
             }
 
             initSizeControls(card);
@@ -2242,6 +2252,16 @@
 
         _initialized = true;
         ML.emit('matrix:module-ready', {});
+
+        // Дополнительно: эмитим `matrix:change` для каждой готовой матрицы,
+        // чтобы calculator.js сразу увидел актуальное состояние.
+        setTimeout(function () {
+            ML.getAllMatrices().forEach(function (item) {
+                try {
+                    item.mi._dispatchChange();
+                } catch (e) { /* noop */ }
+            });
+        }, 0);
     };
 
     if (document.readyState === 'loading') {
