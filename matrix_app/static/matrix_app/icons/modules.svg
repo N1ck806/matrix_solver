@@ -1,39 +1,30 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" role="img" aria-hidden="true">
-    <defs>
-        <linearGradient id="ml-mod-a" x1="4" y1="4" x2="28" y2="28" gradientUnits="userSpaceOnUse">
-            <stop stop-color="#6366F1"/>
-            <stop offset="1" stop-color="#8B5CF6"/>
-        </linearGradient>
-        <linearGradient id="ml-mod-b" x1="8" y1="8" x2="24" y2="24" gradientUnits="userSpaceOnUse">
-            <stop stop-color="#22D3EE"/>
-            <stop offset="1" stop-color="#6366F1"/>
-        </linearGradient>
-    </defs>
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 24 24"
+     fill="none"
+     stroke="currentColor"
+     stroke-width="1.8"
+     stroke-linecap="round"
+     stroke-linejoin="round"
+     role="img"
+     aria-hidden="true">
 
     <!-- Центральный ромб -->
-    <rect x="10" y="10" width="12" height="12" rx="2"
-          transform="rotate(45 16 16)"
-          fill="url(#ml-mod-a)" opacity="0.9"/>
+    <rect x="8" y="8" width="8" height="8" rx="1.5"
+          transform="rotate(45 12 12)"/>
 
-    <!-- Маленькие ромбы по углам — 4 «модуля» -->
-    <rect x="2.5" y="2.5" width="5" height="5" rx="1"
-          transform="rotate(45 5 5)"
-          fill="url(#ml-mod-b)" opacity="0.85"/>
-    <rect x="24.5" y="2.5" width="5" height="5" rx="1"
-          transform="rotate(45 27 5)"
-          fill="url(#ml-mod-b)" opacity="0.85"/>
-    <rect x="2.5" y="24.5" width="5" height="5" rx="1"
-          transform="rotate(45 5 27)"
-          fill="url(#ml-mod-b)" opacity="0.85"/>
-    <rect x="24.5" y="24.5" width="5" height="5" rx="1"
-          transform="rotate(45 27 27)"
-          fill="url(#ml-mod-b)" opacity="0.85"/>
+    <!-- Угловые «модули» -->
+    <rect x="1.5" y="1.5" width="4" height="4" rx="1"
+          transform="rotate(45 3.5 3.5)"/>
+    <rect x="18.5" y="1.5" width="4" height="4" rx="1"
+          transform="rotate(45 20.5 3.5)"/>
+    <rect x="1.5" y="18.5" width="4" height="4" rx="1"
+          transform="rotate(45 3.5 20.5)"/>
+    <rect x="18.5" y="18.5" width="4" height="4" rx="1"
+          transform="rotate(45 20.5 20.5)"/>
 
     <!-- Соединительные линии -->
-    <g stroke="url(#ml-mod-a)" stroke-width="1.2" opacity="0.55" stroke-linecap="round">
-        <line x1="8" y1="8" x2="11" y2="11"/>
-        <line x1="24" y1="8" x2="21" y2="11"/>
-        <line x1="8" y1="24" x2="11" y2="21"/>
-        <line x1="24" y1="24" x2="21" y2="21"/>
-    </g>
+    <line x1="5.5" y1="5.5" x2="8.5" y2="8.5"/>
+    <line x1="18.5" y1="5.5" x2="15.5" y2="8.5"/>
+    <line x1="5.5" y1="18.5" x2="8.5" y2="15.5"/>
+    <line x1="18.5" y1="18.5" x2="15.5" y2="15.5"/>
 </svg>
