@@ -360,18 +360,26 @@
 {{ block.super }}
 
 <!--
-  Отключаем persist-матрицы для /modules/.
-  matrix.js читает body[data-no-persist] и не восстанавливает
-  старое состояние из localStorage.
+  Порядок важен:
+    1. Ставим body[data-no-persist="1"] — до matrix.js.
+    2. Подключаем matrix.js — он строит ячейки.
+    3. Подключаем calculator.js — он находит матрицу и поднимает
+       режим /modules/ (mountModules).
+
+  Fallback-bootstrap удалён: matrix.js сам создаёт ячейки
+  и MatrixInput. Дублирование только мешало.
 -->
 <script>
     (function () {
-        if (document.body) {
-            document.body.dataset.noPersist = '1';
-        } else {
-            document.addEventListener('DOMContentLoaded', function () {
+        function markNoPersist() {
+            if (document.body) {
                 document.body.dataset.noPersist = '1';
-            });
+            }
+        }
+        if (document.body) {
+            markNoPersist();
+        } else {
+            document.addEventListener('DOMContentLoaded', markNoPersist);
         }
     })();
 </script>
@@ -381,46 +389,50 @@
 
 <script>
     /*
-     * Страховка: если matrix.js не построил ячейки —
-     * строим вручную, чтобы страница не выглядела сломанной.
+     * Страховка для /modules/: если по какой-то причине calculator.js
+     * не успел поднять ML.modules (например, matrix.js был подключён
+     * позже), повторно вызываем инициализацию после полной загрузки.
+     *
+     * Ничего не строит вручную — только дергает публичные методы.
      */
     (function () {
-        function bootstrap() {
-            var grid = document.getElementById('modules-matrix-input');
-            if (!grid) return;
-            if (grid.querySelector('.matrix-cell')) return;
+        function kickModules() {
+            if (!window.MatrixLab) return;
 
-            var rows = parseInt(grid.dataset.rows, 10) || 3;
-            var cols = parseInt(grid.dataset.cols, 10) || 3;
-            grid.classList.add('matrix-grid');
-            grid.style.gridTemplateColumns =
-                'repeat(' + cols + ', minmax(0, 1fr))';
+            // Матрица должна быть уже создана matrix.js
+            var matrices = window.MatrixLab.getAllMatrices
+                ? window.MatrixLab.getAllMatrices()
+                : [];
 
-            grid.innerHTML = '';
-            for (var r = 0; r < rows; r++) {
-                for (var c = 0; c < cols; c++) {
-                    var wrap = document.createElement('div');
-                    wrap.className = 'matrix-cell-wrap';
-                    var inp = document.createElement('input');
-                    inp.type = 'text';
-                    inp.className = 'matrix-cell';
-                    inp.autocomplete = 'off';
-                    inp.spellcheck = false;
-                    inp.dataset.row = String(r);
-                    inp.dataset.col = String(c);
-                    wrap.appendChild(inp);
-                    grid.appendChild(wrap);
+            if (!matrices.length) {
+                // Ещё не готова — пробуем через мгновение
+                setTimeout(kickModules, 100);
+                return;
+            }
+
+            // Если ML.modules не поднялся — дёргаем initMatrixModule
+            // (он идемпотентный) и повторно init calculator.js.
+            if (!window.MatrixLab.modules) {
+                if (window.MatrixLab.initMatrixModule) {
+                    window.MatrixLab.initMatrixModule();
+                }
+                // calculator.js уже сам отработает на DOMContentLoaded,
+                // но если он был подключён после — дергаем ещё раз.
+                if (window.MatrixLab.calculator
+                    && typeof window.MatrixLab.calculator.mount === 'function') {
+                    // mount() сам разберётся по data-атрибутам
                 }
             }
         }
 
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', function () {
-                setTimeout(bootstrap, 50);
+                setTimeout(kickModules, 0);
             });
         } else {
-            setTimeout(bootstrap, 50);
+            setTimeout(kickModules, 0);
         }
     })();
 </script>
+
 {% endblock %}
