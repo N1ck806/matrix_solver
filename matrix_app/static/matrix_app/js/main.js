@@ -145,11 +145,11 @@
     };
 
     ML.getCsrfToken = function () {
-        const meta = document.querySelector('meta[name="csrf-token"]');
-        if (meta && meta.content) return meta.content;
-
         const input = document.querySelector('input[name="csrfmiddlewaretoken"]');
         if (input && input.value) return input.value;
+
+        const meta = document.querySelector('meta[name="csrf-token"]');
+        if (meta && meta.content) return meta.content;
 
         const m = document.cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/);
         if (m) return decodeURIComponent(m[1]);
@@ -899,6 +899,9 @@
                 : selector;
             if (!modal) return;
 
+            // Защита от повторного открытия одной и той же модалки
+            if (this._openStack.indexOf(modal) !== -1) return;
+
             modal.hidden = false;
             document.body.style.overflow = 'hidden';
             this._openStack.push(modal);
@@ -989,24 +992,52 @@
             if (okBtn && opts.okText) okBtn.textContent = opts.okText;
             if (cancelBtn && opts.cancelText) cancelBtn.textContent = opts.cancelText;
 
+            let settled = false;
+
             function cleanup(result) {
+                if (settled) return;
+                settled = true;
+
                 if (okBtn) okBtn.removeEventListener('click', onOk);
                 if (cancelBtn) cancelBtn.removeEventListener('click', onCancel);
                 if (backdrop) backdrop.removeEventListener('click', onCancel);
-                document.removeEventListener('keydown', onKey);
+                if (modal) modal.removeEventListener('keydown', onKey);
+                ML.off('modal:close', onModalClose);
+
                 ML.modal.close(modal);
                 resolve(result);
             }
+
             function onOk() { cleanup(true); }
             function onCancel() { cleanup(false); }
+
             function onKey(e) {
-                if (e.key === 'Enter') { e.preventDefault(); onOk(); }
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    onOk();
+                }
+            }
+
+            // Если модалку закрыли извне (Esc в ML.modal или клик по backdrop) —
+            // резолвим false и снимаем обработчики.
+            function onModalClose(payload) {
+                if (payload && payload.modal === modal) {
+                    if (settled) return;
+                    settled = true;
+                    if (okBtn) okBtn.removeEventListener('click', onOk);
+                    if (cancelBtn) cancelBtn.removeEventListener('click', onCancel);
+                    if (backdrop) backdrop.removeEventListener('click', onCancel);
+                    if (modal) modal.removeEventListener('keydown', onKey);
+                    ML.off('modal:close', onModalClose);
+                    resolve(false);
+                }
             }
 
             if (okBtn) okBtn.addEventListener('click', onOk);
             if (cancelBtn) cancelBtn.addEventListener('click', onCancel);
             if (backdrop) backdrop.addEventListener('click', onCancel);
-            document.addEventListener('keydown', onKey);
+            if (modal) modal.addEventListener('keydown', onKey);
+            ML.on('modal:close', onModalClose);
 
             ML.modal.open(modal);
 
@@ -1384,7 +1415,12 @@
     // =========================================================================
 
     ML.header = {
+        _bound: false,
+
         init() {
+            if (this._bound) return;
+            this._bound = true;
+
             const header = document.querySelector('[data-app-header]');
             if (!header) return;
 
@@ -1405,6 +1441,8 @@
     ML.sidebar = {
         _sidebar: null,
         _backdrop: null,
+        _bound: false,
+        _closeTimer: null,
 
         init() {
             const sidebar = document.querySelector('[data-app-sidebar]');
@@ -1412,6 +1450,9 @@
 
             this._sidebar = sidebar;
             this._backdrop = document.querySelector('[data-sidebar-backdrop]');
+
+            if (this._bound) return;
+            this._bound = true;
 
             const self = this;
 
@@ -1460,11 +1501,20 @@
             const sidebar = this._sidebar;
             if (!sidebar) return;
 
+            if (this._closeTimer) {
+                clearTimeout(this._closeTimer);
+                this._closeTimer = null;
+            }
+
             sidebar.classList.add('is-open');
-            if (this._backdrop) {
-                this._backdrop.hidden = false;
+
+            const backdrop = this._backdrop;
+            if (backdrop) {
+                backdrop.hidden = false;
                 requestAnimationFrame(function () {
-                    if (ML.sidebar._backdrop) {
+                    if (ML.sidebar._backdrop
+                        && ML.sidebar._sidebar
+                        && ML.sidebar._sidebar.classList.contains('is-open')) {
                         ML.sidebar._backdrop.classList.add('is-visible');
                     }
                 });
@@ -1487,8 +1537,12 @@
             const backdrop = this._backdrop;
             if (backdrop) {
                 backdrop.classList.remove('is-visible');
-                setTimeout(function () {
-                    if (backdrop) backdrop.hidden = true;
+                const bd = backdrop;
+                if (this._closeTimer) clearTimeout(this._closeTimer);
+                this._closeTimer = setTimeout(function () {
+                    if (bd && !bd.classList.contains('is-visible')) {
+                        bd.hidden = true;
+                    }
                 }, 220);
             }
 
@@ -1511,6 +1565,7 @@
         _input: null,
         _results: null,
         _debounced: null,
+        _bound: false,
 
         // Статический индекс для локального поиска.
         // Если появится /api/search — заменить на fetch в _renderLocal.
@@ -1534,6 +1589,9 @@
 
             this._input   = this._modal.querySelector('[data-search-input]');
             this._results = this._modal.querySelector('[data-search-results]');
+
+            if (this._bound) return;
+            this._bound = true;
 
             const self = this;
 
@@ -1681,8 +1739,8 @@
         // Ядро
         ML.theme.init();
         ML.header.init();
-        ML.sidebar.init();   // ← новый модуль
-        ML.search.init();    // ← модалка поиска
+        ML.sidebar.init();
+        ML.search.init();
         ML.hotkeys.init();
         ML.history.load();
 

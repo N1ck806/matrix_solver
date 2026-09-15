@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" role="img" aria-hidden="true">
+    <defs>
+        <linearGradient id="ml-gr-a" x1="0" y1="0" x2="1" y2="1">
+            <stop stop-color="#6366F1"/>
+            <stop offset="1" stop-color="#8B5CF6"/>
+        </linearGradient>
+        <linearGradient id="ml-gr-b" x1="0" y1="0" x2="1" y2="1">
+            <stop stop-color="#22D3EE"/>
+            <stop offset="1" stop-color="#10B981"/>
+        </linearGradient>
+    </defs>
+
+    <!-- Рёбра -->
+    <g stroke="url(#ml-gr-a)" stroke-width="1.2" opacity="0.55" stroke-linecap="round">
+        <line x1="8" y1="8" x2="16" y2="14"/>
+        <line x1="16" y1="14" x2="24" y2="8"/>
+        <line x1="8" y1="8" x2="6" y2="20"/>
+        <line x1="6" y1="20" x2="16" y2="14"/>
+        <line x1="16" y1="14" x2="26" y2="20"/>
+        <line x1="24" y1="8" x2="26" y2="20"/>
+        <line x1="6" y1="20" x2="26" y2="20"/>
+    </g>
+
+    <!-- Вершины -->
+    <g>
+        <circle cx="8" cy="8" r="3" fill="url(#ml-gr-a)"/>
+        <circle cx="24" cy="8" r="3" fill="url(#ml-gr-b)"/>
+        <circle cx="6" cy="20" r="3" fill="url(#ml-gr-b)"/>
+        <circle cx="26" cy="20" r="3" fill="url(#ml-gr-a)"/>
+        <circle cx="16" cy="14" r="4" fill="url(#ml-gr-a)"/>
+        <circle cx="16" cy="14" r="4" fill="none" stroke="#FFFFFF" stroke-opacity="0.45" stroke-width="0.9"/>
+    </g>
+
+    <!-- Мелкие точки на рёбрах -->
+    <g fill="#FFFFFF" opacity="0.8">
+        <circle cx="12" cy="11" r="1.1"/>
+        <circle cx="20" cy="11" r="1.1"/>
+        <circle cx="11" cy="17" r="1.1"/>
+        <circle cx="21" cy="17" r="1.1"/>
+    </g>
+</svg>

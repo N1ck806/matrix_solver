@@ -31,6 +31,7 @@ JSON API MatrixLab.
 Структура файла:
     1.  Импорты
     2.  Утилиты (_get_payload, _get_matrix, _matrix_to_list, ...)
+    2.5 Ограничения размера для символьных операций
     3.  Обёртки ответа (_success, _fail, _handle)
     4.  История и задание (_save_history, _describe_task)
     5.  Базовые операции (add, subtract, multiply, scalar, transpose, power, compare)
@@ -198,6 +199,66 @@ def _parse_vector(payload: dict[str, Any], key: str = "vector_b") -> sp.Matrix:
             "Вектор b должен быть одномерным.", code="bad_vector"
         )
     return matrix.reshape(matrix.rows * matrix.cols, 1)
+
+
+# =============================================================================
+# 2.5 ОГРАНИЧЕНИЯ РАЗМЕРА ДЛЯ СИМВОЛЬНЫХ ОПЕРАЦИЙ
+# =============================================================================
+#
+# sympy считает символьные определители / собственные значения / разложения
+# очень быстро до определённого размера, а дальше время растёт как факториал.
+#
+#   char_poly / eigenvalues / eigenvectors / diagonalize:
+#       5×5 → точный расчёт укладывается в 1–3 сек;
+#       6×6+ → 30+ сек, браузер отваливается по таймауту.
+#
+#   properties с with_eigenvalues=True:
+#       та же проблема, потому что внутри вызывается eigen.
+#
+#   lu / qr / cholesky:
+#       численно 8×8 ещё ок, но символьные дроби взрываются.
+#
+#   spectral:
+#       требует символьных собственных значений — тоже 6×6 максимум.
+
+_MAX_SIZE_SYMBOLIC_EIGEN = 5    # char_poly, eigenvalues, eigenvectors, diagonalize
+_MAX_SIZE_PROPERTIES_EIGEN = 5  # properties с with_eigenvalues=True
+_MAX_SIZE_DECOMP = 8            # lu, qr, cholesky
+_MAX_SIZE_SPECTRAL = 6          # spectral
+
+
+def _check_size(
+    matrix: sp.Matrix,
+    max_size: int,
+    operation: str,
+    *,
+    square_required: bool = True,
+) -> None:
+    """Проверить, что матрица не слишком большая для символьной операции.
+
+    Если превышает лимит — бросает ValidationError с понятным текстом.
+    Это защита от тайм-аутов: sympy может считать 6×6 char_poly минуты.
+
+    square_required=True: если матрица не квадратная, проверка пропускается —
+    о квадратности сообщит сервис (ValidationError с другим кодом).
+    """
+    n = max(matrix.rows, matrix.cols)
+    if n <= max_size:
+        return
+
+    if square_required and matrix.rows != matrix.cols:
+        # Не наша забота: до сюда дойдёт проверка квадратности в сервисах.
+        return
+
+    raise ValidationError(
+        (
+            f"Операция «{operation}» для матрицы "
+            f"{matrix.rows}×{matrix.cols} требует слишком много времени: "
+            f"точный символьный расчёт поддерживается максимум до "
+            f"{max_size}×{max_size}. Уменьшите размер матрицы."
+        ),
+        code="too_large",
+    )
 
 
 # =============================================================================
@@ -1010,10 +1071,22 @@ def matrix_adjugate(request: HttpRequest) -> JsonResponse:
 @require_POST
 @_handle
 def matrix_properties(request: HttpRequest) -> JsonResponse:
-    """Полный анализ свойств матрицы."""
+    """Полный анализ свойств матрицы.
+
+    ВАЖНО: если with_eigenvalues=True, ограничиваем размер матрицы — иначе
+    sympy может считать собственные значения минуты.
+    """
     payload = _get_payload(request)
     a = _get_matrix(payload, "matrix")
     with_eigen = bool(payload.get("with_eigenvalues", True))
+
+    if with_eigen:
+        _check_size(
+            a,
+            _MAX_SIZE_PROPERTIES_EIGEN,
+            "Полный анализ свойств (с собственными значениями)",
+        )
+
     props = analyze(a, with_eigenvalues=with_eigen)
 
     _save_history(
@@ -1079,9 +1152,14 @@ def matrix_properties(request: HttpRequest) -> JsonResponse:
 @require_POST
 @_handle
 def matrix_eigenvalues(request: HttpRequest) -> JsonResponse:
-    """Собственные значения."""
+    """Собственные значения.
+
+    Ограничение размера: sympy eigenvals() для 6×6+ решает полином
+    высокой степени и может считать минуты.
+    """
     payload = _get_payload(request)
     a = _get_matrix(payload, "matrix")
+    _check_size(a, _MAX_SIZE_SYMBOLIC_EIGEN, "Собственные значения")
     er = compute_eigen(a)
 
     eigenvalues = [
@@ -1127,9 +1205,13 @@ def matrix_eigenvalues(request: HttpRequest) -> JsonResponse:
 @require_POST
 @_handle
 def matrix_eigenvectors(request: HttpRequest) -> JsonResponse:
-    """Собственные векторы (для всех собственных значений)."""
+    """Собственные векторы (для всех собственных значений).
+
+    Ограничение размера — как у eigenvalues.
+    """
     payload = _get_payload(request)
     a = _get_matrix(payload, "matrix")
+    _check_size(a, _MAX_SIZE_SYMBOLIC_EIGEN, "Собственные векторы")
     er = compute_eigen(a)
 
     eigenvectors_payload = [
@@ -1168,9 +1250,13 @@ def matrix_eigenvectors(request: HttpRequest) -> JsonResponse:
 @require_POST
 @_handle
 def matrix_char_poly(request: HttpRequest) -> JsonResponse:
-    """Характеристический многочлен."""
+    """Характеристический многочлен.
+
+    Ограничение размера: charpoly() 6×6+ — минуты.
+    """
     payload = _get_payload(request)
     a = _get_matrix(payload, "matrix")
+    _check_size(a, _MAX_SIZE_SYMBOLIC_EIGEN, "Характеристический многочлен")
     er = compute_eigen(a)
 
     _save_history(
@@ -1208,6 +1294,7 @@ def matrix_lu(request: HttpRequest) -> JsonResponse:
     """LU-разложение."""
     payload = _get_payload(request)
     a = _get_matrix(payload, "matrix")
+    _check_size(a, _MAX_SIZE_DECOMP, "LU-разложение")
     res = lu(a)
 
     parts = {name: _matrix_to_list(m) for name, m in res.parts.items()}
@@ -1246,6 +1333,7 @@ def matrix_qr(request: HttpRequest) -> JsonResponse:
     """QR-разложение."""
     payload = _get_payload(request)
     a = _get_matrix(payload, "matrix")
+    _check_size(a, _MAX_SIZE_DECOMP, "QR-разложение")
     res = qr(a)
 
     parts = {name: _matrix_to_list(m) for name, m in res.parts.items()}
@@ -1284,6 +1372,7 @@ def matrix_cholesky(request: HttpRequest) -> JsonResponse:
     """Разложение Холецкого."""
     payload = _get_payload(request)
     a = _get_matrix(payload, "matrix")
+    _check_size(a, _MAX_SIZE_DECOMP, "Разложение Холецкого")
     res = cholesky(a)
 
     parts = {name: _matrix_to_list(m) for name, m in res.parts.items()}
@@ -1319,9 +1408,13 @@ def matrix_cholesky(request: HttpRequest) -> JsonResponse:
 @require_POST
 @_handle
 def matrix_diagonalize(request: HttpRequest) -> JsonResponse:
-    """Диагонализация A = P·D·P⁻¹."""
+    """Диагонализация A = P·D·P⁻¹.
+
+    Ограничение размера: внутри вызываются символьные собственные значения.
+    """
     payload = _get_payload(request)
     a = _get_matrix(payload, "matrix")
+    _check_size(a, _MAX_SIZE_SYMBOLIC_EIGEN, "Диагонализация")
     res = diagonalize(a)
 
     parts = {name: _matrix_to_list(m) for name, m in res.parts.items()}
@@ -1357,9 +1450,13 @@ def matrix_diagonalize(request: HttpRequest) -> JsonResponse:
 @require_POST
 @_handle
 def matrix_spectral(request: HttpRequest) -> JsonResponse:
-    """Спектральное разложение A = Q·D·Qᵀ."""
+    """Спектральное разложение A = Q·D·Qᵀ.
+
+    Ограничение размера: символьные собственные значения.
+    """
     payload = _get_payload(request)
     a = _get_matrix(payload, "matrix")
+    _check_size(a, _MAX_SIZE_SPECTRAL, "Спектральное разложение")
     res = spectral(a)
 
     parts = {name: _matrix_to_list(m) for name, m in res.parts.items()}

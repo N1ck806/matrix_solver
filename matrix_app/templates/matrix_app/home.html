@@ -9,8 +9,166 @@ MatrixLab — сервис для решения задач линейной а�
 Пошаговые решения с обоснованием каждого шага.
 {% endblock %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'matrix_app/css/main.css' %}">
+{% block extra_head %}
+{{ block.super }}
+<style>
+/* =============================================================================
+   Применение по направлениям — секция на главной.
+   Остальные стили главной живут в main.css.
+   ============================================================================= */
+
+/* --- Сетка школ --- */
+.modules-teaser {
+    padding-block: clamp(48px, 8vw, 96px);
+}
+
+.modules-teaser__grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 16px;
+}
+
+@media (max-width: 1200px) {
+    .modules-teaser__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (max-width: 768px) {
+    .modules-teaser__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 480px) {
+    .modules-teaser__grid { grid-template-columns: 1fr; }
+}
+
+/* --- Карточка школы --- */
+.school-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 24px 16px 22px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    text-decoration: none;
+    color: inherit;
+    transition:
+        transform var(--dur-base) var(--ease-out),
+        border-color var(--dur-base),
+        box-shadow var(--dur-base);
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+}
+
+.school-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 50% 0%,
+            color-mix(in srgb, var(--accent-1) 8%, transparent),
+            transparent 60%);
+    opacity: 0;
+    transition: opacity var(--dur-base);
+    z-index: -1;
+    pointer-events: none;
+}
+
+.school-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent-3);
+    box-shadow: 0 16px 48px var(--accent-glow);
+}
+
+.school-card:hover::before { opacity: 1; }
+
+.school-card__emblem {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100px;
+    height: 100px;
+    margin-bottom: 14px;
+    flex-shrink: 0;
+    transition: transform var(--dur-base) var(--ease-out);
+}
+
+.school-card:hover .school-card__emblem {
+    transform: scale(1.06);
+}
+
+.school-card__emblem .ml-icon,
+.school-card__emblem svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.school-card__title {
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    color: var(--text);
+    margin: 0 0 6px;
+    line-height: 1.3;
+    letter-spacing: -0.005em;
+}
+
+.school-card__count {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    background: var(--accent-soft);
+    border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+    border-radius: var(--radius-full);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+}
+
+.school-card__count .ml-icon,
+.school-card__count svg {
+    width: 11px;
+    height: 11px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+    color: inherit;
+}
+
+/* --- CTA внизу секции --- */
+.modules-teaser__cta {
+    display: flex;
+    justify-content: center;
+    margin-top: 32px;
+}
+
+.modules-teaser__cta .btn {
+    box-shadow:
+        0 8px 20px -6px var(--accent-glow),
+        0 0 0 1px color-mix(in srgb, var(--accent) 10%, transparent);
+    transition: transform var(--dur-fast), box-shadow var(--dur-base);
+}
+
+.modules-teaser__cta .btn:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 16px 32px -8px var(--accent-glow),
+        0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.modules-teaser__cta .btn .ml-icon,
+.modules-teaser__cta .btn svg {
+    width: 16px;
+    height: 16px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+    color: inherit;
+}
+</style>
 {% endblock %}
 
 {% block page_id %}home{% endblock %}
@@ -86,7 +244,7 @@ MatrixLab — сервис для решения задач линейной а�
 
 
 <!-- ================================================================
-     СЕКЦИЯ 2. FEATURES — жёстко твои SVG из icons/features/
+     СЕКЦИЯ 2. FEATURES
      ================================================================ -->
 <section class="features section" id="capabilities">
   <div class="container">
@@ -294,7 +452,100 @@ MatrixLab — сервис для решения задач линейной а�
 
 
 <!-- ================================================================
-     СЕКЦИЯ 5. THEORY
+     СЕКЦИЯ 5. МАТРИЦЫ В РЕАЛЬНОЙ ЖИЗНИ
+     ================================================================ -->
+<section class="modules-teaser section" id="modules">
+  <div class="container">
+
+    <header class="section-head">
+      <span class="section-kicker">Применение</span>
+      <h2 class="section-title">Матрицы в реальной жизни</h2>
+      <p class="section-lead">
+        От педагогики до космических технологий. Для каждой специальности
+        — своя формула, свои примеры и возможность посчитать прямо в калькуляторе.
+      </p>
+    </header>
+
+    <div class="modules-teaser__grid">
+
+      <a href="{% url 'matrix_app:modules' %}#education"
+         class="school-card">
+        <div class="school-card__emblem" aria-hidden="true">
+          {% icon "schools/school-education" size=100 %}
+        </div>
+        <h3 class="school-card__title">Школа образования</h3>
+        <span class="school-card__count">
+          {% icon "modules" size=11 %}
+          <span>13 направлений</span>
+        </span>
+      </a>
+
+      <a href="{% url 'matrix_app:modules' %}#business"
+         class="school-card">
+        <div class="school-card__emblem" aria-hidden="true">
+          {% icon "schools/school-business" size=100 %}
+        </div>
+        <h3 class="school-card__title">Школа бизнеса и финансов</h3>
+        <span class="school-card__count">
+          {% icon "modules" size=11 %}
+          <span>9 направлений</span>
+        </span>
+      </a>
+
+      <a href="{% url 'matrix_app:modules' %}#engineering"
+         class="school-card">
+        <div class="school-card__emblem" aria-hidden="true">
+          {% icon "schools/school-engineering" size=100 %}
+        </div>
+        <h3 class="school-card__title">Инженерная школа</h3>
+        <span class="school-card__count">
+          {% icon "modules" size=11 %}
+          <span>20 направлений</span>
+        </span>
+      </a>
+
+      <a href="{% url 'matrix_app:modules' %}#arts"
+         class="school-card">
+        <div class="school-card__emblem" aria-hidden="true">
+          {% icon "schools/school-arts" size=100 %}
+        </div>
+        <h3 class="school-card__title">Школа искусств</h3>
+        <span class="school-card__count">
+          {% icon "modules" size=11 %}
+          <span>3 направления</span>
+        </span>
+      </a>
+
+      <a href="{% url 'matrix_app:modules' %}#medicine"
+         class="school-card">
+        <div class="school-card__emblem" aria-hidden="true">
+          {% icon "schools/school-medicine" size=100 %}
+        </div>
+        <h3 class="school-card__title">Школа медицины</h3>
+        <span class="school-card__count">
+          {% icon "modules" size=11 %}
+          <span>5 направлений</span>
+        </span>
+      </a>
+
+    </div>
+
+    <div class="modules-teaser__cta">
+      <a href="{% url 'matrix_app:modules' %}" class="btn btn-primary btn-lg">
+        {% icon "modules" size=16 %}
+        <span>Все направления</span>
+        <span class="btn-arrow" aria-hidden="true">
+          {% icon "arrow-right" size=14 %}
+        </span>
+      </a>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ================================================================
+     СЕКЦИЯ 6. THEORY
      ================================================================ -->
 <section class="theory section">
   <div class="theory__bg" aria-hidden="true">
@@ -348,7 +599,7 @@ MatrixLab — сервис для решения задач линейной а�
 
 
 <!-- ================================================================
-     СЕКЦИЯ 6. CTA
+     СЕКЦИЯ 7. CTA
      ================================================================ -->
 <section class="cta-wrap section">
   <div class="container">

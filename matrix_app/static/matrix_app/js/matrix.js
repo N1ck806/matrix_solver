@@ -23,7 +23,8 @@
        • Событийная шина ML.on/off/emit;
        • Динамические матрицы через <template id="matrix-template">;
        • Доступность: role=grid, aria-*;
-       • localStorage — сохранение состояния редактора;
+       • localStorage — сохранение состояния редактора (можно отключить
+         флагом body[data-no-persist="1"]);
        • Haptic через ML.haptic.
 
    Зависимости (из main.js):
@@ -65,6 +66,26 @@
 
     function isInputEl(el) {
         return el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA');
+    }
+
+    /**
+     * Проверить, отключён ли persist на этой странице.
+     *
+     * Флаг ставится вручную до подключения matrix.js:
+     *     document.body.dataset.noPersist = '1';
+     *
+     * Например, на странице /modules/ — чтобы матрица всегда
+     * начиналась с 3×3, а не восстанавливалась из localStorage
+     * как «4×4 из прошлого раза».
+     */
+    function isNoPersist() {
+        var body = document.body;
+        if (!body) return false;
+        if (body.dataset && body.dataset.noPersist === '1') return true;
+        if (body.getAttribute && body.getAttribute('data-no-persist') === '1') {
+            return true;
+        }
+        return false;
     }
 
     // =========================================================================
@@ -1511,10 +1532,6 @@
                 positionKeyboard(currentCell);
             }
         }, { passive: true });
-
-        var startY = 0;
-        // keyboardEl ещё не создан на этом этапе — создадим лениво
-        // в openKeyboardFor через buildKeyboard().
     }
 
     ML.digitalKeyboard = {
@@ -2149,6 +2166,7 @@
     var STORAGE_KEY = 'editor.v1';
 
     function saveToStorage() {
+        if (isNoPersist()) return;
         try {
             var data = {};
             ML.getAllMatrices().forEach(function (item) {
@@ -2163,6 +2181,7 @@
     }
 
     function loadFromStorage() {
+        if (isNoPersist()) return;
         try {
             var data = ML.storage.getJSON(STORAGE_KEY, null);
             if (!data) return;
@@ -2181,6 +2200,7 @@
 
     ML.saveState = saveToStorage;
     ML.loadState = loadFromStorage;
+    ML.isNoPersist = isNoPersist;
 
     ML.on('matrix:change', ML.debounce(saveToStorage, 400));
 
@@ -2215,7 +2235,8 @@
         initAddMatrixButton();
         syncVectorToMatrix();
 
-        if (!ML.prefs || ML.prefs.get('editorPersist') !== false) {
+        if (!isNoPersist()
+            && (!ML.prefs || ML.prefs.get('editorPersist') !== false)) {
             loadFromStorage();
         }
 

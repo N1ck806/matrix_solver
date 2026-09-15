@@ -10,27 +10,36 @@
        • properties.html      — анализ свойств
        • decompositions.html  — LU / QR / Cholesky / diagonalize
        • eigen.html           — собственные значения / векторы / char_poly
+       • modules.html         — пресеты по направлениям + вложенное оглавление
 
    Публичный API:
        ML.calculator.mount(scope, mode)
        ML.calculator.run(op, ctx)
+       ML.calculator.runOperation(op, ctx)
        ML.calculator.getSelectedOperation(scope)
        ML.calculator.updateRunButtonState(scope)
        ML.calculator.opInfo(op)
        ML.calculator.listOperations()
        ML.calculator.registerOperation(op, cfg)
+       ML.calculator.PRESETS
+       ML.calculator.getPresets()
+
        ML.operations.mount(scope)
        ML.operations.getOperation()
        ML.operations.updateRunButtonState()
        ML.operations.updateMatrixCards()
        ML.operations.autoFit()
 
+       ML.modules.setPreset(code)
+       ML.modules.getPreset()
+       ML.modules.run()
+
    Зависимости: main.js, matrix.js, steps.js.
    ============================================================================= */
 (function () {
     'use strict';
 
-    const ML = window.MatrixLab;
+    var ML = window.MatrixLab;
     if (!ML) {
         console.error('[calculator.js] window.MatrixLab не найден — модуль не запущен.');
         return;
@@ -39,19 +48,8 @@
     // =========================================================================
     // 1. РЕЕСТР ОПЕРАЦИЙ
     // =========================================================================
-    //
-    // needs: 1 | 2 | 'n'
-    // autoFit: 'square' | 'same' | 'chain'
-    // payloadMode:
-    //   'single'      — payload.matrix
-    //   'pair'        — payload.matrix_a + payload.matrix_b
-    //   'pair_scalar' — payload.matrix_a + payload.scalar
-    //   'pair_power'  — payload.matrix + payload.power
-    //   'chain'       — payload.operation + payload.matrices
-    // =========================================================================
 
-    const DEFAULT_OPS = {
-        // --- Основные (single) ---
+    var DEFAULT_OPS = {
         determinant: {
             label: 'Определитель',
             url: '/api/matrix/determinant/',
@@ -125,8 +123,6 @@
             category: 'basic',
             payloadMode: 'single'
         },
-
-        // --- Спектр ---
         eigenvalues: {
             label: 'Собственные значения',
             url: '/api/matrix/eigenvalues/',
@@ -157,8 +153,6 @@
             category: 'spectrum',
             payloadMode: 'single'
         },
-
-        // --- Разложения ---
         lu: {
             label: 'LU-разложение',
             url: '/api/matrix/lu/',
@@ -200,8 +194,6 @@
             category: 'decomp',
             payloadMode: 'single'
         },
-
-        // --- Многоматричные ---
         add: {
             label: 'Сложение',
             url: '/api/matrix/chain/',
@@ -259,8 +251,6 @@
             autoFit: 'square',
             payloadMode: 'pair_power'
         },
-
-        // --- СЛАУ ---
         solve_system: {
             label: 'Решение СЛАУ',
             url: '/api/system/solve/',
@@ -272,7 +262,7 @@
         }
     };
 
-    const OPS = Object.assign({}, DEFAULT_OPS);
+    var OPS = Object.assign({}, DEFAULT_OPS);
 
     function opInfo(op) {
         return OPS[op] || {
@@ -285,7 +275,80 @@
     }
 
     // =========================================================================
-    // 2. УТИЛИТЫ
+    // 2. ПРЕСЕТЫ ДЛЯ СТРАНИЦЫ /modules/
+    // =========================================================================
+
+    var PRESETS = {
+        determinant: {
+            label: 'Обратимость преобразования',
+            subtitle: 'det A ≠ 0 — можно вернуться назад',
+            description: (
+                'Определитель показывает, во сколько раз преобразование ' +
+                'изменяет объём. Если он равен нулю — преобразование ' +
+                'необратимо: часть информации теряется. Это фундамент ' +
+                'любой задачи устойчивости.'
+            ),
+            icon: 'math/determinant'
+        },
+        eigenvalues: {
+            label: 'Собственные состояния',
+            subtitle: 'λ — устойчивые режимы системы',
+            description: (
+                'Собственные значения показывают, какие направления ' +
+                'система сохраняет, а какие меняет. Это язык устойчивости, ' +
+                'резонанса и главных компонент — от вибраций моста до ' +
+                'факторов риска в портфеле.'
+            ),
+            icon: 'math/lambda'
+        },
+        lu: {
+            label: 'Разложение сложной задачи',
+            subtitle: 'A = L·U — пошаговое решение',
+            description: (
+                'Сложную матрицу можно разложить на простые треугольные ' +
+                'множители. Тогда решение системы становится быстрым: ' +
+                'сначала прямой ход, потом обратный. Это основа ' +
+                'численных методов.'
+            ),
+            icon: 'math/lu'
+        },
+        rank: {
+            label: 'Размерность данных',
+            subtitle: 'rank A — сколько независимых измерений',
+            description: (
+                'Ранг матрицы — это число независимых строк. В данных ' +
+                'он показывает, сколько скрытых факторов реально ' +
+                'управляет результатом. Низкий ранг — сигнал, что ' +
+                'данные избыточны.'
+            ),
+            icon: 'math/rank'
+        },
+        inverse: {
+            label: 'Обратное преобразование',
+            subtitle: 'A⁻¹ — вернуться к исходному состоянию',
+            description: (
+                'Обратная матрица решает обратную задачу: если мы знаем ' +
+                'результат, что было на входе? Это нужно для ' +
+                'дешифровки, восстановления сигнала и калибровки ' +
+                'измерительных приборов.'
+            ),
+            icon: 'math/inverse'
+        },
+        properties: {
+            label: 'Полный анализ свойств',
+            subtitle: 'Все характеристики матрицы сразу',
+            description: (
+                'Одна матрица — и сразу полный портрет: квадратная ли, ' +
+                'симметричная, ортогональная, вырожденная, ' +
+                'положительно определённая, идемпотентная. ' +
+                'Плюс определитель, ранг, след и собственные значения.'
+            ),
+            icon: 'ui/check-badge'
+        }
+    };
+
+    // =========================================================================
+    // 3. УТИЛИТЫ
     // =========================================================================
 
     function isArr(v) { return Array.isArray(v); }
@@ -302,33 +365,31 @@
         return (scope || document).querySelector(selector);
     }
 
-    function findAll(scope, selector) {
-        return ML.$$(selector, scope);
+    function toArray(list) {
+        if (!list) return [];
+        if (Array.isArray(list)) return list;
+        return Array.prototype.slice.call(list);
     }
 
     function getSelectedOperation(scope) {
-        const s = scope || document;
-        const radio = s.querySelector('[data-op-select]:checked');
+        var s = scope || document;
+        var radio = s.querySelector('[data-op-select]:checked');
         return radio ? radio.value : null;
     }
 
     function getShowSteps(scope) {
-        const el = (scope || document).querySelector(
+        var el = (scope || document).querySelector(
             '[data-show-steps], [data-ops-show-steps], [data-system-steps]'
         );
         return el ? !!el.checked : true;
     }
 
-    /**
-     * ЖИВОЙ список матриц — вызываем каждый раз, когда он нужен.
-     * НЕ хранить в замыкании!
-     */
     function liveMatrices() {
         return ML.getAllMatrices();
     }
 
     function closeModalIfAny(btn) {
-        const modal = btn && btn.closest('.modal');
+        var modal = btn && btn.closest('.modal');
         if (modal && ML.modal) {
             setTimeout(function () {
                 ML.modal.close('#' + modal.id);
@@ -339,22 +400,41 @@
     function scrollToResult(resultBlock) {
         if (!resultBlock || resultBlock.hidden) return;
         try {
-            const top = resultBlock.getBoundingClientRect().top
+            var top = resultBlock.getBoundingClientRect().top
                 + window.pageYOffset - 80;
             window.scrollTo({ top: top, behavior: 'smooth' });
         } catch (e) { /* noop */ }
     }
 
+    function scrollToElement(el) {
+        if (!el) return;
+        try {
+            var top = el.getBoundingClientRect().top
+                + window.pageYOffset - 80;
+            window.scrollTo({ top: top, behavior: 'smooth' });
+        } catch (e) { /* noop */ }
+    }
+
+    function safeResult(resp) {
+        if (!resp) return {};
+        if (typeof resp === 'object' && resp.result !== undefined) {
+            return resp.result;
+        }
+        return resp;
+    }
+
     // =========================================================================
-    // 3. РЕЖИМ
+    // 4. РЕЖИМ
     // =========================================================================
 
     function detectMode(root) {
-        const scope = root || document;
-        const hasSingle = !!findOne(scope, '[data-calc-run]');
-        const hasMulti = !!findOne(scope, '[data-ops-run]');
-        const hasSystem = !!findOne(scope, '[data-system-run]');
+        var scope = root || document;
+        var hasSingle   = !!findOne(scope, '[data-calc-run]');
+        var hasMulti    = !!findOne(scope, '[data-ops-run]');
+        var hasSystem   = !!findOne(scope, '[data-system-run]');
+        var hasModules  = !!findOne(scope, '[data-modules-run]');
 
+        if (hasModules) return 'modules';
         if (hasSingle && !hasMulti) return 'single';
         if (hasMulti && !hasSingle) return 'multi';
         if (hasSingle && hasMulti) return 'both';
@@ -363,16 +443,16 @@
     }
 
     // =========================================================================
-    // 4. ЗАПУСК ОПЕРАЦИИ
+    // 5. ЗАПУСК ОПЕРАЦИИ
     // =========================================================================
 
     async function runOperation(op, ctx) {
         ctx = ctx || {};
-        const scope = ctx.root || document;
-        const info = opInfo(op);
-        const resultBlock = ctx.resultBlock
+        var scope = ctx.root || document;
+        var info = opInfo(op);
+        var resultBlock = ctx.resultBlock
             || findOne(scope, '[data-result-block]');
-        const placeholder = ctx.placeholder;
+        var placeholder = ctx.placeholder;
 
         if (!info.url) {
             ML.toast.error(
@@ -383,8 +463,7 @@
             return null;
         }
 
-        // --- Payload
-        let payload;
+        var payload;
         try {
             payload = buildPayload(op, ctx);
         } catch (err) {
@@ -396,8 +475,7 @@
         }
         if (!payload) return null;
 
-        // --- Валидация
-        const validation = ML.validateMatrixFor(op, {
+        var validation = ML.validateMatrixFor(op, {
             a: ctx.matrices && ctx.matrices[0],
             b: ctx.matrices && ctx.matrices[1]
         });
@@ -406,7 +484,7 @@
             return null;
         }
 
-        const snapshot = JSON.parse(JSON.stringify(payload));
+        var snapshot = JSON.parse(JSON.stringify(payload));
 
         ML.loader.show(ML.i18n.t('common.computing', 'Вычисляем…'));
         if (resultBlock && ML.resultBlock) {
@@ -414,9 +492,9 @@
         }
 
         try {
-            const response = await ML.api.post(info.url, payload);
+            var response = await ML.api.post(info.url, payload);
 
-            let verification = { ok: true };
+            var verification = { ok: true };
             if (ML.verifyResult) {
                 verification = ML.verifyResult(op, snapshot, response);
                 if (!verification.ok) {
@@ -467,40 +545,32 @@
         }
     }
 
-    /**
-     * Собирает payload в зависимости от payloadMode.
-     * Ключи соответствуют тому, что читает matrix_app/api.py.
-     */
     function buildPayload(op, ctx) {
-        const info = opInfo(op);
-        const scope = ctx.root || document;
-        const params = info.params || [];
+        var info = opInfo(op);
+        var scope = ctx.root || document;
+        var params = info.params || [];
 
-        const payload = { show_steps: getShowSteps(scope) };
+        var payload = { show_steps: getShowSteps(scope) };
 
-        // --- Общие параметры
         if (params.indexOf('precision') !== -1) {
-            const el = findOne(scope, '[data-precision]');
-            if (el && el.value) {
-                payload.precision = parseInt(el.value, 10) || 6;
+            var elP = findOne(scope, '[data-precision]');
+            if (elP && elP.value) {
+                payload.precision = parseInt(elP.value, 10) || 6;
             }
         }
         if (params.indexOf('format') !== -1) {
-            const el = findOne(scope, '[data-number-format]');
-            if (el && el.value) payload.format = el.value;
+            var elF = findOne(scope, '[data-number-format]');
+            if (elF && elF.value) payload.format = elF.value;
         }
         if (params.indexOf('method') !== -1) {
-            const el = findOne(scope, '[data-method-select]')
+            var elM = findOne(scope, '[data-method-select]')
                 || findOne(scope, '[data-system-method]:checked');
-            if (el) payload.method = el.value;
+            if (elM) payload.method = elM.value;
         }
 
-        const matrices = ctx.matrices || [];
-        const vector = ctx.vector;
+        var matrices = ctx.matrices || [];
+        var vector = ctx.vector;
 
-        // =====================================================================
-        // СЛАУ
-        // =====================================================================
         if (info.usesVector) {
             if (!matrices[0]) {
                 throw new Error(ML.i18n.t('calculator.fillA',
@@ -516,42 +586,29 @@
             return payload;
         }
 
-        // =====================================================================
-        // В зависимости от payloadMode
-        // =====================================================================
-
         switch (info.payloadMode) {
-
-            // --- Цепочка N матриц: /api/matrix/chain/ ---
             case 'chain': {
-                const filled = [];
+                var filled = [];
                 matrices.forEach(function (mi) {
-                    const data = mi.read();
+                    var data = mi.read();
                     if (!isEmptyMatrix(data)) filled.push(data);
                 });
                 if (filled.length < 2) {
                     throw new Error(ML.i18n.t('calculator.needTwo',
                         'Нужно минимум 2 заполненные матрицы.'));
                 }
-                // api.py: payload.operation = 'add' | 'multiply';
-                //         payload.matrices  = [ [...], [...], ... ]
-                if (op === 'add' || op === 'multiply') {
-                    payload.operation = op;
-                } else {
-                    payload.operation = op;
-                }
+                payload.operation = op;
                 payload.matrices = filled;
                 return payload;
             }
 
-            // --- Пара A и B: /api/matrix/subtract/ или /api/matrix/compare/ ---
             case 'pair': {
                 if (!matrices[0] || !matrices[1]) {
                     throw new Error(ML.i18n.t('calculator.needAB',
                         'Нужны матрицы A и B.'));
                 }
-                const a = matrices[0].read();
-                const b = matrices[1].read();
+                var a = matrices[0].read();
+                var b = matrices[1].read();
                 if (isEmptyMatrix(a)) {
                     throw new Error(ML.i18n.t('calculator.fillA',
                         'Заполните матрицу A.'));
@@ -560,73 +617,64 @@
                     throw new Error(ML.i18n.t('calculator.fillB',
                         'Заполните матрицу B.'));
                 }
-                // api.py matrix_subtract / matrix_compare читают
-                // matrix_a и matrix_b
                 payload.matrix_a = a;
                 payload.matrix_b = b;
                 return payload;
             }
 
-            // --- A + скаляр: /api/matrix/scalar/ ---
             case 'pair_scalar': {
                 if (!matrices[0]) {
                     throw new Error(ML.i18n.t('calculator.fillA',
                         'Заполните матрицу A.'));
                 }
-                const el = findOne(scope, '[data-scalar-input]');
-                const s = el ? String(el.value).trim() : '';
+                var elS = findOne(scope, '[data-scalar-input]');
+                var s = elS ? String(elS.value).trim() : '';
                 if (!s) {
                     throw new Error(ML.i18n.t('calculator.enterScalar',
                         'Введите значение скаляра k.'));
                 }
-                const a = matrices[0].read();
-                if (isEmptyMatrix(a)) {
+                var aS = matrices[0].read();
+                if (isEmptyMatrix(aS)) {
                     throw new Error(ML.i18n.t('calculator.fillA',
                         'Заполните матрицу A.'));
                 }
-                // api.py matrix_scalar читает matrix_a и scalar
-                payload.matrix_a = a;
+                payload.matrix_a = aS;
                 payload.scalar = s;
                 return payload;
             }
 
-            // --- A^n: /api/matrix/power/ ---
             case 'pair_power': {
                 if (!matrices[0]) {
                     throw new Error(ML.i18n.t('calculator.fillA',
                         'Заполните матрицу A.'));
                 }
-                const el = findOne(scope, '[data-power-input]');
-                const p = parseInt(el ? el.value : '', 10);
+                var elPw = findOne(scope, '[data-power-input]');
+                var p = parseInt(elPw ? elPw.value : '', 10);
                 if (isNaN(p)) {
                     throw new Error(ML.i18n.t('calculator.enterPower',
                         'Введите целое число в поле «Степень».'));
                 }
-                const a = matrices[0].read();
-                if (isEmptyMatrix(a)) {
+                var aP = matrices[0].read();
+                if (isEmptyMatrix(aP)) {
                     throw new Error(ML.i18n.t('calculator.fillA',
                         'Заполните матрицу A.'));
                 }
-                // api.py matrix_power читает matrix и power
-                payload.matrix = a;
+                payload.matrix = aP;
                 payload.power = p;
                 return payload;
             }
 
-            // --- Одна матрица: /api/matrix/<op>/ ---
             case 'single':
             default: {
                 if (!matrices[0]) {
                     throw new Error(ML.i18n.t('calculator.noMatrix',
                         'Матрица не найдена.'));
                 }
-                const m = matrices[0].read();
+                var m = matrices[0].read();
                 if (isEmptyMatrix(m)) {
                     throw new Error(ML.i18n.t('calculator.fillMatrix',
                         'Заполните матрицу.'));
                 }
-                // api.py matrix_* (детерминант, ранг, обратная, rref, …)
-                // читают поле "matrix"
                 payload.matrix = m;
                 return payload;
             }
@@ -634,8 +682,8 @@
     }
 
     function buildHistoryEntry(op, payload, response, ctx) {
-        const info = opInfo(op);
-        const entry = {
+        var info = opInfo(op);
+        var entry = {
             op: op,
             label: info.label,
             result: response
@@ -653,13 +701,14 @@
     }
 
     // =========================================================================
-    // 5. АВТОПОДБОР РАЗМЕРОВ
+    // 6. АВТОПОДБОР РАЗМЕРОВ
     // =========================================================================
 
     function applyAutoSize(op, mi) {
-        const info = opInfo(op);
+        var info = opInfo(op);
+        if (!mi) return;
         if (info.autoSquare && mi.rows !== mi.cols) {
-            const n = Math.max(mi.rows, mi.cols);
+            var n = Math.max(mi.rows, mi.cols);
             mi.setSize(n, n, { preserve: true });
             ML.toast.info(
                 ML.i18n.t('calculator.sizeAdjusted', 'Размер подстроен'),
@@ -671,31 +720,33 @@
 
     function applyAutoFit(op, items) {
         if (!items || !items.length) return;
-        const info = opInfo(op);
-        const rule = info.autoFit;
+        var info = opInfo(op);
+        var rule = info.autoFit;
 
         if (rule === 'square') {
-            const a = items[0];
+            var a = items[0];
             if (a && a.mi.rows !== a.mi.cols) a.mi.makeSquare();
             return;
         }
 
         if (rule === 'same') {
-            const a = items[0];
-            if (!a) return;
+            var first = items[0];
+            if (!first) return;
             items.forEach(function (item, i) {
                 if (i === 0) return;
-                if (item.mi.rows !== a.mi.rows || item.mi.cols !== a.mi.cols) {
-                    item.mi.setSize(a.mi.rows, a.mi.cols, { preserve: true });
+                if (item.mi.rows !== first.mi.rows
+                    || item.mi.cols !== first.mi.cols) {
+                    item.mi.setSize(first.mi.rows, first.mi.cols,
+                        { preserve: true });
                 }
             });
             return;
         }
 
         if (rule === 'chain') {
-            for (let i = 1; i < items.length; i++) {
-                const prev = items[i - 1].mi;
-                const cur = items[i].mi;
+            for (var i = 1; i < items.length; i++) {
+                var prev = items[i - 1].mi;
+                var cur = items[i].mi;
                 if (cur.rows !== prev.cols) {
                     cur.setSize(prev.cols, cur.cols, { preserve: true });
                 }
@@ -704,79 +755,75 @@
     }
 
     // =========================================================================
-    // 6. МОНТИРОВАНИЕ
+    // 7. МОНТИРОВАНИЕ (single / multi)
     // =========================================================================
 
     function mount(root, mode, opts) {
         opts = opts || {};
         root = root || document;
 
-        const runSelector = mode === 'multi'
+        var runSelector = mode === 'multi'
             ? '[data-ops-run]'
             : '[data-calc-run]';
-        const runBtn = findOne(root, runSelector);
+        var runBtn = findOne(root, runSelector);
         if (!runBtn) return false;
 
-        const section = runBtn.closest('section') || document;
+        var section = runBtn.closest('section') || document;
 
-        const resultBlock = findOne(section, '[data-result-block]');
-        const resetBtn = findOne(
+        var resultBlock = findOne(section, '[data-result-block]');
+        var resetBtn = findOne(
             section,
             mode === 'multi' ? '[data-ops-reset]' : '[data-calc-reset]'
         );
-        const placeholder = findOne(
+        var placeholder = findOne(
             section,
             mode === 'multi'
                 ? '[data-ops-placeholder]'
                 : '[data-calc-placeholder]'
         );
 
-        // --- Проверка, что матрицы вообще есть
-        const initialMatrices = liveMatrices();
+        var initialMatrices = liveMatrices();
         if (!initialMatrices.length) {
             console.warn('[calculator] Матрицы не найдены.');
             return false;
         }
 
-        const firstMatrix = initialMatrices[0].mi;
+        var firstMatrix = initialMatrices[0].mi;
 
-        // --- Состояние
-        let currentOp = getSelectedOperation(section)
+        var currentOp = getSelectedOperation(section)
             || (mode === 'multi' ? 'add' : 'determinant');
 
-        // =====================================================================
-        // Группы операций (calculator.html)
-        // =====================================================================
         function bindOpGroups() {
-            findAll(section, '[data-op-group]').forEach(function (btn) {
-                btn.addEventListener('click', function () {
-                    findAll(section, '[data-op-group]').forEach(function (b) {
-                        const active = b === btn;
-                        b.classList.toggle('is-active', active);
-                        b.setAttribute('aria-selected', String(active));
+            toArray(section.querySelectorAll('[data-op-group]'))
+                .forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        toArray(section.querySelectorAll('[data-op-group]'))
+                            .forEach(function (b) {
+                                var active = b === btn;
+                                b.classList.toggle('is-active', active);
+                                b.setAttribute('aria-selected',
+                                    String(active));
+                            });
+                        toArray(section.querySelectorAll('[data-op-list]'))
+                            .forEach(function (list) {
+                                list.hidden = (list.dataset.opList
+                                    !== btn.dataset.opGroup);
+                            });
+                        var op = getSelectedOperation(section);
+                        if (op) onOperationChange(op);
                     });
-                    findAll(section, '[data-op-list]').forEach(function (list) {
-                        list.hidden = (list.dataset.opList
-                            !== btn.dataset.opGroup);
-                    });
-                    const op = getSelectedOperation(section);
-                    if (op) onOperationChange(op);
                 });
-            });
         }
 
-        // =====================================================================
-        // Параметры
-        // =====================================================================
         function updateParams(info) {
-            const extra = findOne(section, '[data-op-extra]');
+            var extra = findOne(section, '[data-op-extra]');
             if (!extra) return;
-            const params = info.params || [];
+            var params = info.params || [];
 
             ['method', 'power', 'scalar', 'precision'].forEach(function (k) {
-                const elSingle = findOne(section, '[data-param="' + k + '"]');
-                const elMulti = findOne(section, '[data-ops-param="' + k + '"]');
-                const show = params.indexOf(k) !== -1;
+                var elSingle = findOne(section, '[data-param="' + k + '"]');
+                var elMulti = findOne(section, '[data-ops-param="' + k + '"]');
+                var show = params.indexOf(k) !== -1;
                 if (elSingle) elSingle.hidden = !show;
                 if (elMulti) elMulti.hidden = !show;
             });
@@ -784,29 +831,23 @@
             extra.hidden = params.length === 0;
         }
 
-        // =====================================================================
-        // Карточки матриц
-        // =====================================================================
         function updateMatrixCards() {
             if (mode !== 'multi') return;
-            const info = opInfo(currentOp);
-            const needed = info.needs;
-            const items = liveMatrices();
+            var info = opInfo(currentOp);
+            var needed = info.needs;
+            var items = liveMatrices();
 
             items.forEach(function (item, index) {
-                const show = (needed === 'n') ? true : index < needed;
+                var show = (needed === 'n') ? true : index < needed;
                 item.card.style.display = show ? '' : 'none';
             });
 
-            const addBtn = findOne(section, '[data-add-matrix]');
+            var addBtn = findOne(section, '[data-add-matrix]');
             if (addBtn) addBtn.hidden = (needed !== 'n');
         }
 
-        // =====================================================================
-        // Кнопка «Вычислить»
-        // =====================================================================
         function updateRunButtonState() {
-            const info = opInfo(currentOp);
+            var info = opInfo(currentOp);
             if (mode === 'multi') {
                 updateRunButtonStateMulti(info);
             } else {
@@ -815,11 +856,11 @@
         }
 
         function updateRunButtonStateSingle(info) {
-            const mi = firstMatrix;
-            const matrix = mi.read();
-            const empty = isEmptyMatrix(matrix);
-            const notSquare = info.square && mi.rows !== mi.cols;
-            const invalid = mi.hasInvalid && mi.hasInvalid();
+            var mi = firstMatrix;
+            var matrix = mi.read();
+            var empty = isEmptyMatrix(matrix);
+            var notSquare = info.square && mi.rows !== mi.cols;
+            var invalid = mi.hasInvalid && mi.hasInvalid();
 
             runBtn.disabled = empty || notSquare || invalid;
 
@@ -841,11 +882,11 @@
         }
 
         function updateRunButtonStateMulti(info) {
-            const needed = info.needs;
-            const items = liveMatrices();
+            var needed = info.needs;
+            var items = liveMatrices();
 
             if (needed === 'n') {
-                const filled = items.filter(function (item) {
+                var filled = items.filter(function (item) {
                     return item.card.style.display !== 'none'
                         && !isEmptyMatrix(item.mi.read());
                 });
@@ -858,8 +899,8 @@
                 return;
             }
 
-            for (let i = 0; i < needed; i++) {
-                const item = items[i];
+            for (var i = 0; i < needed; i++) {
+                var item = items[i];
                 if (!item || isEmptyMatrix(item.mi.read())) {
                     runBtn.disabled = true;
                     runBtn.title = ML.i18n.t('calculator.fill',
@@ -882,12 +923,9 @@
             runBtn.setAttribute('aria-disabled', 'false');
         }
 
-        // =====================================================================
-        // Смена операции
-        // =====================================================================
         function onOperationChange(op) {
             currentOp = op || (mode === 'multi' ? 'add' : 'determinant');
-            const info = opInfo(currentOp);
+            var info = opInfo(currentOp);
 
             if (mode === 'single') {
                 applyAutoSize(currentOp, firstMatrix);
@@ -901,26 +939,23 @@
             ML.emit('calculator:operation-change', { op: currentOp });
         }
 
-        // =====================================================================
-        // Биндинг
-        // =====================================================================
         bindOpGroups();
 
-        findAll(section, '[data-op-select]').forEach(function (radio) {
-            radio.addEventListener('change', function () {
-                onOperationChange(radio.value);
+        toArray(section.querySelectorAll('[data-op-select]'))
+            .forEach(function (radio) {
+                radio.addEventListener('change', function () {
+                    onOperationChange(radio.value);
+                });
             });
-        });
 
-        const updateStateDebounced = ML.debounce(updateRunButtonState, 80);
+        var updateStateDebounced = ML.debounce(updateRunButtonState, 80);
 
-        // Подписки на изменения (с живым пересчётом)
         function bindMatrixInputs() {
             liveMatrices().forEach(function (item) {
-                // убираем предыдущую привязку, чтобы не дублировать
                 if (item.mi.el.dataset.stateBound === '1') return;
                 item.mi.el.dataset.stateBound = '1';
-                item.mi.el.addEventListener('matrix:change', updateStateDebounced);
+                item.mi.el.addEventListener('matrix:change',
+                    updateStateDebounced);
             });
         }
         bindMatrixInputs();
@@ -936,14 +971,10 @@
             updateStateDebounced();
         });
 
-        // Начальное состояние
         onOperationChange(currentOp);
 
-        // =====================================================================
-        // Запуск
-        // =====================================================================
         runBtn.addEventListener('click', async function () {
-            const info = opInfo(currentOp);
+            var info = opInfo(currentOp);
 
             if (mode === 'single') {
                 if (firstMatrix.hasInvalid && firstMatrix.hasInvalid()) {
@@ -962,11 +993,10 @@
                 }
             }
 
-            // --- Собираем матрицы из ЖИВОГО списка
-            const items = liveMatrices();
-            let matrices;
+            var items = liveMatrices();
+            var matrices;
             if (mode === 'multi') {
-                const needed = info.needs;
+                var needed = info.needs;
                 if (needed === 'n') {
                     matrices = items
                         .filter(function (item) {
@@ -999,12 +1029,9 @@
             });
         });
 
-        // =====================================================================
-        // Сброс
-        // =====================================================================
         if (resetBtn) {
             resetBtn.addEventListener('click', function () {
-                const items = liveMatrices();
+                var items = liveMatrices();
                 if (mode === 'multi') {
                     items.forEach(function (item) { item.mi.clear(); });
                 } else {
@@ -1023,9 +1050,6 @@
             });
         }
 
-        // =====================================================================
-        // Публичный API
-        // =====================================================================
         if (mode === 'single') {
             ML.calculator.mount = function (r) { return mount(r, 'single'); };
             ML.calculator.run = runOperation;
@@ -1047,20 +1071,462 @@
     }
 
     // =========================================================================
-    // 7. ПРИМЕРЫ
+    // 8. ПОИСК МАТРИЦЫ ДЛЯ /modules/
+    // =========================================================================
+
+    function findModulesMatrix(root) {
+        var items = liveMatrices();
+        if (items.length) return items[0].mi;
+
+        var host = findOne(root || document, '[data-matrix-input]');
+        if (!host) return null;
+
+        console.warn(
+            '[calculator] /modules/: матрица есть в DOM, ' +
+            'но ML.getAllMatrices() её не видит. ' +
+            'Проверьте, что matrix.js подключён и инициализирует [data-matrix-input].'
+        );
+        return null;
+    }
+
+    // =========================================================================
+    // 9. МОНТИРОВАНИЕ МОДУЛЕЙ (/modules/)
+    // =========================================================================
+
+    function mountModules(root) {
+        root = root || document;
+
+        var runBtn = findOne(root, '[data-modules-run]');
+        if (!runBtn) {
+            console.warn('[calculator] modules: кнопка [data-modules-run] не найдена.');
+            return false;
+        }
+
+        var section = runBtn.closest('section') || document;
+        var resultBlock = findOne(section, '[data-result-block]')
+            || document.getElementById('modules-result');
+        var resetBtn = findOne(section, '[data-modules-reset]');
+
+        // --- Матрица
+        var firstMatrix = findModulesMatrix(root);
+        if (!firstMatrix) {
+            console.warn('[calculator] modules: матрица не найдена — модуль не запущен.');
+            return false;
+        }
+
+        // --- Текущий пресет
+        var currentPreset = 'determinant';
+        var presetBtns = toArray(section.querySelectorAll('[data-preset-choice]'));
+        if (presetBtns.length) {
+            var activeBtn = null;
+            for (var i = 0; i < presetBtns.length; i++) {
+                if (presetBtns[i].classList.contains('is-active')) {
+                    activeBtn = presetBtns[i];
+                    break;
+                }
+            }
+            if (activeBtn) currentPreset = activeBtn.dataset.presetChoice;
+        }
+
+        var presetHint = findOne(section, '[data-preset-hint-text]');
+        var presetMeta = buildPresetMeta();
+
+        // =====================================================================
+        // setPreset
+        // =====================================================================
+        function setPreset(code) {
+            if (!code) return;
+            currentPreset = code;
+
+            presetBtns.forEach(function (b) {
+                var isActive = b.dataset.presetChoice === code;
+                b.classList.toggle('is-active', isActive);
+                b.setAttribute('aria-selected', isActive ? 'true' : 'false');
+            });
+
+            if (presetHint && presetMeta[code]) {
+                presetHint.textContent = presetMeta[code];
+            }
+
+            var hintBox = findOne(section, '.preset-hint');
+            if (hintBox) {
+                hintBox.classList.add('is-flash');
+                setTimeout(function () {
+                    hintBox.classList.remove('is-flash');
+                }, 700);
+            }
+
+            if (PRESETS[code]) {
+                applyAutoSize(code, firstMatrix);
+            }
+            updateRunButtonState();
+
+            ML.emit('modules:preset-change', { preset: code });
+        }
+
+        // =====================================================================
+        // Кнопка «Вычислить»
+        // =====================================================================
+        function updateRunButtonState() {
+            var matrix = firstMatrix.read();
+            var empty = isEmptyMatrix(matrix);
+            var invalid = firstMatrix.hasInvalid && firstMatrix.hasInvalid();
+
+            runBtn.disabled = empty || invalid;
+
+            if (invalid) {
+                runBtn.title = ML.i18n.t('calculator.invalidValues',
+                    'Некорректные значения в матрице');
+            } else if (empty) {
+                runBtn.title = ML.i18n.t('calculator.fillMatrix',
+                    'Заполните матрицу');
+            } else {
+                runBtn.title = ML.i18n.t('calculator.run', 'Выполнить');
+            }
+            runBtn.setAttribute('aria-disabled', String(runBtn.disabled));
+        }
+
+        // =====================================================================
+        // Пресеты внизу страницы
+        // =====================================================================
+        presetBtns.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                setPreset(btn.dataset.presetChoice);
+            });
+        });
+
+        // =====================================================================
+        // Кнопки «Попробовать» в карточках направлений
+        //
+        // ПРАВКА: убран автозапуск runBtn.click(). Теперь клик
+        // «Попробовать» только:
+        //   1) ставит нужный пресет (подсветка + подсказка),
+        //   2) загружает пример в матрицу (если он есть),
+        //   3) скроллит к калькулятору.
+        // Пользователь сам нажимает «Вычислить».
+        // =====================================================================
+        var tryButtons = toArray(document.querySelectorAll('[data-modules-try]'));
+        console.debug('[modules] try-кнопок найдено:', tryButtons.length);
+
+        tryButtons.forEach(function (btn) {
+            btn.addEventListener('click', function (ev) {
+                ev.preventDefault();
+
+                var preset = btn.dataset.preset || 'determinant';
+                var exampleSlug = btn.dataset.example;
+
+                var calc = document.getElementById('calculator');
+                scrollToElement(calc || runBtn);
+
+                var start = function () {
+                    setPreset(preset);
+
+                    if (runBtn.disabled) {
+                        ML.toast.info(
+                            'Матрица пуста',
+                            'Заполните матрицу или выберите пример.'
+                        );
+                    } else {
+                        ML.toast.info(
+                            'Можно считать',
+                            'Нажмите «Вычислить», когда будете готовы.'
+                        );
+                    }
+                };
+
+                if (exampleSlug) {
+                    loadExampleInto(firstMatrix, exampleSlug).then(start);
+                } else {
+                    start();
+                }
+            });
+        });
+
+        // Чипы примеров внутри калькулятора
+        toArray(section.querySelectorAll('[data-modules-example]'))
+            .forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var slug = btn.dataset.modulesExample;
+                    if (slug) loadExampleInto(firstMatrix, slug);
+                });
+            });
+
+        // =====================================================================
+        // Размеры матрицы — поля «Строк / Столбцов»
+        //
+        // ПРАВКА: ищем [data-a-rows] / [data-a-cols], как в matrix.js.
+        // Если их нет — падаём на старые data-matrix-rows/data-matrix-cols.
+        // =====================================================================
+        var rowsInput = findOne(section, '[data-a-rows]')
+            || findOne(section, '[data-matrix-rows]');
+        var colsInput = findOne(section, '[data-a-cols]')
+            || findOne(section, '[data-matrix-cols]');
+
+        function onSizeChange() {
+            var r = parseInt(rowsInput ? rowsInput.value : '3', 10) || 3;
+            var c = parseInt(colsInput ? colsInput.value : '3', 10) || 3;
+            firstMatrix.setSize(r, c, { preserve: true });
+            updateRunButtonState();
+        }
+        if (rowsInput) rowsInput.addEventListener('change', onSizeChange);
+        if (colsInput) colsInput.addEventListener('change', onSizeChange);
+
+        // =====================================================================
+        // Запуск
+        // =====================================================================
+        runBtn.addEventListener('click', async function () {
+            if (firstMatrix.hasInvalid && firstMatrix.hasInvalid()) {
+                ML.toast.warning(
+                    ML.i18n.t('calculator.invalidInput', 'Некорректный ввод'),
+                    ML.i18n.t('calculator.fixCells',
+                        'Исправьте подсвеченные ячейки.')
+                );
+                return;
+            }
+
+            await runOperation(currentPreset, {
+                root: section,
+                resultBlock: resultBlock,
+                matrices: [firstMatrix]
+            });
+        });
+
+        // =====================================================================
+        // Сброс
+        // =====================================================================
+        if (resetBtn) {
+            resetBtn.addEventListener('click', function () {
+                firstMatrix.clear();
+                if (resultBlock && ML.resultBlock) {
+                    ML.resultBlock.clear(resultBlock);
+                } else if (resultBlock) {
+                    resultBlock.hidden = true;
+                }
+                updateRunButtonState();
+                ML.emit('modules:reset', {});
+            });
+        }
+
+        // =====================================================================
+        // Начальное состояние
+        // =====================================================================
+        setPreset(currentPreset);
+        updateRunButtonState();
+
+        var updateDebounced = ML.debounce(updateRunButtonState, 80);
+        firstMatrix.el.addEventListener('matrix:change', updateDebounced);
+
+        // =====================================================================
+        // Публичное
+        // =====================================================================
+        ML.modules = ML.modules || {};
+        ML.modules.setPreset = setPreset;
+        ML.modules.getPreset = function () { return currentPreset; };
+        ML.modules.run = function () { runBtn.click(); };
+
+        ML.emit('modules:ready', {});
+        return true;
+    }
+
+    function buildPresetMeta() {
+        var meta = {};
+        Object.keys(PRESETS).forEach(function (code) {
+            meta[code] = PRESETS[code].description;
+        });
+        return meta;
+    }
+
+    function loadExampleInto(mi, slug) {
+        ML.loader.show(ML.i18n.t('calculator.loadingExample',
+            'Загружаем пример…'));
+
+        return ML.api.post('/api/example/' + slug + '/', {})
+            .then(function (resp) {
+                var data = safeResult(resp);
+                var matrix = data.matrix;
+
+                var target = mi;
+                if (!target && ML.getFirstMatrix) {
+                    target = ML.getFirstMatrix();
+                }
+
+                if (matrix && isArr(matrix) && target) {
+                    target.setSize(matrix.length, matrix[0].length,
+                        { preserve: false });
+                    target.write(matrix);
+                }
+
+                if (data.vector) {
+                    var vecEl = document.querySelector('[data-vector-input]');
+                    if (vecEl) {
+                        var vec = ML.vectorInputs && ML.vectorInputs[vecEl.id];
+                        if (vec && vec.write) vec.write(data.vector);
+                    }
+                }
+
+                if (data.title) {
+                    ML.toast.info('Пример загружен', data.title);
+                }
+                return data;
+            })
+            .catch(function (err) {
+                ML.toast.error('Не удалось загрузить', err.message || '');
+                return null;
+            })
+            .finally(function () {
+                ML.loader.hide();
+            });
+    }
+
+    // =========================================================================
+    // 10. ОГЛАВЛЕНИЕ МОДУЛЕЙ (/modules/)
+    // =========================================================================
+
+    function initModulesToc(root) {
+        root = root || document;
+
+        var toc = findOne(root, '[data-modules-toc]')
+            || findOne(root, '.modules-toc');
+        if (!toc) return false;
+
+        var linksBySlug = {};
+        toArray(toc.querySelectorAll('[data-modules-link]'))
+            .forEach(function (link) {
+                var slug = link.dataset.modulesLink;
+                if (slug) linksBySlug[slug] = link;
+            });
+
+        var schoolSections = toArray(
+            document.querySelectorAll('[data-modules-school]')
+        );
+        var directionCards = toArray(
+            document.querySelectorAll('[data-direction-card]')
+        );
+
+        function setActiveLink(slug) {
+            Object.keys(linksBySlug).forEach(function (s) {
+                linksBySlug[s].classList.toggle('is-active', s === slug);
+            });
+        }
+
+        if (schoolSections.length && 'IntersectionObserver' in window) {
+            var visible = new Map();
+
+            var observer = new IntersectionObserver(function (entries) {
+                entries.forEach(function (entry) {
+                    if (entry.isIntersecting) {
+                        visible.set(entry.target,
+                            entry.target.getBoundingClientRect().top);
+                    } else {
+                        visible.delete(entry.target);
+                    }
+                });
+
+                if (!visible.size) return;
+
+                var topEl = null;
+                var topY = Infinity;
+                visible.forEach(function (y, el) {
+                    if (y < topY) { topY = y; topEl = el; }
+                });
+                if (!topEl) return;
+
+                if (topEl.dataset && topEl.dataset.modulesSchool) {
+                    setActiveLink(topEl.dataset.modulesSchool);
+                    return;
+                }
+                if (topEl.id) {
+                    setActiveLink(topEl.id);
+                }
+            }, { rootMargin: '-20% 0px -60% 0px', threshold: 0 });
+
+            schoolSections.forEach(function (s) { observer.observe(s); });
+            directionCards.forEach(function (c) { observer.observe(c); });
+        }
+
+        toArray(toc.querySelectorAll('[data-modules-link]'))
+            .forEach(function (link) {
+                link.addEventListener('click', function (e) {
+                    var href = link.getAttribute('href');
+                    if (!href || href.charAt(0) !== '#') return;
+                    var target = document.querySelector(href);
+                    if (!target) return;
+                    e.preventDefault();
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                    history.replaceState(null, '', href);
+                });
+            });
+
+        var searchInput = findOne(toc, '[data-modules-search]');
+        var emptyState = findOne(toc, '[data-modules-empty]');
+        var schoolGroups = toArray(
+            toc.querySelectorAll('[data-modules-school-item]')
+        );
+        var directionItems = toArray(
+            toc.querySelectorAll('[data-modules-direction-item]')
+        );
+
+        if (searchInput) {
+            var filter = ML.debounce(function () {
+                var q = (searchInput.value || '').toLowerCase().trim();
+                var visibleSchools = {};
+                var totalVisible = 0;
+
+                directionCards.forEach(function (card) {
+                    var title = card.dataset.directionTitle || '';
+                    var match = !q || title.indexOf(q) !== -1;
+                    card.style.display = match ? '' : 'none';
+                    if (match) {
+                        visibleSchools[card.dataset.directionSchool] = true;
+                        totalVisible += 1;
+                    }
+                });
+
+                schoolSections.forEach(function (section) {
+                    var slug = section.dataset.modulesSchool;
+                    section.hidden = q ? !visibleSchools[slug] : false;
+                });
+
+                directionItems.forEach(function (li) {
+                    var title = li.dataset.directionTitle || '';
+                    li.hidden = q ? title.indexOf(q) === -1 : false;
+                });
+
+                schoolGroups.forEach(function (group) {
+                    if (!q) { group.hidden = false; return; }
+                    var anyVisible = toArray(
+                        group.querySelectorAll('[data-modules-direction-item]')
+                    ).some(function (li) { return !li.hidden; });
+                    group.hidden = !anyVisible;
+                });
+
+                if (emptyState) emptyState.hidden = totalVisible > 0;
+            }, 150);
+
+            searchInput.addEventListener('input', filter);
+        }
+
+        return true;
+    }
+
+    // =========================================================================
+    // 11. ПРИМЕРЫ
     // =========================================================================
 
     function initExamples() {
         document.addEventListener('click', async function (e) {
-            const singleBtn = e.target.closest('[data-load-example]');
+            var singleBtn = e.target.closest('[data-load-example]');
             if (singleBtn) {
-                const slug = singleBtn.dataset.loadExample;
+                var slug = singleBtn.dataset.loadExample;
                 if (slug) await loadExample(singleBtn, slug);
                 return;
             }
-            const pairBtn = e.target.closest('[data-load-pair]');
+            var pairBtn = e.target.closest('[data-load-pair]');
             if (pairBtn) {
-                const pair = pairBtn.dataset.loadPair;
+                var pair = pairBtn.dataset.loadPair;
                 if (pair) await loadPair(pairBtn, pair);
             }
         });
@@ -1070,12 +1536,12 @@
         ML.loader.show(ML.i18n.t('calculator.loadingExample',
             'Загружаем пример…'));
         try {
-            const resp = await ML.api.post('/api/example/' + slug + '/', {});
-            const data = (resp && resp.result) || {};
-            const matrix = data.matrix;
+            var resp = await ML.api.post('/api/example/' + slug + '/', {});
+            var data = safeResult(resp);
+            var matrix = data.matrix;
 
             if (matrix && isArr(matrix)) {
-                const mi = ML.getFirstMatrix();
+                var mi = ML.getFirstMatrix ? ML.getFirstMatrix() : null;
                 if (mi) {
                     mi.setSize(matrix.length, matrix[0].length,
                         { preserve: false });
@@ -1083,10 +1549,10 @@
                 }
             }
 
-            const vecEl = document.querySelector('[data-vector-input]');
+            var vecEl = document.querySelector('[data-vector-input]');
             if (vecEl && data.vector) {
-                const vec = ML.vectorInputs[vecEl.id];
-                if (vec) vec.write(data.vector);
+                var vec = ML.vectorInputs && ML.vectorInputs[vecEl.id];
+                if (vec && vec.write) vec.write(data.vector);
             }
 
             closeModalIfAny(btn);
@@ -1106,23 +1572,25 @@
     }
 
     async function loadPair(btn, pair) {
-        const parts = String(pair).split(',');
-        const slugA = parts[0];
-        const slugB = parts[1] || parts[0];
+        var parts = String(pair).split(',');
+        var slugA = parts[0];
+        var slugB = parts[1] || parts[0];
 
         ML.loader.show(ML.i18n.t('calculator.loadingPair',
             'Загружаем пару матриц…'));
         try {
-            const results = await Promise.all([
+            var responses = await Promise.all([
                 ML.api.post('/api/example/' + slugA + '/', {}),
                 ML.api.post('/api/example/' + slugB + '/', {})
             ]);
-            const mA = results[0].result && results[0].result.matrix;
-            const mB = results[1].result && results[1].result.matrix;
+            var dataA = safeResult(responses[0]);
+            var dataB = safeResult(responses[1]);
+            var mA = dataA.matrix;
+            var mB = dataB.matrix;
 
-            const all = liveMatrices();
-            const a = all.find(function (x) { return x.letter === 'a'; });
-            const b = all.find(function (x) { return x.letter === 'b'; });
+            var all = liveMatrices();
+            var a = all.find(function (x) { return x.letter === 'a'; });
+            var b = all.find(function (x) { return x.letter === 'b'; });
 
             if (a && mA) {
                 a.mi.setSize(mA.length, mA[0].length, { preserve: false });
@@ -1150,40 +1618,40 @@
     }
 
     // =========================================================================
-    // 8. ГЕНЕРАТОР СЛУЧАЙНЫХ МАТРИЦ
+    // 12. ГЕНЕРАТОР СЛУЧАЙНЫХ МАТРИЦ
     // =========================================================================
 
     function initRandomGenerator() {
-        const openBtn = document.querySelector('[data-random-open]');
-        const modal = document.querySelector('#random-modal');
+        var openBtn = document.querySelector('[data-random-open]');
+        var modal = document.querySelector('#random-modal');
         if (!openBtn || !modal) return;
 
         openBtn.addEventListener('click', function () {
             ML.modal.open('#random-modal');
         });
 
-        const genBtn = modal.querySelector('[data-random-generate]');
+        var genBtn = modal.querySelector('[data-random-generate]');
         if (!genBtn) return;
 
         genBtn.addEventListener('click', async function () {
-            const rowsInp = modal.querySelector('[data-random-rows]');
-            const colsInp = modal.querySelector('[data-random-cols]');
-            const minInp = modal.querySelector('[data-random-min]');
-            const maxInp = modal.querySelector('[data-random-max]');
-            const kindInp = modal.querySelector('[data-random-kind]');
-            const fracsInp = modal.querySelector('[data-random-fractions]');
+            var rowsInp = modal.querySelector('[data-random-rows]');
+            var colsInp = modal.querySelector('[data-random-cols]');
+            var minInp = modal.querySelector('[data-random-min]');
+            var maxInp = modal.querySelector('[data-random-max]');
+            var kindInp = modal.querySelector('[data-random-kind]');
+            var fracsInp = modal.querySelector('[data-random-fractions]');
 
-            const rows = parseInt(rowsInp ? rowsInp.value : '3', 10) || 3;
-            const cols = parseInt(colsInp ? colsInp.value : '3', 10) || 3;
-            const minValue = parseInt(minInp ? minInp.value : '-9', 10);
-            const maxValue = parseInt(maxInp ? maxInp.value : '9', 10);
-            const kind = kindInp ? kindInp.value : 'random';
-            const allowFractions = fracsInp ? fracsInp.checked : false;
+            var rows = parseInt(rowsInp ? rowsInp.value : '3', 10) || 3;
+            var cols = parseInt(colsInp ? colsInp.value : '3', 10) || 3;
+            var minValue = parseInt(minInp ? minInp.value : '-9', 10);
+            var maxValue = parseInt(maxInp ? maxInp.value : '9', 10);
+            var kind = kindInp ? kindInp.value : 'random';
+            var allowFractions = fracsInp ? fracsInp.checked : false;
 
             ML.loader.show(ML.i18n.t('calculator.generating',
                 'Генерируем…'));
             try {
-                const resp = await ML.api.post('/api/random-matrix/', {
+                var resp = await ML.api.post('/api/random-matrix/', {
                     rows: rows,
                     cols: cols,
                     min_value: isNaN(minValue) ? -9 : minValue,
@@ -1191,10 +1659,10 @@
                     kind: kind,
                     allow_fractions: allowFractions
                 });
-                const matrix = resp.result;
+                var matrix = safeResult(resp);
 
                 if (matrix && isArr(matrix)) {
-                    const mi = ML.getFirstMatrix();
+                    var mi = ML.getFirstMatrix ? ML.getFirstMatrix() : null;
                     if (mi) {
                         mi.setSize(matrix.length, matrix[0].length,
                             { preserve: false });
@@ -1220,27 +1688,27 @@
     }
 
     // =========================================================================
-    // 9. БЫСТРЫЙ / РАСШИРЕННЫЙ РЕЖИМ
+    // 13. БЫСТРЫЙ / РАСШИРЕННЫЙ РЕЖИМ
     // =========================================================================
 
     function initModeToggle() {
-        const toggle = document.querySelector('[data-calc-mode]');
+        var toggle = document.querySelector('[data-calc-mode]');
         if (!toggle) return;
 
         function applyMode() {
-            const mode = toggle.checked ? 'advanced' : 'quick';
+            var mode = toggle.checked ? 'advanced' : 'quick';
             document.body.dataset.calcMode = mode;
             ML.prefs.set('calcMode', mode);
         }
         toggle.addEventListener('change', applyMode);
 
-        const saved = ML.prefs.get('calcMode');
+        var saved = ML.prefs.get('calcMode');
         if (saved === 'advanced') toggle.checked = true;
         applyMode();
     }
 
     // =========================================================================
-    // 10. ПУБЛИЧНЫЙ РЕЕСТР ОПЕРАЦИЙ
+    // 14. ПУБЛИЧНЫЙ РЕЕСТР ОПЕРАЦИЙ
     // =========================================================================
 
     ML.calculator = ML.calculator || {};
@@ -1260,18 +1728,32 @@
 
     ML.calculator.opInfo = opInfo;
 
+    ML.calculator.runOperation = runOperation;
+    ML.calculator.run = runOperation;
+
+    ML.calculator.PRESETS = PRESETS;
+    ML.calculator.getPresets = function () {
+        return Object.keys(PRESETS).map(function (code) {
+            return Object.assign({ code: code }, PRESETS[code]);
+        });
+    };
+
     // =========================================================================
-    // 11. ИНИЦИАЛИЗАЦИЯ
+    // 15. ИНИЦИАЛИЗАЦИЯ
     // =========================================================================
 
-    let _initialized = false;
+    var _initialized = false;
 
     function init() {
         if (_initialized) return;
         _initialized = true;
 
-        const mode = detectMode(document);
-        if (mode === 'single') {
+        var mode = detectMode(document);
+
+        if (mode === 'modules') {
+            mountModules(document);
+            initModulesToc(document);
+        } else if (mode === 'single') {
             mount(document, 'single');
         } else if (mode === 'multi') {
             mount(document, 'multi');

@@ -14,7 +14,6 @@ import logging
 from typing import Any
 
 from django.conf import settings
-from django.contrib import messages
 from django.http import (
     HttpRequest,
     HttpResponse,
@@ -22,13 +21,11 @@ from django.http import (
     JsonResponse,
 )
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_http_methods, require_POST
+from django.views.decorators.http import require_POST
 
 from .forms import SaveMatrixForm
 from .models import CalculationHistory, SavedMatrix, generate_session_key
-from .services import parse_matrix, ValidationError
 from .services.explanations import list_operations
 from .telegram_bot import process_update
 
@@ -121,6 +118,113 @@ EXAMPLES: dict[str, dict[str, Any]] = {
         "matrix": [[1, 1], [2, 2], [3, 3]],
         "vector": [1, 2, 4],
     },
+
+    # --- Дополнительные примеры под модули по направлениям ---
+    "graph_network": {
+        "title": "Матрица смежности (граф связей)",
+        "description": "Симметричная 0/1-матрица для анализа сети.",
+        "matrix": [[0, 1, 1, 0], [1, 0, 0, 1], [1, 0, 0, 1], [0, 1, 1, 0]],
+    },
+    "markov_chain": {
+        "title": "Стохастическая матрица (цепи Маркова)",
+        "description": "Столбцы дают в сумме 1 — переходные вероятности.",
+        "matrix": [["0.7", "0.2", "0.1"], ["0.2", "0.6", "0.2"], ["0.1", "0.2", "0.7"]],
+    },
+    "rotation_2d": {
+        "title": "Матрица поворота 2D",
+        "description": "Ортогональная матрица поворота на угол θ.",
+        "matrix": [["cos(pi/6)", "-sin(pi/6)"], ["sin(pi/6)", "cos(pi/6)"]],
+    },
+    "population": {
+        "title": "Матрица Лесли (динамика популяций)",
+        "description": "Возрастная структура популяции.",
+        "matrix": [[0, 2, 3], ["0.5", 0, 0], [0, "0.8", 0]],
+    },
+    "input_output": {
+        "title": "Матрица «затраты — выпуск»",
+        "description": "Модель Леонтьева для межотраслевого баланса.",
+        "matrix": [["0.2", "0.3", "0.1"], ["0.4", "0.1", "0.3"], ["0.1", "0.2", "0.2"]],
+    },
+    "stiffness": {
+        "title": "Матрица жёсткости (строительная механика)",
+        "description": "Симметричная положительно определённая матрица.",
+        "matrix": [[4, 1, 0], [1, 4, 1], [0, 1, 4]],
+    },
+    "image_filter": {
+        "title": "Свёрточное ядро (фильтр изображения)",
+        "description": "Матрица 3×3 для фильтрации — размытие, резкость, контуры.",
+        "matrix": [[0, -1, 0], [-1, 5, -1], [0, -1, 0]],
+    },
+    "medical_diagnostic": {
+        "title": "Матрица диагностических признаков",
+        "description": "Корреляции симптомов и диагнозов.",
+        "matrix": [[1, "0.6", "0.2"], ["0.6", 1, "0.4"], ["0.2", "0.4", 1]],
+    },
+    "camera_matrix": {
+        "title": "Матрица проекции камеры",
+        "description": "Связь 3D-сцены с 2D-изображением.",
+        "matrix": [[500, 0, 320], [0, 500, 240], [0, 0, 1]],
+    },
+    "kimchi_linguistics": {
+        "title": "Матрица текстовой близости (лингвистика)",
+        "description": "Попарное сходство текстов по метрике TF-IDF.",
+        "matrix": [[1, "0.72", "0.31", "0.15"], ["0.72", 1, "0.28", "0.11"], ["0.31", "0.28", 1, "0.55"], ["0.15", "0.11", "0.55", 1]],
+    },
+    "game_theory": {
+        "title": "Платёжная матрица (теория игр)",
+        "description": "Выигрыши для стратегий двух игроков.",
+        "matrix": [[3, -1, 4], [0, 2, -2], [1, 5, -3]],
+    },
+    "diet_optimization": {
+        "title": "Матрица нутриентов (оптимизация рациона)",
+        "description": "Вклад продуктов в покрытие потребностей.",
+        "matrix": [[10, 5, 0, 2], [0, 20, 15, 3], [5, 0, 8, 12]],
+    },
+    "pharmacy_dosage": {
+        "title": "Матрица фармакокинетики",
+        "description": "Переходы между компартментами модели дозирования.",
+        "matrix": [["-0.3", "0.1", "0.0"], ["0.3", "-0.2", "0.05"], ["0.0", "0.1", "-0.05"]],
+    },
+    "cosmetology_skin": {
+        "title": "Матрица состояний кожи",
+        "description": "Переходы между состояниями при уходе — марковская модель.",
+        "matrix": [["0.85", "0.10", "0.05"], ["0.20", "0.70", "0.10"], ["0.05", "0.25", "0.70"]],
+    },
+    "fashion_design": {
+        "title": "Матрица цветовых переходов (дизайн одежды)",
+        "description": "Совместимость цветов в коллекции.",
+        "matrix": [[1, "0.8", "0.2", "0.1"], ["0.8", 1, "0.6", "0.3"], ["0.2", "0.6", 1, "0.7"], ["0.1", "0.3", "0.7", 1]],
+    },
+    "music_harmony": {
+        "title": "Матрица гармонических переходов",
+        "description": "Вероятности переходов между аккордами.",
+        "matrix": [["0.4", "0.3", "0.2", "0.1"], ["0.1", "0.5", "0.3", "0.1"], ["0.2", "0.4", "0.3", "0.1"], ["0.1", "0.2", "0.4", "0.3"]],
+    },
+    "teacher_grade": {
+        "title": "Матрица оценивания (педагогика)",
+        "description": "Веса критериев оценки по заданиям.",
+        "matrix": [[2, 3, 1, 1], [1, 2, 3, 2], [1, 1, 2, 3]],
+    },
+    "psychology_profile": {
+        "title": "Матрица психологического профиля",
+        "description": "Корреляции между шкалами теста.",
+        "matrix": [[1, "0.65", "0.42", "0.18"], ["0.65", 1, "0.55", "0.27"], ["0.42", "0.55", 1, "0.61"], ["0.18", "0.27", "0.61", 1]],
+    },
+    "translation_alignment": {
+        "title": "Матрица выравнивания перевода",
+        "description": "Попарное соответствие слов оригинала и перевода.",
+        "matrix": [[1, 0, 1, 0, 0], [0, 1, 0, 1, 0], [0, 0, 1, 0, 1]],
+    },
+    "ecommerce_funnel": {
+        "title": "Матрица воронки (e-commerce)",
+        "description": "Переходы пользователей между этапами воронки продаж.",
+        "matrix": [["0.5", "0.3", "0.15", "0.05"], ["0", "0.6", "0.3", "0.1"], ["0", "0", "0.7", "0.3"], ["0", "0", "0", 1]],
+    },
+    "physics_oscillator": {
+        "title": "Матрица связанных осцилляторов",
+        "description": "Симметричная система масс-пружин.",
+        "matrix": [[2, -1, 0], [-1, 2, -1], [0, -1, 2]],
+    },
 }
 
 
@@ -129,114 +233,30 @@ EXAMPLES: dict[str, dict[str, Any]] = {
 # =============================================================================
 
 HOME_FEATURES: list[dict[str, str]] = [
-    {
-        "slug": "determinant",
-        "name": "Определитель",
-        "desc": "det A, миноры, разложение по строке",
-    },
-    {
-        "slug": "inverse",
-        "name": "Обратная",
-        "desc": "A · A⁻¹ = I",
-    },
-    {
-        "slug": "rank",
-        "name": "Ранг",
-        "desc": "rank A, базис образа",
-    },
-    {
-        "slug": "transpose",
-        "name": "Транспонирование",
-        "desc": "Aᵀ",
-    },
-    {
-        "slug": "systems",
-        "name": "СЛАУ",
-        "desc": "Ax = b",
-    },
-    {
-        "slug": "eigen",
-        "name": "Собственные",
-        "desc": "λ и собственные векторы",
-    },
-    {
-        "slug": "decompositions",
-        "name": "Разложения",
-        "desc": "LU, QR, Холецкий",
-    },
-    {
-        "slug": "step-by-step",
-        "name": "Пошагово",
-        "desc": "Каждый шаг с обоснованием",
-    },
+    {"slug": "determinant",    "name": "Определитель",     "desc": "det A, миноры, разложение по строке"},
+    {"slug": "inverse",        "name": "Обратная",         "desc": "A · A⁻¹ = I"},
+    {"slug": "rank",           "name": "Ранг",             "desc": "rank A, базис образа"},
+    {"slug": "transpose",      "name": "Транспонирование", "desc": "Aᵀ"},
+    {"slug": "systems",        "name": "СЛАУ",             "desc": "Ax = b"},
+    {"slug": "eigen",          "name": "Собственные",      "desc": "λ и собственные векторы"},
+    {"slug": "decompositions", "name": "Разложения",       "desc": "LU, QR, Холецкий"},
+    {"slug": "step-by-step",   "name": "Пошагово",         "desc": "Каждый шаг с обоснованием"},
 ]
 
 HOME_PROCESS: list[dict[str, str]] = [
-    {
-        "slug": "input",
-        "title": "Ввод",
-        "desc": "Матрица или система",
-    },
-    {
-        "slug": "choose",
-        "title": "Выбор",
-        "desc": "Операция и метод",
-    },
-    {
-        "slug": "result",
-        "title": "Решение",
-        "desc": "Пошагово, с проверкой",
-    },
-    {
-        "slug": "learn",
-        "title": "Изучение",
-        "desc": "Теория и интуиция",
-    },
+    {"slug": "input",  "title": "Ввод",     "desc": "Матрица или система"},
+    {"slug": "choose", "title": "Выбор",    "desc": "Операция и метод"},
+    {"slug": "result", "title": "Решение",  "desc": "Пошагово, с проверкой"},
+    {"slug": "learn",  "title": "Изучение", "desc": "Теория и интуиция"},
 ]
 
 HOME_POPULAR: list[dict[str, Any]] = [
-    {
-        "slug": "determinant",
-        "title": "Определитель",
-        "desc": "det A — площадь, объём, обратимость",
-        "url_name": "matrix_app:properties",
-        "size": "large",
-    },
-    {
-        "slug": "inverse",
-        "title": "Обратная",
-        "desc": "A · A⁻¹ = I",
-        "url_name": "matrix_app:operations",
-        "size": "tall",
-    },
-    {
-        "slug": "rank",
-        "title": "Ранг",
-        "desc": "размерность образа",
-        "url_name": "matrix_app:properties",
-        "size": "",
-    },
-    {
-        "slug": "systems",
-        "title": "СЛАУ",
-        "desc": "Ax = b",
-        "url_name": "matrix_app:systems",
-        "size": "",
-    },
-    {
-        "slug": "eigen",
-        "title": "Собственные значения",
-        "desc": "λ и v — оси, которые не меняются",
-        "url_name": "matrix_app:eigen",
-        "size": "wide",
-    },
-    {
-        "slug": "decompositions",
-        "title": "LU-разложение",
-        "desc": "A = L · U",
-        "url_name": "matrix_app:decompositions",
-        "size": "wide",
-    },
+    {"slug": "determinant",    "title": "Определитель",         "desc": "det A — площадь, объём, обратимость", "url_name": "matrix_app:properties",     "size": "large"},
+    {"slug": "inverse",        "title": "Обратная",             "desc": "A · A⁻¹ = I",                        "url_name": "matrix_app:operations",     "size": "tall"},
+    {"slug": "rank",           "title": "Ранг",                 "desc": "размерность образа",                 "url_name": "matrix_app:properties",     "size": ""},
+    {"slug": "systems",        "title": "СЛАУ",                 "desc": "Ax = b",                             "url_name": "matrix_app:systems",        "size": ""},
+    {"slug": "eigen",          "title": "Собственные значения", "desc": "λ и v — оси, которые не меняются",   "url_name": "matrix_app:eigen",          "size": "wide"},
+    {"slug": "decompositions", "title": "LU-разложение",        "desc": "A = L · U",                          "url_name": "matrix_app:decompositions", "size": "wide"},
 ]
 
 
@@ -268,19 +288,12 @@ def home(request: HttpRequest) -> HttpResponse:
 # =============================================================================
 
 def search(request: HttpRequest) -> HttpResponse:
-    """Поиск по сайту.
-
-    Пока — заглушка: если запрос пустой, ведём на калькулятор.
-    Если запрос непустой — показываем страницу с результатами
-    (позже подключим реальный индекс: операции, теория, примеры).
-    """
+    """Поиск по сайту."""
     q = request.GET.get("q", "").strip()
 
     if not q:
         return redirect("matrix_app:calculator")
 
-    # Заготовка под будущий поиск. Сейчас — простая фильтрация
-    # по названиям операций.
     operations = list_operations()
     query_lower = q.lower()
     matched_operations = [
@@ -312,20 +325,20 @@ def calculator(request: HttpRequest) -> HttpResponse:
         {
             "examples": EXAMPLES,
             "operations": [
-                {"code": "determinant", "label": "Определитель", "icon": "="},
-                {"code": "rank", "label": "Ранг", "icon": "#"},
-                {"code": "inverse", "label": "Обратная матрица", "icon": "⁻¹"},
-                {"code": "transpose", "label": "Транспонирование", "icon": "ᵀ"},
-                {"code": "trace", "label": "След", "icon": "tr"},
-                {"code": "rref", "label": "RREF", "icon": "⇉"},
-                {"code": "echelon", "label": "Ступенчатая форма", "icon": "△"},
-                {"code": "properties", "label": "Свойства", "icon": "✓"},
-                {"code": "eigenvalues", "label": "Собственные значения", "icon": "λ"},
-                {"code": "char_poly", "label": "Характеристический многочлен", "icon": "p(λ)"},
-                {"code": "lu", "label": "LU-разложение", "icon": "LU"},
-                {"code": "qr", "label": "QR-разложение", "icon": "QR"},
-                {"code": "cholesky", "label": "Разложение Холецкого", "icon": "LLᵀ"},
-                {"code": "diagonalize", "label": "Диагонализация", "icon": "PDP⁻¹"},
+                {"code": "determinant",  "label": "Определитель",                 "icon": "="},
+                {"code": "rank",         "label": "Ранг",                         "icon": "#"},
+                {"code": "inverse",      "label": "Обратная матрица",             "icon": "⁻¹"},
+                {"code": "transpose",    "label": "Транспонирование",             "icon": "ᵀ"},
+                {"code": "trace",        "label": "След",                         "icon": "tr"},
+                {"code": "rref",         "label": "RREF",                         "icon": "⇉"},
+                {"code": "echelon",      "label": "Ступенчатая форма",            "icon": "△"},
+                {"code": "properties",   "label": "Свойства",                     "icon": "✓"},
+                {"code": "eigenvalues",  "label": "Собственные значения",         "icon": "λ"},
+                {"code": "char_poly",    "label": "Характеристический многочлен", "icon": "p(λ)"},
+                {"code": "lu",           "label": "LU-разложение",                "icon": "LU"},
+                {"code": "qr",           "label": "QR-разложение",                "icon": "QR"},
+                {"code": "cholesky",     "label": "Разложение Холецкого",         "icon": "LLᵀ"},
+                {"code": "diagonalize",  "label": "Диагонализация",               "icon": "PDP⁻¹"},
             ],
         },
     )
@@ -337,13 +350,7 @@ def calculator(request: HttpRequest) -> HttpResponse:
 
 def operations(request: HttpRequest) -> HttpResponse:
     """Операции над A и B (сложение, умножение, сравнение и т.д.)."""
-    return render(
-        request,
-        "matrix_app/operations.html",
-        {
-            "examples": EXAMPLES,
-        },
-    )
+    return render(request, "matrix_app/operations.html", {"examples": EXAMPLES})
 
 
 # =============================================================================
@@ -352,11 +359,7 @@ def operations(request: HttpRequest) -> HttpResponse:
 
 def properties(request: HttpRequest) -> HttpResponse:
     """Анализ свойств матрицы."""
-    return render(
-        request,
-        "matrix_app/properties.html",
-        {"examples": EXAMPLES},
-    )
+    return render(request, "matrix_app/properties.html", {"examples": EXAMPLES})
 
 
 # =============================================================================
@@ -371,11 +374,11 @@ def systems(request: HttpRequest) -> HttpResponse:
         {
             "examples": EXAMPLES,
             "methods": [
-                {"code": "auto", "label": "Автоматически"},
-                {"code": "gauss", "label": "Метод Гаусса"},
+                {"code": "auto",         "label": "Автоматически"},
+                {"code": "gauss",        "label": "Метод Гаусса"},
                 {"code": "gauss_jordan", "label": "Метод Гаусса-Жордана"},
-                {"code": "cramer", "label": "Правило Крамера"},
-                {"code": "inverse", "label": "Через обратную матрицу"},
+                {"code": "cramer",       "label": "Правило Крамера"},
+                {"code": "inverse",      "label": "Через обратную матрицу"},
             ],
         },
     )
@@ -387,11 +390,7 @@ def systems(request: HttpRequest) -> HttpResponse:
 
 def decompositions(request: HttpRequest) -> HttpResponse:
     """LU, QR, Холецкий, диагонализация, спектральное."""
-    return render(
-        request,
-        "matrix_app/decompositions.html",
-        {"examples": EXAMPLES},
-    )
+    return render(request, "matrix_app/decompositions.html", {"examples": EXAMPLES})
 
 
 # =============================================================================
@@ -400,61 +399,97 @@ def decompositions(request: HttpRequest) -> HttpResponse:
 
 def eigen(request: HttpRequest) -> HttpResponse:
     """Собственные значения, векторы, характеристический многочлен."""
-    return render(
-        request,
-        "matrix_app/eigen.html",
-        {"examples": EXAMPLES},
-    )
+    return render(request, "matrix_app/eigen.html", {"examples": EXAMPLES})
 
 
 # =============================================================================
 # Теория
 # =============================================================================
+#
+# ВАЖНО: slug каждой темы ДОЛЖЕН точно совпадать с id соответствующего
+# <article> в шаблоне theory.html. Иначе ссылка в боковом оглавлении
+# будет вести «в никуда», а JS-подсветка активной темы не сработает.
+#
+# =============================================================================
 
 THEORY_TOPICS: list[dict[str, str]] = [
-    {"slug": "matrix-basics", "title": "Что такое матрица", "category": "Основы"},
-    {"slug": "matrix-types", "title": "Виды матриц", "category": "Основы"},
-    {"slug": "matrix-size", "title": "Размер матрицы", "category": "Основы"},
-    {"slug": "addition", "title": "Сложение матриц", "category": "Операции"},
-    {"slug": "subtraction", "title": "Вычитание матриц", "category": "Операции"},
-    {"slug": "multiplication", "title": "Умножение матриц", "category": "Операции"},
-    {"slug": "scalar", "title": "Умножение на скаляр", "category": "Операции"},
-    {"slug": "transpose", "title": "Транспонирование", "category": "Операции"},
-    {"slug": "power", "title": "Возведение в степень", "category": "Операции"},
-    {"slug": "determinant", "title": "Определитель", "category": "Определители"},
-    {"slug": "minors", "title": "Миноры и алгебраические дополнения", "category": "Определители"},
-    {"slug": "inverse", "title": "Обратная матрица", "category": "Определители"},
-    {"slug": "rank", "title": "Ранг матрицы", "category": "Ранг"},
-    {"slug": "slau", "title": "Системы линейных уравнений", "category": "СЛАУ"},
-    {"slug": "gauss", "title": "Метод Гаусса", "category": "СЛАУ"},
-    {"slug": "gauss-jordan", "title": "Метод Гаусса-Жордана", "category": "СЛАУ"},
-    {"slug": "cramer", "title": "Правило Крамера", "category": "СЛАУ"},
-    {"slug": "kronecker", "title": "Теорема Кронекера-Капелли", "category": "СЛАУ"},
-    {"slug": "eigenvalues", "title": "Собственные значения", "category": "Спектр"},
-    {"slug": "eigenvectors", "title": "Собственные векторы", "category": "Спектр"},
-    {"slug": "char-poly", "title": "Характеристический многочлен", "category": "Спектр"},
-    {"slug": "diagonalization", "title": "Диагонализация", "category": "Спектр"},
-    {"slug": "lu", "title": "LU-разложение", "category": "Разложения"},
-    {"slug": "qr", "title": "QR-разложение", "category": "Разложения"},
-    {"slug": "cholesky", "title": "Разложение Холецкого", "category": "Разложения"},
-    {"slug": "orthogonal", "title": "Ортогональные матрицы", "category": "Специальные"},
-    {"slug": "symmetric", "title": "Симметричные матрицы", "category": "Специальные"},
-    {"slug": "positive-definite", "title": "Положительно определённые матрицы", "category": "Специальные"},
+    # --- Основы ---
+    {"slug": "matrix-basics",     "title": "Что такое матрица",                  "category": "Основы"},
+    {"slug": "matrix-types",      "title": "Виды матриц",                        "category": "Основы"},
+    {"slug": "matrix-size",       "title": "Размер матрицы",                     "category": "Основы"},
+
+    # --- Операции ---
+    {"slug": "addition",          "title": "Сложение матриц",                    "category": "Операции"},
+    {"slug": "subtraction",       "title": "Вычитание матриц",                   "category": "Операции"},
+    {"slug": "multiplication",    "title": "Умножение матриц",                   "category": "Операции"},
+    {"slug": "scalar",            "title": "Умножение на скаляр",                "category": "Операции"},
+    {"slug": "transpose",         "title": "Транспонирование",                   "category": "Операции"},
+    {"slug": "power",             "title": "Возведение в степень",               "category": "Операции"},
+
+    # --- Определители ---
+    {"slug": "determinant",       "title": "Определитель",                       "category": "Определители"},
+    {"slug": "minors",            "title": "Миноры и алгебраические дополнения", "category": "Определители"},
+    {"slug": "inverse",           "title": "Обратная матрица",                   "category": "Определители"},
+
+    # --- Ранг ---
+    {"slug": "rank",              "title": "Ранг матрицы",                       "category": "Ранг"},
+
+    # --- СЛАУ ---
+    {"slug": "slau",              "title": "Системы линейных уравнений",         "category": "СЛАУ"},
+    {"slug": "gauss",             "title": "Метод Гаусса",                       "category": "СЛАУ"},
+    {"slug": "gauss-jordan",      "title": "Метод Гаусса-Жордана",               "category": "СЛАУ"},
+    {"slug": "cramer",            "title": "Правило Крамера",                    "category": "СЛАУ"},
+    {"slug": "kronecker-capelli", "title": "Теорема Кронекера-Капелли",          "category": "СЛАУ"},
+
+    # --- Спектр ---
+    {"slug": "eigenvalues",       "title": "Собственные значения",               "category": "Спектр"},
+    {"slug": "eigenvectors",      "title": "Собственные векторы",                "category": "Спектр"},
+    {"slug": "char-poly",         "title": "Характеристический многочлен",       "category": "Спектр"},
+    {"slug": "diagonalization",   "title": "Диагонализация",                     "category": "Спектр"},
+
+    # --- Разложения ---
+    {"slug": "lu",                "title": "LU-разложение",                      "category": "Разложения"},
+    {"slug": "qr",                "title": "QR-разложение",                      "category": "Разложения"},
+    {"slug": "cholesky",          "title": "Разложение Холецкого",               "category": "Разложения"},
+
+    # --- Специальные ---
+    {"slug": "orthogonal",        "title": "Ортогональные матрицы",              "category": "Специальные"},
+    {"slug": "symmetric",         "title": "Симметричные матрицы",               "category": "Специальные"},
+    {"slug": "positive-definite", "title": "Положительно определённые матрицы",  "category": "Специальные"},
 ]
 
 
 def theory(request: HttpRequest) -> HttpResponse:
     """Раздел теории. Группируем темы по категориям."""
-    categories: dict[str, list[dict[str, str]]] = {}
+    CATEGORY_ORDER = [
+        "Основы",
+        "Операции",
+        "Определители",
+        "Ранг",
+        "СЛАУ",
+        "Спектр",
+        "Разложения",
+        "Специальные",
+    ]
+
+    grouped: dict[str, list[dict[str, str]]] = {}
     for topic in THEORY_TOPICS:
-        categories.setdefault(topic["category"], []).append(topic)
+        grouped.setdefault(topic["category"], []).append(topic)
+
+    ordered_categories: dict[str, list[dict[str, str]]] = {}
+    for name in CATEGORY_ORDER:
+        if name in grouped:
+            ordered_categories[name] = grouped[name]
+    for name, items in grouped.items():
+        if name not in ordered_categories:
+            ordered_categories[name] = items
 
     return render(
         request,
         "matrix_app/theory.html",
         {
             "topics": THEORY_TOPICS,
-            "categories": categories,
+            "categories": ordered_categories,
         },
     )
 
@@ -464,19 +499,49 @@ def theory(request: HttpRequest) -> HttpResponse:
 # =============================================================================
 
 MATRIX_TYPES: list[dict[str, Any]] = [
+    # ---------------------------------------------------------------- По форме
     {
         "slug": "square",
         "title": "Квадратная матрица",
-        "category": "Базовые",
+        "category": "По форме",
         "definition": "Матрица, у которой число строк равно числу столбцов.",
         "formula": "m = n",
         "example": "[[1, 2], [3, 4]]",
         "uses": "Определитель, обратная матрица, собственные значения.",
     },
     {
+        "slug": "rectangular",
+        "title": "Прямоугольная матрица",
+        "category": "По форме",
+        "definition": "Число строк не равно числу столбцов.",
+        "formula": "m ≠ n",
+        "example": "[[1, 2, 3], [4, 5, 6]]",
+        "uses": "Системы с разным числом уравнений и неизвестных.",
+    },
+    {
+        "slug": "row-matrix",
+        "title": "Матрица-строка (вектор-строка)",
+        "category": "По форме",
+        "definition": "Матрица размера 1 × n.",
+        "formula": "1 × n",
+        "example": "[[1, 2, 3, 4]]",
+        "uses": "Скалярное произведение, ковекторы.",
+    },
+    {
+        "slug": "column-matrix",
+        "title": "Матрица-столбец (вектор-столбец)",
+        "category": "По форме",
+        "definition": "Матрица размера m × 1.",
+        "formula": "m × 1",
+        "example": "[[1], [2], [3]]",
+        "uses": "Решение СЛАУ, базисные векторы.",
+    },
+
+    # ----------------------------------------------------------- По структуре
+    {
         "slug": "zero",
         "title": "Нулевая матрица",
-        "category": "Базовые",
+        "category": "По структуре",
         "definition": "Все элементы равны нулю.",
         "formula": "aᵢⱼ = 0",
         "example": "[[0, 0], [0, 0]]",
@@ -485,7 +550,7 @@ MATRIX_TYPES: list[dict[str, Any]] = [
     {
         "slug": "identity",
         "title": "Единичная матрица",
-        "category": "Базовые",
+        "category": "По структуре",
         "definition": "Диагональные элементы равны 1, остальные — 0.",
         "formula": "aᵢᵢ = 1, aᵢⱼ = 0 при i ≠ j",
         "example": "[[1, 0], [0, 1]]",
@@ -494,43 +559,162 @@ MATRIX_TYPES: list[dict[str, Any]] = [
     {
         "slug": "diagonal",
         "title": "Диагональная матрица",
-        "category": "Базовые",
+        "category": "По структуре",
         "definition": "Все внедиагональные элементы равны нулю.",
         "formula": "aᵢⱼ = 0 при i ≠ j",
         "example": "[[2, 0], [0, 5]]",
         "uses": "Быстрое умножение, спектральные задачи.",
     },
     {
+        "slug": "scalar-matrix",
+        "title": "Скалярная матрица",
+        "category": "По структуре",
+        "definition": "Диагональная матрица с одинаковыми элементами λI.",
+        "formula": "λ · I",
+        "example": "[[3, 0], [0, 3]]",
+        "uses": "Подобие, гомотетия.",
+    },
+    {
+        "slug": "triangular",
+        "title": "Треугольная матрица",
+        "category": "По структуре",
+        "definition": "Все элементы выше (или ниже) главной диагонали равны нулю.",
+        "formula": "aᵢⱼ = 0 при i > j (верхняя)",
+        "example": "[[1, 2], [0, 3]]",
+        "uses": "LU-разложение, определитель — произведение диагоналей.",
+    },
+    {
+        "slug": "band",
+        "title": "Ленточная матрица",
+        "category": "По структуре",
+        "definition": "Ненулевые элементы сосредоточены вблизи главной диагонали.",
+        "formula": "aᵢⱼ = 0 при |i − j| > w",
+        "example": "[[4, 1, 0], [1, 4, 1], [0, 1, 4]]",
+        "uses": "Численные методы, разреженные системы.",
+    },
+    {
+        "slug": "tridiagonal",
+        "title": "Трёхдиагональная матрица",
+        "category": "По структуре",
+        "definition": "Ленточная с шириной ленты 1.",
+        "formula": "aᵢⱼ = 0 при |i − j| > 1",
+        "example": "[[2, -1, 0], [-1, 2, -1], [0, -1, 2]]",
+        "uses": "Разностные схемы, метод прогонки.",
+    },
+    {
+        "slug": "toeplitz",
+        "title": "Тёплицева матрица",
+        "category": "По структуре",
+        "definition": "Элементы постоянны вдоль каждой диагонали.",
+        "formula": "aᵢⱼ = tⱼ₋ᵢ",
+        "example": "[[1, 2, 3], [4, 1, 2], [5, 4, 1]]",
+        "uses": "Фильтры, свёртки, обработка сигналов.",
+    },
+    {
+        "slug": "hankel",
+        "title": "Ганкелева матрица",
+        "category": "По структуре",
+        "definition": "Элементы постоянны вдоль каждой антидиагонали.",
+        "formula": "aᵢⱼ = hᵢ₊ⱼ",
+        "example": "[[1, 2, 3], [2, 3, 4], [3, 4, 5]]",
+        "uses": "Теория систем, аппроксимация.",
+    },
+    {
+        "slug": "circulant",
+        "title": "Циркулянт",
+        "category": "По структуре",
+        "definition": "Каждая строка — циклический сдвиг предыдущей.",
+        "formula": "aᵢⱼ = c₍ⱼ₋ᵢ₎ mod n",
+        "example": "[[1, 2, 3], [3, 1, 2], [2, 3, 1]]",
+        "uses": "БПФ, теория кодирования.",
+    },
+    {
+        "slug": "block",
+        "title": "Блочная матрица",
+        "category": "По структуре",
+        "definition": "Матрица, разбитая на блоки-подматрицы.",
+        "formula": "M = [[A, B], [C, D]]",
+        "example": "[[1, 2, 0, 0], [3, 4, 0, 0], [0, 0, 5, 6], [0, 0, 7, 8]]",
+        "uses": "Блочное умножение, метод Шура.",
+    },
+    {
+        "slug": "sparse",
+        "title": "Разреженная матрица",
+        "category": "По структуре",
+        "definition": "Большинство элементов равны нулю.",
+        "formula": "nnz(A) ≪ m·n",
+        "example": "[[1, 0, 0], [0, 0, 0], [0, 0, 5]]",
+        "uses": "Хранение больших систем, графы.",
+    },
+
+    # --------------------------------------------------------- По свойствам
+    {
         "slug": "symmetric",
         "title": "Симметричная матрица",
-        "category": "Специальные",
+        "category": "По свойствам",
         "definition": "Совпадает со своей транспонированной: A = Aᵀ.",
         "formula": "aᵢⱼ = aⱼᵢ",
         "example": "[[1, 2], [2, 3]]",
         "uses": "Спектральное разложение, оптимизация.",
     },
     {
+        "slug": "skew-symmetric",
+        "title": "Кососимметричная матрица",
+        "category": "По свойствам",
+        "definition": "Aᵀ = −A, диагональ нулевая.",
+        "formula": "aᵢⱼ = −aⱼᵢ",
+        "example": "[[0, 2], [-2, 0]]",
+        "uses": "Векторное произведение, угловая скорость.",
+    },
+    {
         "slug": "orthogonal",
         "title": "Ортогональная матрица",
-        "category": "Специальные",
+        "category": "По свойствам",
         "definition": "Квадратная матрица, у которой AᵀA = I.",
         "formula": "Aᵀ · A = I",
         "example": "[[0, -1], [1, 0]] — матрица поворота",
         "uses": "Повороты, отражения, QR-разложение.",
     },
     {
+        "slug": "unitary",
+        "title": "Унитарная матрица",
+        "category": "По свойствам",
+        "definition": "Комплексный аналог ортогональной: U*U = I.",
+        "formula": "U* · U = I",
+        "example": "[[1, 0], [0, i]]",
+        "uses": "Квантовая механика, комплексные преобразования.",
+    },
+    {
+        "slug": "hermitian",
+        "title": "Эрмитова матрица",
+        "category": "По свойствам",
+        "definition": "Комплексный аналог симметричной: A* = A.",
+        "formula": "A* = A",
+        "example": "[[2, 1+i], [1-i, 3]]",
+        "uses": "Квантовая механика, спектральная теорема.",
+    },
+    {
         "slug": "positive-definite",
         "title": "Положительно определённая",
-        "category": "Специальные",
+        "category": "По свойствам",
         "definition": "Симметричная матрица, у которой все собственные значения положительны.",
         "formula": "xᵀAx > 0 для всех x ≠ 0",
         "example": "[[2, 0], [0, 3]]",
         "uses": "Оптимизация, разложение Холецкого, статистика.",
     },
     {
+        "slug": "negative-definite",
+        "title": "Отрицательно определённая",
+        "category": "По свойствам",
+        "definition": "Симметричная матрица, у которой все собственные значения отрицательны.",
+        "formula": "xᵀAx < 0 для всех x ≠ 0",
+        "example": "[[-2, 0], [0, -3]]",
+        "uses": "Точки максимума, седловые точки.",
+    },
+    {
         "slug": "idempotent",
         "title": "Идемпотентная матрица",
-        "category": "Специальные",
+        "category": "По свойствам",
         "definition": "Матрица, равная своему квадрату: A² = A.",
         "formula": "A · A = A",
         "example": "[[1, 0], [0, 0]] — проектор",
@@ -539,36 +723,1370 @@ MATRIX_TYPES: list[dict[str, Any]] = [
     {
         "slug": "nilpotent",
         "title": "Нильпотентная матрица",
-        "category": "Специальные",
+        "category": "По свойствам",
         "definition": "Некоторая степень равна нулю: Aᵏ = 0.",
         "formula": "Aᵏ = 0 для некоторого k ≥ 1",
         "example": "[[0, 1], [0, 0]]",
         "uses": "Разложение Жордана, теория нильпотентных операторов.",
     },
     {
-        "slug": "triangular",
-        "title": "Треугольная матрица",
-        "category": "Специальные",
-        "definition": "Все элементы выше (или ниже) главной диагонали равны нулю.",
-        "formula": "aᵢⱼ = 0 при i > j (верхняя)",
-        "example": "[[1, 2], [0, 3]]",
-        "uses": "LU-разложение, решение СЛАУ, определитель — произведение диагоналей.",
+        "slug": "involutory",
+        "title": "Инволютивная матрица",
+        "category": "По свойствам",
+        "definition": "Матрица, равная своей обратной: A² = I.",
+        "formula": "A · A = I",
+        "example": "[[0, 1], [1, 0]] — отражение",
+        "uses": "Отражения, инволюции.",
+    },
+    {
+        "slug": "stochastic",
+        "title": "Стохастическая матрица",
+        "category": "По свойствам",
+        "definition": "Неотрицательная, сумма элементов в каждом столбце равна 1.",
+        "formula": "aᵢⱼ ≥ 0, Σᵢ aᵢⱼ = 1",
+        "example": "[[0.7, 0.3], [0.3, 0.7]]",
+        "uses": "Цепи Маркова, теория вероятностей.",
+    },
+    {
+        "slug": "singular",
+        "title": "Вырожденная (сингулярная) матрица",
+        "category": "По свойствам",
+        "definition": "Квадратная матрица с нулевым определителем.",
+        "formula": "det(A) = 0",
+        "example": "[[1, 2], [2, 4]]",
+        "uses": "Отсутствие обратной, потеря размерности.",
+    },
+    {
+        "slug": "nonsingular",
+        "title": "Невырожденная матрица",
+        "category": "По свойствам",
+        "definition": "Квадратная матрица с ненулевым определителем.",
+        "formula": "det(A) ≠ 0",
+        "example": "[[1, 2], [3, 4]]",
+        "uses": "Существование обратной, единственность решения СЛАУ.",
     },
 ]
 
 
 def types(request: HttpRequest) -> HttpResponse:
     """Классификация матриц по видам."""
-    categories: dict[str, list[dict[str, Any]]] = {}
+    CATEGORY_ORDER = [
+        "По форме",
+        "По структуре",
+        "По свойствам",
+    ]
+
+    grouped: dict[str, list[dict[str, Any]]] = {}
     for t in MATRIX_TYPES:
-        categories.setdefault(t["category"], []).append(t)
+        grouped.setdefault(t["category"], []).append(t)
+
+    ordered_categories: dict[str, list[dict[str, Any]]] = {}
+    for name in CATEGORY_ORDER:
+        if name in grouped:
+            ordered_categories[name] = grouped[name]
+    for name, items in grouped.items():
+        if name not in ordered_categories:
+            ordered_categories[name] = items
 
     return render(
         request,
         "matrix_app/types.html",
         {
             "types": MATRIX_TYPES,
-            "categories": categories,
+            "categories": ordered_categories,
+        },
+    )
+
+
+# =============================================================================
+# МОДУЛИ ПО НАПРАВЛЕНИЯМ
+# =============================================================================
+#
+# Структура:
+#   MODULE_SCHOOLS — упорядоченный список школ (блоков).
+#       slug         — якорь для оглавления и URL
+#       title        — название школы
+#       subtitle     — короткое пояснение
+#       icon         — slug SVG-эмблемы школы (icons/schools/<slug>.svg)
+#       accent       — цветовой акцент (для CSS-вариантов)
+#       directions   — список направлений (см. ниже)
+#
+#   Направление (direction):
+#       slug          — якорь
+#       title         — название направления
+#       tagline       — одна строка — зачем матрицы в этой специальности
+#       description   — 2-3 предложения, развёрнуто
+#       formula       — ключевая формула (LaTeX без $$)
+#       formula_note  — пояснение к формуле (одна строка)
+#       uses          — список конкретных применений (3-4 пункта)
+#       example_slug  — ключ из EXAMPLES — «живой» пример для загрузки
+#       operation     — код операции для калькулятора (preset)
+#       icon          — slug иконки (math/determinant и т.п.)
+#
+#   ВАЖНО: operation и example_slug должны быть совместимы:
+#     • solve_system требует, чтобы у примера был ключ "vector";
+#       поэтому на странице /modules/ он НЕ используется.
+#     • lu — невырожденная квадратная матрица;
+#     • determinant, rank, eigenvalues — квадратная;
+#     • inverse — невырожденная квадратная.
+# =============================================================================
+
+MODULE_SCHOOLS: list[dict[str, Any]] = [
+    # =========================================================================
+    # 1. ШКОЛА ОБРАЗОВАНИЯ
+    # =========================================================================
+    {
+        "slug": "education",
+        "title": "Школа образования",
+        "subtitle": "Педагогика, языки, филология, психология — там, где важно "
+                    "видеть структуру и находить закономерности.",
+        "icon": "schools/school-education",
+        "accent": "violet",
+        "directions": [
+            {
+                "slug": "preschool-education",
+                "title": "Дошкольное образование",
+                "tagline": "Оценка развития, диагностика групп, распределение нагрузки",
+                "description": (
+                    "В дошкольной педагогике матрицы помогают работать с "
+                    "многомерными наблюдениями: развитие каждого ребёнка по "
+                    "нескольким шкалам, корреляции между показателями и "
+                    "распределение по группам. Матрицы позволяют увидеть "
+                    "скрытые закономерности там, где таблица уже не читается."
+                ),
+                "formula": "A \\cdot x = y",
+                "formula_note": "Линейная модель развития: на входе — факторы, на выходе — показатель.",
+                "uses": [
+                    "Матрица наблюдений: дети × шкалы развития",
+                    "Корреляционная матрица между показателями",
+                    "Распределение детей по группам (кластеризация)",
+                    "Оценка влияния методик — линейная модель",
+                ],
+                "example_slug": "teacher_grade",
+                "operation": "rank",
+                "icon": "math/matrix-grid",
+            },
+            {
+                "slug": "primary-education",
+                "title": "Начальное образование",
+                "tagline": "Критериальное оценивание, веса заданий, диагностика класса",
+                "description": (
+                    "В начальной школе важно понимать, какие задания "
+                    "действительно различают уровень учеников, а какие — нет. "
+                    "Матрица «ученики × задания» и её ранг показывают, сколько "
+                    "независимых измерений реально даёт тест. Это основа "
+                    "критериального оценивания."
+                ),
+                "formula": "W \\cdot S = G",
+                "formula_note": "Матрица весов W × матрица баллов S = итоговая оценка G.",
+                "uses": [
+                    "Матрица «ученики × задания»",
+                    "Веса критериев оценивания",
+                    "Анализ разнообразия заданий через ранг",
+                    "Прогноз успеваемости по линейной модели",
+                ],
+                "example_slug": "teacher_grade",
+                "operation": "properties",
+                "icon": "ui/check-badge",
+            },
+            {
+                "slug": "korean-philology",
+                "title": "Корейская филология",
+                "tagline": "Семантические поля, попарное сходство, разбор текстов",
+                "description": (
+                    "В филологии матрицы — основа количественного анализа "
+                    "текста. Матрица «слово × документ» (term-document matrix), "
+                    "её разложения и собственные значения дают семантические "
+                    "оси: какие темы доминируют, как тексты группируются, "
+                    "какие слова близки. Это тема LSA (Latent Semantic Analysis)."
+                ),
+                "formula": "A \\approx U \\Sigma V^{T}",
+                "formula_note": "SVD разложение term-document матрицы — основа тематического анализа.",
+                "uses": [
+                    "Матрица «слово × документ»",
+                    "Попарное сходство текстов (косинусная мера)",
+                    "Кластеризация текстов по темам",
+                    "Выделение ключевых слов через SVD",
+                ],
+                "example_slug": "kimchi_linguistics",
+                "operation": "eigenvalues",
+                "icon": "math/lambda",
+            },
+            {
+                "slug": "english-teaching",
+                "title": "Преподавание английского языка",
+                "tagline": "Анализ ошибок, матрица прогресса, диагностика групп",
+                "description": (
+                    "Матрица «студент × тип ошибки» показывает, какие ошибки "
+                    "систематичны, а какие случайны. Собственные значения такой "
+                    "матрицы выделяют «главные» проблемы группы, а разложение — "
+                    "типичные профили учеников."
+                ),
+                "formula": "E = U \\Sigma V^{T}",
+                "formula_note": "Разложение матрицы ошибок на типичные профили.",
+                "uses": [
+                    "Матрица ошибок по темам",
+                    "Профили учеников через кластеризацию",
+                    "Динамика прогресса во времени",
+                    "Подбор упражнений по слабым местам",
+                ],
+                "example_slug": "teacher_grade",
+                "operation": "rank",
+                "icon": "ui/grid",
+            },
+            {
+                "slug": "history",
+                "title": "История",
+                "tagline": "Хронологические связи, сети, миграции, экономика",
+                "description": (
+                    "Исторические данные — это часто сети: кто с кем связан, "
+                    "какие регионы торговали, как распространялись идеи. "
+                    "Матрица смежности и её собственные значения показывают "
+                    "«центральные» узлы и «мосты» — ключ к анализу сетей."
+                ),
+                "formula": "A \\cdot v = \\lambda \\cdot v",
+                "formula_note": "Собственный вектор матрицы связей даёт «центральность» узлов.",
+                "uses": [
+                    "Матрица смежности исторических связей",
+                    "Центральность персон и регионов",
+                    "Анализ торговых путей",
+                    "Экономические балансы эпох",
+                ],
+                "example_slug": "graph_network",
+                "operation": "eigenvalues",
+                "icon": "math/lambda",
+            },
+            {
+                "slug": "special-pedagogy",
+                "title": "Специальная педагогика",
+                "tagline": "Индивидуальные профили, диагностические матрицы",
+                "description": (
+                    "В специальной педагогике важна индивидуальная траектория. "
+                    "Матрица «ребёнок × навык» с весами позволяет построить "
+                    "персональный профиль и отслеживать динамику. Матрицы "
+                    "корреляций показывают, какие навыки развиваются вместе."
+                ),
+                "formula": "P = W \\cdot S",
+                "formula_note": "Взвешенный профиль: W — веса навыков, S — уровень владения.",
+                "uses": [
+                    "Индивидуальный профиль развития",
+                    "Матрица «навык × ребёнок»",
+                    "Динамика коррекции",
+                    "Корреляции между навыками",
+                ],
+                "example_slug": "psychology_profile",
+                "operation": "properties",
+                "icon": "ui/check-badge",
+            },
+            {
+                "slug": "translation-studies-cn",
+                "title": "Переводоведение (китайский и английский)",
+                "tagline": "Выравнивание текстов, оценка качества, попарные метрики",
+                "description": (
+                    "Матрица выравнивания показывает, какому фрагменту "
+                    "оригинала соответствует фрагмент перевода. Её анализ — "
+                    "это и оценка качества, и поиск типичных ошибок, и "
+                    "статистика автоматического перевода."
+                ),
+                "formula": "M_{ij} = \\text{sim}(s_i, t_j)",
+                "formula_note": "Матрица близости: элемент — схожесть i-го оригинала и j-го перевода.",
+                "uses": [
+                    "Матрица выравнивания оригинала и перевода",
+                    "Оценка качества перевода (BLEU, METEOR)",
+                    "Попарная близость предложений",
+                    "Кластеризация типичных ошибок",
+                ],
+                "example_slug": "translation_alignment",
+                "operation": "rank",
+                "icon": "ui/grid",
+            },
+            {
+                "slug": "psychology",
+                "title": "Психология",
+                "tagline": "Корреляции шкал, факторный анализ, профили личности",
+                "description": (
+                    "Психологические тесты дают матрицу «испытуемый × шкала». "
+                    "Её собственные значения — это факторы: устойчивые "
+                    "латентные черты, стоящие за ответами. Это математическая "
+                    "основа факторного анализа."
+                ),
+                "formula": "R \\cdot v = \\lambda \\cdot v",
+                "formula_note": "Собственные векторы корреляционной матрицы — факторы.",
+                "uses": [
+                    "Корреляционная матрица шкал",
+                    "Факторный анализ (PCA)",
+                    "Профили личности",
+                    "Кластеризация испытуемых",
+                ],
+                "example_slug": "psychology_profile",
+                "operation": "eigenvalues",
+                "icon": "math/lambda",
+            },
+            {
+                "slug": "philology-russian",
+                "title": "Филология и преподавание языков (русский)",
+                "tagline": "Частотные словари, синтаксис, семантические расстояния",
+                "description": (
+                    "Матрица «слово × контекст» — основа дистрибутивной "
+                    "семантики: слова со схожими контекстами близки по смыслу. "
+                    "Разложения дают векторные представления слов — эмбеддинги."
+                ),
+                "formula": "w \\approx \\sum_{k} \\sigma_k u_k v_k^{T}",
+                "formula_note": "Разложение матрицы контекстов даёт векторные представления слов.",
+                "uses": [
+                    "Частотная матрица «слово × текст»",
+                    "Семантические расстояния между словами",
+                    "Разбор синтаксических зависимостей",
+                    "Стилометрия авторов",
+                ],
+                "example_slug": "kimchi_linguistics",
+                "operation": "eigenvalues",
+                "icon": "math/lambda",
+            },
+            {
+                "slug": "uzbek-language",
+                "title": "Узбекский язык и литература",
+                "tagline": "Корпусные исследования, частотность, авторский стиль",
+                "description": (
+                    "Корпусная лингвистика — это матрицы частот. Ранг матрицы "
+                    "«слово × жанр» показывает, сколько независимых измерений "
+                    "различает тексты, а разложение — какие именно темы "
+                    "доминируют в жанре."
+                ),
+                "formula": "F = U \\Sigma V^{T}",
+                "formula_note": "Разложение частотной матрицы — основа тематического моделирования.",
+                "uses": [
+                    "Матрица «слово × жанр»",
+                    "Частотный анализ корпуса",
+                    "Авторский стиль через PCA",
+                    "Сравнение периодов литературы",
+                ],
+                "example_slug": "kimchi_linguistics",
+                "operation": "rank",
+                "icon": "ui/grid",
+            },
+            {
+                "slug": "translation-turkish",
+                "title": "Теория и практика перевода (турецкий)",
+                "tagline": "Сопоставление параллельных корпусов, оценка качества",
+                "description": (
+                    "Параллельные корпуса дают матрицу соответствий, а её "
+                    "свойства — характеристику стиля переводчика: как часто "
+                    "он сохраняет порядок, где меняет структуру. Это "
+                    "математическая база переводческой критики."
+                ),
+                "formula": "D = A^{T} \\cdot B",
+                "formula_note": "Матрица соответствий получается умножением матриц-текстов.",
+                "uses": [
+                    "Выравнивание параллельного корпуса",
+                    "Оценка сохранения порядка",
+                    "Автоматическая оценка перевода",
+                    "Стилометрия переводчика",
+                ],
+                "example_slug": "translation_alignment",
+                "operation": "properties",
+                "icon": "ui/check-badge",
+            },
+            {
+                "slug": "japanese-philology",
+                "title": "Филология и преподавание языков (японский)",
+                "tagline": "Иероглифические системы, семантика, корпусные методы",
+                "description": (
+                    "Японская письменность совмещает несколько систем — "
+                    "матрицы позволяют моделировать их взаимодействие: "
+                    "переходы между системами, частотность чтений, "
+                    "семантические расстояния между иероглифами."
+                ),
+                "formula": "T_{ij} = P(\\text{чтение}_j \\mid \\text{иероглиф}_i)",
+                "formula_note": "Матрица переходов между иероглифами и чтениями.",
+                "uses": [
+                    "Матрица «иероглиф × чтение»",
+                    "Семантические расстояния между кандзи",
+                    "Частотный анализ корпуса",
+                    "Автоматическое распознавание текста",
+                ],
+                "example_slug": "kimchi_linguistics",
+                "operation": "eigenvalues",
+                "icon": "math/lambda",
+            },
+            {
+                "slug": "physical-education",
+                "title": "Физическая культура",
+                "tagline": "Мониторинг показателей, распределение нагрузок, прогресс",
+                "description": (
+                    "Матрица «спортсмен × показатель» — основа мониторинга "
+                    "тренированности. Собственные значения показывают, "
+                    "сколько независимых осей реально варьируется, а "
+                    "корреляции — какие показатели двигаются вместе."
+                ),
+                "formula": "S = W \\cdot P",
+                "formula_note": "Итоговый рейтинг — это взвешенная матрица показателей.",
+                "uses": [
+                    "Матрица «спортсмен × тест»",
+                    "Комплексная оценка подготовленности",
+                    "Прогноз результатов",
+                    "Баланс нагрузок и восстановления",
+                ],
+                "example_slug": "teacher_grade",
+                "operation": "properties",
+                "icon": "ui/check-badge",
+            },
+        ],
+    },
+
+    # =========================================================================
+    # 2. ШКОЛА БИЗНЕСА И ФИНАНСОВ
+    # =========================================================================
+    {
+        "slug": "business",
+        "title": "Школа бизнеса и финансов",
+        "subtitle": "Экономика, маркетинг, финансы, менеджмент — там, где "
+                    "решения принимаются на основе данных.",
+        "icon": "schools/school-business",
+        "accent": "emerald",
+        "directions": [
+            {
+                "slug": "tourism",
+                "title": "Туризм",
+                "tagline": "Маршрутные потоки, загрузка, прогноз спроса",
+                "description": (
+                    "Туристические потоки — это матрица «откуда × куда»: "
+                    "сколько людей едет из региона в регион. Её анализ "
+                    "показывает «магниты» и «транзитные узлы», а прогноз — "
+                    "основа планирования загрузки."
+                ),
+                "formula": "F_{ij} = P(\\text{из } i \\to j)",
+                "formula_note": "Матрица миграционных потоков.",
+                "uses": [
+                    "Матрица «регион × регион» потоков",
+                    "Загрузка сезонов",
+                    "Прогноз спроса (Марков)",
+                    "Оптимальные маршруты",
+                ],
+                "example_slug": "markov_chain",
+                "operation": "eigenvalues",
+                "icon": "math/lambda",
+            },
+            {
+                "slug": "business-management",
+                "title": "Управление бизнесом",
+                "tagline": "Многокритериальные решения, ресурсы, KPI",
+                "description": (
+                    "Задачи менеджмента — многокритериальные: есть несколько "
+                    "альтернатив и несколько критериев. Матрица «альтернатива × "
+                    "критерий» с весами даёт итоговый рейтинг — это метод "
+                    "анализа иерархий (AHP)."
+                ),
+                "formula": "S = A \\cdot W",
+                "formula_note": "Итоговый балл = матрица оценок × веса критериев.",
+                "uses": [
+                    "Матрица «альтернатива × критерий»",
+                    "Веса критериев (AHP)",
+                    "Распределение ресурсов",
+                    "Прогноз KPI",
+                ],
+                "example_slug": "teacher_grade",
+                "operation": "properties",
+                "icon": "ui/check-badge",
+            },
+            {
+                "slug": "international-economic-relations",
+                "title": "Международные экономические отношения",
+                "tagline": "Торговые балансы, матрица «экспорт-импорт», модели роста",
+                "description": (
+                    "Модель Леонтьева «затраты — выпуск» описывает экономику "
+                    "как систему линейных уравнений: чтобы выпустить продукт, "
+                    "нужны ресурсы. Матрица коэффициентов — сердце модели; "
+                    "её свойства определяют устойчивость экономики."
+                ),
+                "formula": "x = (I - A)^{-1} \\cdot d",
+                "formula_note": "Модель Леонтьева: выпуск x через матрицу затрат A и спрос d.",
+                "uses": [
+                    "Матрица «отрасль × отрасль»",
+                    "Торговые балансы стран",
+                    "Прогноз роста экономики",
+                    "Анализ устойчивости (собственные числа)",
+                ],
+                "example_slug": "input_output",
+                "operation": "inverse",
+                "icon": "math/inverse",
+            },
+            {
+                "slug": "international-marketing",
+                "title": "Международный маркетинг",
+                "tagline": "Сегментация, поведение, ценовые матрицы",
+                "description": (
+                    "Матрица «потребитель × признак» — основа сегментации. "
+                    "Кластеризация и понижение размерности (PCA) позволяют "
+                    "выделить реальные сегменты, а не придуманные вручную."
+                ),
+                "formula": "X = U \\Sigma V^{T}",
+                "formula_note": "SVD данных покупателей даёт латентные сегменты.",
+                "uses": [
+                    "Матрица «клиент × покупка»",
+                    "Сегментация через кластеризацию",
+                    "Прогноз спроса на рынке",
+                    "Матрица цен и скидок",
+                ],
+                "example_slug": "ecommerce_funnel",
+                "operation": "eigenvalues",
+                "icon": "math/lambda",
+            },
+            {
+                "slug": "accounting",
+                "title": "Бухгалтерский учёт",
+                "tagline": "Оборотные ведомости, балансовые матрицы, аудит",
+                "description": (
+                    "Бухгалтерский баланс — это система линейных уравнений: "
+                    "активы равны пассивам, обороты сходятся. Матричная запись "
+                    "позволяет быстро проверять согласованность, находить "
+                    "ошибки и строить прогнозы."
+                ),
+                "formula": "A \\cdot x = b",
+                "formula_note": "Балансовое уравнение: активы, пассивы, обороты.",
+                "uses": [
+                    "Матрица «счёт × счёт» оборотов",
+                    "Проверка баланса",
+                    "Прогноз денежных потоков",
+                    "Аудит через анализ отклонений",
+                ],
+                "example_slug": "input_output",
+                "operation": "determinant",
+                "icon": "math/determinant",
+            },
+            {
+                "slug": "banking",
+                "title": "Банковское дело",
+                "tagline": "Кредитные портфели, риски, корреляция заёмщиков",
+                "description": (
+                    "Банковский портфель — это матрица «заёмщик × риск-фактор». "
+                    "Корреляции и собственные значения показывают, какие "
+                    "риски системны, а какие диверсифицируемы. Это основа "
+                    "управления капиталом (Basel III, VaR)."
+                ),
+                "formula": "\\Sigma = \\text{Cov}(r_i, r_j)",
+                "formula_note": "Ковариационная матрица доходностей — основа оценки риска.",
+                "uses": [
+                    "Ковариационная матрица активов",
+                    "Портфель минимального риска",
+                    "Кредитный скоринг",
+                    "Стресс-тестирование",
+                ],
+                "example_slug": "medical_diagnostic",
+                "operation": "eigenvalues",
+                "icon": "math/lambda",
+            },
+            {
+                "slug": "finance",
+                "title": "Финансы",
+                "tagline": "Оптимизация портфеля, риски, оценка активов",
+                "description": (
+                    "Портфельная теория Марковица — это чистая линейная "
+                    "алгебра: доходности и ковариации, оптимизация при "
+                    "ограничениях. Собственные значения ковариационной "
+                    "матрицы — это «факторы риска», движущие рынком."
+                ),
+                "formula": "w^{*} = \\frac{\\Sigma^{-1} \\mu}{\\mathbf{1}^{T} \\Sigma^{-1} \\mu}",
+                "formula_note": "Оптимальный портфель через обратную ковариационную матрицу.",
+                "uses": [
+                    "Матрица доходностей активов",
+                    "Оптимизация портфеля Марковица",
+                    "Факторный анализ рисков",
+                    "Оценка опционов (греки)",
+                ],
+                "example_slug": "input_output",
+                "operation": "inverse",
+                "icon": "math/inverse",
+            },
+            {
+                "slug": "international-relations",
+                "title": "Международные отношения",
+                "tagline": "Геополитические сети, конфликты, альянсы",
+                "description": (
+                    "Международные отношения — это сеть: кто с кем торгует, "
+                    "кто в каком альянсе, кто с кем конфликтует. Матрица "
+                    "связей и её собственные значения показывают ключевых "
+                    "игроков и «мосты» между блоками."
+                ),
+                "formula": "A \\cdot v = \\lambda \\cdot v",
+                "formula_note": "Собственный вектор — «центральность» страны в сети.",
+                "uses": [
+                    "Матрица «страна × страна» связей",
+                    "Центральность игроков",
+                    "Анализ альянсов и блоков",
+                    "Моделирование конфликтов",
+                ],
+                "example_slug": "graph_network",
+                "operation": "eigenvalues",
+                "icon": "math/lambda",
+            },
+        ],
+    },
+
+    # =========================================================================
+    # 3. ИНЖЕНЕРНАЯ ШКОЛА
+    # =========================================================================
+    {
+        "slug": "engineering",
+        "title": "Инженерная школа",
+        "subtitle": "Строительство, энергетика, машиностроение, IT — там, где "
+                    "математика становится инструментом.",
+        "icon": "schools/school-engineering",
+        "accent": "indigo",
+        "directions": [
+            # ---------------------------------------------------- 3.1. Архитектура и строительство
+            {
+                "slug": "architecture",
+                "title": "Архитектура и градостроительство",
+                "tagline": "Устойчивость конструкций, композиция, планировка",
+                "description": (
+                    "Архитектурные конструкции описываются матрицами "
+                    "жёсткости: сколько усилий нужно, чтобы сместить узел. "
+                    "Собственные значения такой матрицы — собственные частоты "
+                    "колебаний; если они близки к резонансу, конструкция "
+                    "опасна. Это классика строительной механики."
+                ),
+                "formula": "K \\cdot u = f",
+                "formula_note": "Матрица жёсткости K × перемещения u = усилия f.",
+                "uses": [
+                    "Матрица жёсткости конструкции",
+                    "Собственные частоты здания",
+                    "Оптимальная планировка",
+                    "Анализ устойчивости форм",
+                ],
+                "example_slug": "stiffness",
+                "operation": "eigenvalues",
+                "icon": "math/lambda",
+            },
+            {
+                "slug": "construction",
+                "title": "Строительство",
+                "tagline": "Расчёт балок, ферм, устойчивость, нагрузки",
+                "description": (
+                    "Любая строительная конструкция — это система уравнений "
+                    "равновесия. Матрица жёсткости собирается из блоков "
+                    "(метод конечных элементов), решается — и мы получаем "
+                    "напряжения и деформации. Без матриц это невозможно."
+                ),
+                "formula": "K \\cdot u = f",
+                "formula_note": "Метод конечных элементов: матрица жёсткости и вектор нагрузок.",
+                "uses": [
+                    "Расчёт ферм и балок",
+                    "Метод конечных элементов",
+                    "Анализ устойчивости",
+                    "Смета и оптимизация материалов",
+                ],
+                "example_slug": "stiffness",
+                "operation": "lu",
+                "icon": "math/lu",
+            },
+            {
+                "slug": "engineering-communications",
+                "title": "Строительство и монтаж инженерных коммуникаций",
+                "tagline": "Сети трубопроводов, баланс потоков, оптимизация",
+                "description": (
+                    "Инженерные сети — это граф: узлы и трубы. Матрица "
+                    "инцидентности описывает, куда втекает и откуда вытекает "
+                    "поток. Её свойства связаны с законом Кирхгофа и "
+                    "устойчивостью сети."
+                ),
+                "formula": "B \\cdot q = d",
+                "formula_note": "Матрица инцидентности B × поток q = потребление d.",
+                "uses": [
+                    "Матрица инцидентности сети",
+                    "Баланс давления и потоков",
+                    "Оптимальные диаметры труб",
+                    "Диагностика утечек",
+                ],
+                "example_slug": "input_output",
+                "operation": "lu",
+                "icon": "math/lu",
+            },
+
+            # ---------------------------------------------------- 3.2. Энергетика и транспорт
+            {
+                "slug": "alternative-energy",
+                "title": "Альтернативная энергетика",
+                "tagline": "Распределение энергии, оптимизация, моделирование сетей",
+                "description": (
+                    "Энергосистема — это баланс: производство равно "
+                    "потреблению. Матрица потоков мощности описывает, "
+                    "как энергия идёт от генераторов к потребителям. "
+                    "Собственные значения — устойчивость системы."
+                ),
+                "formula": "P = B \\cdot \\theta",
+                "formula_note": "Поток мощности через матрицу проводимостей и углы напряжений.",
+                "uses": [
+                    "Матрица потоков энергии",
+                    "Оптимизация распределения",
+                    "Устойчивость энергосистемы",
+                    "Прогноз выработки ВИЭ",
+                ],
+                "example_slug": "input_output",
+                "operation": "eigenvalues",
+                "icon": "math/lambda",
+            },
+            {
+                "slug": "space-technology",
+                "title": "Космические технологии",
+                "tagline": "Ориентация, орбитальная динамика, телеметрия",
+                "description": (
+                    "Ориентация спутника описывается матрицей поворота. "
+                    "Кинематика — матрицы Якоби. Управление — собственные "
+                    "значения системы: устойчиво ли положение. Вся "
+                    "космическая механика построена на матрицах."
+                ),
+                "formula": "R(\\theta) = \\begin{pmatrix} \\cos\\theta & -\\sin\\theta \\\\ \\sin\\theta & \\cos\\theta \\end{pmatrix}",
+                "formula_note": "Матрица поворота — ориентация в 3D.",
+                "uses": [
+                    "Матрица ориентации спутника",
+                    "Анализ устойчивости орбиты",
+                    "Обработка телеметрии",
+                    "Оптимальное управление",
+                ],
+                "example_slug": "rotation_2d",
+                "operation": "eigenvalues",
+                "icon": "math/lambda",
+            },
+            {
+                "slug": "elevator-engineering",
+                "title": "Лифтовое машиностроение",
+                "tagline": "Динамика, вибрации, расчёт нагрузок",
+                "description": (
+                    "Лифт — это система масс, пружин и демпферов. Матрица "
+                    "жёсткости и демпфирования описывает колебания кабины, "
+                    "а собственные значения — резонансные частоты, которые "
+                    "нужно избегать при проектировании."
+                ),
+                "formula": "M \\ddot{x} + C \\dot{x} + K x = F",
+                "formula_note": "Матричное уравнение движения системы.",
+                "uses": [
+                    "Матрица жёсткости системы",
+                    "Собственные частоты",
+                    "Гашение вибраций",
+                    "Оптимальное управление",
+                ],
+                "example_slug": "physics_oscillator",
+                "operation": "eigenvalues",
+                "icon": "math/lambda",
+            },
+            {
+                "slug": "road-traffic",
+                "title": "Управление дорожным движением",
+                "tagline": "Потоки, светофоры, оптимизация, сети",
+                "description": (
+                    "Дорожная сеть — граф с потоками. Матрица интенсивности "
+                    "переходов между участками описывает распространение "
+                    "автомобилей. Её стационарное распределение — «равновесие» "
+                    "потока; управление светофорами — задача оптимизации "
+                    "матричной модели."
+                ),
+                "formula": "x_{t+1} = P \\cdot x_t",
+                "formula_note": "Марковская модель потока через матрицу переходов.",
+                "uses": [
+                    "Матрица переходов между участками",
+                    "Оптимизация светофоров",
+                    "Прогноз заторов",
+                    "Планирование маршрутов",
+                ],
+                "example_slug": "markov_chain",
+                "operation": "eigenvalues",
+                "icon": "math/lambda",
+            },
+            {
+                "slug": "sustainable-transport",
+                "title": "Устойчивый транспорт",
+                "tagline": "Логистика, экология, оптимизация маршрутов",
+                "description": (
+                    "Устойчивый транспорт — это баланс между экономикой, "
+                    "экологией и социальной доступностью. Матрица «маршрут × "
+                    "критерий» с весами даёт комплексную оценку, а методы "
+                    "оптимизации — наилучший план."
+                ),
+                "formula": "S = W \\cdot C",
+                "formula_note": "Взвешенная оценка маршрута по критериям.",
+                "uses": [
+                    "Матрица «маршрут × критерий»",
+                    "Оптимизация маршрутов",
+                    "Оценка углеродного следа",
+                    "Анализ доступности",
+                ],
+                "example_slug": "teacher_grade",
+                "operation": "properties",
+                "icon": "ui/check-badge",
+            },
+
+            # ---------------------------------------------------- 3.3. Машиностроение и мехатроника
+            {
+                "slug": "electrical-engineering",
+                "title": "Электротехника",
+                "tagline": "Цепи, узлы, токи, матрицы проводимости",
+                "description": (
+                    "Электрическая цепь — это система линейных уравнений "
+                    "(законы Кирхгофа). Матрица проводимости связывает "
+                    "узлы и токи; её решение даёт напряжения в каждой "
+                    "точке. Это метод узловых потенциалов — основа "
+                    "всей схемотехники."
+                ),
+                "formula": "Y \\cdot U = I",
+                "formula_note": "Матрица проводимости Y × напряжения U = токи I.",
+                "uses": [
+                    "Матрица проводимости цепи",
+                    "Анализ переходных процессов",
+                    "Оптимальное проектирование",
+                    "Частотный анализ",
+                ],
+                "example_slug": "input_output",
+                "operation": "lu",
+                "icon": "math/lu",
+            },
+            {
+                "slug": "mechatronics",
+                "title": "Мехатроника",
+                "tagline": "Управление, робототехника, сенсоры и приводы",
+                "description": (
+                    "Мехатронные системы — это комбинация механики, "
+                    "электроники и управления. Матрицы состояния описывают "
+                    "динамику, а собственные значения — устойчивость "
+                    "и быстродействие системы управления."
+                ),
+                "formula": "\\dot{x} = A x + B u",
+                "formula_note": "Матричное уравнение состояния системы управления.",
+                "uses": [
+                    "Матрица состояния системы",
+                    "Анализ устойчивости",
+                    "Синтез регулятора",
+                    "Кинематика робота",
+                ],
+                "example_slug": "physics_oscillator",
+                "operation": "eigenvalues",
+                "icon": "math/lambda",
+            },
+            {
+                "slug": "mechanical-engineering",
+                "title": "Технология машиностроения",
+                "tagline": "Расчёт деталей, напряжений, оптимизация",
+                "description": (
+                    "Детали машин работают под нагрузкой, и их напряжённое "
+                    "состояние — это тензор, который в матричной форме "
+                    "описывает напряжения в каждой точке. Собственные "
+                    "значения — главные напряжения, определяющие прочность."
+                ),
+                "formula": "\\sigma = C \\cdot \\varepsilon",
+                "formula_note": "Закон Гука в матричной форме: напряжения через деформации.",
+                "uses": [
+                    "Матрица напряжений",
+                    "Главные напряжения",
+                    "Прочность и усталость",
+                    "Оптимизация геометрии",
+                ],
+                "example_slug": "stiffness",
+                "operation": "eigenvalues",
+                "icon": "math/lambda",
+            },
+            {
+                "slug": "industrial-engineering",
+                "title": "Промышленная инженерия и менеджмент",
+                "tagline": "Планирование производства, ресурсы, оптимизация",
+                "description": (
+                    "Задачи планирования производства — это линейное "
+                    "программирование: максимизировать выпуск при "
+                    "ограничениях на ресурсы. Матрица ограничений — "
+                    "основа симплекс-метода и всей оптимизации."
+                ),
+                "formula": "\\max c^{T} x \\quad \\text{при} \\quad A x \\leq b",
+                "formula_note": "Линейная оптимизация: матрица ограничений A.",
+                "uses": [
+                    "Матрица «продукт × ресурс»",
+                    "Оптимизация расписания",
+                    "Управление запасами",
+                    "Оценка узких мест",
+                ],
+                "example_slug": "input_output",
+                "operation": "lu",
+                "icon": "math/lu",
+            },
+            {
+                "slug": "biotechnology",
+                "title": "Биотехнология",
+                "tagline": "Популяции, метаболизм, генетические сети",
+                "description": (
+                    "Биологические системы — это сети взаимодействий: "
+                    "гены регулируют друг друга, метаболиты переходят "
+                    "друг в друга. Матрица таких связей описывает "
+                    "динамику системы, а собственные значения — "
+                    "устойчивость и режимы."
+                ),
+                "formula": "\\dot{x} = A x",
+                "formula_note": "Линейная модель биологической сети.",
+                "uses": [
+                    "Матрица генной регуляции",
+                    "Динамика популяций (Лесли)",
+                    "Метаболические пути",
+                    "Устойчивость экосистем",
+                ],
+                "example_slug": "population",
+                "operation": "eigenvalues",
+                "icon": "math/lambda",
+            },
+
+            # ---------------------------------------------------- 3.4. IT, данные и AI
+            {
+                "slug": "information-systems",
+                "title": "Инженерия информационных систем",
+                "tagline": "Архитектура систем, графы зависимостей, оптимизация",
+                "description": (
+                    "Информационные системы — это графы: сервисы, базы, "
+                    "интеграции. Матрица смежности показывает зависимости "
+                    "и точки отказа. Собственные значения — «узкие места», "
+                    "которые нужно резервировать."
+                ),
+                "formula": "A \\cdot v = \\lambda \\cdot v",
+                "formula_note": "Анализ графа зависимостей системы.",
+                "uses": [
+                    "Граф зависимостей сервисов",
+                    "Поиск узких мест",
+                    "Оценка надёжности",
+                    "Оптимизация архитектуры",
+                ],
+                "example_slug": "graph_network",
+                "operation": "eigenvalues",
+                "icon": "math/lambda",
+            },
+            {
+                "slug": "information-technology",
+                "title": "Информационные системы и технологии",
+                "tagline": "Базы данных, поиск, рекомендации, машинное обучение",
+                "description": (
+                    "Информационные системы работают с матрицами повсюду: "
+                    "от индексов баз данных до рекомендательных систем. "
+                    "SVD матрицы «пользователь × товар» — это основа "
+                    "коллаборативной фильтрации."
+                ),
+                "formula": "R \\approx U \\Sigma V^{T}",
+                "formula_note": "Разложение матрицы предпочтений — рекомендации.",
+                "uses": [
+                    "Матрица «пользователь × товар»",
+                    "Рекомендательные системы",
+                    "Поиск (TF-IDF, BM25)",
+                    "Кластеризация данных",
+                ],
+                "example_slug": "ecommerce_funnel",
+                "operation": "eigenvalues",
+                "icon": "math/lambda",
+            },
+            {
+                "slug": "software-engineering",
+                "title": "Программная инженерия",
+                "tagline": "Граф зависимостей кода, тестирование, метрики",
+                "description": (
+                    "Кодовая база — это граф зависимостей между модулями. "
+                    "Матрица связей помогает найти «сильно связанные» "
+                    "компоненты, оценить сложность рефакторинга и "
+                    "спланировать тестирование."
+                ),
+                "formula": "C = A^{T} \\cdot A",
+                "formula_note": "Матрица связности модулей через произведение.",
+                "uses": [
+                    "Граф зависимостей модулей",
+                    "Метрики связанности",
+                    "Планирование тестов",
+                    "Анализ влияния изменений",
+                ],
+                "example_slug": "graph_network",
+                "operation": "rank",
+                "icon": "ui/grid",
+            },
+            {
+                "slug": "computer-engineering",
+                "title": "Компьютерная инженерия",
+                "tagline": "Обработка сигналов, кодирование, встраиваемые системы",
+                "description": (
+                    "Обработка сигналов — это свёртки, а свёртки — "
+                    "умножение на матрицу Тёплица. Кодирование — это "
+                    "линейные коды над конечными полями: проверочная "
+                    "матрица и её ранг определяют, сколько ошибок "
+                    "можно исправить."
+                ),
+                "formula": "y = H \\cdot x",
+                "formula_note": "Кодирование линейным кодом через проверочную матрицу.",
+                "uses": [
+                    "Фильтрация сигналов",
+                    "Линейные коды (Хэмминг, Рида-Соломона)",
+                    "Сжатие данных",
+                    "Обработка изображений",
+                ],
+                "example_slug": "image_filter",
+                "operation": "properties",
+                "icon": "ui/check-badge",
+            },
+            {
+                "slug": "applied-mathematics",
+                "title": "Прикладная математика",
+                "tagline": "Численные методы, оптимизация, моделирование",
+                "description": (
+                    "Прикладная математика — это язык матриц. Численные "
+                    "методы решения уравнений, оптимизация, аппроксимация, "
+                    "дифференциальные уравнения — всё это в матричной "
+                    "форме. Собственные значения — универсальный "
+                    "инструмент анализа."
+                ),
+                "formula": "A x = b \\;\\Rightarrow\\; x = A^{-1} b",
+                "formula_note": "Решение линейной системы — базовый численный метод.",
+                "uses": [
+                    "Численное решение уравнений",
+                    "Оптимизация функций",
+                    "Аппроксимация данных",
+                    "Анализ устойчивости",
+                ],
+                "example_slug": "matrix_3x3",
+                "operation": "lu",
+                "icon": "math/lu",
+            },
+            {
+                "slug": "artificial-intelligence",
+                "title": "Искусственный интеллект",
+                "tagline": "Нейросети, эмбеддинги, обучение, трансформеры",
+                "description": (
+                    "Современный ИИ — это матрицы. Слой нейросети — "
+                    "умножение на матрицу весов. Внимание в трансформерах — "
+                    "матричное произведение Q·Kᵀ. Эмбеддинги слов — "
+                    "результат разложения матрицы контекстов. Без линейной "
+                    "алгебры ИИ не существует."
+                ),
+                "formula": "\\text{Attention}(Q,K,V) = \\text{softmax}\\!\\left(\\frac{Q K^{T}}{\\sqrt{d}}\\right) V",
+                "formula_note": "Механизм внимания — три матрицы и softmax.",
+                "uses": [
+                    "Слои нейросети (веса)",
+                    "Эмбеддинги (SVD, Word2Vec)",
+                    "Механизм внимания (Q, K, V)",
+                    "Метрики качества (матрица ошибок)",
+                ],
+                "example_slug": "image_filter",
+                "operation": "properties",
+                "icon": "ui/check-badge",
+            },
+        ],
+    },
+
+    # =========================================================================
+    # 4. ШКОЛА ИСКУССТВ
+    # =========================================================================
+    {
+        "slug": "arts",
+        "title": "Школа искусств",
+        "subtitle": "Дизайн, живопись, музыка — там, где гармония становится "
+                    "структурой.",
+        "icon": "schools/school-arts",
+        "accent": "rose",
+        "directions": [
+            {
+                "slug": "fashion-design",
+                "title": "Дизайн одежды",
+                "tagline": "Цветовые гармонии, паттерны, тренды",
+                "description": (
+                    "Дизайнер работает с матрицами цветовых сочетаний: "
+                    "какие цвета совместимы, какие — контрастируют. "
+                    "Матрица цветовых переходов в коллекции показывает "
+                    "её целостность; собственные значения — её "
+                    "«температуру»."
+                ),
+                "formula": "C_{ij} = \\text{совместимость}(c_i, c_j)",
+                "formula_note": "Матрица совместимости цветов коллекции.",
+                "uses": [
+                    "Матрица цветовых гармоний",
+                    "Анализ трендов (PCA)",
+                    "Кластеризация стилей",
+                    "Прогноз коллекций",
+                ],
+                "example_slug": "fashion_design",
+                "operation": "eigenvalues",
+                "icon": "math/lambda",
+            },
+            {
+                "slug": "painting",
+                "title": "Живопись",
+                "tagline": "Композиция, перспектива, анализ стиля",
+                "description": (
+                    "Композиция картины — это баланс масс и цветов. "
+                    "Матрица распределения цвета по полотну и её "
+                    "собственные значения показывают, где «центр "
+                    "тяжести» картины. Это инструмент анализа стиля "
+                    "и композиции."
+                ),
+                "formula": "M_{ij} = \\text{цвет в ячейке } (i, j)",
+                "formula_note": "Цветовая матрица изображения.",
+                "uses": [
+                    "Цветовая матрица картины",
+                    "Анализ композиции",
+                    "Стилометрия художника",
+                    "Восстановление и реставрация",
+                ],
+                "example_slug": "image_filter",
+                "operation": "eigenvalues",
+                "icon": "math/lambda",
+            },
+            {
+                "slug": "interior-design",
+                "title": "Дизайн интерьера",
+                "tagline": "Планировка, зонирование, оптимизация пространства",
+                "description": (
+                    "Планировка помещения — это задача оптимизации: "
+                    "разместить элементы так, чтобы связи между ними "
+                    "были удобны. Матрица «зона × зона» с весами "
+                    "близости — основа алгоритмов автоматической "
+                    "планировки."
+                ),
+                "formula": "S = W \\cdot D",
+                "formula_note": "Оценка планировки через взвешенные расстояния.",
+                "uses": [
+                    "Матрица «зона × зона»",
+                    "Оптимизация планировки",
+                    "Оценка освещённости",
+                    "Зонирование пространства",
+                ],
+                "example_slug": "teacher_grade",
+                "operation": "properties",
+                "icon": "ui/check-badge",
+            },
+        ],
+    },
+
+    # =========================================================================
+    # 5. ШКОЛА МЕДИЦИНЫ
+    # =========================================================================
+    {
+        "slug": "medicine",
+        "title": "Школа медицины",
+        "subtitle": "Диагностика, фармакокинетика, эпидемиология — там, где "
+                    "данные спасают жизни.",
+        "icon": "schools/school-medicine",
+        "accent": "cyan",
+        "directions": [
+            {
+                "slug": "general-medicine",
+                "title": "Лечебное дело",
+                "tagline": "Диагностика, симптомы, корреляции, прогноз",
+                "description": (
+                    "Диагностика — это матрица «симптом × диагноз»: "
+                    "какие симптомы чаще встречаются при какой болезни. "
+                    "Байесовский подход через матрицы условных вероятностей "
+                    "лежит в основе медицинских экспертных систем."
+                ),
+                "formula": "P(D \\mid S) = \\frac{P(S \\mid D) P(D)}{P(S)}",
+                "formula_note": "Байесовская диагностика через матрицу условных вероятностей.",
+                "uses": [
+                    "Матрица «симптом × диагноз»",
+                    "Байесовская диагностика",
+                    "Прогноз течения болезни",
+                    "Кластеризация пациентов",
+                ],
+                "example_slug": "medical_diagnostic",
+                "operation": "eigenvalues",
+                "icon": "math/lambda",
+            },
+            {
+                "slug": "dentistry",
+                "title": "Стоматология",
+                "tagline": "Топография зубов, окклюзия, биомеханика",
+                "description": (
+                    "Биомеханика зуба — это тензор напряжений в тканях. "
+                    "Матрица нагрузок и матрица упругости вместе дают "
+                    "распределение напряжений. Это основа ортодонтии и "
+                    "протезирования."
+                ),
+                "formula": "\\sigma = C \\cdot \\varepsilon",
+                "formula_note": "Матрица упругости тканей зуба.",
+                "uses": [
+                    "Матрица нагрузок на зуб",
+                    "Анализ окклюзии",
+                    "Планирование имплантата",
+                    "Моделирование челюсти",
+                ],
+                "example_slug": "stiffness",
+                "operation": "eigenvalues",
+                "icon": "math/lambda",
+            },
+            {
+                "slug": "pediatrics",
+                "title": "Педиатрия",
+                "tagline": "Развитие, нормы, диагностика по возрастам",
+                "description": (
+                    "Педиатрия — это работа с нормами развития: рост, вес, "
+                    "психомоторика. Матрица «ребёнок × показатель» с "
+                    "возрастными нормами позволяет строить перцентильные "
+                    "кривые и находить отклонения."
+                ),
+                "formula": "Z = \\frac{x - \\mu}{\\sigma}",
+                "formula_note": "Z-оценка через матрицу норм и отклонений.",
+                "uses": [
+                    "Матрица показателей развития",
+                    "Перцентильные кривые",
+                    "Скрининг отклонений",
+                    "Прогноз развития",
+                ],
+                "example_slug": "psychology_profile",
+                "operation": "properties",
+                "icon": "ui/check-badge",
+            },
+            {
+                "slug": "nursing",
+                "title": "Высшее сестринское дело",
+                "tagline": "Уход, мониторинг, планирование нагрузки",
+                "description": (
+                    "Сестринский процесс — это алгоритм с обратной связью. "
+                    "Матрица состояния пациента по показателям и матрица "
+                    "вмешательств позволяют оптимизировать план ухода "
+                    "и распределение времени медсестёр."
+                ),
+                "formula": "S_{t+1} = T \\cdot S_t",
+                "formula_note": "Марковская модель состояния пациента.",
+                "uses": [
+                    "Матрица состояния пациента",
+                    "Оптимизация нагрузки",
+                    "Мониторинг динамики",
+                    "Стандартизация протоколов",
+                ],
+                "example_slug": "markov_chain",
+                "operation": "properties",
+                "icon": "ui/check-badge",
+            },
+            {
+                "slug": "cosmetology",
+                "title": "Косметология",
+                "tagline": "Состояния кожи, уход, оценка процедур",
+                "description": (
+                    "Кожа проходит через состояния: норма, сухость, "
+                    "воспаление. Переходы между состояниями под "
+                    "воздействием процедур — это марковская цепь. "
+                    "Матрица переходов показывает долгосрочный эффект "
+                    "ухода и помогает строить персонализированные "
+                    "программы."
+                ),
+                "formula": "S_{t+1} = P \\cdot S_t",
+                "formula_note": "Марковская модель состояний кожи.",
+                "uses": [
+                    "Матрица состояний кожи",
+                    "Оценка эффективности процедур",
+                    "Персонализация программ",
+                    "Прогноз долгосрочного эффекта",
+                ],
+                "example_slug": "cosmetology_skin",
+                "operation": "eigenvalues",
+                "icon": "math/lambda",
+            },
+        ],
+    },
+]
+
+
+# =============================================================================
+# Пресеты для калькулятора на странице модулей
+# =============================================================================
+#
+# Каждый пресет — «человеческое» название операции для конкретной задачи.
+# При выборе пресета в калькуляторе меняется подсказка и иконка.
+#
+# ВАЖНО: на странице /modules/ нет поля для вектора b, поэтому
+# пресет solve_system здесь НЕ используется. Все пресеты ниже
+# работают с одной квадратной матрицей.
+
+MODULE_PRESETS: list[dict[str, Any]] = [
+    {
+        "code": "determinant",
+        "label": "Обратимость преобразования",
+        "subtitle": "det A ≠ 0 — можно вернуться назад",
+        "description": (
+            "Определитель показывает, во сколько раз преобразование "
+            "изменяет объём. Если он равен нулю — преобразование "
+            "необратимо: часть информации теряется. Это фундамент "
+            "любой задачи устойчивости."
+        ),
+        "icon": "math/determinant",
+    },
+    {
+        "code": "eigenvalues",
+        "label": "Собственные состояния",
+        "subtitle": "λ — устойчивые режимы системы",
+        "description": (
+            "Собственные значения показывают, какие направления "
+            "система сохраняет, а какие меняет. Это язык устойчивости, "
+            "резонанса и главных компонент — от вибраций моста до "
+            "факторов риска в портфеле."
+        ),
+        "icon": "math/lambda",
+    },
+    {
+        "code": "lu",
+        "label": "Разложение сложной задачи",
+        "subtitle": "A = L·U — пошаговое решение",
+        "description": (
+            "Сложную матрицу можно разложить на простые треугольные "
+            "множители. Тогда решение системы становится быстрым: "
+            "сначала прямой ход, потом обратный. Это основа "
+            "численных методов."
+        ),
+        "icon": "math/lu",
+    },
+    {
+        "code": "rank",
+        "label": "Размерность данных",
+        "subtitle": "rank A — сколько независимых измерений",
+        "description": (
+            "Ранг матрицы — это число независимых строк. В данных "
+            "он показывает, сколько скрытых факторов реально "
+            "управляет результатом. Низкий ранг — сигнал, что "
+            "данные избыточны."
+        ),
+        "icon": "math/rank",
+    },
+    {
+        "code": "inverse",
+        "label": "Обратное преобразование",
+        "subtitle": "A⁻¹ — вернуться к исходному состоянию",
+        "description": (
+            "Обратная матрица решает обратную задачу: если мы знаем "
+            "результат, что было на входе? Это нужно для "
+            "дешифровки, восстановления сигнала и калибровки "
+            "измерительных приборов."
+        ),
+        "icon": "math/inverse",
+    },
+    # --- ДОБАВЛЕНО: пресет для operation: "properties" ---
+    {
+        "code": "properties",
+        "label": "Полный анализ свойств",
+        "subtitle": "Все характеристики матрицы сразу",
+        "description": (
+            "Одна матрица — и сразу полный портрет: квадратная ли, "
+            "симметричная, ортогональная, вырожденная, "
+            "положительно определённая, идемпотентная. "
+            "Плюс определитель, ранг, след и собственные значения."
+        ),
+        "icon": "ui/check-badge",
+    },
+]
+
+
+def modules(request: HttpRequest) -> HttpResponse:
+    """Страница «Применение по направлениям».
+
+    Группируем направления по школам, передаём пресеты для
+    встроенного калькулятора и общие примеры.
+
+    Дополнительно передаём плоский список школ с направлениями
+    для бокового оглавления (школа → направления, как в теории).
+    """
+    return render(
+        request,
+        "matrix_app/modules.html",
+        {
+            "schools": MODULE_SCHOOLS,
+            "presets": MODULE_PRESETS,
+            "examples": EXAMPLES,
+            "total_directions": sum(
+                len(s["directions"]) for s in MODULE_SCHOOLS
+            ),
         },
     )
 
@@ -637,7 +2155,6 @@ def save_matrix(request: HttpRequest) -> JsonResponse:
     matrix = form.cleaned_data["matrix"]
     notes = form.cleaned_data.get("notes", "")
 
-    # Преобразуем в список строк — сохраняем точное представление.
     matrix_data = [
         [str(matrix[i, j]) for j in range(matrix.cols)]
         for i in range(matrix.rows)
@@ -694,10 +2211,7 @@ def about(request: HttpRequest) -> HttpResponse:
 @csrf_exempt
 @require_POST
 def telegram_webhook(request: HttpRequest, secret: str) -> HttpResponse:
-    """Принимает апдейты от Telegram.
-
-    Telegram сам стучится на этот URL, когда пользователь пишет боту.
-    """
+    """Принимает апдейты от Telegram."""
     if secret != settings.WEBHOOK_SECRET:
         logger.warning("Telegram webhook: неверный secret")
         return HttpResponseBadRequest("forbidden")
@@ -715,7 +2229,6 @@ def telegram_webhook(request: HttpRequest, secret: str) -> HttpResponse:
         process_update(data)
     except Exception:
         logger.exception("Ошибка обработки Telegram update")
-        # Возвращаем 200, чтобы Telegram не спамил повторами.
         return HttpResponse("error handled")
 
     return HttpResponse("ok")

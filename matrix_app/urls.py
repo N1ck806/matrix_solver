@@ -45,8 +45,15 @@ urlpatterns = [
     path("systems/", views.systems, name="systems"),
     path("decompositions/", views.decompositions, name="decompositions"),
     path("eigen/", views.eigen, name="eigen"),
+
+    # Обучение
     path("theory/", views.theory, name="theory"),
     path("types/", views.types, name="types"),
+
+    # Применение по направлениям (модули)
+    path("modules/", views.modules, name="modules"),
+
+    # Личное
     path("history/", views.history, name="history"),
     path("about/", views.about, name="about"),
 

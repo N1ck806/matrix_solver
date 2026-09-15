@@ -245,6 +245,15 @@
                         <span class="sidebar-link__label">Виды матриц</span>
                     </a>
                 </li>
+                <li>
+                    <a href="{% url 'matrix_app:modules' %}"
+                       class="sidebar-link {% if ACTIVE_PAGE == 'matrix_app:modules' %}is-active{% endif %}">
+                        <span class="sidebar-link__icon" aria-hidden="true">
+                            {% icon "modules" size=18 %}
+                        </span>
+                        <span class="sidebar-link__label">Применение</span>
+                    </a>
+                </li>
             </ul>
 
             <p class="sidebar-nav__group-title">Личное</p>
@@ -486,6 +495,7 @@
                     <ul>
                         <li><a href="{% url 'matrix_app:theory' %}"><span>Теория</span></a></li>
                         <li><a href="{% url 'matrix_app:types' %}"><span>Виды матриц</span></a></li>
+                        <li><a href="{% url 'matrix_app:modules' %}"><span>Применение</span></a></li>
                         <li><a href="{% url 'matrix_app:saved_matrices' %}"><span>Сохранённые</span></a></li>
                         <li><a href="{% url 'matrix_app:history' %}"><span>История</span></a></li>
                         <li><a href="{% url 'matrix_app:about' %}"><span>О проекте</span></a></li>

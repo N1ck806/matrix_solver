@@ -129,16 +129,19 @@ def cdn(request: HttpRequest) -> dict[str, Any]:  # noqa: ARG001
 # =============================================================================
 
 # Единый источник пунктов меню.
-# Используется в base.html (шапка, мобильное меню) и в футере.
+# Используется в base.html (шапка, мобильное меню, сайдбар) и в футере.
 #
 # Поля:
 #   url_name    — полное имя маршрута с namespace: 'matrix_app:calculator'
 #   label       — название пункта
 #   description — короткая подпись (мобильное меню, подсказки)
 #   icon        — идентификатор иконки для {% icon %}
-#   group       — логическая группа: 'tools' | 'learn'
+#   group       — логическая группа: 'tools' | 'learn' | 'personal'
+#
+# Порядок внутри группы — как в сайдбаре и мобильном меню.
 #
 NAV_ITEMS: Final[tuple[dict[str, str], ...]] = (
+    # --- Инструменты -------------------------------------------------------
     {
         "url_name": "matrix_app:calculator",
         "label": "Калькулятор",
@@ -150,50 +153,82 @@ NAV_ITEMS: Final[tuple[dict[str, str], ...]] = (
         "url_name": "matrix_app:operations",
         "label": "Операции",
         "description": "Сложение, умножение, степень",
-        "icon": "layers",
+        "icon": "operations",
         "group": "tools",
     },
     {
         "url_name": "matrix_app:properties",
         "label": "Свойства",
         "description": "Определитель, ранг, след",
-        "icon": "check-badge",
+        "icon": "properties",
         "group": "tools",
     },
     {
         "url_name": "matrix_app:systems",
         "label": "СЛАУ",
         "description": "Системы линейных уравнений",
-        "icon": "system",
+        "icon": "systems",
         "group": "tools",
     },
     {
         "url_name": "matrix_app:decompositions",
         "label": "Разложения",
         "description": "LU, QR, Холецкий",
-        "icon": "grid",
+        "icon": "decompositions",
         "group": "tools",
     },
     {
         "url_name": "matrix_app:eigen",
         "label": "Спектр",
         "description": "Собственные значения и векторы",
-        "icon": "lambda",
+        "icon": "eigen",
         "group": "tools",
     },
+
+    # --- Обучение ----------------------------------------------------------
     {
         "url_name": "matrix_app:theory",
         "label": "Теория",
         "description": "Линейная алгебра",
-        "icon": "book-open",
+        "icon": "theory",
         "group": "learn",
     },
     {
         "url_name": "matrix_app:types",
         "label": "Виды матриц",
         "description": "Классификация и примеры",
-        "icon": "matrix-grid",
+        "icon": "types",
         "group": "learn",
+    },
+    {
+        "url_name": "matrix_app:modules",
+        "label": "Применение",
+        "description": "Матрицы в реальных профессиях",
+        "icon": "modules",
+        "group": "learn",
+    },
+
+    # --- Личное ------------------------------------------------------------
+    {
+        "url_name": "matrix_app:saved_matrices",
+        "label": "Сохранённые",
+        "description": "Ваши матрицы",
+        "icon": "bookmark",
+        "group": "personal",
+    },
+    {
+        "url_name": "matrix_app:history",
+        "label": "История",
+        "description": "Последние вычисления",
+        "icon": "history",
+        "group": "personal",
+    },
+    {
+        "url_name": "matrix_app:about",
+        "label": "О проекте",
+        "description": "О MatrixLab",
+        "icon": "info",
+        "group": "personal",
     },
 )
 
@@ -203,7 +238,8 @@ def navigation(request: HttpRequest) -> dict[str, Any]:
     Пункты навигации, текущая активная страница и группа.
 
     ACTIVE_PAGE  — полное имя маршрута (например, 'matrix_app:calculator').
-    ACTIVE_GROUP — группа активного пункта ('tools' | 'learn'), либо ''.
+    ACTIVE_GROUP — группа активного пункта ('tools' | 'learn' | 'personal'),
+                   либо ''.
     """
     active: str = ""
     if request is not None and getattr(request, "resolver_match", None) is not None:
