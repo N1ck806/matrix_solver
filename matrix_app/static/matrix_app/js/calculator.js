@@ -1166,13 +1166,19 @@
 
         // =====================================================================
         // Кнопка «Вычислить»
+        //
+        // Кнопка ВСЕГДА активна. Состояние только меняет подсказку (title),
+        // чтобы пользователь понимал, чего не хватает.
         // =====================================================================
         function updateRunButtonState() {
             var matrix = firstMatrix.read();
             var empty = isEmptyMatrix(matrix);
             var invalid = firstMatrix.hasInvalid && firstMatrix.hasInvalid();
 
-            runBtn.disabled = empty || invalid;
+            // Принудительно разблокируем кнопку — она всегда кликабельна.
+            if (runBtn.disabled) runBtn.disabled = false;
+            runBtn.removeAttribute('disabled');
+            runBtn.setAttribute('aria-disabled', 'false');
 
             if (invalid) {
                 runBtn.title = ML.i18n.t('calculator.invalidValues',
@@ -1183,7 +1189,6 @@
             } else {
                 runBtn.title = ML.i18n.t('calculator.run', 'Выполнить');
             }
-            runBtn.setAttribute('aria-disabled', String(runBtn.disabled));
         }
 
         // =====================================================================
@@ -1197,16 +1202,8 @@
 
         // =====================================================================
         // Кнопки «Попробовать» в карточках направлений
-        //
-        // ПРАВКА: убран автозапуск runBtn.click(). Теперь клик
-        // «Попробовать» только:
-        //   1) ставит нужный пресет (подсветка + подсказка),
-        //   2) загружает пример в матрицу (если он есть),
-        //   3) скроллит к калькулятору.
-        // Пользователь сам нажимает «Вычислить».
         // =====================================================================
         var tryButtons = toArray(document.querySelectorAll('[data-modules-try]'));
-        console.debug('[modules] try-кнопок найдено:', tryButtons.length);
 
         tryButtons.forEach(function (btn) {
             btn.addEventListener('click', function (ev) {
@@ -1253,9 +1250,6 @@
 
         // =====================================================================
         // Размеры матрицы — поля «Строк / Столбцов»
-        //
-        // ПРАВКА: ищем [data-a-rows] / [data-a-cols], как в matrix.js.
-        // Если их нет — падаём на старые data-matrix-rows/data-matrix-cols.
         // =====================================================================
         var rowsInput = findOne(section, '[data-a-rows]')
             || findOne(section, '[data-matrix-rows]');
@@ -1272,7 +1266,7 @@
         if (colsInput) colsInput.addEventListener('change', onSizeChange);
 
         // =====================================================================
-        // Запуск
+        // Запуск — по клику
         // =====================================================================
         runBtn.addEventListener('click', async function () {
             if (firstMatrix.hasInvalid && firstMatrix.hasInvalid()) {
@@ -1284,11 +1278,19 @@
                 return;
             }
 
-            await runOperation(currentPreset, {
-                root: section,
-                resultBlock: resultBlock,
-                matrices: [firstMatrix]
-            });
+            try {
+                await runOperation(currentPreset, {
+                    root: section,
+                    resultBlock: resultBlock,
+                    matrices: [firstMatrix]
+                });
+            } catch (err) {
+                console.error('[modules] run error:', err);
+                ML.toast.error(
+                    ML.i18n.t('calculator.failed', 'Не удалось выполнить'),
+                    err && err.message ? err.message : ''
+                );
+            }
         });
 
         // =====================================================================
@@ -1313,8 +1315,50 @@
         setPreset(currentPreset);
         updateRunButtonState();
 
+        // ---------------------------------------------------------------------
+        // Страховки: кнопка не должна «зависать» в disabled,
+        // даже если matrix:change не приходит (fallback-ячейки и т.п.)
+        // ---------------------------------------------------------------------
         var updateDebounced = ML.debounce(updateRunButtonState, 80);
-        firstMatrix.el.addEventListener('matrix:change', updateDebounced);
+
+        if (firstMatrix && firstMatrix.el) {
+            firstMatrix.el.addEventListener('matrix:change', updateDebounced);
+
+            // Ловим нативные события в capture-фазе — на случай,
+            // если matrix.js не эмитит matrix:change.
+            firstMatrix.el.addEventListener('input',  updateDebounced, true);
+            firstMatrix.el.addEventListener('change', updateDebounced, true);
+            firstMatrix.el.addEventListener('keyup',  updateDebounced, true);
+
+            // MutationObserver — на случай, если ячейки перестраиваются
+            // программно (например, из примера/random).
+            if (typeof MutationObserver !== 'undefined') {
+                try {
+                    var mo = new MutationObserver(function () {
+                        updateDebounced();
+                    });
+                    mo.observe(firstMatrix.el, {
+                        childList: true,
+                        subtree: true,
+                        attributes: true,
+                        attributeFilter: ['data-value', 'class']
+                    });
+                } catch (e) { /* noop */ }
+            }
+        }
+
+        // Периодическая синхронизация состояния — раз в 400 мс.
+        // Дешёвая операция, но гарантирует, что кнопка не «залипнет».
+        var unlockTimer = setInterval(function () {
+            if (firstMatrix && typeof firstMatrix.read === 'function') {
+                updateRunButtonState();
+            }
+        }, 400);
+
+        // Останавливаем таймер при уходе со страницы.
+        window.addEventListener('beforeunload', function () {
+            if (unlockTimer) clearInterval(unlockTimer);
+        });
 
         // =====================================================================
         // Публичное
