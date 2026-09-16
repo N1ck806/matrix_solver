@@ -1,0 +1,86 @@
+{% extends "matrix_app/base.html" %}
+{% load static %}
+
+{% block title %}Страница не найдена — 404{% endblock %}
+
+{% block content %}
+
+<section class="error-page">
+    <div class="container error-page-inner">
+
+        <div class="error-page-code" aria-hidden="true">
+            <span class="error-page-digit">4</span>
+            <span class="error-page-digit error-page-digit--accent">0</span>
+            <span class="error-page-digit">4</span>
+        </div>
+
+        <div class="error-page-body">
+            <h1 class="error-page-title">Страница не найдена</h1>
+            <p class="error-page-message">
+                Запрашиваемая страница не существует или была перемещена.
+                Проверьте адрес или воспользуйтесь навигацией ниже.
+            </p>
+
+            <div class="error-page-links">
+                <h2 class="error-page-hints-title">Популярные разделы</h2>
+                <div class="error-page-links-grid">
+                    <a href="{% url 'matrix_app:calculator' %}" class="error-page-link">
+                        <span class="error-page-link-icon">Δ</span>
+                        <span class="error-page-link-text">
+                            <strong>Калькулятор</strong>
+                            <span>Определитель, ранг, обратная матрица</span>
+                        </span>
+                    </a>
+                    <a href="{% url 'matrix_app:systems' %}" class="error-page-link">
+                        <span class="error-page-link-icon">{</span>
+                        <span class="error-page-link-text">
+                            <strong>СЛАУ</strong>
+                            <span>Метод Гаусса, Крамера, Кронекер-Капелли</span>
+                        </span>
+                    </a>
+                    <a href="{% url 'matrix_app:eigen' %}" class="error-page-link">
+                        <span class="error-page-link-icon">λ</span>
+                        <span class="error-page-link-text">
+                            <strong>Спектр</strong>
+                            <span>Собственные значения и векторы</span>
+                        </span>
+                    </a>
+                    <a href="{% url 'matrix_app:decompositions' %}" class="error-page-link">
+                        <span class="error-page-link-icon">LU</span>
+                        <span class="error-page-link-text">
+                            <strong>Разложения</strong>
+                            <span>LU, QR, Холецкий, диагонализация</span>
+                        </span>
+                    </a>
+                    <a href="{% url 'matrix_app:properties' %}" class="error-page-link">
+                        <span class="error-page-link-icon">✓</span>
+                        <span class="error-page-link-text">
+                            <strong>Свойства</strong>
+                            <span>Полный анализ матрицы</span>
+                        </span>
+                    </a>
+                    <a href="{% url 'matrix_app:theory' %}" class="error-page-link">
+                        <span class="error-page-link-icon">§</span>
+                        <span class="error-page-link-text">
+                            <strong>Теория</strong>
+                            <span>Формулы, объяснения, примеры</span>
+                        </span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="error-page-actions">
+                <a href="{% url 'matrix_app:home' %}" class="btn btn-primary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                        <polyline points="9 22 9 12 15 12 15 22"/>
+                    </svg>
+                    На главную
+                </a>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+{% endblock %}

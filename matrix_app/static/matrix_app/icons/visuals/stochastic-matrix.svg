@@ -1,0 +1,252 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 560" fill="none"
+     role="img" aria-label="Стохастическая матрица и стационарное распределение">
+    <defs>
+        <linearGradient id="sm-bg" x1="0" y1="0" x2="800" y2="560" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#06B6D4" stop-opacity="0.06"/>
+            <stop offset="1" stop-color="#8B5CF6" stop-opacity="0.06"/>
+        </linearGradient>
+        <linearGradient id="sm-bar1" x1="0" y1="0" x2="0" y2="1">
+            <stop stop-color="#22D3EE"/>
+            <stop offset="1" stop-color="#0891B2"/>
+        </linearGradient>
+        <linearGradient id="sm-bar2" x1="0" y1="0" x2="0" y2="1">
+            <stop stop-color="#A78BFA"/>
+            <stop offset="1" stop-color="#7C3AED"/>
+        </linearGradient>
+        <linearGradient id="sm-bar3" x1="0" y1="0" x2="0" y2="1">
+            <stop stop-color="#F472B6"/>
+            <stop offset="1" stop-color="#EC4899"/>
+        </linearGradient>
+        <filter id="sm-glow" x="-40%" y="-40%" width="180%" height="180%">
+            <feGaussianBlur stdDeviation="4" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <marker id="sm-arrow" viewBox="0 0 10 10" refX="9" refY="5"
+                markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M0,0 L10,5 L0,10 Z" fill="#7C3AED"/>
+        </marker>
+    </defs>
+
+    <rect width="800" height="560" fill="url(#sm-bg)" rx="24"/>
+
+    <!-- Заголовок -->
+    <rect x="180" y="20" width="440" height="52" rx="26"
+          fill="#06B6D4" fill-opacity="0.10"
+          stroke="#06B6D4" stroke-opacity="0.4" stroke-width="1.5"/>
+    <text x="400" y="52" text-anchor="middle"
+          font-family="system-ui, -apple-system, sans-serif"
+          font-size="20" font-weight="800" fill="#0891B2">
+        Стохастическая матрица: π · P = π
+    </text>
+
+    <!-- ЛЕВАЯ ЧАСТЬ: матрица P -->
+    <g transform="translate(30, 100)">
+
+        <rect x="0" y="0" width="360" height="380" rx="14"
+              fill="#FFFFFF" fill-opacity="0.6"
+              stroke="#06B6D4" stroke-opacity="0.25" stroke-width="1.2"/>
+
+        <text x="180" y="24" text-anchor="middle"
+              font-family="system-ui, sans-serif"
+              font-size="12" font-weight="800" fill="#0891B2"
+              letter-spacing="1">МАТРИЦА ПЕРЕХОДОВ P (3 × 3)</text>
+
+        <!-- Заголовки столбцов -->
+        <g font-family="ui-monospace, monospace" font-size="11"
+           font-weight="800" fill="#6B7280" text-anchor="middle">
+            <text x="130" y="62">S₁</text>
+            <text x="205" y="62">S₂</text>
+            <text x="280" y="62">S₃</text>
+        </g>
+
+        <!-- Заголовки строк -->
+        <g font-family="ui-monospace, monospace" font-size="11"
+           font-weight="800" fill="#6B7280" text-anchor="end">
+            <text x="100" y="100">S₁</text>
+            <text x="100" y="160">S₂</text>
+            <text x="100" y="220">S₃</text>
+        </g>
+
+        <!-- Ячейки 3×3 -->
+        <g transform="translate(110, 75)">
+            <!-- Строка 1 -->
+            <rect x="0"  y="0" width="60" height="50" rx="8" fill="#0891B2" opacity="0.9"/>
+            <rect x="70" y="0" width="60" height="50" rx="8" fill="#0891B2" opacity="0.25"/>
+            <rect x="140" y="0" width="60" height="50" rx="8" fill="#0891B2" opacity="0.15"/>
+
+            <!-- Строка 2 -->
+            <rect x="0"  y="60" width="60" height="50" rx="8" fill="#7C3AED" opacity="0.25"/>
+            <rect x="70" y="60" width="60" height="50" rx="8" fill="#7C3AED" opacity="0.9"/>
+            <rect x="140" y="60" width="60" height="50" rx="8" fill="#7C3AED" opacity="0.3"/>
+
+            <!-- Строка 3 -->
+            <rect x="0"  y="120" width="60" height="50" rx="8" fill="#EC4899" opacity="0.15"/>
+            <rect x="70" y="120" width="60" height="50" rx="8" fill="#EC4899" opacity="0.3"/>
+            <rect x="140" y="120" width="60" height="50" rx="8" fill="#EC4899" opacity="0.95"/>
+
+            <!-- Значения -->
+            <g font-family="ui-monospace, monospace" font-size="14"
+               font-weight="800" text-anchor="middle" fill="#FFFFFF">
+                <text x="30" y="32">0.7</text>
+                <text x="100" y="32">0.2</text>
+                <text x="170" y="32">0.1</text>
+
+                <text x="30" y="92">0.2</text>
+                <text x="100" y="92">0.6</text>
+                <text x="170" y="92">0.2</text>
+
+                <text x="30" y="152">0.1</text>
+                <text x="100" y="152">0.2</text>
+                <text x="170" y="152">0.7</text>
+            </g>
+        </g>
+
+        <!-- Суммы строк = 1 -->
+        <g transform="translate(110, 245)">
+            <text x="0" y="14" font-family="system-ui, sans-serif"
+                  font-size="11" font-weight="700" fill="#0891B2">Σ:</text>
+            <g transform="translate(30, 0)">
+                <rect x="0"  y="0" width="60" height="20" rx="4" fill="#0891B2" opacity="0.15"
+                      stroke="#0891B2" stroke-opacity="0.5" stroke-width="1"/>
+                <text x="30" y="14" text-anchor="middle"
+                      font-family="ui-monospace, monospace" font-size="11"
+                      font-weight="800" fill="#0891B2">1.00</text>
+
+                <rect x="70" y="0" width="60" height="20" rx="4" fill="#7C3AED" opacity="0.15"
+                      stroke="#7C3AED" stroke-opacity="0.5" stroke-width="1"/>
+                <text x="100" y="14" text-anchor="middle"
+                      font-family="ui-monospace, monospace" font-size="11"
+                      font-weight="800" fill="#7C3AED">1.00</text>
+
+                <rect x="140" y="0" width="60" height="20" rx="4" fill="#EC4899" opacity="0.15"
+                      stroke="#EC4899" stroke-opacity="0.5" stroke-width="1"/>
+                <text x="170" y="14" text-anchor="middle"
+                      font-family="ui-monospace, monospace" font-size="11"
+                      font-weight="800" fill="#EC4899">1.00</text>
+            </g>
+        </g>
+
+        <!-- Пояснение -->
+        <g transform="translate(30, 285)">
+            <rect x="0" y="0" width="300" height="60" rx="10"
+                  fill="#7C3AED" fill-opacity="0.08"
+                  stroke="#7C3AED" stroke-opacity="0.4" stroke-width="1.2"/>
+
+            <text x="150" y="22" text-anchor="middle"
+                  font-family="system-ui, sans-serif"
+                  font-size="11" font-weight="800" fill="#7C3AED"
+                  letter-spacing="0.8">СВОЙСТВО МАТРИЦЫ</text>
+
+            <text x="150" y="44" text-anchor="middle"
+                  font-family="ui-monospace, monospace"
+                  font-size="14" font-weight="800" fill="#7C3AED">
+                P ≥ 0 · Σ P[i][j] = 1
+            </text>
+        </g>
+    </g>
+
+    <!-- СТРЕЛКА → -->
+    <g transform="translate(405, 290)">
+        <line x1="0" y1="0" x2="28" y2="0"
+              stroke="#7C3AED" stroke-width="3" stroke-linecap="round"/>
+        <polygon points="28,-6 42,0 28,6" fill="#7C3AED"/>
+    </g>
+
+    <!-- ПРАВАЯ ЧАСТЬ: стационарное распределение -->
+    <g transform="translate(460, 100)">
+
+        <rect x="0" y="0" width="310" height="380" rx="14"
+              fill="#FFFFFF" fill-opacity="0.6"
+              stroke="#06B6D4" stroke-opacity="0.25" stroke-width="1.2"/>
+
+        <text x="155" y="24" text-anchor="middle"
+              font-family="system-ui, sans-serif"
+              font-size="12" font-weight="800" fill="#0891B2"
+              letter-spacing="1">СТАЦИОНАРНОЕ РАСПРЕДЕЛЕНИЕ π</text>
+
+        <!-- Формула -->
+        <text x="155" y="56" text-anchor="middle"
+              font-family="ui-monospace, monospace"
+              font-size="16" font-weight="800" fill="#7C3AED">
+            π · P = π
+        </text>
+
+        <!-- График: 3 столбика π -->
+        <g transform="translate(30, 80)">
+            <!-- Оси -->
+            <line x1="0" y1="150" x2="250" y2="150"
+                  stroke="#94A3B8" stroke-width="1.2"/>
+            <line x1="0" y1="0" x2="0" y2="150"
+                  stroke="#94A3B8" stroke-width="1.2"/>
+
+            <!-- Столбик π₁ -->
+            <rect x="20" y="45" width="55" height="105" rx="5"
+                  fill="url(#sm-bar1)" filter="url(#sm-glow)"/>
+            <text x="47" y="140" text-anchor="middle"
+                  font-family="system-ui, sans-serif"
+                  font-size="11" font-weight="800" fill="#0891B2">π₁</text>
+            <text x="47" y="35" text-anchor="middle"
+                  font-family="ui-monospace, monospace"
+                  font-size="13" font-weight="800" fill="#0891B2">0.42</text>
+
+            <!-- Столбик π₂ -->
+            <rect x="100" y="30" width="55" height="120" rx="5"
+                  fill="url(#sm-bar2)" filter="url(#sm-glow)"/>
+            <text x="127" y="140" text-anchor="middle"
+                  font-family="system-ui, sans-serif"
+                  font-size="11" font-weight="800" fill="#7C3AED">π₂</text>
+            <text x="127" y="20" text-anchor="middle"
+                  font-family="ui-monospace, monospace"
+                  font-size="13" font-weight="800" fill="#7C3AED">0.34</text>
+
+            <!-- Столбик π₃ -->
+            <rect x="180" y="75" width="55" height="75" rx="5"
+                  fill="url(#sm-bar3)" filter="url(#sm-glow)"/>
+            <text x="207" y="140" text-anchor="middle"
+                  font-family="system-ui, sans-serif"
+                  font-size="11" font-weight="800" fill="#BE185D">π₃</text>
+            <text x="207" y="65" text-anchor="middle"
+                  font-family="ui-monospace, monospace"
+                  font-size="13" font-weight="800" fill="#BE185D">0.24</text>
+        </g>
+
+        <!-- Разделитель -->
+        <line x1="20" y1="250" x2="290" y2="250"
+              stroke="#06B6D4" stroke-opacity="0.25" stroke-width="1"
+              stroke-dasharray="3 3"/>
+
+        <!-- Что это значит -->
+        <text x="155" y="272" text-anchor="middle"
+              font-family="system-ui, sans-serif"
+              font-size="11" font-weight="800" fill="#0891B2"
+              letter-spacing="0.8">ДОЛГОСРОЧНАЯ ДОЛЯ</text>
+
+        <g font-family="system-ui, sans-serif" font-size="11" fill="#4B5563">
+            <g transform="translate(30, 290)">
+                <circle cx="6" cy="-3" r="5" fill="#0891B2"/>
+                <text x="20" y="0">S₁ — 42% времени</text>
+            </g>
+            <g transform="translate(30, 312)">
+                <circle cx="6" cy="-3" r="5" fill="#7C3AED"/>
+                <text x="20" y="0">S₂ — 34% времени</text>
+            </g>
+            <g transform="translate(30, 334)">
+                <circle cx="6" cy="-3" r="5" fill="#EC4899"/>
+                <text x="20" y="0">S₃ — 24% времени</text>
+            </g>
+        </g>
+    </g>
+
+    <!-- Нижняя плашка -->
+    <g transform="translate(30, 500)">
+        <rect x="0" y="0" width="740" height="40" rx="12"
+              fill="#FFFFFF" fill-opacity="0.9"
+              stroke="#06B6D4" stroke-opacity="0.3" stroke-width="1.2"/>
+
+        <text x="370" y="26" text-anchor="middle"
+              font-family="system-ui, sans-serif"
+              font-size="11" fill="#6B7280">
+            Стохастическая матрица: каждый столбец суммируется в 1. Собственный вектор для λ = 1 — стационарное распределение π.
+        </text>
+    </g>
+</svg>

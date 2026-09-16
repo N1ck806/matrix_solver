@@ -1,0 +1,50 @@
+{% extends "matrix_app/base.html" %}
+{% load static %}
+
+{% block title %}Доступ запрещён — 403{% endblock %}
+
+{% block content %}
+
+<section class="error-page">
+    <div class="container error-page-inner">
+
+        <div class="error-page-code" aria-hidden="true">
+            <span class="error-page-digit">4</span>
+            <span class="error-page-digit error-page-digit--accent">0</span>
+            <span class="error-page-digit">3</span>
+        </div>
+
+        <div class="error-page-body">
+            <h1 class="error-page-title">Доступ запрещён</h1>
+            <p class="error-page-message">
+                У вас нет прав на выполнение этого действия. Чаще всего
+                это связано с истёкшим CSRF-токеном сессии.
+            </p>
+
+            <div class="error-page-hints">
+                <h2 class="error-page-hints-title">Что можно сделать</h2>
+                <ul class="error-page-hints-list">
+                    <li>Обновите страницу — новый CSRF-токен будет выдан автоматически.</li>
+                    <li>Если вы вошли с другого устройства, попробуйте войти заново.</li>
+                    <li>Очистите cookies сайта, если ошибка повторяется.</li>
+                </ul>
+            </div>
+
+            <div class="error-page-actions">
+                <a href="{% url 'matrix_app:home' %}" class="btn btn-primary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                        <polyline points="9 22 9 12 15 12 15 22"/>
+                    </svg>
+                    На главную
+                </a>
+                <button type="button" class="btn btn-ghost" onclick="window.location.reload()">
+                    Обновить страницу
+                </button>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+{% endblock %}

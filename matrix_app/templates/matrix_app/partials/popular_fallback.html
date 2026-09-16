@@ -1,0 +1,91 @@
+{% load static matrix_icons %}
+
+<a href="{% url 'matrix_app:properties' %}"
+   class="bento__card bento__card--large">
+  <div class="bento__visual" aria-hidden="true">
+    <img src="{% static 'matrix_app/illustrations/popular/determinant.svg' %}"
+         alt=""
+         class="bento__scene-img"
+         width="560" height="480"
+         loading="lazy">
+  </div>
+  <div class="bento__body">
+    <div class="bento__title">Определитель</div>
+    <div class="bento__desc">det A — площадь, объём, обратимость</div>
+  </div>
+</a>
+
+<a href="{% url 'matrix_app:operations' %}"
+   class="bento__card bento__card--tall">
+  <div class="bento__visual" aria-hidden="true">
+    <img src="{% static 'matrix_app/illustrations/popular/inverse.svg' %}"
+         alt=""
+         class="bento__scene-img"
+         width="560" height="480"
+         loading="lazy">
+  </div>
+  <div class="bento__body">
+    <div class="bento__title">Обратная</div>
+    <div class="bento__desc">A · A⁻¹ = I</div>
+  </div>
+</a>
+
+<a href="{% url 'matrix_app:properties' %}"
+   class="bento__card">
+  <div class="bento__visual" aria-hidden="true">
+    <img src="{% static 'matrix_app/illustrations/popular/rank.svg' %}"
+         alt=""
+         class="bento__scene-img"
+         width="560" height="480"
+         loading="lazy">
+  </div>
+  <div class="bento__body">
+    <div class="bento__title">Ранг</div>
+    <div class="bento__desc">размерность образа</div>
+  </div>
+</a>
+
+<a href="{% url 'matrix_app:systems' %}"
+   class="bento__card">
+  <div class="bento__visual" aria-hidden="true">
+    <img src="{% static 'matrix_app/illustrations/popular/systems.svg' %}"
+         alt=""
+         class="bento__scene-img"
+         width="560" height="480"
+         loading="lazy">
+  </div>
+  <div class="bento__body">
+    <div class="bento__title">СЛАУ</div>
+    <div class="bento__desc">Ax = b</div>
+  </div>
+</a>
+
+<a href="{% url 'matrix_app:eigen' %}"
+   class="bento__card bento__card--wide">
+  <div class="bento__visual" aria-hidden="true">
+    <img src="{% static 'matrix_app/illustrations/popular/eigen.svg' %}"
+         alt=""
+         class="bento__scene-img"
+         width="560" height="480"
+         loading="lazy">
+  </div>
+  <div class="bento__body">
+    <div class="bento__title">Собственные значения</div>
+    <div class="bento__desc">λ и v — оси, которые не меняются</div>
+  </div>
+</a>
+
+<a href="{% url 'matrix_app:decompositions' %}"
+   class="bento__card bento__card--wide">
+  <div class="bento__visual" aria-hidden="true">
+    <img src="{% static 'matrix_app/illustrations/popular/decompositions.svg' %}"
+         alt=""
+         class="bento__scene-img"
+         width="560" height="480"
+         loading="lazy">
+  </div>
+  <div class="bento__body">
+    <div class="bento__title">LU-разложение</div>
+    <div class="bento__desc">A = L · U</div>
+  </div>
+</a>

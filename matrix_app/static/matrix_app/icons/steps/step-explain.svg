@@ -1,0 +1,371 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 280" fill="none"
+     role="img" aria-label="Пошаговое решение"
+     class="ml-step ml-step--explain"
+     preserveAspectRatio="xMidYMid meet"
+     font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">
+
+  <defs>
+
+    <!-- ЯДРО: сиренево-фиолетовое -->
+    <radialGradient id="se-neon" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"    stop-color="#FFFFFF" stop-opacity="1"/>
+      <stop offset="0.2"  stop-color="#DDD6FE" stop-opacity="0.95"/>
+      <stop offset="0.45" stop-color="#A78BFA" stop-opacity="0.8"/>
+      <stop offset="0.75" stop-color="#8B5CF6" stop-opacity="0.5"/>
+      <stop offset="1"    stop-color="#4C1D95" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="se-glass" cx="0.4" cy="0.32" r="0.72">
+      <stop offset="0"    stop-color="#FFFFFF" stop-opacity="0.35"/>
+      <stop offset="0.4"  stop-color="#E9D5FF" stop-opacity="0.18"/>
+      <stop offset="0.75" stop-color="#8B5CF6" stop-opacity="0.22"/>
+      <stop offset="1"    stop-color="#4C1D95" stop-opacity="0.4"/>
+    </radialGradient>
+
+    <radialGradient id="se-fresnel" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"    stop-color="#FFFFFF" stop-opacity="0"/>
+      <stop offset="0.78" stop-color="#FFFFFF" stop-opacity="0.05"/>
+      <stop offset="0.93" stop-color="#DDD6FE" stop-opacity="0.5"/>
+      <stop offset="1"    stop-color="#FFFFFF" stop-opacity="0.85"/>
+    </radialGradient>
+
+    <radialGradient id="se-key" cx="0.28" cy="0.18" r="0.42">
+      <stop offset="0"   stop-color="#FFFFFF" stop-opacity="0.95"/>
+      <stop offset="0.4" stop-color="#FFFFFF" stop-opacity="0.22"/>
+      <stop offset="1"   stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="se-fill" cx="0.75" cy="0.85" r="0.55">
+      <stop offset="0" stop-color="#DDD6FE" stop-opacity="0.4"/>
+      <stop offset="1" stop-color="#DDD6FE" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="se-rim" x1="0" y1="0" x2="0.7" y2="1">
+      <stop offset="0"    stop-color="#F0ABFC" stop-opacity="0"/>
+      <stop offset="0.55" stop-color="#F0ABFC" stop-opacity="0.5"/>
+      <stop offset="1"    stop-color="#E879F9" stop-opacity="0"/>
+    </linearGradient>
+
+    <radialGradient id="se-bounce" cx="0.5" cy="1" r="0.6">
+      <stop offset="0" stop-color="#8B5CF6" stop-opacity="0.26"/>
+      <stop offset="1" stop-color="#8B5CF6" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- ОРБИТЫ -->
+    <linearGradient id="se-orbit-1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0"   stop-color="#C4B5FD" stop-opacity="0.95"/>
+      <stop offset="0.5" stop-color="#A78BFA" stop-opacity="0.85"/>
+      <stop offset="1"   stop-color="#7C3AED" stop-opacity="0.9"/>
+    </linearGradient>
+
+    <linearGradient id="se-orbit-2" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0"   stop-color="#F0ABFC" stop-opacity="0.8"/>
+      <stop offset="0.5" stop-color="#D946EF" stop-opacity="0.7"/>
+      <stop offset="1"   stop-color="#A855F7" stop-opacity="0.8"/>
+    </linearGradient>
+
+    <!-- КАРТОЧКИ-СЛОИ -->
+    <linearGradient id="se-card-1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#DDD6FE" stop-opacity="0.75"/>
+    </linearGradient>
+
+    <linearGradient id="se-card-2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.7"/>
+      <stop offset="1" stop-color="#C4B5FD" stop-opacity="0.55"/>
+    </linearGradient>
+
+    <linearGradient id="se-card-3" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#A78BFA" stop-opacity="0.4"/>
+    </linearGradient>
+
+    <!-- ЧАСТИЦЫ -->
+    <radialGradient id="se-spark-white" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"   stop-color="#FFFFFF"/>
+      <stop offset="0.4" stop-color="#DDD6FE"/>
+      <stop offset="1"   stop-color="#8B5CF6" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="se-spark-cyan" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"   stop-color="#FFFFFF"/>
+      <stop offset="0.4" stop-color="#A5F3FC"/>
+      <stop offset="1"   stop-color="#06B6D4" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="se-spark-pink" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"   stop-color="#FFFFFF"/>
+      <stop offset="0.4" stop-color="#FBCFE8"/>
+      <stop offset="1"   stop-color="#EC4899" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="se-spark-warm" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"   stop-color="#FFFFFF"/>
+      <stop offset="0.4" stop-color="#FDE68A"/>
+      <stop offset="1"   stop-color="#F59E0B" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- ФИЛЬТРЫ -->
+    <filter id="se-bloom-sm" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1.4"/>
+    </filter>
+    <filter id="se-bloom-md" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3"/>
+    </filter>
+    <filter id="se-bloom-lg" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6.5"/>
+    </filter>
+    <filter id="se-shadow-floor" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="9"/>
+    </filter>
+    <filter id="se-core-shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="5"/>
+      <feOffset dx="0" dy="5"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.42"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <clipPath id="se-core-clip">
+      <circle cx="140" cy="140" r="52"/>
+    </clipPath>
+
+  </defs>
+
+  <!-- ================================================================
+       ФОН: ореол
+       ================================================================ -->
+  <circle cx="140" cy="140" r="120"
+          fill="url(#se-neon)" opacity="0.1">
+    <animate attributeName="r" values="120;126;120" dur="8s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- ================================================================
+       ТЕНЬ НА ПОЛ
+       ================================================================ -->
+  <ellipse cx="140" cy="234" rx="72" ry="9"
+           fill="#4C1D95" opacity="0.22"
+           filter="url(#se-shadow-floor)">
+    <animate attributeName="rx" values="72;78;72" dur="7s" repeatCount="indefinite"/>
+  </ellipse>
+
+  <!-- ================================================================
+       ДВЕ ОРБИТЫ
+       ================================================================ -->
+
+  <!-- 1. Дальняя (медленная) -->
+  <g transform="translate(140 138)">
+    <g>
+      <animateTransform attributeName="transform" type="rotate"
+                        from="0 0 0" to="360 0 0" dur="38s" repeatCount="indefinite"/>
+      <ellipse cx="0" cy="0" rx="116" ry="25"
+               fill="none" stroke="url(#se-orbit-1)"
+               stroke-width="1.5" opacity="0.75"
+               transform="rotate(-22)"/>
+      <ellipse cx="0" cy="0" rx="116" ry="25"
+               fill="none" stroke="#8B5CF6" stroke-width="4"
+               opacity="0.12" filter="url(#se-bloom-md)"
+               transform="rotate(-22)"/>
+      <g transform="rotate(-22)">
+        <circle cx="116" cy="0" r="3"
+                fill="url(#se-spark-white)" filter="url(#se-bloom-sm)">
+          <animate attributeName="r" values="3;4;3" dur="2.6s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="116" cy="0" r="1.4" fill="#FFFFFF"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- 2. Ближняя (розовая, обратное вращение) -->
+  <g transform="translate(140 138)">
+    <g>
+      <animateTransform attributeName="transform" type="rotate"
+                        from="360 0 0" to="0 0 0" dur="28s" repeatCount="indefinite"/>
+      <ellipse cx="0" cy="0" rx="96" ry="21"
+               fill="none" stroke="url(#se-orbit-2)"
+               stroke-width="1.5" opacity="0.8"
+               transform="rotate(32)"/>
+      <ellipse cx="0" cy="0" rx="96" ry="21"
+               fill="none" stroke="#D946EF" stroke-width="4"
+               opacity="0.14" filter="url(#se-bloom-md)"
+               transform="rotate(32)"/>
+      <g transform="rotate(32)">
+        <circle cx="-96" cy="0" r="3"
+                fill="url(#se-spark-pink)" filter="url(#se-bloom-sm)">
+          <animate attributeName="r" values="3;4;3" dur="2.4s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="-96" cy="0" r="1.4" fill="#FFFFFF"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- ================================================================
+       ЛУЧ ВХОДА (слева)
+       ================================================================ -->
+  <g opacity="0.75">
+    <path d="M18 138 L86 138"
+          stroke="#22D3EE" stroke-width="1.4"
+          stroke-linecap="round" stroke-dasharray="3 4"
+          opacity="0.6"/>
+    <circle cx="18" cy="138" r="2.6"
+            fill="url(#se-spark-cyan)" filter="url(#se-bloom-sm)">
+      <animate attributeName="opacity" values="1;0.4;1" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="18" cy="138" r="1.2" fill="#FFFFFF"/>
+  </g>
+
+  <!-- ================================================================
+       ЛУЧ ВЫХОДА (справа, тонкий, к result)
+       ================================================================ -->
+  <g opacity="0.7">
+    <path d="M194 138 L262 138"
+          stroke="#A855F7" stroke-width="1.2"
+          stroke-linecap="round" stroke-dasharray="3 4"
+          opacity="0.6"/>
+    <circle cx="262" cy="138" r="2.4"
+            fill="url(#se-spark-white)" filter="url(#se-bloom-sm)">
+      <animate attributeName="opacity" values="1;0.4;1" dur="2s" begin="1s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="262" cy="138" r="1.1" fill="#FFFFFF"/>
+  </g>
+
+  <!-- ================================================================
+       ЯДРО: стеклянная сфера со стопкой карточек-шагов
+       ================================================================ -->
+  <g filter="url(#se-core-shadow)">
+
+    <!-- Ореол -->
+    <circle cx="140" cy="140" r="70"
+            fill="url(#se-neon)" opacity="0.3"
+            filter="url(#se-bloom-lg)">
+      <animate attributeName="r" values="70;76;70" dur="5s" repeatCount="indefinite"/>
+    </circle>
+
+    <circle cx="140" cy="140" r="52" fill="url(#se-glass)"/>
+    <circle cx="140" cy="140" r="52" fill="url(#se-neon)" opacity="0.82"/>
+    <circle cx="140" cy="140" r="52" fill="url(#se-fresnel)"/>
+
+    <!-- Внутренний пульс -->
+    <circle cx="140" cy="140" r="24"
+            fill="url(#se-neon)" opacity="0.85">
+      <animate attributeName="r" values="24;28;24" dur="4.6s" repeatCount="indefinite"/>
+    </circle>
+
+    <!-- ============================================================
+         СТОПКА КАРТОЧЕК-СЛОЁВ
+         ============================================================ -->
+    <g clip-path="url(#se-core-clip)">
+
+      <!-- Карточка 3 (задняя, самая тусклая) -->
+      <rect x="108" y="106" width="60" height="40" rx="8"
+            fill="url(#se-card-3)"
+            stroke="#FFFFFF" stroke-opacity="0.3" stroke-width="0.8"
+            transform="rotate(-8 138 126)"/>
+      <g transform="rotate(-8 138 126)" opacity="0.35">
+        <path d="M114 116 H160 M114 122 H160 M114 128 H156 M114 134 H160 M114 140 H154"
+              stroke="#FFFFFF" stroke-width="0.7"/>
+      </g>
+
+      <!-- Карточка 2 (средняя) -->
+      <rect x="110" y="112" width="60" height="40" rx="8"
+            fill="url(#se-card-2)"
+            stroke="#FFFFFF" stroke-opacity="0.45" stroke-width="0.8"
+            transform="rotate(-4 140 132)"/>
+      <g transform="rotate(-4 140 132)" opacity="0.55">
+        <path d="M116 122 H162 M116 128 H162 M116 134 H158 M116 140 H162 M116 146 H156"
+              stroke="#FFFFFF" stroke-width="0.7"/>
+      </g>
+
+      <!-- Карточка 1 (передняя, активная) -->
+      <rect x="112" y="118" width="60" height="40" rx="8"
+            fill="url(#se-card-1)"
+            stroke="#FFFFFF" stroke-opacity="0.95" stroke-width="1.1"/>
+      <g opacity="0.85">
+        <path d="M118 128 H166 M118 134 H166 M118 140 H162 M118 146 H166 M118 152 H160"
+              stroke="#FFFFFF" stroke-width="0.8"/>
+      </g>
+
+      <!-- Маркер-точка на активном шаге -->
+      <circle cx="165" cy="125" r="2.2" fill="#FFFFFF">
+        <animate attributeName="r" values="2.2;3;2.2" dur="1.8s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="1;0.55;1" dur="1.8s" repeatCount="indefinite"/>
+      </circle>
+
+      <!-- Верхний светлый край для объёма -->
+      <path d="M114 120 H170"
+            stroke="#FFFFFF" stroke-opacity="0.9" stroke-width="0.7"/>
+    </g>
+
+    <!-- Key light -->
+    <ellipse cx="120" cy="120" rx="18" ry="12"
+             fill="url(#se-key)" transform="rotate(-24 120 120)"/>
+    <ellipse cx="116" cy="116" rx="5" ry="3.2"
+             fill="#FFFFFF" opacity="0.9"
+             transform="rotate(-28 116 116)"/>
+
+    <!-- Fill -->
+    <ellipse cx="164" cy="172" rx="22" ry="14"
+             fill="url(#se-fill)" transform="rotate(-20 164 172)"/>
+
+    <!-- Rim -->
+    <path d="M188 128 A52 52 0 0 1 170 182"
+          fill="none" stroke="url(#se-rim)" stroke-width="1.8"
+          stroke-linecap="round" opacity="0.8"/>
+
+    <!-- Bounce -->
+    <ellipse cx="140" cy="186" rx="34" ry="10"
+             fill="url(#se-bounce)"/>
+
+    <circle cx="140" cy="140" r="52" fill="none"
+            stroke="#FFFFFF" stroke-opacity="0.3" stroke-width="0.8"/>
+  </g>
+
+  <!-- ================================================================
+       ПУНКТИРНЫЕ СВЯЗИ вокруг ядра (как формулы, вытекающие одна из другой)
+       ================================================================ -->
+  <g stroke="#C4B5FD" stroke-width="0.9" stroke-linecap="round"
+     opacity="0.55" stroke-dasharray="2 4" fill="none">
+    <path d="M76 96 Q140 60 204 96"/>
+    <path d="M76 184 Q140 220 204 184"/>
+  </g>
+
+  <!-- ================================================================
+       ТРИ СПУТНИКА-ТОЧКИ вокруг ядра (вне орбит)
+       ================================================================ -->
+  <circle cx="76" cy="96" r="3.2"
+          fill="url(#se-spark-pink)" filter="url(#se-bloom-sm)">
+    <animate attributeName="r" values="3.2;4.2;3.2" dur="3s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="1;0.6;1" dur="3s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="76" cy="96" r="1.5" fill="#FFFFFF"/>
+
+  <circle cx="204" cy="96" r="3.2"
+          fill="url(#se-spark-cyan)" filter="url(#se-bloom-sm)">
+    <animate attributeName="r" values="3.2;4.2;3.2" dur="3s" begin="1s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="1;0.6;1" dur="3s" begin="1s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="204" cy="96" r="1.5" fill="#FFFFFF"/>
+
+  <circle cx="204" cy="184" r="3.2"
+          fill="url(#se-spark-warm)" filter="url(#se-bloom-sm)">
+    <animate attributeName="r" values="3.2;4.2;3.2" dur="3s" begin="2s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="1;0.6;1" dur="3s" begin="2s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="204" cy="184" r="1.5" fill="#FFFFFF"/>
+
+  <!-- ================================================================
+       ЧАСТИЦЫ
+       ================================================================ -->
+  <circle cx="38" cy="46" r="1.8" fill="url(#se-spark-cyan)" filter="url(#se-bloom-sm)">
+    <animate attributeName="opacity" values="1;0.4;1" dur="5s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="244" cy="44" r="2" fill="url(#se-spark-pink)" filter="url(#se-bloom-sm)">
+    <animate attributeName="opacity" values="0.9;0.3;0.9" dur="6s" begin="0.6s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="40" cy="238" r="1.8" fill="url(#se-spark-warm)" filter="url(#se-bloom-sm)">
+    <animate attributeName="cy" values="238;232;238" dur="6.5s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="246" cy="234" r="2.2" fill="url(#se-spark-white)" filter="url(#se-bloom-sm)">
+    <animate attributeName="opacity" values="0.9;0.35;0.9" dur="5.6s" begin="1.2s" repeatCount="indefinite"/>
+  </circle>
+
+</svg>

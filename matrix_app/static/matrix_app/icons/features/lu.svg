@@ -1,0 +1,179 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" fill="none"
+     role="img" aria-label="LU-разложение"
+     class="ml-feature-svg ml-feature-svg--lu"
+     preserveAspectRatio="xMidYMid meet"
+     font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">
+
+  <defs>
+    <radialGradient id="lu-core" cx="0.38" cy="0.32" r="0.78">
+      <stop offset="0" stop-color="#FBCFE8">
+        <animate attributeName="stop-color"
+                 values="#FBCFE8;#F9A8D4;#EC4899;#FBCFE8"
+                 dur="14s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="0.45" stop-color="#EC4899">
+        <animate attributeName="stop-color"
+                 values="#EC4899;#DB2777;#BE185D;#EC4899"
+                 dur="14s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="1" stop-color="#831843"/>
+    </radialGradient>
+
+    <radialGradient id="lu-glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"    stop-color="#FFFFFF" stop-opacity="1"/>
+      <stop offset="0.35" stop-color="#FCE7F3" stop-opacity="0.7"/>
+      <stop offset="0.7"  stop-color="#F9A8D4" stop-opacity="0.3"/>
+      <stop offset="1"    stop-color="#DB2777" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="lu-hl" cx="0.34" cy="0.24" r="0.72">
+      <stop offset="0"   stop-color="#FFFFFF" stop-opacity="0.95"/>
+      <stop offset="0.4" stop-color="#FFFFFF" stop-opacity="0.18"/>
+      <stop offset="1"   stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="lu-orbit" x1="0" y1="0" x2="96" y2="96"
+                    gradientUnits="userSpaceOnUse">
+      <stop offset="0"   stop-color="#FBCFE8"/>
+      <stop offset="0.5" stop-color="#EC4899"/>
+      <stop offset="1"   stop-color="#BE185D"/>
+    </linearGradient>
+
+    <linearGradient id="lu-orbit-2" x1="96" y1="0" x2="0" y2="96"
+                    gradientUnits="userSpaceOnUse">
+      <stop offset="0"   stop-color="#A5F3FC"/>
+      <stop offset="1"   stop-color="#EC4899"/>
+    </linearGradient>
+
+    <linearGradient id="lu-text" x1="0" y1="0" x2="96" y2="0"
+                    gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#BE185D">
+        <animate attributeName="stop-color"
+                 values="#BE185D;#EC4899;#F9A8D4;#BE185D"
+                 dur="8s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="1" stop-color="#EC4899">
+        <animate attributeName="stop-color"
+                 values="#EC4899;#F9A8D4;#FBCFE8;#EC4899"
+                 dur="8s" repeatCount="indefinite"/>
+      </stop>
+    </linearGradient>
+
+    <radialGradient id="lu-spark" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"   stop-color="#FFFFFF"/>
+      <stop offset="0.4" stop-color="#FBCFE8"/>
+      <stop offset="1"   stop-color="#EC4899" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="lu-spark-cool" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"   stop-color="#FFFFFF"/>
+      <stop offset="0.4" stop-color="#A5F3FC"/>
+      <stop offset="1"   stop-color="#06B6D4" stop-opacity="0"/>
+    </radialGradient>
+
+    <filter id="lu-spark-glow" x="-400%" y="-400%" width="900%" height="900%">
+      <feGaussianBlur stdDeviation="1.8"/>
+    </filter>
+    <filter id="lu-core-shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2.2"/>
+      <feOffset dx="0" dy="1.6"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.38"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="lu-orbit-glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1"/>
+    </filter>
+
+    <clipPath id="lu-core-clip">
+      <circle cx="48" cy="46" r="13"/>
+    </clipPath>
+  </defs>
+
+  <circle cx="48" cy="48" r="46" fill="url(#lu-glow)" opacity="0.16">
+    <animate attributeName="r" values="46;48;46" dur="6s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.16;0.22;0.16" dur="6s" repeatCount="indefinite"/>
+  </circle>
+
+  <g transform="translate(48 46)">
+    <g>
+      <animateTransform attributeName="transform" type="rotate"
+                        from="0 0 0" to="360 0 0" dur="24s" repeatCount="indefinite"/>
+      <ellipse cx="0" cy="0" rx="32" ry="9.5"
+               fill="none" stroke="url(#lu-orbit)"
+               stroke-width="1.5" opacity="0.85"
+               transform="rotate(-28)"/>
+      <ellipse cx="0" cy="0" rx="32" ry="9.5"
+               fill="none" stroke="#EC4899" stroke-width="3.2"
+               opacity="0.14" filter="url(#lu-orbit-glow)"
+               transform="rotate(-28)"/>
+      <g transform="rotate(-28)">
+        <circle cx="32" cy="0" r="2.4"
+                fill="url(#lu-spark)" filter="url(#lu-spark-glow)">
+          <animate attributeName="r" values="2.4;3;2.4" dur="2.4s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="32" cy="0" r="1.05" fill="#FFFFFF"/>
+      </g>
+    </g>
+
+    <g>
+      <animateTransform attributeName="transform" type="rotate"
+                        from="360 0 0" to="0 0 0" dur="34s" repeatCount="indefinite"/>
+      <ellipse cx="0" cy="0" rx="30" ry="8"
+               fill="none" stroke="url(#lu-orbit-2)"
+               stroke-width="0.9" opacity="0.55"
+               transform="rotate(38)"/>
+      <g transform="rotate(38)">
+        <circle cx="-30" cy="0" r="1.4"
+                fill="url(#lu-spark-cool)" filter="url(#lu-spark-glow)">
+          <animate attributeName="r" values="1.4;1.9;1.4" dur="3s" repeatCount="indefinite"/>
+        </circle>
+      </g>
+    </g>
+  </g>
+
+  <g filter="url(#lu-core-shadow)">
+    <circle cx="48" cy="46" r="17.5" fill="url(#lu-glow)" opacity="0.5">
+      <animate attributeName="r" values="17.5;19.5;17.5" dur="5s" repeatCount="indefinite"/>
+    </circle>
+
+    <circle cx="48" cy="46" r="13" fill="url(#lu-core)"/>
+    <circle cx="48" cy="46" r="13" fill="url(#lu-hl)"/>
+    <circle cx="48" cy="46" r="12.5" fill="none"
+            stroke="#FFFFFF" stroke-opacity="0.4" stroke-width="0.7"/>
+
+    <g clip-path="url(#lu-core-clip)">
+      <!-- L (нижняя треугольная) -->
+      <path d="M41 40 h4.2 v4.2 h-4.2 Z" fill="#831843" fill-opacity="0.95"/>
+      <path d="M41 44.6 h4.2 v4.2 h-4.2 Z" fill="#831843" fill-opacity="0.95"/>
+      <path d="M45.6 44.6 h4.2 v4.2 h-4.2 Z" fill="#831843" fill-opacity="0.95"/>
+      <!-- пустые позиции сверху справа -->
+      <path d="M45.6 40 h4.2 v4.2 h-4.2 Z" fill="#831843" fill-opacity="0.15"/>
+
+      <!-- знак = -->
+      <path d="M51.5 43.5 h2 M51.5 46.5 h2"
+            stroke="#831843" stroke-opacity="0.75" stroke-width="0.9"
+            stroke-linecap="round"/>
+    </g>
+
+    <circle cx="48" cy="46" r="2.4" fill="url(#lu-glow)" opacity="0.85">
+      <animate attributeName="r" values="2.4;3.2;2.4" dur="3.6s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <circle cx="14" cy="14" r="1.3" fill="url(#lu-spark-cool)" filter="url(#lu-spark-glow)">
+    <animate attributeName="opacity" values="1;0.4;1" dur="4s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="82" cy="18" r="1.4" fill="url(#lu-spark)" filter="url(#lu-spark-glow)">
+    <animate attributeName="opacity" values="0.9;0.3;0.9" dur="5s" begin="0.8s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="84" cy="80" r="1.2" fill="url(#lu-spark-cool)" filter="url(#lu-spark-glow)">
+    <animate attributeName="opacity" values="1;0.4;1" dur="4.5s" begin="1.2s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="12" cy="82" r="1" fill="url(#lu-spark)" filter="url(#lu-spark-glow)">
+    <animate attributeName="opacity" values="0.7;0.2;0.7" dur="3.5s" begin="0.4s" repeatCount="indefinite"/>
+  </circle>
+
+  <text x="48" y="86" font-size="8" font-weight="700"
+        letter-spacing="0.06em" text-anchor="middle"
+        fill="url(#lu-text)">A = L · U</text>
+</svg>

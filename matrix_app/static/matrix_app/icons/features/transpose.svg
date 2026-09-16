@@ -1,0 +1,191 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" fill="none"
+     role="img" aria-label="Транспонирование"
+     class="ml-feature-svg ml-feature-svg--transpose"
+     preserveAspectRatio="xMidYMid meet"
+     font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">
+
+  <defs>
+    <radialGradient id="trn-core" cx="0.38" cy="0.32" r="0.78">
+      <stop offset="0" stop-color="#6EE7B7">
+        <animate attributeName="stop-color"
+                 values="#6EE7B7;#34D399;#10B981;#6EE7B7"
+                 dur="14s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="0.45" stop-color="#10B981">
+        <animate attributeName="stop-color"
+                 values="#10B981;#059669;#047857;#10B981"
+                 dur="14s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="1" stop-color="#064E3B"/>
+    </radialGradient>
+
+    <radialGradient id="trn-glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"    stop-color="#FFFFFF" stop-opacity="1"/>
+      <stop offset="0.35" stop-color="#A7F3D0" stop-opacity="0.7"/>
+      <stop offset="0.7"  stop-color="#10B981" stop-opacity="0.3"/>
+      <stop offset="1"    stop-color="#059669" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="trn-hl" cx="0.34" cy="0.24" r="0.72">
+      <stop offset="0"   stop-color="#FFFFFF" stop-opacity="0.95"/>
+      <stop offset="0.4" stop-color="#FFFFFF" stop-opacity="0.18"/>
+      <stop offset="1"   stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="trn-orbit" x1="0" y1="0" x2="96" y2="96"
+                    gradientUnits="userSpaceOnUse">
+      <stop offset="0"   stop-color="#6EE7B7"/>
+      <stop offset="0.5" stop-color="#10B981"/>
+      <stop offset="1"   stop-color="#059669"/>
+    </linearGradient>
+
+    <linearGradient id="trn-orbit-2" x1="96" y1="0" x2="0" y2="96"
+                    gradientUnits="userSpaceOnUse">
+      <stop offset="0"   stop-color="#67E8F9"/>
+      <stop offset="1"   stop-color="#10B981"/>
+    </linearGradient>
+
+    <linearGradient id="trn-text" x1="0" y1="0" x2="96" y2="0"
+                    gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#047857">
+        <animate attributeName="stop-color"
+                 values="#047857;#10B981;#34D399;#047857"
+                 dur="8s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="1" stop-color="#34D399">
+        <animate attributeName="stop-color"
+                 values="#34D399;#6EE7B7;#A7F3D0;#34D399"
+                 dur="8s" repeatCount="indefinite"/>
+      </stop>
+    </linearGradient>
+
+    <radialGradient id="trn-spark" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"   stop-color="#FFFFFF"/>
+      <stop offset="0.4" stop-color="#A7F3D0"/>
+      <stop offset="1"   stop-color="#10B981" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="trn-spark-cyan" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"   stop-color="#FFFFFF"/>
+      <stop offset="0.4" stop-color="#A5F3FC"/>
+      <stop offset="1"   stop-color="#22D3EE" stop-opacity="0"/>
+    </radialGradient>
+
+    <filter id="trn-spark-glow" x="-400%" y="-400%" width="900%" height="900%">
+      <feGaussianBlur stdDeviation="1.8"/>
+    </filter>
+    <filter id="trn-core-shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2.2"/>
+      <feOffset dx="0" dy="1.6"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.38"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="trn-orbit-glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1"/>
+    </filter>
+
+    <clipPath id="trn-core-clip">
+      <circle cx="48" cy="46" r="13"/>
+    </clipPath>
+  </defs>
+
+  <circle cx="48" cy="48" r="46" fill="url(#trn-glow)" opacity="0.16">
+    <animate attributeName="r" values="46;48;46" dur="6s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.16;0.22;0.16" dur="6s" repeatCount="indefinite"/>
+  </circle>
+
+  <g transform="translate(48 46)">
+    <g>
+      <animateTransform attributeName="transform" type="rotate"
+                        from="0 0 0" to="360 0 0" dur="23s" repeatCount="indefinite"/>
+      <ellipse cx="0" cy="0" rx="32" ry="9.5"
+               fill="none" stroke="url(#trn-orbit)"
+               stroke-width="1.5" opacity="0.85"
+               transform="rotate(-28)"/>
+      <ellipse cx="0" cy="0" rx="32" ry="9.5"
+               fill="none" stroke="#10B981" stroke-width="3.2"
+               opacity="0.14" filter="url(#trn-orbit-glow)"
+               transform="rotate(-28)"/>
+      <g transform="rotate(-28)">
+        <circle cx="32" cy="0" r="2.4"
+                fill="url(#trn-spark)" filter="url(#trn-spark-glow)">
+          <animate attributeName="r" values="2.4;3;2.4" dur="2.4s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="32" cy="0" r="1.05" fill="#FFFFFF"/>
+      </g>
+    </g>
+
+    <g>
+      <animateTransform attributeName="transform" type="rotate"
+                        from="360 0 0" to="0 0 0" dur="34s" repeatCount="indefinite"/>
+      <ellipse cx="0" cy="0" rx="30" ry="8"
+               fill="none" stroke="url(#trn-orbit-2)"
+               stroke-width="0.9" opacity="0.55"
+               transform="rotate(38)"/>
+      <g transform="rotate(38)">
+        <circle cx="-30" cy="0" r="1.4"
+                fill="url(#trn-spark-cyan)" filter="url(#trn-spark-glow)">
+          <animate attributeName="r" values="1.4;1.9;1.4" dur="3s" repeatCount="indefinite"/>
+        </circle>
+      </g>
+    </g>
+  </g>
+
+  <g filter="url(#trn-core-shadow)">
+    <circle cx="48" cy="46" r="17.5" fill="url(#trn-glow)" opacity="0.5">
+      <animate attributeName="r" values="17.5;19.5;17.5" dur="5s" repeatCount="indefinite"/>
+    </circle>
+
+    <circle cx="48" cy="46" r="13" fill="url(#trn-core)"/>
+    <circle cx="48" cy="46" r="13" fill="url(#trn-hl)"/>
+    <circle cx="48" cy="46" r="12.5" fill="none"
+            stroke="#FFFFFF" stroke-opacity="0.4" stroke-width="0.7"/>
+
+    <g clip-path="url(#trn-core-clip)">
+      <!-- A: 2×3 -->
+      <path d="M41 41 h8 v10 h-8 Z"
+            stroke="#064E3B" stroke-opacity="0.85" stroke-width="1.1"
+            stroke-linejoin="round" fill="none"/>
+      <path d="M41 44.3 h8 M41 47.6 h8"
+            stroke="#064E3B" stroke-opacity="0.55" stroke-width="0.9"/>
+
+      <!-- стрелка -->
+      <path d="M50 46 L53 46"
+            stroke="#064E3B" stroke-opacity="0.9" stroke-width="1.1"
+            stroke-linecap="round"/>
+      <path d="M52 44.5 L53.5 46 L52 47.5"
+            stroke="#064E3B" stroke-opacity="0.9" stroke-width="1.1"
+            stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+      <!-- Aᵀ: 3×2 -->
+      <path d="M55 39.5 h7 v13 h-7 Z"
+            stroke="#064E3B" stroke-opacity="0.95" stroke-width="1.3"
+            stroke-linejoin="round" fill="none"/>
+      <path d="M55 43.8 h7 M55 48.2 h7"
+            stroke="#064E3B" stroke-opacity="0.75" stroke-width="0.9"/>
+      <path d="M57.3 39.5 v13 M60.7 39.5 v13"
+            stroke="#064E3B" stroke-opacity="0.45" stroke-width="0.9"/>
+    </g>
+
+    <circle cx="48" cy="46" r="2.4" fill="url(#trn-glow)" opacity="0.85">
+      <animate attributeName="r" values="2.4;3.2;2.4" dur="3.6s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <circle cx="14" cy="14" r="1.3" fill="url(#trn-spark-cyan)" filter="url(#trn-spark-glow)">
+    <animate attributeName="opacity" values="1;0.4;1" dur="4s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="82" cy="18" r="1.4" fill="url(#trn-spark)" filter="url(#trn-spark-glow)">
+    <animate attributeName="opacity" values="0.9;0.3;0.9" dur="5s" begin="0.8s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="84" cy="80" r="1.2" fill="url(#trn-spark-cyan)" filter="url(#trn-spark-glow)">
+    <animate attributeName="opacity" values="1;0.4;1" dur="4.5s" begin="1.2s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="12" cy="82" r="1" fill="url(#trn-spark)" filter="url(#trn-spark-glow)">
+    <animate attributeName="opacity" values="0.7;0.2;0.7" dur="3.5s" begin="0.4s" repeatCount="indefinite"/>
+  </circle>
+
+  <text x="48" y="86" font-size="8" font-weight="700"
+        letter-spacing="0.06em" text-anchor="middle"
+        fill="url(#trn-text)">Aᵀ</text>
+</svg>

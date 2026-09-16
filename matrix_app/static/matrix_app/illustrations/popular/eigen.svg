@@ -1,0 +1,667 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 480" fill="none"
+     role="img" aria-label="Собственные значения и собственные векторы: A·v = λ·v"
+     class="ml-popular ml-popular--eigen"
+     preserveAspectRatio="xMidYMid meet"
+     font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">
+
+  <defs>
+
+    <!-- ============================================================
+         ЯДРО: изумруд/золото (собственные значения — «золото»)
+         ============================================================ -->
+    <radialGradient id="eg-neon" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"    stop-color="#FFFFFF" stop-opacity="1"/>
+      <stop offset="0.18" stop-color="#A7F3D0" stop-opacity="0.95"/>
+      <stop offset="0.42" stop-color="#34D399" stop-opacity="0.85"/>
+      <stop offset="0.72" stop-color="#059669" stop-opacity="0.55"/>
+      <stop offset="1"    stop-color="#064E3B" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="eg-glass" cx="0.4" cy="0.32" r="0.72">
+      <stop offset="0"    stop-color="#FFFFFF" stop-opacity="0.35"/>
+      <stop offset="0.35" stop-color="#D1FAE5" stop-opacity="0.18"/>
+      <stop offset="0.7"  stop-color="#34D399" stop-opacity="0.22"/>
+      <stop offset="1"    stop-color="#064E3B" stop-opacity="0.38"/>
+    </radialGradient>
+
+    <radialGradient id="eg-fresnel" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"    stop-color="#FFFFFF" stop-opacity="0"/>
+      <stop offset="0.72" stop-color="#FFFFFF" stop-opacity="0.05"/>
+      <stop offset="0.92" stop-color="#A7F3D0" stop-opacity="0.55"/>
+      <stop offset="1"    stop-color="#FFFFFF" stop-opacity="0.85"/>
+    </radialGradient>
+
+    <radialGradient id="eg-key" cx="0.28" cy="0.18" r="0.42">
+      <stop offset="0"   stop-color="#FFFFFF" stop-opacity="0.95"/>
+      <stop offset="0.35" stop-color="#FFFFFF" stop-opacity="0.25"/>
+      <stop offset="1"   stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="eg-fill" cx="0.75" cy="0.85" r="0.55">
+      <stop offset="0"   stop-color="#FDE68A" stop-opacity="0.4"/>
+      <stop offset="1"   stop-color="#FDE68A" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="eg-rim" x1="0" y1="0" x2="0.6" y2="1">
+      <stop offset="0"   stop-color="#FCD34D" stop-opacity="0"/>
+      <stop offset="0.55" stop-color="#FCD34D" stop-opacity="0.55"/>
+      <stop offset="1"   stop-color="#FDE68A" stop-opacity="0"/>
+    </linearGradient>
+
+    <radialGradient id="eg-bounce" cx="0.5" cy="1" r="0.6">
+      <stop offset="0"   stop-color="#F59E0B" stop-opacity="0.28"/>
+      <stop offset="1"   stop-color="#F59E0B" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- ============================================================
+         ОРБИТЫ
+         ============================================================ -->
+    <linearGradient id="eg-orbit-gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0"   stop-color="#FDE68A" stop-opacity="0.95"/>
+      <stop offset="0.5" stop-color="#F59E0B" stop-opacity="0.85"/>
+      <stop offset="1"   stop-color="#D97706" stop-opacity="0.9"/>
+    </linearGradient>
+
+    <linearGradient id="eg-orbit-cyan" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0"   stop-color="#67E8F9" stop-opacity="0.95"/>
+      <stop offset="0.5" stop-color="#22D3EE" stop-opacity="0.85"/>
+      <stop offset="1"   stop-color="#0891B2" stop-opacity="0.9"/>
+    </linearGradient>
+
+    <linearGradient id="eg-orbit-mint" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0"   stop-color="#A7F3D0" stop-opacity="0.75"/>
+      <stop offset="0.5" stop-color="#34D399" stop-opacity="0.7"/>
+      <stop offset="1"   stop-color="#059669" stop-opacity="0.75"/>
+    </linearGradient>
+
+    <!-- ============================================================
+         ВЕКТОРЫ
+         ============================================================ -->
+    <linearGradient id="eg-vec-v" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#A7F3D0"/>
+      <stop offset="1" stop-color="#059669"/>
+    </linearGradient>
+
+    <linearGradient id="eg-vec-lv" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FDE68A"/>
+      <stop offset="1" stop-color="#D97706"/>
+    </linearGradient>
+
+    <linearGradient id="eg-vec-w" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#67E8F9" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#0891B2" stop-opacity="0.85"/>
+    </linearGradient>
+
+    <!-- ============================================================
+         ПАНЕЛИ
+         ============================================================ -->
+    <linearGradient id="eg-panel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.08"/>
+      <stop offset="1" stop-color="#34D399" stop-opacity="0.12"/>
+    </linearGradient>
+
+    <linearGradient id="eg-panel-edge" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#6EE7B7"/>
+      <stop offset="0.5" stop-color="#34D399"/>
+      <stop offset="1" stop-color="#FDE68A"/>
+    </linearGradient>
+
+    <!-- ============================================================
+         ЧИПЫ
+         ============================================================ -->
+    <linearGradient id="eg-chip-mint" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#6EE7B7"/>
+      <stop offset="1" stop-color="#059669"/>
+    </linearGradient>
+
+    <linearGradient id="eg-chip-gold" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#FDE68A"/>
+      <stop offset="1" stop-color="#F59E0B"/>
+    </linearGradient>
+
+    <linearGradient id="eg-chip-cyan" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#67E8F9"/>
+      <stop offset="1" stop-color="#0891B2"/>
+    </linearGradient>
+
+    <linearGradient id="eg-chip-violet" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#C4B5FD"/>
+      <stop offset="1" stop-color="#7C3AED"/>
+    </linearGradient>
+
+    <!-- ============================================================
+         ЧАСТИЦЫ
+         ============================================================ -->
+    <radialGradient id="eg-spark-white" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"   stop-color="#FFFFFF"/>
+      <stop offset="0.4" stop-color="#A7F3D0"/>
+      <stop offset="1"   stop-color="#34D399" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="eg-spark-gold" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"   stop-color="#FFFFFF"/>
+      <stop offset="0.4" stop-color="#FDE68A"/>
+      <stop offset="1"   stop-color="#F59E0B" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="eg-spark-cyan" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"   stop-color="#FFFFFF"/>
+      <stop offset="0.4" stop-color="#A5F3FC"/>
+      <stop offset="1"   stop-color="#06B6D4" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- ============================================================
+         ФИЛЬТРЫ
+         ============================================================ -->
+    <filter id="eg-bloom-sm" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1.6"/>
+    </filter>
+    <filter id="eg-bloom-md" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3.2"/>
+    </filter>
+    <filter id="eg-bloom-lg" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="7"/>
+    </filter>
+    <filter id="eg-dof-far" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1.1"/>
+    </filter>
+    <filter id="eg-shadow-floor" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="12"/>
+    </filter>
+    <filter id="eg-core-shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="6"/>
+      <feOffset dx="0" dy="6"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.45"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="eg-chip-shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2.4"/>
+      <feOffset dx="0" dy="3"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.35"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="eg-flare" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="1.4"/>
+    </filter>
+    <filter id="eg-text-glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1.2"/>
+    </filter>
+
+    <!-- ============================================================
+         МАСКИ
+         ============================================================ -->
+    <clipPath id="eg-core-clip">
+      <circle cx="280" cy="240" r="72"/>
+    </clipPath>
+
+  </defs>
+
+  <!-- ================================================================
+       ФОНОВЫЙ ОРЕОЛ СЦЕНЫ
+       ================================================================ -->
+  <circle cx="280" cy="240" r="220" fill="url(#eg-neon)" opacity="0.1">
+    <animate attributeName="r" values="220;228;220" dur="9s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- ================================================================
+       ТЕНЬ НА ПОЛ
+       ================================================================ -->
+  <ellipse cx="280" cy="400" rx="200" ry="16"
+           fill="#064E3B" opacity="0.28"
+           filter="url(#eg-shadow-floor)">
+    <animate attributeName="rx" values="200;212;200" dur="7s" repeatCount="indefinite"/>
+  </ellipse>
+
+  <!-- ================================================================
+       ФОРМУЛА-ПАНЕЛЬ СВЕРХУ: A·v = λ·v
+       ================================================================ -->
+  <g filter="url(#eg-chip-shadow)" transform="translate(280 56)">
+    <rect x="-180" y="-26" width="360" height="52" rx="14"
+          fill="url(#eg-panel)"/>
+    <rect x="-180" y="-26" width="360" height="52" rx="14"
+          fill="none" stroke="url(#eg-panel-edge)" stroke-width="1.2"/>
+
+    <text x="-120" y="7" font-size="20" font-weight="800" font-style="italic"
+          fill="#A7F3D0" text-anchor="middle">A</text>
+    <text x="-96" y="6" font-size="14" font-weight="600"
+          fill="#FFFFFF" opacity="0.75" text-anchor="middle">·</text>
+    <text x="-70" y="7" font-size="20" font-weight="800" font-style="italic"
+          fill="#A7F3D0" text-anchor="middle">v</text>
+
+    <text x="-28" y="6" font-size="16" font-weight="600"
+          fill="#FFFFFF" opacity="0.75" text-anchor="middle">=</text>
+
+    <text x="20" y="7" font-size="20" font-weight="800" font-style="italic"
+          fill="#FDE68A" text-anchor="middle">λ</text>
+    <text x="44" y="6" font-size="14" font-weight="600"
+          fill="#FFFFFF" opacity="0.75" text-anchor="middle">·</text>
+    <text x="70" y="7" font-size="20" font-weight="800" font-style="italic"
+          fill="#A7F3D0" text-anchor="middle">v</text>
+
+    <text x="120" y="6" font-size="12" font-weight="500"
+          fill="#FFFFFF" opacity="0.55" text-anchor="middle"
+          letter-spacing="0.04em">направление сохраняется</text>
+  </g>
+
+  <!-- ================================================================
+       ДАЛЬНЯЯ ОРБИТА (циан)
+       ================================================================ -->
+  <g filter="url(#eg-dof-far)" transform="translate(280 240)">
+    <g>
+      <animateTransform attributeName="transform" type="rotate"
+                        from="0 0 0" to="360 0 0" dur="38s" repeatCount="indefinite"/>
+      <ellipse cx="0" cy="0" rx="190" ry="44"
+               fill="none" stroke="url(#eg-orbit-cyan)"
+               stroke-width="2" opacity="0.7" transform="rotate(-22)"/>
+      <ellipse cx="0" cy="0" rx="190" ry="44"
+               fill="none" stroke="#22D3EE" stroke-width="5"
+               opacity="0.12" filter="url(#eg-bloom-md)" transform="rotate(-22)"/>
+    </g>
+  </g>
+
+  <!-- ================================================================
+       ГЛАВНАЯ ОСЬ — прямая через сферу (направление собственного вектора)
+       ================================================================ -->
+  <g>
+    <!-- Светящаяся линия сквозь сферу по диагонали -->
+    <line x1="80" y1="400" x2="480" y2="80"
+          stroke="#A7F3D0" stroke-width="1"
+          opacity="0.35"
+          stroke-dasharray="2 6" stroke-linecap="round"/>
+
+    <!-- Направляющий луч в центре -->
+    <line x1="180" y1="312" x2="380" y2="168"
+          stroke="#FDE68A" stroke-width="1.8"
+          opacity="0.7"
+          stroke-linecap="round"/>
+  </g>
+
+  <!-- ================================================================
+       ВЕКТОР v — маленький, зелёный (собственный вектор)
+       ================================================================ -->
+  <g>
+    <line x1="280" y1="240" x2="330" y2="202"
+          stroke="url(#eg-vec-v)" stroke-width="3"
+          stroke-linecap="round"/>
+    <!-- Стрелка -->
+    <path d="M324 206 L330 202 L328 210"
+          stroke="#A7F3D0" stroke-width="3"
+          stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <!-- Начальная точка -->
+    <circle cx="280" cy="240" r="4.5"
+            fill="url(#eg-spark-white)" filter="url(#eg-bloom-sm)">
+      <animate attributeName="r" values="4.5;5.6;4.5" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="280" cy="240" r="2" fill="#FFFFFF"/>
+    <!-- Подпись v -->
+    <text x="340" y="204" font-size="18" font-weight="800" font-style="italic"
+          fill="#A7F3D0" text-anchor="middle">v</text>
+  </g>
+
+  <!-- ================================================================
+       ВЕКТОР λv — в 2 раза длиннее, золотой
+       ================================================================ -->
+  <g>
+    <line x1="280" y1="240" x2="380" y2="168"
+          stroke="url(#eg-vec-lv)" stroke-width="3.6"
+          stroke-linecap="round"/>
+    <path d="M372 173 L380 168 L378 178"
+          stroke="#FDE68A" stroke-width="3.6"
+          stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <circle cx="380" cy="168" r="6"
+            fill="url(#eg-spark-gold)" filter="url(#eg-bloom-md)">
+      <animate attributeName="r" values="6;7.6;6" dur="3s" begin="1.4s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="380" cy="168" r="2.6" fill="#FFFFFF"/>
+    <text x="396" y="164" font-size="18" font-weight="800" font-style="italic"
+          fill="#FDE68A" text-anchor="middle">λv</text>
+  </g>
+
+  <!-- ================================================================
+       ВЕКТОР w — НЕ собственный (контраст, показывает разницу)
+       ================================================================ -->
+  <g opacity="0.55">
+    <line x1="280" y1="240" x2="330" y2="300"
+          stroke="url(#eg-vec-w)" stroke-width="2.2"
+          stroke-linecap="round" stroke-dasharray="4 4"/>
+    <path d="M323 296 L330 300 L326 306"
+          stroke="#22D3EE" stroke-width="2.2"
+          stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <text x="344" y="314" font-size="14" font-weight="700" font-style="italic"
+          fill="#67E8F9" text-anchor="middle">w</text>
+
+    <!-- A·w — не сонаправлен w (пунктиром) -->
+    <line x1="280" y1="240" x2="358" y2="284"
+          stroke="#22D3EE" stroke-width="1.6"
+          stroke-linecap="round" stroke-dasharray="3 5" opacity="0.7"/>
+    <text x="372" y="292" font-size="14" font-weight="700" font-style="italic"
+          fill="#67E8F9" text-anchor="middle" opacity="0.85">A·w</text>
+
+    <!-- Дуга между w и A·w -->
+    <path d="M312 280 A40 40 0 0 1 336 290"
+          fill="none" stroke="#22D3EE" stroke-width="0.9"
+          opacity="0.6" stroke-dasharray="2 3"/>
+  </g>
+
+  <!-- ================================================================
+       ЯДРО
+       ================================================================ -->
+  <g filter="url(#eg-core-shadow)">
+
+    <!-- Ореол -->
+    <circle cx="280" cy="240" r="96" fill="url(#eg-neon)" opacity="0.35"
+            filter="url(#eg-bloom-lg)">
+      <animate attributeName="r" values="96;104;96" dur="5.6s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.35;0.22;0.35" dur="5.6s" repeatCount="indefinite"/>
+    </circle>
+
+    <!-- Стекло -->
+    <circle cx="280" cy="240" r="72" fill="url(#eg-glass)"/>
+    <circle cx="280" cy="240" r="72" fill="url(#eg-neon)" opacity="0.85">
+      <animate attributeName="opacity" values="0.85;0.7;0.85" dur="4.8s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="280" cy="240" r="72" fill="url(#eg-fresnel)"/>
+
+    <!-- Внутренний пульс по оси -->
+    <circle cx="280" cy="240" r="28" fill="url(#eg-neon)" opacity="0.9">
+      <animate attributeName="r" values="28;36;28" dur="4s" repeatCount="indefinite"/>
+    </circle>
+
+    <!-- Тонкая внутренняя ось через центр — визуализация «направление не меняется» -->
+    <line x1="220" y1="284" x2="340" y2="196"
+          stroke="#A7F3D0" stroke-width="1.4"
+          opacity="0.55" stroke-linecap="round"/>
+
+    <!-- Внутренние точки вдоль оси -->
+    <circle cx="240" cy="270" r="2" fill="#FFFFFF" opacity="0.8"/>
+    <circle cx="280" cy="240" r="2.4" fill="#FFFFFF" opacity="0.95"/>
+    <circle cx="320" cy="210" r="2" fill="#FFFFFF" opacity="0.8"/>
+
+    <!-- Сетка полярная (лёгкая) -->
+    <g clip-path="url(#eg-core-clip)" opacity="0.1">
+      <line x1="280" y1="168" x2="280" y2="312" stroke="#FFFFFF" stroke-width="0.6"/>
+      <line x1="208" y1="240" x2="352" y2="240" stroke="#FFFFFF" stroke-width="0.6"/>
+      <circle cx="280" cy="240" r="30" fill="none" stroke="#FFFFFF" stroke-width="0.6"/>
+      <circle cx="280" cy="240" r="50" fill="none" stroke="#FFFFFF" stroke-width="0.6"/>
+    </g>
+
+    <!-- 4 неоновые точки -->
+    <circle cx="240" cy="200" r="4.5" fill="#FFFFFF" opacity="0.9">
+      <animate attributeName="r" values="4.5;6;4.5" dur="3.6s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="1;0.55;1" dur="3.6s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="320" cy="200" r="4.5" fill="#FFFFFF" opacity="0.9">
+      <animate attributeName="r" values="4.5;6;4.5" dur="3.6s" begin="0.9s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="1;0.55;1" dur="3.6s" begin="0.9s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="240" cy="280" r="4.5" fill="#FFFFFF" opacity="0.9">
+      <animate attributeName="r" values="4.5;6;4.5" dur="3.6s" begin="1.8s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="1;0.55;1" dur="3.6s" begin="1.8s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="320" cy="280" r="4.5" fill="#FFFFFF" opacity="0.9">
+      <animate attributeName="r" values="4.5;6;4.5" dur="3.6s" begin="2.7s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="1;0.55;1" dur="3.6s" begin="2.7s" repeatCount="indefinite"/>
+    </circle>
+
+    <!-- Лучи-вспышки -->
+    <g stroke="#FFFFFF" stroke-width="1.2" stroke-linecap="round" opacity="0.55">
+      <path d="M280 156 V174">
+        <animate attributeName="opacity" values="0.55;0.95;0.55" dur="3.2s" repeatCount="indefinite"/>
+      </path>
+      <path d="M280 324 V306">
+        <animate attributeName="opacity" values="0.55;0.95;0.55" dur="3.2s" begin="0.8s" repeatCount="indefinite"/>
+      </path>
+      <path d="M196 240 H214">
+        <animate attributeName="opacity" values="0.55;0.95;0.55" dur="3.2s" begin="1.6s" repeatCount="indefinite"/>
+      </path>
+      <path d="M364 240 H346">
+        <animate attributeName="opacity" values="0.55;0.95;0.55" dur="3.2s" begin="2.4s" repeatCount="indefinite"/>
+      </path>
+    </g>
+
+    <!-- Key light -->
+    <ellipse cx="252" cy="206" rx="26" ry="18"
+             fill="url(#eg-key)" transform="rotate(-24 252 206)"/>
+    <ellipse cx="246" cy="200" rx="7" ry="4.5"
+             fill="#FFFFFF" opacity="0.9"
+             transform="rotate(-28 246 200)"/>
+
+    <!-- Fill -->
+    <ellipse cx="316" cy="288" rx="34" ry="22"
+             fill="url(#eg-fill)" transform="rotate(-20 316 288)"/>
+
+    <!-- Rim: золотая полоска -->
+    <path d="M352 220 A72 72 0 0 1 320 300"
+          fill="none" stroke="url(#eg-rim)" stroke-width="2"
+          stroke-linecap="round" opacity="0.75"/>
+
+    <!-- Bounce -->
+    <ellipse cx="280" cy="308" rx="46" ry="14"
+             fill="url(#eg-bounce)"/>
+
+    <circle cx="280" cy="240" r="72" fill="none"
+            stroke="#FFFFFF" stroke-opacity="0.28" stroke-width="0.9"/>
+  </g>
+
+  <!-- ================================================================
+       БЛИЖНЯЯ ОРБИТА (мятная) — поверх
+       ================================================================ -->
+  <g transform="translate(280 240)">
+    <g>
+      <animateTransform attributeName="transform" type="rotate"
+                        from="0 0 0" to="360 0 0" dur="26s" repeatCount="indefinite"/>
+      <ellipse cx="0" cy="0" rx="110" ry="24"
+               fill="none" stroke="url(#eg-orbit-mint)"
+               stroke-width="1.6" opacity="0.85" transform="rotate(32)"/>
+      <ellipse cx="0" cy="0" rx="110" ry="24"
+               fill="none" stroke="#34D399" stroke-width="4.5"
+               opacity="0.14" filter="url(#eg-bloom-md)" transform="rotate(32)"/>
+      <g transform="rotate(32)">
+        <circle cx="110" cy="0" r="3.4"
+                fill="url(#eg-spark-white)" filter="url(#eg-bloom-sm)">
+          <animate attributeName="r" values="3.4;4.4;3.4" dur="2.6s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="110" cy="0" r="1.5" fill="#FFFFFF"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- ================================================================
+       ЗОЛОТАЯ ОРБИТА ПОВЕРХ
+       ================================================================ -->
+  <g transform="translate(280 240)">
+    <g>
+      <animateTransform attributeName="transform" type="rotate"
+                        from="360 0 0" to="0 0 0" dur="44s" repeatCount="indefinite"/>
+      <ellipse cx="0" cy="0" rx="134" ry="30"
+               fill="none" stroke="url(#eg-orbit-gold)"
+               stroke-width="1.4" opacity="0.7" transform="rotate(-52)"/>
+      <g transform="rotate(-52)">
+        <circle cx="-134" cy="0" r="3"
+                fill="url(#eg-spark-gold)" filter="url(#eg-bloom-sm)">
+          <animate attributeName="r" values="3;4;3" dur="2.4s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="-134" cy="0" r="1.4" fill="#FFFFFF"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- ================================================================
+       РЕЗУЛЬТАТ СНИЗУ: λ = 2, v = (1, 1)
+       ================================================================ -->
+  <g transform="translate(280 440)">
+    <rect x="-180" y="-26" width="360" height="52" rx="14"
+          fill="url(#eg-panel)"
+          stroke="url(#eg-panel-edge)" stroke-width="1"
+          filter="url(#eg-chip-shadow)"/>
+
+    <text x="-120" y="6" font-size="14" font-weight="800"
+          fill="#FDE68A" text-anchor="middle" letter-spacing="0.05em">
+      λ =
+    </text>
+    <text x="-84" y="8" font-size="20" font-weight="900"
+          fill="#FDE68A" text-anchor="middle">2</text>
+
+    <text x="-30" y="6" font-size="14" font-weight="800"
+          fill="#A7F3D0" text-anchor="middle">
+      v =
+    </text>
+    <text x="34" y="7" font-size="14" font-weight="700"
+          fill="#A7F3D0" text-anchor="middle">(1, 1)</text>
+
+    <text x="100" y="6" font-size="12" font-weight="500"
+          fill="#FFFFFF" opacity="0.55" text-anchor="middle"
+          letter-spacing="0.04em">A·v = 2v</text>
+
+    <circle cx="152" cy="0" r="9" fill="#10B981" opacity="0.95"/>
+    <path d="M148 0 L151 3.5 L157 -3"
+          stroke="#FFFFFF" stroke-width="1.7"
+          stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  </g>
+
+  <!-- ================================================================
+       ЧИПЫ ПО УГЛАМ
+       ================================================================ -->
+
+  <!-- A·v = λ·v (левый верх) -->
+  <g transform="translate(72 104)" filter="url(#eg-chip-shadow)">
+    <rect x="-64" y="-22" width="128" height="44" rx="12"
+          fill="#FFFFFF" fill-opacity="0.04"/>
+    <rect x="-64" y="-22" width="128" height="44" rx="12"
+          fill="none" stroke="url(#eg-chip-mint)" stroke-width="1.2"/>
+    <circle cx="-52" cy="0" r="2.2" fill="#059669">
+      <animate attributeName="r" values="2.2;3;2.2" dur="2.8s" repeatCount="indefinite"/>
+    </circle>
+    <text x="4" y="6" font-size="14" font-weight="800" font-style="italic"
+          fill="#A7F3D0" text-anchor="middle">A·v = λ·v</text>
+    <animateTransform attributeName="transform" type="translate"
+                      values="72 104; 72 98; 72 104"
+                      dur="5s" repeatCount="indefinite"/>
+  </g>
+
+  <!-- λ = 2 (правый верх) -->
+  <g transform="translate(488 104)" filter="url(#eg-chip-shadow)">
+    <rect x="-56" y="-22" width="112" height="44" rx="12"
+          fill="#FFFFFF" fill-opacity="0.04"/>
+    <rect x="-56" y="-22" width="112" height="44" rx="12"
+          fill="none" stroke="url(#eg-chip-gold)" stroke-width="1.2"/>
+    <circle cx="-44" cy="0" r="2.2" fill="#F59E0B">
+      <animate attributeName="r" values="2.2;3;2.2" dur="2.8s" begin="0.6s" repeatCount="indefinite"/>
+    </circle>
+    <text x="4" y="-2" font-size="11" font-weight="800"
+          fill="#FDE68A" text-anchor="middle">собств. число</text>
+    <text x="4" y="12" font-size="16" font-weight="900"
+          fill="#FDE68A" text-anchor="middle">λ = 2</text>
+    <animateTransform attributeName="transform" type="translate"
+                      values="488 104; 488 96; 488 104"
+                      dur="6s" repeatCount="indefinite"/>
+  </g>
+
+  <!-- det(A − λI) = 0 (левый низ) -->
+  <g transform="translate(72 400)" filter="url(#eg-chip-shadow)">
+    <rect x="-68" y="-22" width="136" height="44" rx="12"
+          fill="#FFFFFF" fill-opacity="0.04"/>
+    <rect x="-68" y="-22" width="136" height="44" rx="12"
+          fill="none" stroke="url(#eg-chip-violet)" stroke-width="1.2"/>
+    <circle cx="-56" cy="0" r="2.2" fill="#7C3AED">
+      <animate attributeName="r" values="2.2;3;2.2" dur="2.8s" begin="1.2s" repeatCount="indefinite"/>
+    </circle>
+    <text x="4" y="6" font-size="12" font-weight="800"
+          fill="#C4B5FD" text-anchor="middle">det(A − λI) = 0</text>
+    <animateTransform attributeName="transform" type="translate"
+                      values="72 400; 72 392; 72 400"
+                      dur="5.6s" repeatCount="indefinite"/>
+  </g>
+
+  <!-- v ≠ 0 (правый низ) -->
+  <g transform="translate(488 400)" filter="url(#eg-chip-shadow)">
+    <rect x="-56" y="-22" width="112" height="44" rx="12"
+          fill="#FFFFFF" fill-opacity="0.04"/>
+    <rect x="-56" y="-22" width="112" height="44" rx="12"
+          fill="none" stroke="url(#eg-chip-cyan)" stroke-width="1.2"/>
+    <circle cx="-44" cy="0" r="2.2" fill="#0891B2">
+      <animate attributeName="r" values="2.2;3;2.2" dur="2.8s" begin="1.8s" repeatCount="indefinite"/>
+    </circle>
+    <text x="4" y="6" font-size="14" font-weight="800" font-style="italic"
+          fill="#A5F3FC" text-anchor="middle">v ≠ 0</text>
+    <animateTransform attributeName="transform" type="translate"
+                      values="488 400; 488 392; 488 400"
+                      dur="6.4s" repeatCount="indefinite"/>
+  </g>
+
+  <!-- ================================================================
+       ЧАСТИЦЫ
+       ================================================================ -->
+
+  <g opacity="0.5" filter="url(#eg-dof-far)">
+    <circle cx="60" cy="46" r="1.6" fill="url(#eg-spark-cyan)">
+      <animate attributeName="opacity" values="0.8;0.3;0.8" dur="6s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="500" cy="40" r="1.4" fill="url(#eg-spark-gold)">
+      <animate attributeName="opacity" values="0.7;0.2;0.7" dur="7s" begin="1s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="40" cy="200" r="1.2" fill="url(#eg-spark-white)">
+      <animate attributeName="opacity" values="0.6;0.15;0.6" dur="5.5s" begin="2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="520" cy="240" r="1.5" fill="url(#eg-spark-gold)">
+      <animate attributeName="opacity" values="0.75;0.25;0.75" dur="6.8s" begin="0.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="100" cy="456" r="1.4" fill="url(#eg-spark-mint)">
+      <animate attributeName="opacity" values="0.65;0.2;0.65" dur="6.2s" begin="1.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="460" cy="456" r="1.3" fill="url(#eg-spark-cyan)">
+      <animate attributeName="opacity" values="0.7;0.2;0.7" dur="5.8s" begin="2.4s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <circle cx="46" cy="140" r="2.4" fill="url(#eg-spark-mint)" filter="url(#eg-bloom-sm)">
+    <animate attributeName="opacity" values="1;0.5;1" dur="4.5s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="520" cy="170" r="2.6" fill="url(#eg-spark-gold)" filter="url(#eg-bloom-sm)">
+    <animate attributeName="opacity" values="1;0.55;1" dur="5.5s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="280" cy="24" r="2.2" fill="url(#eg-spark-white)" filter="url(#eg-bloom-sm)">
+    <animate attributeName="opacity" values="1;0.4;1" dur="4.8s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="200" cy="464" r="2.4" fill="url(#eg-spark-mint)" filter="url(#eg-bloom-sm)">
+    <animate attributeName="opacity" values="0.9;0.3;0.9" dur="5.2s" begin="0.8s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="360" cy="460" r="2" fill="url(#eg-spark-cyan)" filter="url(#eg-bloom-sm)">
+    <animate attributeName="opacity" values="0.85;0.25;0.85" dur="5.6s" begin="1.4s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="280" cy="380" r="2" fill="url(#eg-spark-gold)" filter="url(#eg-bloom-sm)">
+    <animate attributeName="opacity" values="1;0.35;1" dur="4.2s" begin="2s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Частицы вдоль оси v -->
+  <circle cx="200" cy="296" r="2" fill="url(#eg-spark-mint)" filter="url(#eg-bloom-sm)">
+    <animate attributeName="cx" values="200;380;200" dur="8s" repeatCount="indefinite"/>
+    <animate attributeName="cy" values="296;168;296" dur="8s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0;1;0" dur="8s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="360" cy="176" r="2" fill="url(#eg-spark-gold)" filter="url(#eg-bloom-sm)">
+    <animate attributeName="cx" values="360;200;360" dur="8s" begin="4s" repeatCount="indefinite"/>
+    <animate attributeName="cy" values="176;296;176" dur="8s" begin="4s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0;1;0" dur="8s" begin="4s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Крупные ближние -->
+  <circle cx="94" cy="42" r="8" fill="url(#eg-spark-gold)" opacity="0.35" filter="url(#eg-bloom-md)">
+    <animate attributeName="opacity" values="0.35;0.15;0.35" dur="7s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="94" cy="42" r="2.2" fill="#FFFFFF"/>
+
+  <circle cx="480" cy="438" r="9" fill="url(#eg-spark-mint)" opacity="0.4" filter="url(#eg-bloom-md)">
+    <animate attributeName="opacity" values="0.4;0.18;0.4" dur="6.4s" begin="1.2s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="480" cy="438" r="2.4" fill="#FFFFFF"/>
+
+  <!-- ================================================================
+       ЛИНЗОВЫЕ ВСПЫШКИ
+       ================================================================ -->
+  <g opacity="0.8" filter="url(#eg-flare)">
+    <circle cx="248" cy="204" r="12" fill="#FFFFFF" opacity="0.35"/>
+    <circle cx="244" cy="200" r="4.5" fill="#FFFFFF" opacity="0.9"/>
+  </g>
+
+</svg>

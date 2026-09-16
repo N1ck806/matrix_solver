@@ -1,0 +1,587 @@
+/* =============================================================================
+   MatrixLab — Mobile (≤ 992px)
+   Премиум-опыт: bottom-sheet, tabbar, FAB, safe-area, ripple, крупные тач-таргеты
+   ============================================================================= */
+
+/* --- Переменные --- */
+:root {
+    --mobile-tabbar-height: 64px;
+    --mobile-safe-bottom: env(safe-area-inset-bottom, 0px);
+    --mobile-safe-top: env(safe-area-inset-top, 0px);
+    --mobile-safe-left: env(safe-area-inset-left, 0px);
+    --mobile-safe-right: env(safe-area-inset-right, 0px);
+    --mobile-radius: 18px;
+    --mobile-gutter: 16px;
+    --mobile-tap-min: 44px;
+}
+
+/* --- Убираем «синие» тапы и выделение текста --- */
+.is-mobile * {
+    -webkit-tap-highlight-color: transparent;
+}
+.is-mobile .app-body {
+    overscroll-behavior-y: none;
+}
+
+/* --- Отступ снизу под tabbar --- */
+.is-mobile .app-main {
+    padding-bottom: calc(var(--mobile-tabbar-height) + var(--mobile-safe-bottom) + 24px);
+}
+
+/* --- Скрываем desktop-элементы --- */
+.is-mobile .main-nav,
+.is-mobile .header-cta {
+    display: none !important;
+}
+
+/* =============================================================================
+   ШАПКА
+   ============================================================================= */
+.is-mobile .app-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(247, 248, 252, 0.85);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid rgba(99, 102, 241, 0.08);
+    padding-top: var(--mobile-safe-top);
+}
+
+[data-theme="dark"] .is-mobile .app-header {
+    background: rgba(11, 14, 26, 0.85);
+    border-bottom-color: rgba(129, 140, 248, 0.15);
+}
+
+.is-mobile .header-inner {
+    padding: 10px var(--mobile-gutter);
+    gap: 12px;
+    min-height: 56px;
+}
+
+.is-mobile .logo-text .logo-sub {
+    display: none;
+}
+
+.is-mobile .logo-text strong {
+    font-size: 17px;
+}
+
+.is-mobile .logo-mark svg {
+    width: 34px;
+    height: 34px;
+}
+
+.is-mobile .nav-toggle {
+    display: inline-flex !important;
+    width: var(--mobile-tap-min);
+    height: var(--mobile-tap-min);
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: rgba(99, 102, 241, 0.08);
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    flex-direction: column;
+    gap: 4px;
+    padding: 0;
+    cursor: pointer;
+    transition: transform 200ms, background 200ms;
+}
+
+.is-mobile .nav-toggle:active {
+    transform: scale(0.94);
+    background: rgba(99, 102, 241, 0.16);
+}
+
+.is-mobile .nav-toggle span {
+    width: 18px;
+    height: 2px;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1),
+                opacity 200ms;
+}
+
+/* Анимация «бургер → крестик» */
+.is-mobile .nav-toggle[aria-expanded="true"] span:nth-child(1) {
+    transform: translateY(6px) rotate(45deg);
+}
+.is-mobile .nav-toggle[aria-expanded="true"] span:nth-child(2) {
+    opacity: 0;
+}
+.is-mobile .nav-toggle[aria-expanded="true"] span:nth-child(3) {
+    transform: translateY(-6px) rotate(-45deg);
+}
+
+.is-mobile .theme-toggle {
+    width: var(--mobile-tap-min);
+    height: var(--mobile-tap-min);
+    border-radius: 12px;
+}
+
+/* =============================================================================
+   BOTTOM-SHEET МЕНЮ
+   ============================================================================= */
+.is-mobile .mobile-nav-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: rgba(11, 14, 26, 0.55);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    opacity: 0;
+    animation: sheetBackdropIn 240ms ease forwards;
+}
+
+@keyframes sheetBackdropIn {
+    to { opacity: 1; }
+}
+
+.is-mobile .mobile-nav-sheet {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 201;
+    max-height: 92vh;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border-top-left-radius: 28px;
+    border-top-right-radius: 28px;
+    box-shadow:
+        0 -1px 0 rgba(99, 102, 241, 0.1),
+        0 -32px 64px -16px rgba(11, 14, 26, 0.35);
+    padding:
+        8px
+        var(--mobile-gutter)
+        calc(24px + var(--mobile-safe-bottom));
+    overflow-y: auto;
+    transform: translateY(100%);
+    animation: sheetSlideUp 380ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    will-change: transform;
+}
+
+[data-theme="dark"] .is-mobile .mobile-nav-sheet {
+    background: rgba(20, 24, 40, 0.98);
+    box-shadow:
+        0 -1px 0 rgba(129, 140, 248, 0.15),
+        0 -32px 64px -16px rgba(0, 0, 0, 0.6);
+}
+
+@keyframes sheetSlideUp {
+    to { transform: translateY(0); }
+}
+
+.is-mobile .mobile-nav-sheet.is-closing {
+    animation: sheetSlideDown 280ms cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+@keyframes sheetSlideDown {
+    to { transform: translateY(100%); }
+}
+
+.is-mobile .mobile-nav-handle {
+    display: flex;
+    justify-content: center;
+    padding: 8px 0 12px;
+    cursor: grab;
+}
+
+.is-mobile .mobile-nav-handle span {
+    width: 44px;
+    height: 5px;
+    border-radius: 3px;
+    background: rgba(99, 102, 241, 0.25);
+}
+
+.is-mobile .mobile-nav-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+    margin-bottom: 16px;
+}
+
+.is-mobile .mobile-nav-greeting {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.is-mobile .mobile-nav-greeting-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+}
+
+.is-mobile .mobile-nav-greeting-sub {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.is-mobile .mobile-nav-close {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: rgba(99, 102, 241, 0.08);
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    color: var(--text-secondary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 200ms, background 200ms;
+}
+
+.is-mobile .mobile-nav-close:active {
+    transform: scale(0.92);
+    background: rgba(99, 102, 241, 0.16);
+}
+
+/* Плитки разделов */
+.is-mobile .mobile-nav-tiles {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.is-mobile .mobile-nav-tile {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: rgba(99, 102, 241, 0.04);
+    border: 1px solid rgba(99, 102, 241, 0.12);
+    border-radius: var(--mobile-radius);
+    text-decoration: none;
+    color: inherit;
+    transition: transform 200ms, background 200ms, border-color 200ms;
+    min-height: 64px;
+}
+
+.is-mobile .mobile-nav-tile:active {
+    transform: scale(0.98);
+    background: rgba(99, 102, 241, 0.1);
+    border-color: rgba(99, 102, 241, 0.28);
+}
+
+.is-mobile .mobile-nav-tile.is-active {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(139, 92, 246, 0.12));
+    border-color: rgba(99, 102, 241, 0.35);
+}
+
+.is-mobile .mobile-nav-tile-icon {
+    width: 44px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #6366F1, #8B5CF6);
+    color: #fff;
+    border-radius: 13px;
+    box-shadow: 0 8px 18px -6px rgba(99, 102, 241, 0.5);
+    flex-shrink: 0;
+}
+
+.is-mobile .mobile-nav-tile-text {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.is-mobile .mobile-nav-tile-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.01em;
+}
+
+.is-mobile .mobile-nav-tile-sub {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.is-mobile .mobile-nav-tile-arrow {
+    color: var(--accent);
+    opacity: 0.5;
+    flex-shrink: 0;
+}
+
+/* Дополнительные ссылки */
+.is-mobile .mobile-nav-extra {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 0;
+    border-top: 1px dashed rgba(99, 102, 241, 0.15);
+    border-bottom: 1px dashed rgba(99, 102, 241, 0.15);
+    margin-bottom: 16px;
+}
+
+.is-mobile .mobile-nav-extra-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background 200ms, color 200ms;
+}
+
+.is-mobile .mobile-nav-extra-link:active {
+    background: rgba(99, 102, 241, 0.08);
+    color: var(--accent);
+}
+
+/* CTA-кнопка */
+.is-mobile .mobile-nav-cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, #6366F1, #8B5CF6);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.01em;
+    border-radius: var(--mobile-radius);
+    text-decoration: none;
+    box-shadow: 0 12px 24px -8px rgba(99, 102, 241, 0.6);
+    transition: transform 200ms, box-shadow 200ms;
+    min-height: var(--mobile-tap-min);
+}
+
+.is-mobile .mobile-nav-cta:active {
+    transform: scale(0.97);
+    box-shadow: 0 6px 14px -6px rgba(99, 102, 241, 0.5);
+}
+
+/* =============================================================================
+   НИЖНЯЯ НАВИГАЦИЯ (TABBAR)
+   ============================================================================= */
+.is-mobile .mobile-tabbar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 150;
+    display: flex;
+    align-items: stretch;
+    height: calc(var(--mobile-tabbar-height) + var(--mobile-safe-bottom));
+    padding-bottom: var(--mobile-safe-bottom);
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-top: 1px solid rgba(99, 102, 241, 0.1);
+    box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.02), 0 -8px 24px -12px rgba(11, 14, 26, 0.15);
+}
+
+[data-theme="dark"] .is-mobile .mobile-tabbar {
+    background: rgba(11, 14, 26, 0.94);
+    border-top-color: rgba(129, 140, 248, 0.15);
+}
+
+.is-mobile .mobile-tabbar-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 8px 4px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    transition: color 200ms, transform 120ms;
+    min-height: var(--mobile-tap-min);
+}
+
+.is-mobile .mobile-tabbar-item:active {
+    transform: scale(0.92);
+}
+
+.is-mobile .mobile-tabbar-item svg {
+    transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.is-mobile .mobile-tabbar-item.is-active {
+    color: var(--accent);
+}
+
+.is-mobile .mobile-tabbar-item.is-active svg {
+    transform: translateY(-2px) scale(1.08);
+}
+
+.is-mobile .mobile-tabbar-item.is-active::before {
+    content: "";
+    position: absolute;
+    top: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 28px;
+    height: 3px;
+    border-radius: 2px;
+    background: linear-gradient(135deg, #6366F1, #8B5CF6);
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.5);
+}
+
+.is-mobile .mobile-tabbar-item--more {
+    color: var(--text-secondary);
+}
+
+/* =============================================================================
+   FAB (плавающая кнопка)
+   ============================================================================= */
+.is-mobile .mobile-fab {
+    position: fixed;
+    right: calc(var(--mobile-gutter) + var(--mobile-safe-right));
+    bottom: calc(var(--mobile-tabbar-height) + var(--mobile-safe-bottom) + 16px);
+    z-index: 149;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366F1, #8B5CF6);
+    color: #fff;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow:
+        0 12px 24px -6px rgba(99, 102, 241, 0.6),
+        0 0 0 1px rgba(255, 255, 255, 0.15) inset;
+    cursor: pointer;
+    transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 200ms;
+    overflow: hidden;
+}
+
+.is-mobile .mobile-fab:active {
+    transform: scale(0.92);
+    box-shadow: 0 6px 14px -4px rgba(99, 102, 241, 0.5);
+}
+
+/* Ripple-эффект на FAB */
+.is-mobile .mobile-fab::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(circle at var(--ripple-x, 50%) var(--ripple-y, 50%),
+                rgba(255, 255, 255, 0.5) 0%,
+                transparent 60%);
+    opacity: 0;
+    transition: opacity 600ms;
+    pointer-events: none;
+}
+
+.is-mobile .mobile-fab.is-rippling::after {
+    opacity: 1;
+    transition: opacity 0ms;
+}
+
+/* =============================================================================
+   КРУПНЫЕ ТАЧ-ТАРГЕТЫ И АДАПТИВ КОНТЕНТА
+   ============================================================================= */
+
+/* Кнопки — минимум 44px по высоте */
+.is-mobile .btn,
+.is-mobile .icon-btn,
+.is-mobile .chip {
+    min-height: var(--mobile-tap-min);
+}
+
+.is-mobile .icon-btn {
+    width: var(--mobile-tap-min);
+    height: var(--mobile-tap-min);
+}
+
+/* Убираем hover-эффекты на touch-устройствах */
+@media (hover: none) {
+    .is-mobile .history-item:hover,
+    .is-mobile .saved-card:hover,
+    .is-mobile .type-card:hover,
+    .is-mobile .about-tech-card:hover,
+    .is-mobile .about-audience-card:hover,
+    .is-mobile .about-principle:hover,
+    .is-mobile .eigen-info-card:hover,
+    .is-mobile .example-card:hover {
+        transform: none;
+        box-shadow: none;
+        background: inherit;
+    }
+}
+
+/* Заголовки — компактнее */
+.is-mobile .page-title {
+    font-size: clamp(24px, 6vw, 30px);
+}
+
+.is-mobile .page-subtitle {
+    font-size: 14.5px;
+}
+
+/* Уменьшаем вертикальные отступы */
+.is-mobile .history-layout,
+.is-mobile .saved-layout,
+.is-mobile .types-layout,
+.is-mobile .about-layout {
+    padding: 24px 0 32px;
+}
+
+/* Контейнер — плотнее */
+.is-mobile .container {
+    padding-left: var(--mobile-gutter);
+    padding-right: var(--mobile-gutter);
+}
+
+/* Скролл без «отскока» внутри карточек */
+.is-mobile .matrix-scroll,
+.is-mobile .saved-card-preview,
+.is-mobile .history-item-preview {
+    -webkit-overflow-scrolling: touch;
+}
+
+/* =============================================================================
+   ТОСТЫ — поднимаем над tabbar
+   ============================================================================= */
+.is-mobile .toast-container {
+    bottom: calc(var(--mobile-tabbar-height) + var(--mobile-safe-bottom) + 16px);
+    left: var(--mobile-gutter);
+    right: var(--mobile-gutter);
+}
+
+/* =============================================================================
+   SAFE-AREA ДЛЯ FOOTER
+   ============================================================================= */
+.is-mobile .app-footer {
+    padding-bottom: calc(24px + var(--mobile-safe-bottom) + var(--mobile-tabbar-height));
+}
+
+/* =============================================================================
+   АНИМАЦИИ
+   ============================================================================= */
+@media (prefers-reduced-motion: reduce) {
+    .is-mobile *,
+    .is-mobile *::before,
+    .is-mobile *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
+}

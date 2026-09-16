@@ -1,0 +1,798 @@
+{% extends "matrix_app/base.html" %}
+{% load static matrix_icons %}
+
+{% block title %}Сохранённые матрицы{% endblock %}
+
+{% block meta_description %}
+Именованные матрицы, сохранённые в браузере: открыть, переименовать,
+использовать повторно в калькуляторе.
+{% endblock %}
+
+
+{% block extra_head %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'matrix_app/css/calculator.css' %}">
+
+<style>
+/* =============================================================================
+   Сохранённые матрицы — только специфика страницы.
+   -----------------------------------------------------------------------------
+   Из main.css / calculator.css уже приходят:
+     .page-head, .breadcrumbs, .page-title, .page-subtitle, .page-head-actions,
+     .btn, .btn-primary, .btn-soft, .btn-ghost, .btn-sm,
+     .modal, .modal-backdrop, .modal-dialog, .modal-dialog--md, .modal-dialog--lg,
+     .modal-head, .modal-body, .modal-foot, .modal-close, .modal-hint,
+     .icon-btn, .icon-btn--danger.
+
+   Здесь — только .saved-* и уточнения .modal-head-* / .field-*.
+   ============================================================================= */
+
+
+/* =============================================================================
+   1. РАСКЛАДКА
+   ============================================================================= */
+.saved-layout {
+    padding: 40px 0 96px;
+}
+
+
+/* =============================================================================
+   2. СТАТИСТИКА
+   ============================================================================= */
+.saved-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.saved-stat {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 22px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.03),
+        0 4px 16px -4px var(--accent-glow);
+    transition:
+        transform var(--dur-base) var(--ease-out),
+        box-shadow var(--dur-base),
+        border-color var(--dur-base);
+}
+
+.saved-stat:hover {
+    transform: translateY(-3px);
+    border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+    box-shadow: 0 16px 32px -12px var(--accent-glow);
+}
+
+.saved-stat-icon {
+    width: 48px;
+    height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    color: #fff;
+    border-radius: var(--radius-md);
+    box-shadow: 0 8px 18px -6px var(--accent-glow);
+    flex-shrink: 0;
+}
+
+.saved-stat-icon .ml-icon,
+.saved-stat-icon svg {
+    width: 20px;
+    height: 20px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+    color: #fff;
+}
+
+.saved-stat-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.saved-stat-value {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.15;
+}
+
+.saved-stat-label {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-dim);
+}
+
+
+/* =============================================================================
+   3. СЕТКА И КАРТОЧКИ
+   ============================================================================= */
+.saved-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+}
+
+.saved-card {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 22px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.03),
+        0 4px 16px -4px var(--accent-glow);
+    transition:
+        transform var(--dur-base) var(--ease-out),
+        box-shadow var(--dur-base),
+        border-color var(--dur-base);
+    position: relative;
+}
+
+.saved-card:hover {
+    transform: translateY(-4px);
+    border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+    box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.04),
+        0 24px 48px -16px var(--accent-glow);
+}
+
+.saved-card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.saved-card-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    flex: 1;
+}
+
+.saved-card-letter {
+    width: 44px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    color: #fff;
+    font-size: 18px;
+    font-weight: 800;
+    border-radius: var(--radius-md);
+    box-shadow: 0 8px 18px -6px var(--accent-glow);
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.saved-card-title-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.saved-card-title h3 {
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    margin: 0;
+    color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.saved-card-shape {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    align-self: flex-start;
+    padding: 3px 9px;
+    background: color-mix(in srgb, #06B6D4 8%, transparent);
+    border: 1px solid color-mix(in srgb, #06B6D4 20%, transparent);
+    border-radius: var(--radius-full);
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #0891B2;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.saved-card-shape .ml-icon,
+.saved-card-shape svg {
+    width: 12px;
+    height: 12px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+    color: inherit;
+}
+
+.saved-card-menu {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+
+/* =============================================================================
+   4. ПРЕВЬЮ МАТРИЦЫ
+   ============================================================================= */
+.saved-card-preview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 120px;
+    padding: 16px;
+    background:
+        linear-gradient(135deg,
+            color-mix(in srgb, var(--accent-1) 5%, transparent),
+            color-mix(in srgb, var(--accent-2) 5%, transparent)),
+        color-mix(in srgb, var(--surface) 60%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent) 12%, transparent);
+    border-radius: var(--radius-md);
+    overflow-x: auto;
+    position: relative;
+}
+
+.saved-card-preview::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(to right,
+            color-mix(in srgb, var(--accent) 5%, transparent) 1px, transparent 1px),
+        linear-gradient(to bottom,
+            color-mix(in srgb, var(--accent) 5%, transparent) 1px, transparent 1px);
+    background-size: 20px 20px;
+    pointer-events: none;
+    border-radius: inherit;
+}
+
+.saved-card-preview-placeholder {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-dim);
+    position: relative;
+    z-index: 1;
+}
+
+.saved-card-preview-placeholder .ml-icon,
+.saved-card-preview-placeholder svg {
+    width: 20px;
+    height: 20px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+    color: var(--accent);
+    opacity: 0.6;
+}
+
+
+/* =============================================================================
+   5. ЗАМЕТКА И ПОДВАЛ КАРТОЧКИ
+   ============================================================================= */
+.saved-card-notes {
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--text-dim);
+    margin: 0;
+    padding: 10px 12px;
+    background: color-mix(in srgb, #F59E0B 6%, transparent);
+    border: 1px solid color-mix(in srgb, #F59E0B 18%, transparent);
+    border-radius: var(--radius-sm);
+}
+
+.saved-card-notes .ml-icon,
+.saved-card-notes svg {
+    width: 12px;
+    height: 12px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+    color: #F59E0B;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.saved-card-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-top: 14px;
+    border-top: 1px dashed color-mix(in srgb, var(--accent) 20%, transparent);
+    flex-wrap: wrap;
+}
+
+.saved-card-time {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-dim);
+    font-variant-numeric: tabular-nums;
+}
+
+.saved-card-time .ml-icon,
+.saved-card-time svg {
+    width: 12px;
+    height: 12px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+    opacity: 0.7;
+    color: inherit;
+}
+
+.btn-xs {
+    padding: 6px 12px;
+    font-size: 12px;
+    border-radius: var(--radius-sm);
+}
+
+.btn-xs .ml-icon,
+.btn-xs svg {
+    width: 12px;
+    height: 12px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+    color: inherit;
+}
+
+
+/* =============================================================================
+   6. ПУСТОЕ СОСТОЯНИЕ
+   ============================================================================= */
+.saved-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 72px 24px;
+    background: color-mix(in srgb, var(--surface) 70%, transparent);
+    border: 1px dashed color-mix(in srgb, var(--accent) 25%, transparent);
+    border-radius: var(--radius-xl);
+}
+
+.saved-empty-icon {
+    width: 96px;
+    height: 96px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg,
+        color-mix(in srgb, var(--accent-1) 12%, transparent),
+        color-mix(in srgb, var(--accent-2) 12%, transparent));
+    border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+    border-radius: var(--radius-xl);
+    color: var(--accent);
+}
+
+.saved-empty-icon .ml-icon,
+.saved-empty-icon svg {
+    width: 48px;
+    height: 48px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+    color: var(--accent);
+}
+
+.saved-empty h2 {
+    font-size: clamp(20px, 2.4vw, 26px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0 0 10px;
+    color: var(--text);
+}
+
+.saved-empty p {
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: var(--text-dim);
+    margin: 0 0 24px;
+    max-width: 480px;
+}
+
+.saved-empty .btn-primary {
+    box-shadow:
+        0 8px 20px -6px var(--accent-glow),
+        0 0 0 1px color-mix(in srgb, var(--accent) 10%, transparent);
+    transition: transform var(--dur-fast), box-shadow var(--dur-base);
+}
+
+.saved-empty .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 16px 32px -8px var(--accent-glow),
+        0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+
+/* =============================================================================
+   7. МОДАЛКА — уточнения поверх calculator.css
+   ============================================================================= */
+.modal-head-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.modal-head-icon {
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    color: #fff;
+    border-radius: var(--radius-sm);
+    box-shadow: 0 6px 14px -4px var(--accent-glow);
+    flex-shrink: 0;
+}
+
+.modal-head-icon .ml-icon,
+.modal-head-icon svg {
+    width: 18px;
+    height: 18px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+    color: #fff;
+}
+
+
+/* =============================================================================
+   8. ПОЛЯ ФОРМЫ
+   ============================================================================= */
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.field-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+}
+
+.field-label .ml-icon,
+.field-label svg {
+    width: 12px;
+    height: 12px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+    color: var(--accent);
+}
+
+.field-input {
+    width: 100%;
+    padding: 11px 14px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    transition:
+        border-color var(--dur-fast),
+        box-shadow var(--dur-fast),
+        background-color var(--dur-fast);
+}
+
+.field-input:hover {
+    border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+.field-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 15%, transparent);
+}
+
+.field-input::placeholder {
+    color: var(--text-dim);
+    opacity: 0.6;
+    font-weight: 500;
+}
+
+.field-textarea {
+    resize: vertical;
+    min-height: 80px;
+    line-height: 1.55;
+}
+
+
+/* =============================================================================
+   9. АДАПТИВ
+   ============================================================================= */
+@media (max-width: 992px) {
+    .saved-layout { padding: 32px 0 64px; }
+    .saved-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+}
+
+@media (max-width: 640px) {
+    .saved-stats { grid-template-columns: 1fr; }
+    .saved-grid { grid-template-columns: 1fr; }
+    .saved-empty { padding: 48px 20px; }
+    .saved-empty .btn-primary { width: 100%; justify-content: center; }
+
+    .saved-card-foot {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .saved-card-foot .btn { width: 100%; justify-content: center; }
+    .saved-card-time { justify-content: center; }
+}
+</style>
+{% endblock %}
+
+
+{% block content %}
+
+<!-- ================================================================
+     Заголовок
+     ================================================================ -->
+<section class="page-head">
+    <div class="container">
+        <nav class="breadcrumbs" aria-label="Навигационная цепочка">
+            <a href="{% url 'matrix_app:home' %}">Главная</a>
+            <span class="breadcrumbs-sep">/</span>
+            <span aria-current="page">Сохранённые матрицы</span>
+        </nav>
+        <div class="page-head-row">
+            <div>
+                <h1 class="page-title">Сохранённые матрицы</h1>
+                <p class="page-subtitle">
+                    Именованные матрицы, которые можно открыть, переименовать
+                    или использовать повторно в калькуляторе.
+                </p>
+            </div>
+            <div class="page-head-actions">
+                <a href="{% url 'matrix_app:calculator' %}" class="btn btn-primary btn-sm">
+                    {% icon "plus" size=14 %}
+                    <span>Новая матрица</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ================================================================
+     Список сохранённых матриц
+     ================================================================ -->
+<section class="saved-layout">
+    <div class="container">
+
+        {% if saved %}
+
+            <!-- Статистика -->
+            <div class="saved-stats">
+                <div class="saved-stat">
+                    <span class="saved-stat-icon" aria-hidden="true">
+                        {% icon "square-matrix" size=20 %}
+                    </span>
+                    <div class="saved-stat-body">
+                        <span class="saved-stat-value">{{ saved|length }}</span>
+                        <span class="saved-stat-label">
+                            {% if saved|length == 1 %}матрица{% elif saved|length < 5 %}матрицы{% else %}матриц{% endif %}
+                        </span>
+                    </div>
+                </div>
+                <div class="saved-stat">
+                    <span class="saved-stat-icon" aria-hidden="true">
+                        {% icon "clock" size=20 %}
+                    </span>
+                    <div class="saved-stat-body">
+                        <span class="saved-stat-value">
+                            {% if saved.0.updated_at %}{{ saved.0.updated_at|date:"H:i" }}{% else %}—{% endif %}
+                        </span>
+                        <span class="saved-stat-label">последнее обновление</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Сетка карточек -->
+            <div class="saved-grid">
+                {% for item in saved %}
+                    <article class="saved-card" data-saved-item="{{ item.pk }}">
+
+                        <header class="saved-card-head">
+                            <div class="saved-card-title">
+                                <span class="saved-card-letter" aria-hidden="true">
+                                    {{ item.name|first|upper }}
+                                </span>
+                                <div class="saved-card-title-text">
+                                    <h3>{{ item.name }}</h3>
+                                    <span class="saved-card-shape">
+                                        {% icon "square-matrix" size=12 %}
+                                        <span>{{ item.shape_label }}</span>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="saved-card-menu">
+                                <button type="button"
+                                        class="icon-btn icon-btn--sm"
+                                        data-saved-use="{{ item.pk }}"
+                                        title="Использовать в калькуляторе"
+                                        aria-label="Использовать в калькуляторе">
+                                    {% icon "arrow-right" size=14 %}
+                                </button>
+                                <button type="button"
+                                        class="icon-btn icon-btn--sm icon-btn--danger"
+                                        data-saved-delete="{{ item.pk }}"
+                                        title="Удалить"
+                                        aria-label="Удалить матрицу">
+                                    {% icon "trash" size=14 %}
+                                </button>
+                            </div>
+                        </header>
+
+                        <!-- Превью матрицы (заполняется JS через MathJax) -->
+                        <div class="saved-card-preview" data-saved-preview="{{ item.pk }}">
+                            <span class="saved-card-preview-placeholder">
+                                {% icon "matrix-grid" size=20 %}
+                                <span>Загрузка…</span>
+                            </span>
+                        </div>
+
+                        {% if item.notes %}
+                            <p class="saved-card-notes">
+                                {% icon "file-text" size=12 %}
+                                <span>{{ item.notes }}</span>
+                            </p>
+                        {% endif %}
+
+                        <footer class="saved-card-foot">
+                            <time class="saved-card-time" datetime="{{ item.updated_at|date:'c' }}">
+                                {% icon "clock" size=12 %}
+                                <span>{{ item.updated_at|date:"d.m.Y H:i" }}</span>
+                            </time>
+                            <button type="button"
+                                    class="btn btn-soft btn-xs"
+                                    data-saved-use="{{ item.pk }}">
+                                {% icon "calculator" size=12 %}
+                                <span>Использовать</span>
+                            </button>
+                        </footer>
+
+                        <!-- Данные матрицы в JSON — безопасный json_script -->
+                        {{ item.matrix_data|json_script:item.pk }}
+                    </article>
+                {% endfor %}
+            </div>
+
+        {% else %}
+
+            <!-- Пустое состояние -->
+            <div class="saved-empty">
+                <div class="saved-empty-icon" aria-hidden="true">
+                    {% icon "square-matrix" size=48 %}
+                </div>
+                <h2>Сохранённых матриц пока нет</h2>
+                <p>
+                    Сохраните матрицу в калькуляторе, чтобы вернуться к ней позже.
+                    Сохранённые матрицы доступны только в этом браузере.
+                </p>
+                <a href="{% url 'matrix_app:calculator' %}" class="btn btn-primary">
+                    {% icon "calculator" size=16 %}
+                    <span>Открыть калькулятор</span>
+                </a>
+            </div>
+
+        {% endif %}
+
+    </div>
+</section>
+
+
+<!-- ================================================================
+     Модальное окно для сохранения
+     ================================================================ -->
+<div class="modal" id="saved-modal" data-saved-modal hidden>
+    <div class="modal-backdrop" data-saved-modal-close></div>
+    <div class="modal-dialog modal-dialog--md"
+         role="dialog"
+         aria-labelledby="saved-modal-title"
+         aria-modal="true">
+        <header class="modal-head">
+            <div class="modal-head-title">
+                <div class="modal-head-icon" aria-hidden="true">
+                    {% icon "clipboard" size=18 %}
+                </div>
+                <h3 id="saved-modal-title">Сохранить матрицу</h3>
+            </div>
+            <button type="button" class="modal-close"
+                    data-saved-modal-close aria-label="Закрыть">
+                {% icon "close" size=16 %}
+            </button>
+        </header>
+
+        <div class="modal-body">
+            <label class="field">
+                <span class="field-label">
+                    {% icon "edit" size=12 %}
+                    <span>Название матрицы</span>
+                </span>
+                <input type="text"
+                       class="field-input"
+                       placeholder="Например, «Матрица A из задачи 3.4»"
+                       data-saved-name
+                       maxlength="120"
+                       autocomplete="off">
+            </label>
+
+            <label class="field">
+                <span class="field-label">
+                    {% icon "file-text" size=12 %}
+                    <span>Заметка (необязательно)</span>
+                </span>
+                <textarea class="field-input field-textarea"
+                          rows="3"
+                          placeholder="Зачем эта матрица сохранена"
+                          data-saved-notes></textarea>
+            </label>
+
+            <p class="modal-hint">
+                {% icon "check-circle" size=14 %}
+                <span>Матрица сохраняется в точной форме — дроби, корни и комплексные числа не теряют точности.</span>
+            </p>
+        </div>
+
+        <footer class="modal-foot">
+            <button type="button" class="btn btn-ghost" data-saved-modal-close>Отмена</button>
+            <button type="button" class="btn btn-primary" data-saved-save>
+                {% icon "clipboard" size=14 %}
+                <span>Сохранить</span>
+            </button>
+        </footer>
+    </div>
+</div>
+
+{% endblock %}
+
+
+{% block extra_scripts %}
+{{ block.super }}
+<script src="{% static 'matrix_app/js/matrix.js' %}"></script>
+<script src="{% static 'matrix_app/js/saved.js' %}"></script>
+{% endblock %}

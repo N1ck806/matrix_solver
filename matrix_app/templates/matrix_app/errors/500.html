@@ -1,0 +1,52 @@
+{% extends "matrix_app/base.html" %}
+{% load static %}
+
+{% block title %}Внутренняя ошибка сервера — 500{% endblock %}
+
+{% block content %}
+
+<section class="error-page">
+    <div class="container error-page-inner">
+
+        <div class="error-page-code" aria-hidden="true">
+            <span class="error-page-digit">5</span>
+            <span class="error-page-digit error-page-digit--accent">0</span>
+            <span class="error-page-digit">0</span>
+        </div>
+
+        <div class="error-page-body">
+            <h1 class="error-page-title">Внутренняя ошибка сервера</h1>
+            <p class="error-page-message">
+                Что-то пошло не так на стороне сервера. Мы уже получили
+                информацию об ошибке. Попробуйте обновить страницу или
+                вернуться позже.
+            </p>
+
+            <div class="error-page-hints">
+                <h2 class="error-page-hints-title">Что можно сделать</h2>
+                <ul class="error-page-hints-list">
+                    <li>Обновите страницу — возможно, это была временная проблема.</li>
+                    <li>Вернитесь на предыдущую страницу и попробуйте снова.</li>
+                    <li>Если ошибка повторяется, попробуйте уменьшить размер матрицы или упростить ввод.</li>
+                    <li>Проверьте корректность введённых данных — особенно если использовались символьные выражения.</li>
+                </ul>
+            </div>
+
+            <div class="error-page-actions">
+                <a href="{% url 'matrix_app:home' %}" class="btn btn-primary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                        <polyline points="9 22 9 12 15 12 15 22"/>
+                    </svg>
+                    На главную
+                </a>
+                <button type="button" class="btn btn-ghost" onclick="window.location.reload()">
+                    Обновить страницу
+                </button>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+{% endblock %}

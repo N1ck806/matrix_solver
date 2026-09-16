@@ -1,0 +1,183 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" fill="none"
+     role="img" aria-label="Норма матрицы"
+     class="ml-feature-svg ml-feature-svg--norm"
+     preserveAspectRatio="xMidYMid meet"
+     font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">
+
+  <defs>
+    <radialGradient id="nrm-core" cx="0.38" cy="0.32" r="0.78">
+      <stop offset="0" stop-color="#E9D5FF">
+        <animate attributeName="stop-color"
+                 values="#E9D5FF;#D8B4FE;#A855F7;#E9D5FF"
+                 dur="14s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="0.45" stop-color="#A855F7">
+        <animate attributeName="stop-color"
+                 values="#A855F7;#9333EA;#7E22CE;#A855F7"
+                 dur="14s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="1" stop-color="#3B0764"/>
+    </radialGradient>
+
+    <radialGradient id="nrm-glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"    stop-color="#FFFFFF" stop-opacity="1"/>
+      <stop offset="0.35" stop-color="#F3E8FF" stop-opacity="0.7"/>
+      <stop offset="0.7"  stop-color="#D8B4FE" stop-opacity="0.3"/>
+      <stop offset="1"    stop-color="#9333EA" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="nrm-hl" cx="0.34" cy="0.24" r="0.72">
+      <stop offset="0"   stop-color="#FFFFFF" stop-opacity="0.95"/>
+      <stop offset="0.4" stop-color="#FFFFFF" stop-opacity="0.18"/>
+      <stop offset="1"   stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="nrm-orbit" x1="0" y1="0" x2="96" y2="96"
+                    gradientUnits="userSpaceOnUse">
+      <stop offset="0"   stop-color="#D8B4FE"/>
+      <stop offset="0.5" stop-color="#A855F7"/>
+      <stop offset="1"   stop-color="#7E22CE"/>
+    </linearGradient>
+
+    <linearGradient id="nrm-orbit-2" x1="96" y1="0" x2="0" y2="96"
+                    gradientUnits="userSpaceOnUse">
+      <stop offset="0"   stop-color="#A5F3FC"/>
+      <stop offset="1"   stop-color="#A855F7"/>
+    </linearGradient>
+
+    <linearGradient id="nrm-text" x1="0" y1="0" x2="96" y2="0"
+                    gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7E22CE">
+        <animate attributeName="stop-color"
+                 values="#7E22CE;#A855F7;#D8B4FE;#7E22CE"
+                 dur="8s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="1" stop-color="#A855F7">
+        <animate attributeName="stop-color"
+                 values="#A855F7;#D8B4FE;#E9D5FF;#A855F7"
+                 dur="8s" repeatCount="indefinite"/>
+      </stop>
+    </linearGradient>
+
+    <radialGradient id="nrm-spark" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"   stop-color="#FFFFFF"/>
+      <stop offset="0.4" stop-color="#E9D5FF"/>
+      <stop offset="1"   stop-color="#A855F7" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="nrm-spark-cool" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"   stop-color="#FFFFFF"/>
+      <stop offset="0.4" stop-color="#A5F3FC"/>
+      <stop offset="1"   stop-color="#06B6D4" stop-opacity="0"/>
+    </radialGradient>
+
+    <filter id="nrm-spark-glow" x="-400%" y="-400%" width="900%" height="900%">
+      <feGaussianBlur stdDeviation="1.8"/>
+    </filter>
+    <filter id="nrm-core-shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2.2"/>
+      <feOffset dx="0" dy="1.6"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.38"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="nrm-orbit-glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1"/>
+    </filter>
+
+    <clipPath id="nrm-core-clip">
+      <circle cx="48" cy="46" r="13"/>
+    </clipPath>
+  </defs>
+
+  <circle cx="48" cy="48" r="46" fill="url(#nrm-glow)" opacity="0.16">
+    <animate attributeName="r" values="46;48;46" dur="6s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.16;0.22;0.16" dur="6s" repeatCount="indefinite"/>
+  </circle>
+
+  <g transform="translate(48 46)">
+    <g>
+      <animateTransform attributeName="transform" type="rotate"
+                        from="0 0 0" to="360 0 0" dur="24s" repeatCount="indefinite"/>
+      <ellipse cx="0" cy="0" rx="32" ry="9.5"
+               fill="none" stroke="url(#nrm-orbit)"
+               stroke-width="1.5" opacity="0.85"
+               transform="rotate(-28)"/>
+      <ellipse cx="0" cy="0" rx="32" ry="9.5"
+               fill="none" stroke="#A855F7" stroke-width="3.2"
+               opacity="0.14" filter="url(#nrm-orbit-glow)"
+               transform="rotate(-28)"/>
+      <g transform="rotate(-28)">
+        <circle cx="32" cy="0" r="2.4"
+                fill="url(#nrm-spark)" filter="url(#nrm-spark-glow)">
+          <animate attributeName="r" values="2.4;3;2.4" dur="2.4s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="32" cy="0" r="1.05" fill="#FFFFFF"/>
+      </g>
+    </g>
+
+    <g>
+      <animateTransform attributeName="transform" type="rotate"
+                        from="360 0 0" to="0 0 0" dur="34s" repeatCount="indefinite"/>
+      <ellipse cx="0" cy="0" rx="30" ry="8"
+               fill="none" stroke="url(#nrm-orbit-2)"
+               stroke-width="0.9" opacity="0.55"
+               transform="rotate(38)"/>
+      <g transform="rotate(38)">
+        <circle cx="-30" cy="0" r="1.4"
+                fill="url(#nrm-spark-cool)" filter="url(#nrm-spark-glow)">
+          <animate attributeName="r" values="1.4;1.9;1.4" dur="3s" repeatCount="indefinite"/>
+        </circle>
+      </g>
+    </g>
+  </g>
+
+  <g filter="url(#nrm-core-shadow)">
+    <circle cx="48" cy="46" r="17.5" fill="url(#nrm-glow)" opacity="0.5">
+      <animate attributeName="r" values="17.5;19.5;17.5" dur="5s" repeatCount="indefinite"/>
+    </circle>
+
+    <circle cx="48" cy="46" r="13" fill="url(#nrm-core)"/>
+    <circle cx="48" cy="46" r="13" fill="url(#nrm-hl)"/>
+    <circle cx="48" cy="46" r="12.5" fill="none"
+            stroke="#FFFFFF" stroke-opacity="0.4" stroke-width="0.7"/>
+
+    <g clip-path="url(#nrm-core-clip)">
+      <!-- Вертикальные двойные черты нормы -->
+      <path d="M40 41 L40 51 M42.5 41 L42.5 51"
+            stroke="#3B0764" stroke-opacity="0.95" stroke-width="1.4"
+            stroke-linecap="round"/>
+      <path d="M53.5 41 L53.5 51 M56 41 L56 51"
+            stroke="#3B0764" stroke-opacity="0.95" stroke-width="1.4"
+            stroke-linecap="round"/>
+
+      <!-- Внутри: вектор -->
+      <path d="M45 50 L51 42"
+            stroke="#3B0764" stroke-opacity="0.9" stroke-width="1.3"
+            stroke-linecap="round"/>
+      <path d="M50 42.6 L51 42 L50.4 43.2"
+            stroke="#3B0764" stroke-opacity="0.9" stroke-width="1.3"
+            stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </g>
+
+    <circle cx="48" cy="46" r="2.4" fill="url(#nrm-glow)" opacity="0.85">
+      <animate attributeName="r" values="2.4;3.2;2.4" dur="3.6s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <circle cx="14" cy="14" r="1.3" fill="url(#nrm-spark-cool)" filter="url(#nrm-spark-glow)">
+    <animate attributeName="opacity" values="1;0.4;1" dur="4s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="82" cy="18" r="1.4" fill="url(#nrm-spark)" filter="url(#nrm-spark-glow)">
+    <animate attributeName="opacity" values="0.9;0.3;0.9" dur="5s" begin="0.8s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="84" cy="80" r="1.2" fill="url(#nrm-spark-cool)" filter="url(#nrm-spark-glow)">
+    <animate attributeName="opacity" values="1;0.4;1" dur="4.5s" begin="1.2s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="12" cy="82" r="1" fill="url(#nrm-spark)" filter="url(#nrm-spark-glow)">
+    <animate attributeName="opacity" values="0.7;0.2;0.7" dur="3.5s" begin="0.4s" repeatCount="indefinite"/>
+  </circle>
+
+  <text x="48" y="86" font-size="8" font-weight="700"
+        letter-spacing="0.06em" text-anchor="middle"
+        fill="url(#nrm-text)">‖A‖</text>
+</svg>

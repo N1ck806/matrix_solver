@@ -1,0 +1,276 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 560" fill="none"
+     role="img" aria-label="Воронка продаж и матрица переходов">
+    <defs>
+        <linearGradient id="ef-bg" x1="0" y1="0" x2="800" y2="560" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#10B981" stop-opacity="0.06"/>
+            <stop offset="1" stop-color="#EC4899" stop-opacity="0.06"/>
+        </linearGradient>
+        <linearGradient id="ef-stage1" x1="0" y1="0" x2="1" y2="0">
+            <stop stop-color="#10B981"/>
+            <stop offset="1" stop-color="#059669"/>
+        </linearGradient>
+        <linearGradient id="ef-stage2" x1="0" y1="0" x2="1" y2="0">
+            <stop stop-color="#22D3EE"/>
+            <stop offset="1" stop-color="#0891B2"/>
+        </linearGradient>
+        <linearGradient id="ef-stage3" x1="0" y1="0" x2="1" y2="0">
+            <stop stop-color="#8B5CF6"/>
+            <stop offset="1" stop-color="#7C3AED"/>
+        </linearGradient>
+        <linearGradient id="ef-stage4" x1="0" y1="0" x2="1" y2="0">
+            <stop stop-color="#EC4899"/>
+            <stop offset="1" stop-color="#BE185D"/>
+        </linearGradient>
+        <filter id="ef-glow" x="-40%" y="-40%" width="180%" height="180%">
+            <feGaussianBlur stdDeviation="4" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <marker id="ef-arrow" viewBox="0 0 10 10" refX="9" refY="5"
+                markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M0,0 L10,5 L0,10 Z" fill="#7C3AED"/>
+        </marker>
+    </defs>
+
+    <rect width="800" height="560" fill="url(#ef-bg)" rx="24"/>
+
+    <!-- Заголовок -->
+    <rect x="200" y="20" width="400" height="52" rx="26"
+          fill="#EC4899" fill-opacity="0.10"
+          stroke="#EC4899" stroke-opacity="0.4" stroke-width="1.5"/>
+    <text x="400" y="52" text-anchor="middle"
+          font-family="system-ui, -apple-system, sans-serif"
+          font-size="20" font-weight="800" fill="#BE185D">
+        Воронка продаж: матрица переходов
+    </text>
+
+    <!-- ============================================================
+         ЛЕВАЯ ЧАСТЬ: воронка
+         ============================================================ -->
+    <g transform="translate(40, 100)">
+
+        <rect x="0" y="0" width="360" height="380" rx="14"
+              fill="#FFFFFF" fill-opacity="0.6"
+              stroke="#EC4899" stroke-opacity="0.25" stroke-width="1.2"/>
+
+        <text x="180" y="24" text-anchor="middle"
+              font-family="system-ui, sans-serif"
+              font-size="12" font-weight="800" fill="#BE185D"
+              letter-spacing="1">ВОРОНКА (4 ЭТАПА)</text>
+
+        <!-- Этап 1 — визит -->
+        <g transform="translate(30, 60)">
+            <rect x="0" y="0" width="300" height="52" rx="10"
+                  fill="url(#ef-stage1)" filter="url(#ef-glow)"/>
+            <text x="20" y="22" font-family="system-ui, sans-serif"
+                  font-size="13" font-weight="800" fill="#FFFFFF">ВИЗИТ</text>
+            <text x="20" y="40" font-family="system-ui, sans-serif"
+                  font-size="11" fill="#FFFFFF" fill-opacity="0.85">100 000 пользователей</text>
+            <text x="280" y="32" text-anchor="end" font-family="ui-monospace, monospace"
+                  font-size="16" font-weight="800" fill="#FFFFFF">100%</text>
+        </g>
+
+        <!-- Стрелка вниз -->
+        <g transform="translate(180, 118)">
+            <line x1="0" y1="0" x2="0" y2="16"
+                  stroke="#7C3AED" stroke-width="2.5" stroke-linecap="round"
+                  marker-end="url(#ef-arrow)"/>
+            <text x="24" y="12" font-family="system-ui, sans-serif"
+                  font-size="10" fill="#7C3AED" font-weight="700">×0.5</text>
+        </g>
+
+        <!-- Этап 2 — просмотр -->
+        <g transform="translate(60, 142)">
+            <rect x="0" y="0" width="240" height="52" rx="10"
+                  fill="url(#ef-stage2)" filter="url(#ef-glow)"/>
+            <text x="20" y="22" font-family="system-ui, sans-serif"
+                  font-size="13" font-weight="800" fill="#FFFFFF">ПРОСМОТР</text>
+            <text x="20" y="40" font-family="system-ui, sans-serif"
+                  font-size="11" fill="#FFFFFF" fill-opacity="0.85">50 000 просмотров</text>
+            <text x="220" y="32" text-anchor="end" font-family="ui-monospace, monospace"
+                  font-size="16" font-weight="800" fill="#FFFFFF">50%</text>
+        </g>
+
+        <!-- Стрелка вниз -->
+        <g transform="translate(180, 200)">
+            <line x1="0" y1="0" x2="0" y2="16"
+                  stroke="#7C3AED" stroke-width="2.5" stroke-linecap="round"
+                  marker-end="url(#ef-arrow)"/>
+            <text x="24" y="12" font-family="system-ui, sans-serif"
+                  font-size="10" fill="#7C3AED" font-weight="700">×0.3</text>
+        </g>
+
+        <!-- Этап 3 — корзина -->
+        <g transform="translate(90, 224)">
+            <rect x="0" y="0" width="180" height="52" rx="10"
+                  fill="url(#ef-stage3)" filter="url(#ef-glow)"/>
+            <text x="20" y="22" font-family="system-ui, sans-serif"
+                  font-size="13" font-weight="800" fill="#FFFFFF">КОРЗИНА</text>
+            <text x="20" y="40" font-family="system-ui, sans-serif"
+                  font-size="11" fill="#FFFFFF" fill-opacity="0.85">15 000 корзин</text>
+            <text x="160" y="32" text-anchor="end" font-family="ui-monospace, monospace"
+                  font-size="16" font-weight="800" fill="#FFFFFF">15%</text>
+        </g>
+
+        <!-- Стрелка вниз -->
+        <g transform="translate(180, 282)">
+            <line x1="0" y1="0" x2="0" y2="16"
+                  stroke="#7C3AED" stroke-width="2.5" stroke-linecap="round"
+                  marker-end="url(#ef-arrow)"/>
+            <text x="24" y="12" font-family="system-ui, sans-serif"
+                  font-size="10" fill="#7C3AED" font-weight="700">×0.4</text>
+        </g>
+
+        <!-- Этап 4 — покупка -->
+        <g transform="translate(120, 306)">
+            <rect x="0" y="0" width="120" height="52" rx="10"
+                  fill="url(#ef-stage4)" filter="url(#ef-glow)"/>
+            <text x="20" y="22" font-family="system-ui, sans-serif"
+                  font-size="13" font-weight="800" fill="#FFFFFF">ПОКУПКА</text>
+            <text x="20" y="40" font-family="system-ui, sans-serif"
+                  font-size="11" fill="#FFFFFF" fill-opacity="0.85">6 000 заказов</text>
+            <text x="106" y="32" text-anchor="end" font-family="ui-monospace, monospace"
+                  font-size="16" font-weight="800" fill="#FFFFFF">6%</text>
+        </g>
+    </g>
+
+    <!-- СТРЕЛКА → -->
+    <g transform="translate(420, 290)">
+        <line x1="0" y1="0" x2="28" y2="0"
+              stroke="#7C3AED" stroke-width="3" stroke-linecap="round"/>
+        <polygon points="28,-6 42,0 28,6" fill="#7C3AED"/>
+    </g>
+
+    <!-- ============================================================
+         ПРАВАЯ ЧАСТЬ: матрица переходов
+         ============================================================ -->
+    <g transform="translate(475, 100)">
+
+        <rect x="0" y="0" width="295" height="380" rx="14"
+              fill="#FFFFFF" fill-opacity="0.6"
+              stroke="#EC4899" stroke-opacity="0.25" stroke-width="1.2"/>
+
+        <text x="147" y="24" text-anchor="middle"
+              font-family="system-ui, sans-serif"
+              font-size="12" font-weight="800" fill="#BE185D"
+              letter-spacing="1">МАТРИЦА P (4 × 4)</text>
+
+        <!-- Заголовки столбцов -->
+        <g font-family="ui-monospace, monospace" font-size="10"
+           font-weight="800" fill="#6B7280" text-anchor="middle">
+            <text x="95"  y="52">В</text>
+            <text x="145" y="52">П</text>
+            <text x="195" y="52">К</text>
+            <text x="245" y="52">Пк</text>
+        </g>
+
+        <!-- Заголовки строк -->
+        <g font-family="ui-monospace, monospace" font-size="10"
+           font-weight="800" fill="#6B7280" text-anchor="end">
+            <text x="80" y="83">В</text>
+            <text x="80" y="133">П</text>
+            <text x="80" y="183">К</text>
+            <text x="80" y="233">Пк</text>
+        </g>
+
+        <!-- Ячейки матрицы 4×4 -->
+        <g transform="translate(85, 62)">
+            <!-- Строка 1 (В) -->
+            <rect x="0"   y="0"   width="44" height="44" rx="6" fill="#10B981" opacity="0.35"/>
+            <rect x="50"  y="0"   width="44" height="44" rx="6" fill="#10B981" opacity="0.55"/>
+            <rect x="100" y="0"   width="44" height="44" rx="6" fill="#10B981" opacity="0.08"/>
+            <rect x="150" y="0"   width="44" height="44" rx="6" fill="#10B981" opacity="0.02"/>
+
+            <!-- Строка 2 (П) -->
+            <rect x="0"   y="50"  width="44" height="44" rx="6" fill="#22D3EE" opacity="0.05"/>
+            <rect x="50"  y="50"  width="44" height="44" rx="6" fill="#22D3EE" opacity="0.30"/>
+            <rect x="100" y="50"  width="44" height="44" rx="6" fill="#22D3EE" opacity="0.55"/>
+            <rect x="150" y="50"  width="44" height="44" rx="6" fill="#22D3EE" opacity="0.10"/>
+
+            <!-- Строка 3 (К) -->
+            <rect x="0"   y="100" width="44" height="44" rx="6" fill="#8B5CF6" opacity="0.02"/>
+            <rect x="50"  y="100" width="44" height="44" rx="6" fill="#8B5CF6" opacity="0.05"/>
+            <rect x="100" y="100" width="44" height="44" rx="6" fill="#8B5CF6" opacity="0.40"/>
+            <rect x="150" y="100" width="44" height="44" rx="6" fill="#8B5CF6" opacity="0.55"/>
+
+            <!-- Строка 4 (Пк) -->
+            <rect x="0"   y="150" width="44" height="44" rx="6" fill="#EC4899" opacity="0.01"/>
+            <rect x="50"  y="150" width="44" height="44" rx="6" fill="#EC4899" opacity="0.02"/>
+            <rect x="100" y="150" width="44" height="44" rx="6" fill="#EC4899" opacity="0.05"/>
+            <rect x="150" y="150" width="44" height="44" rx="6" fill="#EC4899" opacity="0.95"/>
+
+            <!-- Значения -->
+            <g font-family="ui-monospace, monospace" font-size="11"
+               font-weight="800" text-anchor="middle">
+                <text x="22"  y="27"  fill="#FFFFFF">0.35</text>
+                <text x="72"  y="27"  fill="#FFFFFF">0.55</text>
+                <text x="122" y="27"  fill="#047857">0.08</text>
+                <text x="172" y="27"  fill="#047857">0.02</text>
+
+                <text x="22"  y="77"  fill="#0891B2">0.05</text>
+                <text x="72"  y="77"  fill="#FFFFFF">0.30</text>
+                <text x="122" y="77"  fill="#FFFFFF">0.55</text>
+                <text x="172" y="77"  fill="#0891B2">0.10</text>
+
+                <text x="22"  y="127" fill="#7C3AED">0.02</text>
+                <text x="72"  y="127" fill="#7C3AED">0.05</text>
+                <text x="122" y="127" fill="#FFFFFF">0.40</text>
+                <text x="172" y="127" fill="#FFFFFF">0.53</text>
+
+                <text x="22"  y="177" fill="#BE185D">0.00</text>
+                <text x="72"  y="177" fill="#BE185D">0.00</text>
+                <text x="122" y="177" fill="#BE185D">0.05</text>
+                <text x="172" y="177" fill="#FFFFFF">0.95</text>
+            </g>
+        </g>
+
+        <!-- Пояснение к матрице -->
+        <text x="147" y="245" text-anchor="middle"
+              font-family="system-ui, sans-serif"
+              font-size="10.5" fill="#6B7280">
+            P[i][j] — вероятность перейти из i в j
+        </text>
+        <text x="147" y="262" text-anchor="middle"
+              font-family="system-ui, sans-serif"
+              font-size="10.5" fill="#6B7280">
+            каждый столбец суммируется в 1
+        </text>
+
+        <!-- Прогноз: следующее состояние -->
+        <g transform="translate(25, 285)">
+            <rect x="0" y="0" width="245" height="75" rx="10"
+                  fill="#7C3AED" fill-opacity="0.08"
+                  stroke="#7C3AED" stroke-opacity="0.4" stroke-width="1.2"/>
+
+            <text x="122" y="22" text-anchor="middle"
+                  font-family="system-ui, sans-serif"
+                  font-size="11" font-weight="800" fill="#7C3AED"
+                  letter-spacing="0.8">ПРОГНОЗ ПОТОКА</text>
+
+            <text x="122" y="48" text-anchor="middle"
+                  font-family="ui-monospace, monospace"
+                  font-size="15" font-weight="800" fill="#7C3AED">
+                s(t+1) = P · s(t)
+            </text>
+
+            <text x="122" y="66" text-anchor="middle"
+                  font-family="system-ui, sans-serif"
+                  font-size="10" fill="#6B7280">
+                s — распределение пользователей
+            </text>
+        </g>
+    </g>
+
+    <!-- Нижняя плашка -->
+    <g transform="translate(30, 500)">
+        <rect x="0" y="0" width="740" height="40" rx="12"
+              fill="#FFFFFF" fill-opacity="0.9"
+              stroke="#EC4899" stroke-opacity="0.3" stroke-width="1.2"/>
+
+        <text x="370" y="26" text-anchor="middle"
+              font-family="system-ui, sans-serif"
+              font-size="11" fill="#6B7280">
+            Каждый этап воронки — состояние. Матрица P описывает, как пользователи переходят между этапами.
+            Стационарное распределение π показывает долгосрочные доли.
+        </text>
+    </g>
+</svg>

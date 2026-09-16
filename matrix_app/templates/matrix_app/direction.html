@@ -1,0 +1,946 @@
+{% extends "matrix_app/base.html" %}
+{% load static matrix_icons %}
+
+{% block title %}{{ direction.title }} — {{ school.title }}{% endblock %}
+{% block meta_description %}{{ direction.tagline }}{% endblock %}
+
+
+{% block extra_head %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'matrix_app/css/direction-page.css' %}">
+<link rel="stylesheet" href="{% static 'matrix_app/css/result-block.css' %}">
+{% endblock %}
+
+
+{% block content %}
+
+<div class="direction-page">
+
+<!-- ================================================================
+     Хлебные крошки
+     ================================================================ -->
+<section class="page-head">
+    <div class="container">
+        <nav class="breadcrumbs" aria-label="Навигационная цепочка">
+            <a href="{% url 'matrix_app:home' %}">Главная</a>
+            <span class="breadcrumbs-sep">/</span>
+            <a href="{% url 'matrix_app:modules' %}">Применение</a>
+            <span class="breadcrumbs-sep">/</span>
+            <a href="{% url 'matrix_app:school_detail' school.slug %}">{{ school.title }}</a>
+            <span class="breadcrumbs-sep">/</span>
+            <span aria-current="page">{{ direction.title }}</span>
+        </nav>
+    </div>
+</section>
+
+
+<!-- ================================================================
+     Hero направления
+     ================================================================ -->
+<section class="dir-hero">
+    <div class="container dir-hero__grid">
+
+        <div class="dir-hero__emblem" aria-hidden="true">
+            {% icon direction.icon size=120 %}
+        </div>
+
+        <div class="dir-hero__text">
+            <span class="dir-hero__kicker">
+                {% icon "modules" size=12 %}
+                <span>{{ school.title }}</span>
+            </span>
+
+            <h1 class="dir-hero__title">{{ direction.title }}</h1>
+            <p class="dir-hero__tagline">{{ direction.tagline }}</p>
+
+            <div class="dir-hero__meta">
+                {% if direction.operation %}
+                    <span class="dir-hero__meta-item">
+                        {% icon "calculator" size=13 %}
+                        <span>Операция: {{ direction.operation }}</span>
+                    </span>
+                {% endif %}
+                {% if content.theory %}
+                    <span class="dir-hero__meta-item">
+                        {% icon "book-open" size=13 %}
+                        <span>{{ content.theory|length }} блоков теории</span>
+                    </span>
+                {% endif %}
+                {% if content.notation %}
+                    <span class="dir-hero__meta-item">
+                        {% icon "sigma" size=13 %}
+                        <span>{{ content.notation|length }} обозначений</span>
+                    </span>
+                {% endif %}
+                {% if content.solved_examples %}
+                    <span class="dir-hero__meta-item">
+                        {% icon "check-badge" size=13 %}
+                        <span>{{ content.solved_examples|length }} примеров</span>
+                    </span>
+                {% endif %}
+            </div>
+
+            <div class="dir-hero__actions">
+                <a href="#calculator" class="btn btn-primary">
+                    {% icon "calculator" size=16 %}
+                    <span>Попробовать в калькуляторе</span>
+                </a>
+                <a href="{% url 'matrix_app:school_detail' school.slug %}"
+                   class="btn btn-ghost">
+                    {% icon "arrow-left" size=14 %}
+                    <span>К школе</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ================================================================
+     Рабочая область
+     ================================================================ -->
+<section class="dir-layout">
+    <div class="container dir-grid">
+
+        <!-- ========================================================
+             Боковое оглавление
+             ======================================================== -->
+        <aside class="dir-toc" aria-label="Оглавление направления">
+
+            <h2 class="dir-toc__title">
+                {% icon "book-open" size=16 %}
+                <span>Содержание</span>
+            </h2>
+
+            <nav class="dir-toc__nav">
+                <ul class="dir-toc__list">
+
+                    <li class="dir-toc__item">
+                        <a href="#overview" class="dir-toc__link"
+                           data-dir-link="overview">
+                            <span class="dir-toc__num">1</span>
+                            <span class="dir-toc__text">Обзор</span>
+                        </a>
+                    </li>
+
+                    {% if direction.formula %}
+                        <li class="dir-toc__item">
+                            <a href="#key-formula" class="dir-toc__link"
+                               data-dir-link="key-formula">
+                                <span class="dir-toc__num">2</span>
+                                <span class="dir-toc__text">Ключевая формула</span>
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    {% if content.theory %}
+                        {% for block in content.theory %}
+                            <li class="dir-toc__item">
+                                <a href="#{{ block.slug }}" class="dir-toc__link"
+                                   data-dir-link="{{ block.slug }}">
+                                    <span class="dir-toc__num">{{ forloop.counter|add:2 }}</span>
+                                    <span class="dir-toc__text">{{ block.title }}</span>
+                                </a>
+                            </li>
+                        {% endfor %}
+                    {% endif %}
+
+                    {% if content.notation %}
+                        <li class="dir-toc__item">
+                            <a href="#notation" class="dir-toc__link"
+                               data-dir-link="notation">
+                                <span class="dir-toc__num">Σ</span>
+                                <span class="dir-toc__text">Обозначения</span>
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    {% if content.conditions %}
+                        <li class="dir-toc__item">
+                            <a href="#conditions" class="dir-toc__link"
+                               data-dir-link="conditions">
+                                <span class="dir-toc__num">✓</span>
+                                <span class="dir-toc__text">Условия применимости</span>
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    {% if content.visualizations %}
+                        <li class="dir-toc__item">
+                            <a href="#visualization" class="dir-toc__link"
+                               data-dir-link="visualization">
+                                <span class="dir-toc__num">◈</span>
+                                <span class="dir-toc__text">Визуализация</span>
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    {% if content.solved_examples %}
+                        <li class="dir-toc__item">
+                            <a href="#examples" class="dir-toc__link"
+                               data-dir-link="examples">
+                                <span class="dir-toc__num">∑</span>
+                                <span class="dir-toc__text">Разобранные примеры</span>
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    <li class="dir-toc__item">
+                        <a href="#calculator" class="dir-toc__link"
+                           data-dir-link="calculator">
+                            <span class="dir-toc__num">=</span>
+                            <span class="dir-toc__text">Калькулятор</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="dir-toc__foot">
+                <a href="{% url 'matrix_app:school_detail' school.slug %}"
+                   class="dir-toc__back">
+                    {% icon "arrow-left" size=14 %}
+                    <span>Все направления школы</span>
+                </a>
+            </div>
+        </aside>
+
+
+        <!-- ========================================================
+             Контент
+             ======================================================== -->
+        <div class="dir-content">
+
+            <!-- ==============================================
+                 1. Обзор
+                 ============================================== -->
+            <article class="dir-section" id="overview">
+                <header class="dir-section__head">
+                    <span class="dir-section__num">1</span>
+                    <h2 class="dir-section__title">Обзор</h2>
+                </header>
+                <div class="dir-section__body">
+                    {% if content.intro %}
+                        <p class="dir-lead">{{ content.intro|safe }}</p>
+                    {% else %}
+                        <p class="dir-lead">{{ direction.description|safe }}</p>
+                    {% endif %}
+
+                    {% if direction.uses %}
+                        <h3 class="dir-subtitle">Применения</h3>
+                        <ul class="dir-uses">
+                            {% for use in direction.uses %}
+                                <li>{{ use }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            </article>
+
+
+            <!-- ==============================================
+                 2. Ключевая формула
+                 ============================================== -->
+            {% if direction.formula %}
+                <article class="dir-section" id="key-formula">
+                    <header class="dir-section__head">
+                        <span class="dir-section__num">2</span>
+                        <h2 class="dir-section__title">Ключевая формула</h2>
+                    </header>
+                    <div class="dir-section__body">
+                        <div class="dir-formula">
+                            <span class="dir-formula__label">
+                                {% icon "sigma" size=12 %}
+                                <span>Основная формула направления</span>
+                            </span>
+                            <div class="dir-formula__body">
+                                $${{ direction.formula }}$$
+                            </div>
+                            {% if direction.formula_note %}
+                                <p class="dir-formula__note">{{ direction.formula_note|safe }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </article>
+            {% endif %}
+
+
+            <!-- ==============================================
+                 3+. Блоки теории
+                 ============================================== -->
+            {% for block in content.theory %}
+                <article class="dir-section" id="{{ block.slug }}">
+                    <header class="dir-section__head">
+                        {% if block.icon %}
+                            <span class="dir-section__icon" aria-hidden="true">
+                                {% icon block.icon size=18 %}
+                            </span>
+                        {% endif %}
+                        <span class="dir-section__num">{{ forloop.counter|add:2 }}</span>
+                        <h2 class="dir-section__title">{{ block.title }}</h2>
+                    </header>
+                    <div class="dir-section__body">
+                        {% for item in block.blocks %}
+
+                            {% if item.type == "text" %}
+                                <p class="dir-text {% if item.lead %}dir-lead{% endif %}">
+                                    {{ item.content|safe }}
+                                </p>
+
+                            {% elif item.type == "formula" %}
+                                <div class="dir-formula">
+                                    {% if item.label %}
+                                        <span class="dir-formula__label">
+                                            {% icon "sigma" size=12 %}
+                                            <span>{{ item.label }}</span>
+                                        </span>
+                                    {% endif %}
+                                    <div class="dir-formula__body">
+                                        $${{ item.latex }}$$
+                                    </div>
+                                    {% if item.note %}
+                                        <p class="dir-formula__note">{{ item.note|safe }}</p>
+                                    {% endif %}
+                                </div>
+
+                            {% elif item.type == "note" %}
+                                <div class="dir-note">
+                                    <span class="dir-note__icon" aria-hidden="true">i</span>
+                                    <div class="dir-note__body">{{ item.content|safe }}</div>
+                                </div>
+
+                            {% elif item.type == "warning" %}
+                                <div class="dir-note dir-note--warning">
+                                    <span class="dir-note__icon" aria-hidden="true">!</span>
+                                    <div class="dir-note__body">{{ item.content|safe }}</div>
+                                </div>
+
+                            {% elif item.type == "list" %}
+                                <ul class="dir-list">
+                                    {% for li in item.items %}
+                                        <li>{{ li }}</li>
+                                    {% endfor %}
+                                </ul>
+
+                            {% elif item.type == "ordered" %}
+                                <ol class="dir-ordered">
+                                    {% for li in item.items %}
+                                        <li>{{ li }}</li>
+                                    {% endfor %}
+                                </ol>
+
+                            {% elif item.type == "example" %}
+                                <div class="dir-example">
+                                    {% if item.title %}
+                                        <div class="dir-example__head">
+                                            {% icon "sparkles" size=14 %}
+                                            <span>{{ item.title }}</span>
+                                        </div>
+                                    {% endif %}
+                                    <div class="dir-example__body">
+                                        {% if item.latex %}
+                                            <div class="dir-formula__body">
+                                                $${{ item.latex }}$$
+                                            </div>
+                                        {% endif %}
+                                        {% if item.text %}
+                                            <p>{{ item.text|safe }}</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                            {% elif item.type == "definition_list" %}
+                                <dl class="dir-defs">
+                                    {% for d in item.items %}
+                                        <dt>{{ d.term }}</dt>
+                                        <dd>{{ d.definition|safe }}</dd>
+                                    {% endfor %}
+                                </dl>
+
+                            {% elif item.type == "history" %}
+                                <div class="dir-history">
+                                    <span class="dir-history__icon" aria-hidden="true">🕰</span>
+                                    <div class="dir-history__body">{{ item.content|safe }}</div>
+                                </div>
+
+                            {% elif item.type == "algorithm" %}
+                                <div class="dir-algorithm">
+                                    {% if item.title %}
+                                        <header class="dir-algorithm__head">
+                                            <h4 class="dir-algorithm__title">{{ item.title }}</h4>
+                                        </header>
+                                    {% endif %}
+                                    <ol class="dir-algorithm__steps">
+                                        {% for step in item.steps %}
+                                            <li class="dir-algorithm__step">
+                                                <span class="dir-algorithm__num">{{ forloop.counter }}</span>
+                                                <span class="dir-algorithm__text">{{ step|safe }}</span>
+                                            </li>
+                                        {% endfor %}
+                                    </ol>
+                                </div>
+
+                            {% elif item.type == "connection" %}
+                                {% if item.url_name %}
+                                    <a class="dir-connection" href="{% url item.url_name %}">
+                                {% else %}
+                                    <div class="dir-connection">
+                                {% endif %}
+                                    <span class="dir-connection__icon" aria-hidden="true">🔗</span>
+                                    <span class="dir-connection__body">
+                                        <span class="dir-connection__title">{{ item.title }}</span>
+                                        <span class="dir-connection__text">{{ item.text|safe }}</span>
+                                    </span>
+                                    <span class="dir-connection__arrow" aria-hidden="true">→</span>
+                                {% if item.url_name %}
+                                    </a>
+                                {% else %}
+                                    </div>
+                                {% endif %}
+
+                            {% elif item.type == "premium_visual" %}
+                                <figure class="dir-visual dir-visual--premium"
+                                        data-visual-type="{{ item.visual.type }}"
+                                        data-visual-name="{{ item.visual.name }}">
+                                    <div class="dir-visual__canvas">
+                                        {% with visual_path="visuals/"|add:item.visual.name %}
+                                            {% icon visual_path size=260 %}
+                                        {% endwith %}
+                                    </div>
+                                    {% if item.visual.caption %}
+                                        <figcaption class="dir-visual__caption">
+                                            {{ item.visual.caption }}
+                                        </figcaption>
+                                    {% endif %}
+                                </figure>
+
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </article>
+            {% endfor %}
+
+
+            <!-- ==============================================
+                 Обозначения
+                 ============================================== -->
+            {% if content.notation %}
+                <article class="dir-section" id="notation">
+                    <header class="dir-section__head">
+                        <span class="dir-section__num">Σ</span>
+                        <h2 class="dir-section__title">Обозначения</h2>
+                    </header>
+                    <div class="dir-section__body">
+                        <p class="dir-text">
+                            Что означают буквы и символы в формулах этого направления.
+                        </p>
+                        <div class="dir-notation">
+                            <table class="dir-notation__table">
+                                <thead>
+                                    <tr>
+                                        <th>Символ</th>
+                                        <th>Значение</th>
+                                        <th>Пример</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for row in content.notation %}
+                                        <tr>
+                                            <td class="dir-notation__symbol">{{ row.symbol }}</td>
+                                            <td class="dir-notation__meaning">{{ row.meaning }}</td>
+                                            <td class="dir-notation__example">{{ row.example }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </article>
+            {% endif %}
+
+
+            <!-- ==============================================
+                 Условия применимости
+                 ============================================== -->
+            {% if content.conditions %}
+                <article class="dir-section" id="conditions">
+                    <header class="dir-section__head">
+                        <span class="dir-section__num">✓</span>
+                        <h2 class="dir-section__title">Условия применимости</h2>
+                    </header>
+                    <div class="dir-section__body">
+                        <p class="dir-text">
+                            Когда формула и операция применимы, а когда — нет.
+                        </p>
+                        <ul class="dir-conditions">
+                            {% for c in content.conditions %}
+                                <li class="dir-conditions__item {% if c.ok %}is-ok{% else %}is-no{% endif %}">
+                                    <span class="dir-conditions__icon" aria-hidden="true">
+                                        {% if c.ok %}✓{% else %}✗{% endif %}
+                                    </span>
+                                    <span class="dir-conditions__text">{{ c.text }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </article>
+            {% endif %}
+
+
+            <!-- ==============================================
+                 Визуализация
+                 ============================================== -->
+            {% if content.visualizations %}
+                <article class="dir-section" id="visualization">
+                    <header class="dir-section__head">
+                        <span class="dir-section__num">◈</span>
+                        <h2 class="dir-section__title">Визуализация</h2>
+                    </header>
+                    <div class="dir-section__body">
+                        {% for v in content.visualizations %}
+                            <figure class="dir-visual"
+                                    data-visual-type="{{ v.type }}"
+                                    data-visual-name="{{ v.name }}">
+                                <div class="dir-visual__canvas">
+                                    {% with visual_path="visuals/"|add:v.name %}
+                                        {% icon visual_path size=260 %}
+                                    {% endwith %}
+                                </div>
+                                {% if v.caption %}
+                                    <figcaption class="dir-visual__caption">
+                                        {{ v.caption }}
+                                    </figcaption>
+                                {% endif %}
+                            </figure>
+                        {% endfor %}
+                    </div>
+                </article>
+            {% endif %}
+
+
+            <!-- ==============================================
+                 Разобранные примеры
+                 ============================================== -->
+            {% if content.solved_examples %}
+                <article class="dir-section" id="examples">
+                    <header class="dir-section__head">
+                        <span class="dir-section__num">∑</span>
+                        <h2 class="dir-section__title">Разобранные примеры</h2>
+                    </header>
+                    <div class="dir-section__body">
+                        {% for ex in content.solved_examples %}
+                            <div class="dir-solved">
+                                <header class="dir-solved__head">
+                                    <span class="dir-solved__num">{{ forloop.counter }}</span>
+                                    <h3 class="dir-solved__title">{{ ex.title }}</h3>
+                                </header>
+
+                                <div class="dir-solved__body">
+                                    {% if ex.note %}
+                                        <p class="dir-solved__note">{{ ex.note|safe }}</p>
+                                    {% endif %}
+
+                                    {% if ex.matrix_latex %}
+                                        <div class="dir-solved__input">
+                                            <span class="dir-solved__label">Исходные данные</span>
+                                            <div class="dir-solved__matrix dir-solved__matrix--latex">
+                                                $${{ ex.matrix_latex }}$$
+                                            </div>
+                                        </div>
+                                    {% endif %}
+
+                                    {% if ex.steps %}
+                                        <ol class="dir-solved__steps">
+                                            {% for step in ex.steps %}
+                                                <li class="dir-solved__step">
+                                                    <span class="dir-solved__step-num">{{ forloop.counter }}</span>
+                                                    <div class="dir-solved__step-body">
+                                                        {% if step.title %}
+                                                            <h4>{{ step.title }}</h4>
+                                                        {% endif %}
+                                                        {% if step.text %}
+                                                            <p>{{ step.text|safe }}</p>
+                                                        {% endif %}
+                                                        {% if step.latex %}
+                                                            <div class="dir-formula__body">
+                                                                $${{ step.latex }}$$
+                                                            </div>
+                                                        {% endif %}
+                                                    </div>
+                                                </li>
+                                            {% endfor %}
+                                        </ol>
+                                    {% endif %}
+
+                                    {% if ex.result %}
+                                        <div class="dir-solved__result">
+                                            <span class="dir-solved__label">Результат</span>
+                                            <div class="dir-formula__body">
+                                                $${{ ex.result }}$$
+                                            </div>
+                                        </div>
+                                    {% endif %}
+
+                                    {% if ex.matrix_json and ex.operation %}
+                                        <div class="dir-solved__actions">
+                                            <button type="button"
+                                                    class="btn btn-primary btn-sm"
+                                                    data-solved-example-use
+                                                    data-solved-matrix='{{ ex.matrix_json|safe }}'
+                                                    data-solved-operation="{{ ex.operation }}">
+                                                {% icon "calculator" size=14 %}
+                                                <span>Открыть в калькуляторе</span>
+                                            </button>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </article>
+            {% endif %}
+
+
+            <!-- ==============================================
+                 Мини-калькулятор
+                 ============================================== -->
+            <article class="dir-section dir-section--calc" id="calculator">
+                <header class="dir-section__head">
+                    <span class="dir-section__num">=</span>
+                    <h2 class="dir-section__title">Калькулятор</h2>
+                </header>
+                <div class="dir-section__body">
+
+                    <p class="dir-text">
+                        Введите матрицу, выберите пресет — получите результат
+                        с пошаговым решением.
+                    </p>
+
+                    {% if presets %}
+                    <div class="presets" role="tablist" aria-label="Тематические пресеты">
+                        {% for preset in presets %}
+                            <button type="button"
+                                    class="preset-btn {% if preset.code == direction.operation %}is-active{% endif %}"
+                                    data-preset-choice="{{ preset.code }}"
+                                    role="tab"
+                                    aria-selected="{% if preset.code == direction.operation %}true{% else %}false{% endif %}">
+                                <span class="preset-icon" aria-hidden="true">
+                                    {% icon preset.icon size=20 %}
+                                </span>
+                                <span class="preset-text">
+                                    <span class="preset-label">{{ preset.label }}</span>
+                                    <span class="preset-subtitle">{{ preset.subtitle }}</span>
+                                </span>
+                            </button>
+                        {% endfor %}
+                    </div>
+
+                    <div class="preset-hint">
+                        <span class="preset-hint-icon" aria-hidden="true">
+                            {% icon "info" size=22 %}
+                        </span>
+                        <span data-preset-hint-text>
+                            {% with first=presets|first %}
+                                {% if first %}{{ first.description }}{% endif %}
+                            {% endwith %}
+                        </span>
+                    </div>
+                    {% endif %}
+
+                    <div class="mini-calc">
+                        <div class="mini-calc-input">
+                            <span class="mini-calc-label">
+                                {% icon "matrix-grid" size=14 %}
+                                <span>Матрица</span>
+                            </span>
+
+                            <div class="dir-matrix-frame">
+                                <div class="dir-matrix-card"
+                                     data-matrix-card="a"
+                                     data-no-persist="1">
+                                    <div id="direction-matrix-input"
+                                         data-matrix-input
+                                         data-rows="3"
+                                         data-cols="3"
+                                         data-matrix-letter="a"
+                                         data-no-persist="1"></div>
+                                </div>
+                            </div>
+
+                            <div class="dir-matrix-controls">
+                                <label class="dir-matrix-size-label">
+                                    {% icon "matrix-grid" size=13 %}
+                                    <span>Строк:</span>
+                                    <input type="number" min="1" max="10" value="3"
+                                           class="dir-matrix-size-input"
+                                           data-a-rows>
+                                </label>
+                                <label class="dir-matrix-size-label">
+                                    {% icon "matrix-grid" size=13 %}
+                                    <span>Столбцов:</span>
+                                    <input type="number" min="1" max="10" value="3"
+                                           class="dir-matrix-size-input"
+                                           data-a-cols>
+                                </label>
+                            </div>
+
+                            {% if direction.example_slug %}
+                                <div class="dir-matrix-chips">
+                                    <button type="button" class="chip chip--button"
+                                            data-dir-example="{{ direction.example_slug }}">
+                                        {% icon "sparkles" size=14 %}
+                                        <span>Загрузить пример</span>
+                                    </button>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mini-calc-actions">
+                            <button type="button"
+                                    class="btn btn-primary btn-lg"
+                                    data-modules-run>
+                                {% icon "arrow-right" size=16 %}
+                                <span>Вычислить</span>
+                            </button>
+                            <button type="button"
+                                    class="btn btn-ghost"
+                                    data-modules-reset>
+                                {% icon "close" size=14 %}
+                                <span>Очистить</span>
+                            </button>
+                        </div>
+
+                        <div class="mini-calc-result">
+                            {% include "matrix_app/partials/_result_block.html" with result_id="direction-result" show_steps=True show_actions=True %}
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+
+            <!-- ==============================================
+                 Похожие направления
+                 ============================================== -->
+            {% if related_directions %}
+                <section class="dir-related">
+                    <header class="dir-related__head">
+                        <h2 class="dir-related__title">Другие направления школы</h2>
+                    </header>
+                    <div class="dir-related__grid">
+                        {% for d in related_directions %}
+                            <a href="{% url 'matrix_app:direction_detail' school.slug d.slug %}"
+                               class="dir-related__card">
+                                <span class="dir-related__icon" aria-hidden="true">
+                                    {% icon d.icon size=20 %}
+                                </span>
+                                <span class="dir-related__text">
+                                    <span class="dir-related__name">{{ d.title }}</span>
+                                    <span class="dir-related__tagline">{{ d.tagline }}</span>
+                                </span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </section>
+            {% endif %}
+
+
+            <!-- ==============================================
+                 Навигация prev/next
+                 ============================================== -->
+            {% if prev_direction or next_direction %}
+                <nav class="dir-nav" aria-label="Навигация по направлениям школы">
+                    {% if prev_direction %}
+                        <a href="{% url 'matrix_app:direction_detail' school.slug prev_direction.slug %}"
+                           class="dir-nav__item dir-nav__item--prev">
+                            <span class="dir-nav__icon">{% icon "arrow-left" size=18 %}</span>
+                            <span class="dir-nav__text">
+                                <span class="dir-nav__label">Предыдущее</span>
+                                <span class="dir-nav__title">{{ prev_direction.title }}</span>
+                            </span>
+                        </a>
+                    {% else %}
+                        <span class="dir-nav__spacer"></span>
+                    {% endif %}
+
+                    {% if next_direction %}
+                        <a href="{% url 'matrix_app:direction_detail' school.slug next_direction.slug %}"
+                           class="dir-nav__item dir-nav__item--next">
+                            <span class="dir-nav__text">
+                                <span class="dir-nav__label">Следующее</span>
+                                <span class="dir-nav__title">{{ next_direction.title }}</span>
+                            </span>
+                            <span class="dir-nav__icon">{% icon "arrow-right" size=18 %}</span>
+                        </a>
+                    {% else %}
+                        <span class="dir-nav__spacer"></span>
+                    {% endif %}
+                </nav>
+            {% endif %}
+
+        </div>
+    </div>
+</section>
+
+</div><!-- /.direction-page -->
+
+{% endblock %}
+
+
+{% block extra_scripts %}
+{{ block.super }}
+
+<script>
+    (function () {
+        function markNoPersist() {
+            if (document.body) document.body.dataset.noPersist = '1';
+        }
+        if (document.body) markNoPersist();
+        else document.addEventListener('DOMContentLoaded', markNoPersist);
+    })();
+</script>
+
+<script src="{% static 'matrix_app/js/matrix.js' %}"></script>
+<script src="{% static 'matrix_app/js/calculator.js' %}"></script>
+
+<script>
+    /*
+     * Страница направления:
+     *   • TOC и активная ссылка при скролле;
+     *   • плавная прокрутка по оглавлению;
+     *   • загрузка примера по data-dir-example;
+     *   • кнопка «Открыть в калькуляторе» у разобранного примера
+     *     (data-solved-example-use) — кладёт матрицу в sessionStorage
+     *     и переходит на /calculator/.
+     *
+     * Обработчики data-modules-run / data-modules-reset живут
+     * в calculator.js (mountModules) — здесь их НЕ дублируем.
+     */
+    (function () {
+        document.addEventListener('DOMContentLoaded', function () {
+            if (!window.MatrixLab) return;
+            var ML = window.MatrixLab;
+
+            // --- Активная ссылка при скролле ---
+            var links = document.querySelectorAll('[data-dir-link]');
+            var sections = document.querySelectorAll('.dir-section[id]');
+            var byId = {};
+            links.forEach(function (l) { byId[l.dataset.dirLink] = l; });
+
+            if (sections.length && 'IntersectionObserver' in window) {
+                var observer = new IntersectionObserver(function (entries) {
+                    entries.forEach(function (entry) {
+                        if (!entry.isIntersecting) return;
+                        var link = byId[entry.target.id];
+                        if (!link) return;
+                        links.forEach(function (l) { l.classList.remove('is-active'); });
+                        link.classList.add('is-active');
+                    });
+                }, { rootMargin: '-20% 0px -60% 0px', threshold: 0 });
+                sections.forEach(function (s) { observer.observe(s); });
+            }
+
+            // --- Плавная прокрутка по TOC ---
+            links.forEach(function (link) {
+                link.addEventListener('click', function (e) {
+                    var href = link.getAttribute('href');
+                    if (!href || href.charAt(0) !== '#') return;
+                    var target = document.querySelector(href);
+                    if (!target) return;
+                    e.preventDefault();
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    history.replaceState(null, '', href);
+                });
+            });
+
+            // --- Загрузить пример в матрицу (data-dir-example) ---
+            var exampleBtn = document.querySelector('[data-dir-example]');
+            if (exampleBtn && ML.api) {
+                exampleBtn.addEventListener('click', function () {
+                    var slug = exampleBtn.dataset.dirExample;
+                    if (!slug) return;
+
+                    ML.loader.show('Загружаем пример…');
+                    ML.api.post('/api/example/' + slug + '/', {})
+                        .then(function (resp) {
+                            var data = (resp && resp.result) ? resp.result : resp;
+                            var matrix = data && data.matrix;
+                            if (!matrix) return;
+                            var mi = ML.getFirstMatrix
+                                ? ML.getFirstMatrix()
+                                : null;
+                            if (!mi) return;
+                            mi.setSize(
+                                matrix.length,
+                                matrix[0].length,
+                                { preserve: false }
+                            );
+                            mi.write(matrix);
+                            ML.toast.success(
+                                'Пример загружен',
+                                data.title || slug
+                            );
+                        })
+                        .catch(function (err) {
+                            ML.toast.error(
+                                'Не удалось загрузить',
+                                err && err.message ? err.message : ''
+                            );
+                        })
+                        .finally(function () {
+                            ML.loader.hide();
+                        });
+                });
+            }
+        });
+
+        // --- Кнопка «Открыть в калькуляторе» у разобранного примера ---
+        document.addEventListener('click', function (e) {
+            var btn = e.target.closest('[data-solved-example-use]');
+            if (!btn) return;
+
+            var raw = btn.getAttribute('data-solved-matrix');
+            var op = btn.getAttribute('data-solved-operation') || '';
+
+            if (!raw) {
+                if (window.MatrixLab && MatrixLab.toast) {
+                    MatrixLab.toast.error('Нет матрицы', 'Пример не содержит данных.');
+                }
+                return;
+            }
+
+            var matrix;
+            try {
+                matrix = JSON.parse(raw);
+            } catch (err) {
+                if (window.MatrixLab && MatrixLab.toast) {
+                    MatrixLab.toast.error('Ошибка', 'Не удалось разобрать матрицу.');
+                }
+                return;
+            }
+
+            try {
+                sessionStorage.setItem(
+                    'matrixlab.load_matrix',
+                    JSON.stringify(matrix)
+                );
+                if (op) {
+                    sessionStorage.setItem('matrixlab.load_op', op);
+                }
+            } catch (err) {
+                if (window.MatrixLab && MatrixLab.toast) {
+                    MatrixLab.toast.error('Ошибка сессии', 'Не удалось сохранить.');
+                }
+                return;
+            }
+
+            if (window.MatrixLab && MatrixLab.toast) {
+                MatrixLab.toast.info('Матрица подставлена', 'Открываем калькулятор…');
+            }
+
+            setTimeout(function () {
+                window.location.href = '/calculator/';
+            }, 250);
+        });
+    })();
+</script>
+
+{% endblock %}

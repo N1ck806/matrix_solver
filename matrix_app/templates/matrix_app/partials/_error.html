@@ -1,0 +1,38 @@
+{% comment %}
+Блок ошибки. Используется как в шаблонах страниц, так и в JS
+для замены содержимого при неудачном запросе.
+
+Параметры:
+    error_title   — заголовок (по умолчанию 'Произошла ошибка')
+    error_message — текст ошибки
+    error_hint    — подсказка (необязательно)
+    error_code    — код ошибки (например, 'singular', 'shape_mismatch')
+    inline        — если True, уменьшенные отступы (для встраивания)
+{% endcomment %}
+
+<div class="error-block {% if inline %}error-block--inline{% endif %}"
+     role="alert"
+     data-error-block>
+    <div class="error-block-icon" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+    </div>
+
+    <div class="error-block-body">
+        <h4 class="error-block-title">
+            {{ error_title|default:"Произошла ошибка" }}
+        </h4>
+        <p class="error-block-message" data-error-message>
+            {{ error_message|default:"Что-то пошло не так. Попробуйте ещё раз." }}
+        </p>
+        {% if error_hint %}
+            <p class="error-block-hint">{{ error_hint }}</p>
+        {% endif %}
+        {% if error_code %}
+            <span class="error-block-code no-mathjax">код: {{ error_code }}</span>
+        {% endif %}
+    </div>
+</div>

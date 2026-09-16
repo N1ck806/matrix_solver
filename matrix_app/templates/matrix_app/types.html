@@ -1,0 +1,1003 @@
+{% extends "matrix_app/base.html" %}
+{% load static matrix_icons %}
+
+{% block title %}Виды матриц — полная классификация{% endblock %}
+
+{% block meta_description %}
+Классификация матриц: базовые, специальные и особые типы. Определения,
+формулы, примеры, визуализация и применения.
+{% endblock %}
+
+
+{% block extra_head %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'matrix_app/css/calculator.css' %}">
+
+<style>
+/* =============================================================================
+   Виды матриц — только специфика страницы.
+   -----------------------------------------------------------------------------
+   Из main.css / calculator.css уже приходят:
+     .page-head, .breadcrumbs, .page-title, .page-subtitle, .page-head-actions,
+     .btn, .btn-soft, .btn-sm, .btn-primary, .container.
+
+   Здесь — .types-* и .type-card-*.
+   ============================================================================= */
+
+
+/* =============================================================================
+   1. РАСКЛАДКА
+   ============================================================================= */
+.types-layout {
+    padding: 40px 0 96px;
+}
+
+
+/* =============================================================================
+   2. КАТЕГОРИИ
+   ============================================================================= */
+.types-category {
+    margin-bottom: 56px;
+    scroll-margin-top: calc(var(--header-h, 64px) + 24px);
+}
+
+.types-category:last-of-type {
+    margin-bottom: 40px;
+}
+
+.types-category-head {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.types-category-icon {
+    width: 52px;
+    height: 52px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    color: #fff;
+    border-radius: var(--radius-md);
+    box-shadow: 0 10px 20px -6px var(--accent-glow);
+    flex-shrink: 0;
+}
+
+.types-category-icon .ml-icon,
+.types-category-icon svg {
+    width: 22px;
+    height: 22px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+    color: #fff;
+}
+
+.types-category-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.types-category-text h2 {
+    font-size: clamp(20px, 2vw, 26px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0 0 4px;
+    color: var(--text);
+}
+
+.types-category-desc {
+    font-size: 14px;
+    color: var(--text-dim);
+    margin: 0;
+    line-height: 1.5;
+}
+
+.types-category-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    height: 32px;
+    padding: 0 12px;
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+    border-radius: var(--radius-full);
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+}
+
+
+/* =============================================================================
+   3. СЕТКА КАРТОЧЕК
+   ============================================================================= */
+.types-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 20px;
+}
+
+
+/* =============================================================================
+   4. КАРТОЧКА ТИПА
+   ============================================================================= */
+.type-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.03),
+        0 4px 16px -4px var(--accent-glow);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    transition:
+        transform var(--dur-base) var(--ease-out),
+        box-shadow var(--dur-base),
+        border-color var(--dur-base);
+    scroll-margin-top: calc(var(--header-h, 64px) + 24px);
+}
+
+.type-card:hover {
+    transform: translateY(-4px);
+    border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+    box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.04),
+        0 24px 48px -16px var(--accent-glow);
+}
+
+.type-card.is-open {
+    border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+    box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.04),
+        0 20px 40px -16px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+
+/* --- Шапка карточки --- */
+.type-card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.type-card-head-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.type-card-title {
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    margin: 0;
+    color: var(--text);
+    line-height: 1.3;
+}
+
+.type-card-toggle {
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent) 18%, transparent);
+    border-radius: var(--radius-sm);
+    color: var(--accent);
+    cursor: pointer;
+    transition:
+        background var(--dur-fast),
+        color var(--dur-fast),
+        border-color var(--dur-fast),
+        transform var(--dur-fast),
+        box-shadow var(--dur-fast);
+    flex-shrink: 0;
+}
+
+.type-card-toggle .ml-icon,
+.type-card-toggle svg {
+    width: 16px;
+    height: 16px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+    transition: transform var(--dur-base) var(--ease-out);
+}
+
+.type-card-toggle:hover {
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    color: #fff;
+    border-color: transparent;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px -4px var(--accent-glow);
+}
+
+.type-card.is-open .type-card-toggle .ml-icon,
+.type-card.is-open .type-card-toggle svg {
+    transform: rotate(180deg);
+}
+
+
+/* --- Определение --- */
+.type-card-definition {
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--text-dim);
+    margin: 0;
+}
+
+
+/* =============================================================================
+   5. ВИЗУАЛЬНОЕ ПРЕВЬЮ МАТРИЦЫ
+   ============================================================================= */
+.type-card-visual {
+    position: relative;
+    padding: 16px 18px;
+    background:
+        linear-gradient(135deg,
+            color-mix(in srgb, var(--accent) 5%, transparent),
+            color-mix(in srgb, var(--accent) 9%, transparent)),
+        var(--surface-2);
+    border: 1px solid color-mix(in srgb, var(--accent) 15%, transparent);
+    border-radius: var(--radius-md);
+    min-height: 92px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow-x: auto;
+    /* Сетка-паттерн внутри превью */
+    isolation: isolate;
+}
+
+.type-card-visual::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(to right,
+            color-mix(in srgb, var(--accent) 7%, transparent) 1px, transparent 1px),
+        linear-gradient(to bottom,
+            color-mix(in srgb, var(--accent) 7%, transparent) 1px, transparent 1px);
+    background-size: 20px 20px;
+    pointer-events: none;
+    border-radius: inherit;
+    z-index: -1;
+}
+
+.type-card-visual mjx-container,
+.type-card-visual .MathJax {
+    margin: 0 !important;
+    font-size: 115% !important;
+}
+
+.type-card-visual-label {
+    position: absolute;
+    top: 8px;
+    left: 12px;
+    font-size: 9.5px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    opacity: 0.75;
+    z-index: 1;
+}
+
+
+/* --- Формула --- */
+.type-card-formula {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px 14px;
+    background: color-mix(in srgb, var(--accent) 5%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent) 12%, transparent);
+    border-radius: var(--radius-md);
+}
+
+.type-card-formula-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+
+.type-card-formula-label .ml-icon,
+.type-card-formula-label svg {
+    width: 12px;
+    height: 12px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+}
+
+.type-card-formula-body {
+    display: block;
+    font-size: 14px;
+    color: var(--text);
+    text-align: center;
+    overflow-x: auto;
+}
+
+
+/* =============================================================================
+   6. РАСКРЫВАЕМОЕ ТЕЛО
+   ============================================================================= */
+.type-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding-top: 14px;
+    border-top: 1px dashed color-mix(in srgb, var(--accent) 20%, transparent);
+    animation: typeCardOpen var(--dur-base) var(--ease-out);
+}
+
+.type-card-body[hidden] {
+    display: none;
+}
+
+@keyframes typeCardOpen {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.type-card-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.type-card-section-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+}
+
+.type-card-section-label .ml-icon,
+.type-card-section-label svg {
+    width: 12px;
+    height: 12px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+    color: var(--accent);
+}
+
+.type-card-section p {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-dim);
+    margin: 0;
+}
+
+.type-card-example {
+    display: block;
+    padding: 10px 14px;
+    background: color-mix(in srgb, #06B6D4 6%, transparent);
+    border: 1px solid color-mix(in srgb, #06B6D4 18%, transparent);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--text);
+    overflow-x: auto;
+    white-space: nowrap;
+}
+
+
+/* =============================================================================
+   7. КНОПКИ В КАРТОЧКЕ
+   ============================================================================= */
+.type-card-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+    flex-wrap: wrap;
+}
+
+.type-card-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+        background var(--dur-fast),
+        color var(--dur-fast),
+        border-color var(--dur-fast),
+        transform var(--dur-fast),
+        box-shadow var(--dur-fast);
+    flex: 1 1 auto;
+    min-width: 0;
+    white-space: nowrap;
+}
+
+.type-card-btn .ml-icon,
+.type-card-btn svg {
+    width: 14px;
+    height: 14px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+    color: currentColor;
+    transition: transform var(--dur-fast);
+    flex-shrink: 0;
+}
+
+/* Основная — «Подставить в калькулятор» */
+.type-card-btn--primary {
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    color: #fff;
+    border: 1px solid transparent;
+    box-shadow: 0 6px 14px -6px var(--accent-glow);
+}
+
+.type-card-btn--primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px -8px var(--accent-glow);
+}
+
+.type-card-btn--primary:hover .ml-icon,
+.type-card-btn--primary:hover svg {
+    transform: translateX(3px);
+}
+
+/* Второстепенная — «Проверить свойства» */
+.type-card-btn--soft {
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+    color: var(--accent);
+    border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+}
+
+.type-card-btn--soft:hover {
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+    border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+    transform: translateY(-2px);
+}
+
+
+/* =============================================================================
+   8. CTA
+   ============================================================================= */
+.types-cta {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-top: 40px;
+    padding: 32px;
+    background:
+        linear-gradient(135deg,
+            color-mix(in srgb, var(--accent-1) 10%, transparent),
+            color-mix(in srgb, var(--accent-2) 10%, transparent)),
+        var(--surface);
+    border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+    border-radius: var(--radius-xl);
+    box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.03),
+        0 12px 32px -12px var(--accent-glow);
+    position: relative;
+    overflow: hidden;
+}
+
+.types-cta::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(to right,
+            color-mix(in srgb, var(--accent) 6%, transparent) 1px, transparent 1px),
+        linear-gradient(to bottom,
+            color-mix(in srgb, var(--accent) 6%, transparent) 1px, transparent 1px);
+    background-size: 32px 32px;
+    mask-image: radial-gradient(ellipse 60% 100% at 0% 50%, black 20%, transparent 80%);
+    -webkit-mask-image: radial-gradient(ellipse 60% 100% at 0% 50%, black 20%, transparent 80%);
+    pointer-events: none;
+}
+
+.types-cta-icon {
+    width: 72px;
+    height: 72px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    color: #fff;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 16px 32px -10px var(--accent-glow);
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+}
+
+.types-cta-icon .ml-icon,
+.types-cta-icon svg {
+    width: 32px;
+    height: 32px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+    color: #fff;
+}
+
+.types-cta-content {
+    flex: 1;
+    min-width: 0;
+    position: relative;
+    z-index: 1;
+}
+
+.types-cta-content h3 {
+    font-size: clamp(18px, 2vw, 22px);
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    margin: 0 0 8px;
+    color: var(--text);
+}
+
+.types-cta-content p {
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: var(--text-dim);
+    margin: 0 0 18px;
+    max-width: 640px;
+}
+
+.types-cta-content .btn .ml-icon,
+.types-cta-content .btn svg {
+    width: 16px;
+    height: 16px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+    flex-shrink: 0;
+}
+
+.types-cta-content .btn-primary {
+    box-shadow:
+        0 8px 20px -6px var(--accent-glow),
+        0 0 0 1px color-mix(in srgb, var(--accent) 10%, transparent);
+    transition: transform var(--dur-fast), box-shadow var(--dur-base);
+}
+
+.types-cta-content .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 16px 32px -8px var(--accent-glow),
+        0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+
+/* =============================================================================
+   9. АДАПТИВ
+   ============================================================================= */
+@media (max-width: 992px) {
+    .types-layout { padding: 32px 0 64px; }
+    .types-category { margin-bottom: 40px; }
+    .types-grid { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+}
+
+@media (max-width: 640px) {
+    .types-grid { grid-template-columns: 1fr; }
+    .types-category-head { flex-wrap: wrap; }
+    .types-category-count { margin-left: auto; }
+
+    .type-card-actions { flex-direction: column; }
+    .type-card-btn { width: 100%; }
+
+    .types-cta {
+        flex-direction: column;
+        text-align: center;
+        padding: 24px;
+    }
+    .types-cta-content p { margin-left: auto; margin-right: auto; }
+    .types-cta-content .btn-primary { width: 100%; justify-content: center; }
+    .types-cta::before { display: none; }
+}
+</style>
+{% endblock %}
+
+
+{% block content %}
+
+<!-- ================================================================
+     Заголовок
+     ================================================================ -->
+<section class="page-head">
+    <div class="container">
+        <nav class="breadcrumbs" aria-label="Навигационная цепочка">
+            <a href="{% url 'matrix_app:home' %}">Главная</a>
+            <span class="breadcrumbs-sep">/</span>
+            <span aria-current="page">Виды матриц</span>
+        </nav>
+        <div class="page-head-row">
+            <div>
+                <h1 class="page-title">Классификация матриц</h1>
+                <p class="page-subtitle">
+                    Базовые и специальные типы матриц с определениями,
+                    формулами, наглядным примером и областью применения.
+                    Любую матрицу-пример можно сразу подставить в калькулятор.
+                </p>
+            </div>
+            <div class="page-head-actions">
+                <button type="button" class="btn btn-soft btn-sm" data-types-expand-all>
+                    {% icon "grid" size=14 %}
+                    <span>Развернуть всё</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ================================================================
+     Список типов
+     ================================================================ -->
+<section class="types-layout">
+    <div class="container">
+
+        {% for category, category_types in categories.items %}
+            <section class="types-category">
+                <header class="types-category-head">
+                    <div class="types-category-icon" aria-hidden="true">
+                        {% if category == "По форме" or category == "Базовые" %}
+                            {% icon "matrix-grid" size=22 %}
+                        {% elif category == "По структуре" %}
+                            {% icon "layers" size=22 %}
+                        {% elif category == "По свойствам" or category == "Специальные" %}
+                            {% icon "sparkles" size=22 %}
+                        {% else %}
+                            {% icon "layers" size=22 %}
+                        {% endif %}
+                    </div>
+                    <div class="types-category-text">
+                        <h2>{{ category }}</h2>
+                        <p class="types-category-desc">
+                            {% if category == "По форме" or category == "Базовые" %}
+                                Определяются соотношением числа строк и столбцов.
+                            {% elif category == "По структуре" %}
+                                Расположение нулевых и ненулевых элементов.
+                            {% elif category == "По свойствам" or category == "Специальные" %}
+                                Дополнительные алгебраические свойства элементов.
+                            {% else %}
+                                Дополнительная классификация матриц.
+                            {% endif %}
+                        </p>
+                    </div>
+                    <span class="types-category-count">{{ category_types|length }}</span>
+                </header>
+
+                <div class="types-grid">
+                    {% for t in category_types %}
+                        <article class="type-card" id="{{ t.slug }}"
+                                 data-type-slug="{{ t.slug }}">
+
+                            <header class="type-card-head">
+                                <div class="type-card-head-text">
+                                    <h3 class="type-card-title">{{ t.title }}</h3>
+                                </div>
+                                <button type="button"
+                                        class="type-card-toggle"
+                                        data-type-toggle
+                                        aria-expanded="false"
+                                        aria-controls="body-{{ t.slug }}"
+                                        aria-label="Развернуть описание">
+                                    {% icon "arrow-right" size=16 %}
+                                </button>
+                            </header>
+
+                            <p class="type-card-definition">{{ t.definition }}</p>
+
+                            {# --- Визуальное превью матрицы (всегда видно) --- #}
+                            <div class="type-card-visual" aria-hidden="true">
+                                <span class="type-card-visual-label">Пример</span>
+                                <span class="type-card-visual-body">$${{ t.example_latex }}$$</span>
+                            </div>
+
+                            <div class="type-card-formula">
+                                <span class="type-card-formula-label">
+                                    {% icon "sigma" size=12 %}
+                                    <span>Формула</span>
+                                </span>
+                                <span class="type-card-formula-body">$${{ t.formula }}$$</span>
+                            </div>
+
+                            <div class="type-card-actions">
+                                <button type="button"
+                                        class="type-card-btn type-card-btn--primary"
+                                        data-type-use="{{ t.slug }}"
+                                        aria-label="Подставить пример в калькулятор">
+                                    {% icon "calculator" size=14 %}
+                                    <span>В калькулятор</span>
+                                    {% icon "arrow-right" size=14 %}
+                                </button>
+                                <a href="{% url 'matrix_app:properties' %}"
+                                   class="type-card-btn type-card-btn--soft">
+                                    {% icon "check-badge" size=14 %}
+                                    <span>Свойства</span>
+                                </a>
+                            </div>
+
+                            <div class="type-card-body" id="body-{{ t.slug }}" hidden>
+
+                                <div class="type-card-section">
+                                    <span class="type-card-section-label">
+                                        {% icon "matrix-grid" size=12 %}
+                                        <span>Пример в виде текста</span>
+                                    </span>
+                                    <code class="type-card-example">{{ t.example }}</code>
+                                </div>
+
+                                <div class="type-card-section">
+                                    <span class="type-card-section-label">
+                                        {% icon "sparkles" size=12 %}
+                                        <span>Применения</span>
+                                    </span>
+                                    <p>{{ t.uses }}</p>
+                                </div>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            </section>
+        {% endfor %}
+
+
+        <!-- ================================================================
+             CTA
+             ================================================================ -->
+        <div class="types-cta">
+            <div class="types-cta-icon" aria-hidden="true">
+                {% icon "check-badge" size=32 %}
+            </div>
+            <div class="types-cta-content">
+                <h3>Определить тип своей матрицы</h3>
+                <p>
+                    Введите матрицу — сервис автоматически определит все её
+                    свойства: квадратность, диагональность, симметрию,
+                    ортогональность, положительную определённость и многое другое.
+                </p>
+                <a href="{% url 'matrix_app:properties' %}" class="btn btn-primary">
+                    {% icon "check-badge" size=16 %}
+                    <span>Перейти к анализу свойств</span>
+                </a>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+{% endblock %}
+
+
+{% block extra_scripts %}
+{{ block.super }}
+<script>
+/* =============================================================================
+   Виды матриц:
+       • раскрытие/сворачивание карточек;
+       • кнопка «Развернуть всё» / «Свернуть всё»;
+       • подстановка примерной матрицы в калькулятор (sessionStorage);
+       • авто-раскрытие карточки при загрузке с #hash.
+
+   Матрицы-примеры хранятся в data-атрибутах (JSON) — не надо
+   рендерить их в шаблоне дважды. Визуальное превью строится
+   в самом шаблоне через MathJax $$...$$.
+   ============================================================================= */
+document.addEventListener('DOMContentLoaded', function () {
+
+    /* -------------------------------------------------------------------------
+       1. Матрицы-примеры для подстановки в калькулятор
+       -------------------------------------------------------------------------
+       Парсим t.example (строка вида "[[1, 2], [3, 4]]" или "(1, 2, 3)")
+       в двумерный массив строк для sessionStorage.
+    ------------------------------------------------------------------------- */
+    var EXAMPLES = {
+        {% for category, category_types in categories.items %}
+            {% for t in category_types %}
+                '{{ t.slug }}': {{ t.example|safe }},
+            {% endfor %}
+        {% endfor %}
+    };
+
+    /* -------------------------------------------------------------------------
+       2. Раскрытие одной карточки
+    ------------------------------------------------------------------------- */
+    document.querySelectorAll('[data-type-toggle]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var card = btn.closest('.type-card');
+            if (!card) return;
+
+            var body = card.querySelector('.type-card-body');
+            if (!body) return;
+
+            var isOpen = btn.getAttribute('aria-expanded') === 'true';
+            var newState = !isOpen;
+
+            btn.setAttribute('aria-expanded', String(newState));
+            body.hidden = !newState;
+            card.classList.toggle('is-open', newState);
+
+            updateExpandAllLabel();
+        });
+    });
+
+    /* -------------------------------------------------------------------------
+       3. Кнопка «Развернуть всё» / «Свернуть всё»
+    ------------------------------------------------------------------------- */
+    var expandBtn = document.querySelector('[data-types-expand-all]');
+
+    function anyCardOpen() {
+        return Array.prototype.some.call(
+            document.querySelectorAll('.type-card-body'),
+            function (b) { return !b.hidden; }
+        );
+    }
+
+    function updateExpandAllLabel() {
+        if (!expandBtn) return;
+        var label = expandBtn.querySelector('span');
+        if (!label) return;
+        label.textContent = anyCardOpen()
+            ? 'Свернуть всё'
+            : 'Развернуть всё';
+    }
+
+    if (expandBtn) {
+        expandBtn.addEventListener('click', function () {
+            var cards = document.querySelectorAll('.type-card');
+            var expand = !anyCardOpen();
+
+            cards.forEach(function (card) {
+                var body = card.querySelector('.type-card-body');
+                var toggle = card.querySelector('[data-type-toggle]');
+                if (!body || !toggle) return;
+
+                body.hidden = !expand;
+                toggle.setAttribute('aria-expanded', String(expand));
+                card.classList.toggle('is-open', expand);
+            });
+
+            updateExpandAllLabel();
+        });
+    }
+
+    /* -------------------------------------------------------------------------
+       4. Авто-раскрытие при загрузке с #hash
+    ------------------------------------------------------------------------- */
+    if (window.location.hash) {
+        var target = document.querySelector(window.location.hash);
+        if (target && target.classList.contains('type-card')) {
+            setTimeout(function () {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+                var toggle = target.querySelector('[data-type-toggle]');
+                var body = target.querySelector('.type-card-body');
+                if (toggle && body) {
+                    toggle.setAttribute('aria-expanded', 'true');
+                    body.hidden = false;
+                    target.classList.add('is-open');
+                    updateExpandAllLabel();
+                }
+            }, 100);
+        }
+    }
+
+    /* -------------------------------------------------------------------------
+       5. Подстановка примера в калькулятор
+       -------------------------------------------------------------------------
+       Логика:
+         • берём матрицу-пример по slug;
+         • нормализуем: любой формат → [[стр, стр], ...];
+         • кладём в sessionStorage['matrixlab.load_matrix'];
+         • переходим на /calculator/ — calculator.js при загрузке прочитает
+           это и подставит в редактор.
+       Тот же механизм использует saved.js.
+    ------------------------------------------------------------------------- */
+    function normalizeMatrix(raw) {
+        // Уже двумерный массив
+        if (Array.isArray(raw) && raw.length && Array.isArray(raw[0])) {
+            return raw.map(function (row) {
+                return row.map(function (v) {
+                    return (v === null || v === undefined) ? '' : String(v);
+                });
+            });
+        }
+        // Плоский массив — одна строка
+        if (Array.isArray(raw)) {
+            return [raw.map(function (v) {
+                return (v === null || v === undefined) ? '' : String(v);
+            })];
+        }
+        // Строка — пытаемся распарсить как JSON
+        if (typeof raw === 'string') {
+            try {
+                return normalizeMatrix(JSON.parse(raw));
+            } catch (e) {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    document.addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-type-use]');
+        if (!btn) return;
+
+        e.preventDefault();
+
+        var slug = btn.getAttribute('data-type-use');
+        var raw = EXAMPLES[slug];
+
+        if (!raw) {
+            if (window.MatrixLab && MatrixLab.toast) {
+                MatrixLab.toast.error(
+                    'Пример не найден',
+                    'Матрица для типа «' + slug + '» не задана.'
+                );
+            }
+            return;
+        }
+
+        var matrix = normalizeMatrix(raw);
+        if (!matrix) {
+            if (window.MatrixLab && MatrixLab.toast) {
+                MatrixLab.toast.error(
+                    'Некорректные данные',
+                    'Не удалось преобразовать матрицу-пример.'
+                );
+            }
+            return;
+        }
+
+        try {
+            sessionStorage.setItem(
+                'matrixlab.load_matrix',
+                JSON.stringify(matrix)
+            );
+        } catch (err) {
+            if (window.MatrixLab && MatrixLab.toast) {
+                MatrixLab.toast.error(
+                    'Ошибка сессии',
+                    'Не удалось сохранить матрицу. Попробуйте ещё раз.'
+                );
+            }
+            return;
+        }
+
+        if (window.MatrixLab && MatrixLab.toast) {
+            MatrixLab.toast.info(
+                'Матрица подставлена',
+                'Открываем калькулятор…'
+            );
+        }
+
+        setTimeout(function () {
+            window.location.href = '/calculator/';
+        }, 250);
+    });
+});
+</script>
+{% endblock %}

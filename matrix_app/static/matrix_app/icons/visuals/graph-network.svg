@@ -1,0 +1,124 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" fill="none"
+     role="img" aria-label="Граф связей: узлы и рёбра">
+    <defs>
+        <linearGradient id="gn-bg" x1="0" y1="0" x2="800" y2="600" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#6366F1" stop-opacity="0.06"/>
+            <stop offset="1" stop-color="#22D3EE" stop-opacity="0.06"/>
+        </linearGradient>
+        <radialGradient id="gn-core" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse"
+                        gradientTransform="translate(400 320) scale(80)">
+            <stop stop-color="#A5F3FC"/>
+            <stop offset="0.5" stop-color="#06B6D4"/>
+            <stop offset="1" stop-color="#0E7490"/>
+        </radialGradient>
+        <linearGradient id="gn-node" x1="0" y1="0" x2="1" y2="1">
+            <stop stop-color="#A78BFA"/>
+            <stop offset="1" stop-color="#7C3AED"/>
+        </linearGradient>
+        <linearGradient id="gn-edge" x1="0" y1="0" x2="1" y2="0">
+            <stop stop-color="#8B5CF6" stop-opacity="0.7"/>
+            <stop offset="1" stop-color="#22D3EE" stop-opacity="0.7"/>
+        </linearGradient>
+        <filter id="gn-glow" x="-40%" y="-40%" width="180%" height="180%">
+            <feGaussianBlur stdDeviation="8" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+    </defs>
+
+    <rect width="800" height="600" fill="url(#gn-bg)" rx="24"/>
+
+    <!-- Заголовок -->
+    <rect x="200" y="40" width="400" height="60" rx="30"
+          fill="#8B5CF6" fill-opacity="0.12"
+          stroke="#8B5CF6" stroke-opacity="0.4" stroke-width="1.5"/>
+    <text x="400" y="78" text-anchor="middle"
+          font-family="system-ui, -apple-system, sans-serif"
+          font-size="24" font-weight="800" fill="#7C3AED">
+        Граф связей
+    </text>
+
+    <!-- Подписи рёбер: A[i][j] -->
+    <g stroke="url(#gn-edge)" stroke-width="2.2" fill="none" stroke-linecap="round">
+        <!-- Центр → 4 периферийных -->
+        <line x1="400" y1="320" x2="200" y2="180"/>
+        <line x1="400" y1="320" x2="600" y2="180"/>
+        <line x1="400" y1="320" x2="200" y2="460"/>
+        <line x1="400" y1="320" x2="600" y2="460"/>
+        <!-- Между периферийными -->
+        <line x1="200" y1="180" x2="600" y2="180" opacity="0.4"/>
+        <line x1="200" y1="460" x2="600" y2="460" opacity="0.4"/>
+        <line x1="200" y1="180" x2="200" y2="460" opacity="0.4"/>
+        <line x1="600" y1="180" x2="600" y2="460" opacity="0.4"/>
+    </g>
+
+    <!-- Анимированный импульс по центральному ребру -->
+    <circle r="5" fill="#06B6D4" filter="url(#gn-glow)">
+        <animateMotion dur="2.4s" repeatCount="indefinite"
+                       path="M400,320 L200,180"/>
+        <animate attributeName="opacity" values="1;0.3;1" dur="2.4s" repeatCount="indefinite"/>
+    </circle>
+    <circle r="5" fill="#A78BFA" filter="url(#gn-glow)">
+        <animateMotion dur="2.4s" begin="1.2s" repeatCount="indefinite"
+                       path="M400,320 L600,460"/>
+        <animate attributeName="opacity" values="1;0.3;1" dur="2.4s" begin="1.2s" repeatCount="indefinite"/>
+    </circle>
+
+    <!-- Центральный узел -->
+    <g filter="url(#gn-glow)">
+        <circle cx="400" cy="320" r="52" fill="url(#gn-core)"/>
+        <circle cx="400" cy="320" r="52" fill="none" stroke="#FFFFFF" stroke-opacity="0.4" stroke-width="1.5"/>
+    </g>
+    <text x="400" y="326" text-anchor="middle"
+          font-family="system-ui, sans-serif"
+          font-size="16" font-weight="800" fill="#FFFFFF">A</text>
+    <text x="400" y="346" text-anchor="middle"
+          font-family="system-ui, sans-serif"
+          font-size="10" fill="#FFFFFF" fill-opacity="0.8">степень 4</text>
+
+    <!-- Периферийные узлы -->
+    <g>
+        <!-- B -->
+        <circle cx="200" cy="180" r="42" fill="url(#gn-node)" filter="url(#gn-glow)"/>
+        <circle cx="200" cy="180" r="42" fill="none" stroke="#FFFFFF" stroke-opacity="0.3" stroke-width="1"/>
+        <text x="200" y="186" text-anchor="middle"
+              font-family="system-ui, sans-serif" font-size="15" font-weight="800" fill="#FFFFFF">B</text>
+
+        <!-- C -->
+        <circle cx="600" cy="180" r="42" fill="url(#gn-node)" filter="url(#gn-glow)"/>
+        <circle cx="600" cy="180" r="42" fill="none" stroke="#FFFFFF" stroke-opacity="0.3" stroke-width="1"/>
+        <text x="600" y="186" text-anchor="middle"
+              font-family="system-ui, sans-serif" font-size="15" font-weight="800" fill="#FFFFFF">C</text>
+
+        <!-- D -->
+        <circle cx="200" cy="460" r="42" fill="url(#gn-node)" filter="url(#gn-glow)"/>
+        <circle cx="200" cy="460" r="42" fill="none" stroke="#FFFFFF" stroke-opacity="0.3" stroke-width="1"/>
+        <text x="200" y="466" text-anchor="middle"
+              font-family="system-ui, sans-serif" font-size="15" font-weight="800" fill="#FFFFFF">D</text>
+
+        <!-- E -->
+        <circle cx="600" cy="460" r="42" fill="url(#gn-node)" filter="url(#gn-glow)"/>
+        <circle cx="600" cy="460" r="42" fill="none" stroke="#FFFFFF" stroke-opacity="0.3" stroke-width="1"/>
+        <text x="600" y="466" text-anchor="middle"
+              font-family="system-ui, sans-serif" font-size="15" font-weight="800" fill="#FFFFFF">E</text>
+    </g>
+
+    <!-- Формула -->
+    <rect x="60" y="530" width="320" height="50" rx="12"
+          fill="#FFFFFF" fill-opacity="0.9"
+          stroke="#8B5CF6" stroke-opacity="0.35" stroke-width="1.5"/>
+    <text x="220" y="562" text-anchor="middle"
+          font-family="system-ui, sans-serif"
+          font-size="16" font-weight="800" fill="#7C3AED">
+        A · v = λ · v
+    </text>
+
+    <!-- Пояснение -->
+    <rect x="420" y="530" width="320" height="50" rx="12"
+          fill="#06B6D4" fill-opacity="0.1"
+          stroke="#06B6D4" stroke-opacity="0.4" stroke-width="1.5"/>
+    <text x="580" y="562" text-anchor="middle"
+          font-family="system-ui, sans-serif"
+          font-size="13" font-weight="600" fill="#0E7490">
+        v — центральность узлов
+    </text>
+</svg>

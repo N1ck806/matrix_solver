@@ -1,0 +1,1783 @@
+{% extends "matrix_app/base.html" %}
+{% load static matrix_icons %}
+
+{% block title %}MatrixLab — линейная алгебра с пошаговыми решениями{% endblock %}
+
+{% block meta_description %}
+MatrixLab — точные вычисления с матрицами: определители, обратные, СЛАУ,
+собственные значения, LU- и QR-разложения. Пошаговые решения, экспорт,
+API. Для студентов, преподавателей и инженеров.
+{% endblock %}
+
+
+{% block extra_head %}
+{{ block.super }}
+
+<style>
+/* =============================================================================
+   ГЛАВНАЯ — стили страницы.
+   База (hero/features/how/popular/theory/cta) — в main.css.
+   Здесь — hero-chips, schools, quick links, overview, capabilities, audience, faq.
+   ============================================================================= */
+
+
+/* =============================================================================
+   1. HERO — дополнения поверх main.css
+   ============================================================================= */
+.hero__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 22px;
+}
+
+.hero__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 12px;
+    background: color-mix(in srgb, var(--surface) 80%, transparent);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    backdrop-filter: blur(8px);
+    transition: border-color var(--dur-fast), color var(--dur-fast);
+}
+
+.hero__chip:hover {
+    border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+    color: var(--accent);
+}
+
+.hero__chip-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+
+/* =============================================================================
+   2. СЕКЦИЯ «ПРИМЕНЕНИЕ» (школы)
+   ============================================================================= */
+.modules-teaser {
+    padding-block: clamp(48px, 8vw, 96px);
+}
+
+.modules-teaser__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+@media (max-width: 480px) {
+    .modules-teaser__grid { grid-template-columns: 1fr; }
+}
+
+.school-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 24px 16px 22px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    text-decoration: none;
+    color: inherit;
+    transition:
+        transform var(--dur-base) var(--ease-out),
+        border-color var(--dur-base),
+        box-shadow var(--dur-base);
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+}
+
+.school-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+        circle at 50% 0%,
+        color-mix(in srgb, var(--accent-1) 8%, transparent),
+        transparent 60%
+    );
+    opacity: 0;
+    transition: opacity var(--dur-base);
+    z-index: -1;
+    pointer-events: none;
+}
+
+.school-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent);
+    box-shadow: 0 16px 48px var(--accent-glow);
+}
+
+.school-card:hover::before { opacity: 1; }
+
+.school-card__emblem {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 110px;
+    height: 110px;
+    margin-bottom: 14px;
+    flex-shrink: 0;
+    transition: transform var(--dur-base) var(--ease-out);
+}
+
+.school-card:hover .school-card__emblem { transform: scale(1.08); }
+
+.school-card__emblem .ml-icon,
+.school-card__emblem svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    stroke: none;
+    fill: none;
+}
+
+.school-card__title {
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    color: var(--text);
+    margin: 0 0 6px;
+    line-height: 1.3;
+    letter-spacing: -0.005em;
+}
+
+.school-card__count {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    background: var(--accent-soft);
+    border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+    border-radius: var(--radius-full);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+}
+
+.school-card__count .ml-icon,
+.school-card__count svg {
+    width: 11px;
+    height: 11px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+    color: inherit;
+}
+
+.modules-teaser__cta {
+    display: flex;
+    justify-content: center;
+    margin-top: 32px;
+}
+
+.modules-teaser__cta .btn {
+    box-shadow:
+        0 8px 20px -6px var(--accent-glow),
+        0 0 0 1px color-mix(in srgb, var(--accent) 10%, transparent);
+    transition: transform var(--dur-fast), box-shadow var(--dur-base);
+}
+
+.modules-teaser__cta .btn:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 16px 32px -8px var(--accent-glow),
+        0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.modules-teaser__cta .btn .ml-icon,
+.modules-teaser__cta .btn svg {
+    width: 16px;
+    height: 16px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+    color: inherit;
+}
+
+
+/* =============================================================================
+   3. БЫСТРЫЕ ССЫЛКИ
+   ============================================================================= */
+.home-quick-links {
+    padding-block: clamp(32px, 5vw, 56px);
+}
+
+.home-quick-links__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+}
+
+.quick-link {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    text-decoration: none;
+    color: inherit;
+    transition:
+        transform var(--dur-base) var(--ease-out),
+        border-color var(--dur-base),
+        box-shadow var(--dur-base);
+}
+
+.quick-link:hover {
+    transform: translateY(-3px);
+    border-color: var(--accent);
+    box-shadow: 0 12px 28px -12px var(--accent-glow);
+}
+
+.quick-link__icon {
+    width: 44px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-radius: 12px;
+    flex-shrink: 0;
+}
+
+.quick-link__icon .ml-icon,
+.quick-link__icon svg {
+    width: 20px;
+    height: 20px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+    color: inherit;
+}
+
+.quick-link__text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1;
+}
+
+.quick-link__title {
+    font-size: var(--fs-base);
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.005em;
+}
+
+.quick-link__desc {
+    font-size: var(--fs-xs);
+    color: var(--text-dim);
+    line-height: 1.4;
+}
+
+.quick-link__arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    color: var(--text-dim);
+    flex-shrink: 0;
+    transition: transform var(--dur-fast), color var(--dur-fast);
+}
+
+.quick-link:hover .quick-link__arrow {
+    color: var(--accent);
+    transform: translateX(4px);
+}
+
+.quick-link__arrow .ml-icon,
+.quick-link__arrow svg {
+    width: 14px;
+    height: 14px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+    color: inherit;
+}
+
+
+/* =============================================================================
+   4. ПОЛНЫЙ ОБЗОР РАЗДЕЛОВ
+   ============================================================================= */
+.overview {
+    padding-block: clamp(56px, 8vw, 96px);
+}
+
+.overview__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 18px;
+}
+
+.overview-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 22px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    text-decoration: none;
+    color: inherit;
+    position: relative;
+    overflow: hidden;
+    transition:
+        transform var(--dur-base) var(--ease-out),
+        border-color var(--dur-base),
+        box-shadow var(--dur-base);
+    isolation: isolate;
+}
+
+.overview-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+        circle at 0% 0%,
+        color-mix(in srgb, var(--accent-1) 10%, transparent),
+        transparent 55%
+    );
+    opacity: 0;
+    transition: opacity var(--dur-base);
+    z-index: -1;
+    pointer-events: none;
+}
+
+.overview-card:hover {
+    transform: translateY(-4px);
+    border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+    box-shadow: 0 20px 40px -16px var(--accent-glow);
+}
+
+.overview-card:hover::before { opacity: 1; }
+
+.overview-card__head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.overview-card__icon {
+    width: 46px;
+    height: 46px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    color: #fff;
+    border-radius: var(--radius-md);
+    box-shadow: 0 8px 18px -6px var(--accent-glow);
+    flex-shrink: 0;
+}
+
+.overview-card__icon .ml-icon,
+.overview-card__icon svg {
+    width: 22px;
+    height: 22px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+    color: #fff;
+}
+
+.overview-card__title {
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    margin: 0;
+    color: var(--text);
+    line-height: 1.25;
+}
+
+.overview-card__desc {
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--text-dim);
+    margin: 0;
+}
+
+.overview-card__list {
+    list-style: none;
+    margin: 4px 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.overview-card__list li {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent) 15%, transparent);
+    border-radius: var(--radius-full);
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+}
+
+.overview-card__arrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: auto;
+    padding-top: 12px;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--accent);
+    transition: gap var(--dur-fast);
+}
+
+.overview-card:hover .overview-card__arrow { gap: 10px; }
+
+.overview-card__arrow .ml-icon,
+.overview-card__arrow svg {
+    width: 14px;
+    height: 14px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+    color: inherit;
+}
+
+
+/* =============================================================================
+   5. «ЧТО УМЕЕТ СЕРВИС» — преимущества
+   ============================================================================= */
+.capabilities {
+    padding-block: clamp(56px, 8vw, 96px);
+}
+
+.capabilities__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+}
+
+.cap-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 24px 22px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    transition:
+        transform var(--dur-base) var(--ease-out),
+        border-color var(--dur-base),
+        box-shadow var(--dur-base);
+    position: relative;
+    overflow: hidden;
+}
+
+.cap-card:hover {
+    transform: translateY(-3px);
+    border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+    box-shadow: 0 12px 28px -12px var(--accent-glow);
+}
+
+.cap-card__icon {
+    width: 52px;
+    height: 52px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-radius: var(--radius-md);
+    flex-shrink: 0;
+}
+
+.cap-card__icon .ml-icon,
+.cap-card__icon svg {
+    width: 24px;
+    height: 24px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+    color: inherit;
+}
+
+.cap-card__title {
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    margin: 0;
+    color: var(--text);
+}
+
+.cap-card__desc {
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--text-dim);
+    margin: 0;
+}
+
+
+/* =============================================================================
+   6. «ДЛЯ КОГО» — аудитория
+   ============================================================================= */
+.audience {
+    padding-block: clamp(48px, 6vw, 80px);
+}
+
+.audience__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+.audience-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+    padding: 28px 22px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    transition:
+        transform var(--dur-base) var(--ease-out),
+        border-color var(--dur-base),
+        box-shadow var(--dur-base);
+}
+
+.audience-card:hover {
+    transform: translateY(-3px);
+    border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+    box-shadow: 0 12px 28px -12px var(--accent-glow);
+}
+
+.audience-card__icon {
+    width: 64px;
+    height: 64px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    color: #fff;
+    border-radius: 18px;
+    box-shadow: 0 10px 22px -8px var(--accent-glow);
+    flex-shrink: 0;
+}
+
+.audience-card__icon .ml-icon,
+.audience-card__icon svg {
+    width: 30px;
+    height: 30px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+    color: #fff;
+}
+
+.audience-card__title {
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    margin: 0;
+    color: var(--text);
+}
+
+.audience-card__desc {
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--text-dim);
+    margin: 0;
+}
+
+
+/* =============================================================================
+   7. FAQ
+   ============================================================================= */
+.faq {
+    padding-block: clamp(56px, 8vw, 96px);
+}
+
+.faq__list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 860px;
+    margin: 0 auto;
+}
+
+.faq-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: border-color var(--dur-base), box-shadow var(--dur-base);
+}
+
+.faq-item:hover {
+    border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.faq-item[open] {
+    border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+    box-shadow: 0 12px 28px -12px var(--accent-glow);
+}
+
+.faq-item__q {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 22px;
+    cursor: pointer;
+    list-style: none;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.005em;
+    user-select: none;
+}
+
+.faq-item__q::-webkit-details-marker { display: none; }
+
+.faq-item__icon {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-radius: 9px;
+    flex-shrink: 0;
+    transition: transform var(--dur-base), background var(--dur-base), color var(--dur-base);
+}
+
+.faq-item[open] .faq-item__icon {
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    color: #fff;
+    transform: rotate(90deg);
+}
+
+.faq-item__icon .ml-icon,
+.faq-item__icon svg {
+    width: 14px;
+    height: 14px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+    color: inherit;
+}
+
+.faq-item__q-text { flex: 1; min-width: 0; }
+
+.faq-item__a {
+    padding: 0 22px 20px 68px;
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--text-dim);
+}
+
+.faq-item__a p { margin: 0 0 10px; }
+.faq-item__a p:last-child { margin-bottom: 0; }
+
+
+/* =============================================================================
+   8. АДАПТИВ
+   ============================================================================= */
+@media (max-width: 640px) {
+    .school-card { padding: 20px 14px 18px; }
+    .school-card__emblem {
+        width: 88px;
+        height: 88px;
+        margin-bottom: 10px;
+    }
+
+    .home-quick-links__grid { grid-template-columns: 1fr; }
+    .overview__grid { grid-template-columns: 1fr; }
+    .capabilities__grid { grid-template-columns: 1fr; }
+    .audience__grid { grid-template-columns: 1fr; }
+
+    .faq-item__q { padding: 16px 18px; font-size: 14px; }
+    .faq-item__a { padding: 0 18px 18px 60px; }
+}
+</style>
+{% endblock %}
+
+{% block page_id %}home{% endblock %}
+
+
+{% block content %}
+
+<!-- ================================================================
+     СЕКЦИЯ 1. HERO
+     ================================================================ -->
+<section class="hero">
+  <div class="hero__bg" aria-hidden="true">
+    <div class="hero__bg-grid"></div>
+  </div>
+
+  <div class="container hero__inner">
+
+    <div class="hero__text">
+      <span class="hero__kicker">Линейная алгебра · Высшая математика</span>
+
+      <h1 class="hero__title">
+        Матрица — это <span class="hero__title-accent">преобразование</span>,<br>
+        а не таблица чисел
+      </h1>
+
+      <p class="hero__lead">
+        Вектор входит — вектор выходит. Площадь меняется во столько раз,
+        сколько равен определитель. Собственные векторы не поворачиваются —
+        только растягиваются. MatrixLab показывает это на каждом шаге решения.
+      </p>
+
+      <div class="hero__actions">
+        <a href="{% url 'matrix_app:calculator' %}" class="btn btn-primary btn-lg">
+          <span>Открыть калькулятор</span>
+          <span class="btn-arrow" aria-hidden="true">
+            {% icon "arrow-right" size=14 %}
+          </span>
+        </a>
+        <a href="#capabilities" class="btn btn-ghost btn-lg">
+          <span>Что умеет</span>
+        </a>
+      </div>
+
+      <div class="hero__chips">
+        <span class="hero__chip">
+          <span class="hero__chip-dot" aria-hidden="true"></span>
+          <span>det(A) = 5</span>
+        </span>
+        <span class="hero__chip">
+          <span class="hero__chip-dot" aria-hidden="true"></span>
+          <span>rank(A) = 2</span>
+        </span>
+        <span class="hero__chip">
+          <span class="hero__chip-dot" aria-hidden="true"></span>
+          <span>A·v = λ·v</span>
+        </span>
+        <span class="hero__chip">
+          <span class="hero__chip-dot" aria-hidden="true"></span>
+          <span>A = L·U</span>
+        </span>
+      </div>
+
+      <dl class="hero__meta">
+        <div class="hero__meta-item">
+          <dt class="hero__meta-label">Операции</dt>
+          <dd class="hero__meta-value">det, rank, tr, A⁻¹</dd>
+        </div>
+        <div class="hero__meta-divider" aria-hidden="true"></div>
+        <div class="hero__meta-item">
+          <dt class="hero__meta-label">Разложения</dt>
+          <dd class="hero__meta-value">LU, QR, Холецкий</dd>
+        </div>
+        <div class="hero__meta-divider" aria-hidden="true"></div>
+        <div class="hero__meta-item">
+          <dt class="hero__meta-label">Спектр</dt>
+          <dd class="hero__meta-value">λ, собственные векторы</dd>
+        </div>
+      </dl>
+    </div>
+
+    <div class="hero__scene">
+      <div class="hero__scene-slot">
+        <img src="{% static 'matrix_app/icons/hero/hero-transform.svg' %}"
+             alt="Матрица A отображает вектор v в вектор A·v и преобразует единичный квадрат в параллелограмм площади |det A|"
+             class="hero__scene-img"
+             width="900" height="620">
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ================================================================
+     СЕКЦИЯ 2. FEATURES
+     ================================================================ -->
+<section class="features section" id="capabilities">
+  <div class="container">
+
+    <header class="section-head section-head--center">
+      <span class="section-kicker">Возможности</span>
+      <h2 class="section-title">Полный набор операций</h2>
+      <p class="section-lead">
+        От базовых вычислений до спектрального анализа. Каждая операция
+        сопровождается пошаговым решением и обоснованием метода.
+      </p>
+    </header>
+
+    <div class="features__rail">
+      <ul class="features__items">
+
+        <li class="feature">
+          <div class="feature__medallion" aria-hidden="true">
+            {% icon "features/determinant" size=160 %}
+          </div>
+          <div class="feature__name">Определитель</div>
+          <div class="feature__desc">det A, миноры, разложение по строке</div>
+        </li>
+
+        <li class="feature">
+          <div class="feature__medallion" aria-hidden="true">
+            {% icon "features/inverse" size=160 %}
+          </div>
+          <div class="feature__name">Обратная</div>
+          <div class="feature__desc">A · A⁻¹ = I</div>
+        </li>
+
+        <li class="feature">
+          <div class="feature__medallion" aria-hidden="true">
+            {% icon "features/rank" size=160 %}
+          </div>
+          <div class="feature__name">Ранг</div>
+          <div class="feature__desc">rank A, базис образа</div>
+        </li>
+
+        <li class="feature">
+          <div class="feature__medallion" aria-hidden="true">
+            {% icon "features/transpose" size=160 %}
+          </div>
+          <div class="feature__name">Транспонирование</div>
+          <div class="feature__desc">Aᵀ</div>
+        </li>
+
+        <li class="feature">
+          <div class="feature__medallion" aria-hidden="true">
+            {% icon "features/slau" size=160 %}
+          </div>
+          <div class="feature__name">СЛАУ</div>
+          <div class="feature__desc">Ax = b</div>
+        </li>
+
+        <li class="feature">
+          <div class="feature__medallion" aria-hidden="true">
+            {% icon "features/eigen" size=160 %}
+          </div>
+          <div class="feature__name">Собственные</div>
+          <div class="feature__desc">λ и собственные векторы</div>
+        </li>
+
+        <li class="feature">
+          <div class="feature__medallion" aria-hidden="true">
+            {% icon "features/decompositions" size=160 %}
+          </div>
+          <div class="feature__name">Разложения</div>
+          <div class="feature__desc">LU, QR, Холецкий</div>
+        </li>
+
+        <li class="feature">
+          <div class="feature__medallion" aria-hidden="true">
+            {% icon "features/lu" size=160 %}
+          </div>
+          <div class="feature__name">Пошагово</div>
+          <div class="feature__desc">Каждый шаг с обоснованием</div>
+        </li>
+
+      </ul>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ================================================================
+     СЕКЦИЯ 3. ПОЛНЫЙ ОБЗОР РАЗДЕЛОВ
+     ================================================================ -->
+<section class="overview section">
+  <div class="container">
+
+    <header class="section-head section-head--center">
+      <span class="section-kicker">Все разделы</span>
+      <h2 class="section-title">Что можно делать в MatrixLab</h2>
+      <p class="section-lead">
+        Одиннадцать инструментов под одной обложкой — от простого
+        калькулятора до полного анализа свойств, разложений и спектра.
+      </p>
+    </header>
+
+    <div class="overview__grid">
+
+      <a href="{% url 'matrix_app:calculator' %}" class="overview-card">
+        <div class="overview-card__head">
+          <span class="overview-card__icon" aria-hidden="true">
+            {% icon "calculator" size=22 %}
+          </span>
+          <h3 class="overview-card__title">Калькулятор</h3>
+        </div>
+        <p class="overview-card__desc">
+          Одна матрица, любая операция. Точное решение и проверка результата.
+        </p>
+        <ul class="overview-card__list">
+          <li>det</li><li>rank</li><li>tr</li><li>A⁻¹</li>
+          <li>Aᵀ</li><li>RREF</li><li>REF</li><li>Свойства</li>
+        </ul>
+        <span class="overview-card__arrow">
+          <span>Открыть</span>
+          {% icon "arrow-right" size=14 %}
+        </span>
+      </a>
+
+      <a href="{% url 'matrix_app:operations' %}" class="overview-card">
+        <div class="overview-card__head">
+          <span class="overview-card__icon" aria-hidden="true">
+            {% icon "operations" size=22 %}
+          </span>
+          <h3 class="overview-card__title">Операции A и B</h3>
+        </div>
+        <p class="overview-card__desc">
+          Действия с двумя и более матрицами. Сложение, умножение,
+          скаляр, степень, транспонирование, сравнение.
+        </p>
+        <ul class="overview-card__list">
+          <li>A+B</li><li>A−B</li><li>A·B</li><li>k·A</li>
+          <li>Aⁿ</li><li>Aᵀ</li><li>A ? B</li>
+        </ul>
+        <span class="overview-card__arrow">
+          <span>Открыть</span>
+          {% icon "arrow-right" size=14 %}
+        </span>
+      </a>
+
+      <a href="{% url 'matrix_app:properties' %}" class="overview-card">
+        <div class="overview-card__head">
+          <span class="overview-card__icon" aria-hidden="true">
+            {% icon "properties" size=22 %}
+          </span>
+          <h3 class="overview-card__title">Свойства матрицы</h3>
+        </div>
+        <p class="overview-card__desc">
+          Полный анализ: квадратность, симметрия, ортогональность,
+          определённость, диагонализуемость, спектр.
+        </p>
+        <ul class="overview-card__list">
+          <li>Форма</li><li>Структура</li><li>Симметрия</li>
+          <li>Определённость</li><li>Спектр</li>
+        </ul>
+        <span class="overview-card__arrow">
+          <span>Открыть</span>
+          {% icon "arrow-right" size=14 %}
+        </span>
+      </a>
+
+      <a href="{% url 'matrix_app:systems' %}" class="overview-card">
+        <div class="overview-card__head">
+          <span class="overview-card__icon" aria-hidden="true">
+            {% icon "system" size=22 %}
+          </span>
+          <h3 class="overview-card__title">СЛАУ</h3>
+        </div>
+        <p class="overview-card__desc">
+          Системы линейных уравнений: Гаусс, Гаусс-Жордан, Крамер,
+          через обратную, Кронекер-Капелли.
+        </p>
+        <ul class="overview-card__list">
+          <li>Ax = b</li><li>Гаусс</li><li>Крамер</li>
+          <li>rank([A|b])</li>
+        </ul>
+        <span class="overview-card__arrow">
+          <span>Открыть</span>
+          {% icon "arrow-right" size=14 %}
+        </span>
+      </a>
+
+      <a href="{% url 'matrix_app:decompositions' %}" class="overview-card">
+        <div class="overview-card__head">
+          <span class="overview-card__icon" aria-hidden="true">
+            {% icon "decompositions" size=22 %}
+          </span>
+          <h3 class="overview-card__title">Разложения</h3>
+        </div>
+        <p class="overview-card__desc">
+          LU, QR, Холецкий, диагонализация, спектральное —
+          с пошаговым построением и проверкой восстановления.
+        </p>
+        <ul class="overview-card__list">
+          <li>LU</li><li>QR</li><li>L·Lᵀ</li>
+          <li>P·D·P⁻¹</li><li>Q·D·Qᵀ</li>
+        </ul>
+        <span class="overview-card__arrow">
+          <span>Открыть</span>
+          {% icon "arrow-right" size=14 %}
+        </span>
+      </a>
+
+      <a href="{% url 'matrix_app:eigen' %}" class="overview-card">
+        <div class="overview-card__head">
+          <span class="overview-card__icon" aria-hidden="true">
+            {% icon "eigen" size=22 %}
+          </span>
+          <h3 class="overview-card__title">Спектр</h3>
+        </div>
+        <p class="overview-card__desc">
+          Характеристический многочлен, собственные значения
+          с кратностями, собственные векторы, диагонализируемость.
+        </p>
+        <ul class="overview-card__list">
+          <li>p(λ)</li><li>λᵢ</li><li>ker(A−λI)</li>
+          <li>tr, det</li>
+        </ul>
+        <span class="overview-card__arrow">
+          <span>Открыть</span>
+          {% icon "arrow-right" size=14 %}
+        </span>
+      </a>
+
+      <a href="{% url 'matrix_app:modules' %}" class="overview-card">
+        <div class="overview-card__head">
+          <span class="overview-card__icon" aria-hidden="true">
+            {% icon "modules" size=22 %}
+          </span>
+          <h3 class="overview-card__title">Применение</h3>
+        </div>
+        <p class="overview-card__desc">
+          Сорок восемь направлений в пяти школах: инженерия, бизнес,
+          медицина, образование, искусство.
+        </p>
+        <ul class="overview-card__list">
+          <li>Инженерия</li><li>Бизнес</li><li>Медицина</li>
+          <li>Образование</li><li>Искусство</li>
+        </ul>
+        <span class="overview-card__arrow">
+          <span>Открыть</span>
+          {% icon "arrow-right" size=14 %}
+        </span>
+      </a>
+
+      <a href="{% url 'matrix_app:theory' %}" class="overview-card">
+        <div class="overview-card__head">
+          <span class="overview-card__icon" aria-hidden="true">
+            {% icon "theory" size=22 %}
+          </span>
+          <h3 class="overview-card__title">Теория</h3>
+        </div>
+        <p class="overview-card__desc">
+          Понятные объяснения ключевых понятий: что, зачем, как,
+          типичные ошибки. С формулами, примерами и применениями.
+        </p>
+        <ul class="overview-card__list">
+          <li>Основы</li><li>Операции</li><li>Определители</li>
+          <li>СЛАУ</li><li>Спектр</li><li>Разложения</li>
+        </ul>
+        <span class="overview-card__arrow">
+          <span>Открыть</span>
+          {% icon "arrow-right" size=14 %}
+        </span>
+      </a>
+
+      <a href="{% url 'matrix_app:types' %}" class="overview-card">
+        <div class="overview-card__head">
+          <span class="overview-card__icon" aria-hidden="true">
+            {% icon "types" size=22 %}
+          </span>
+          <h3 class="overview-card__title">Виды матриц</h3>
+        </div>
+        <p class="overview-card__desc">
+          Полная классификация: базовые, специальные, особые.
+          Определения, формулы, примеры, применения.
+        </p>
+        <ul class="overview-card__list">
+          <li>Квадратная</li><li>Диагональная</li><li>Симметричная</li>
+          <li>Ортогональная</li><li>Нильпотентная</li>
+        </ul>
+        <span class="overview-card__arrow">
+          <span>Открыть</span>
+          {% icon "arrow-right" size=14 %}
+        </span>
+      </a>
+
+      <a href="{% url 'matrix_app:saved_matrices' %}" class="overview-card">
+        <div class="overview-card__head">
+          <span class="overview-card__icon" aria-hidden="true">
+            {% icon "bookmark" size=22 %}
+          </span>
+          <h3 class="overview-card__title">Сохранённые</h3>
+        </div>
+        <p class="overview-card__desc">
+          Именованные матрицы с заметками. Открыть, использовать
+          повторно в калькуляторе или удалить — в один клик.
+        </p>
+        <ul class="overview-card__list">
+          <li>Имена</li><li>Заметки</li><li>Повтор</li>
+        </ul>
+        <span class="overview-card__arrow">
+          <span>Открыть</span>
+          {% icon "arrow-right" size=14 %}
+        </span>
+      </a>
+
+      <a href="{% url 'matrix_app:history' %}" class="overview-card">
+        <div class="overview-card__head">
+          <span class="overview-card__icon" aria-hidden="true">
+            {% icon "history" size=22 %}
+          </span>
+          <h3 class="overview-card__title">История</h3>
+        </div>
+        <p class="overview-card__desc">
+          Все выполненные операции. Открыть результат, повторить
+          вычисление, удалить запись — без потери данных.
+        </p>
+        <ul class="overview-card__list">
+          <li>Дата</li><li>Операция</li><li>Результат</li>
+        </ul>
+        <span class="overview-card__arrow">
+          <span>Открыть</span>
+          {% icon "arrow-right" size=14 %}
+        </span>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ================================================================
+     СЕКЦИЯ 4. HOW (как это работает)
+     ================================================================ -->
+<section class="how section">
+  <div class="container">
+
+    <header class="section-head section-head--center">
+      <span class="section-kicker">Как это работает</span>
+      <h2 class="section-title">От условия до ответа</h2>
+      <p class="section-lead">
+        Четыре шага: ввод данных, выбор метода, решение с проверкой,
+        разбор теории за каждым шагом.
+      </p>
+    </header>
+
+    <div class="how__diagram">
+      <div class="how__track" aria-hidden="true">
+        <div class="how__track-line"></div>
+        <div class="how__track-dot"></div>
+      </div>
+
+      <ol class="how__steps">
+        {% for s in process %}
+          <li class="how__step">
+            <div class="how__step-scene" aria-hidden="true">
+              {% icon "steps/step-"|add:s.slug size=160 %}
+            </div>
+            <div class="how__step-title">{{ s.title }}</div>
+            <div class="how__step-desc">{{ s.desc }}</div>
+          </li>
+        {% empty %}
+          <li class="how__step">
+            <div class="how__step-scene" aria-hidden="true">
+              {% icon "steps/step-input" size=160 %}
+            </div>
+            <div class="how__step-title">Ввод</div>
+            <div class="how__step-desc">Матрица, вектор или система уравнений</div>
+          </li>
+          <li class="how__step">
+            <div class="how__step-scene" aria-hidden="true">
+              {% icon "steps/step-choose" size=160 %}
+            </div>
+            <div class="how__step-title">Выбор метода</div>
+            <div class="how__step-desc">Гаусс, Крамер, LU, QR — по условию</div>
+          </li>
+          <li class="how__step">
+            <div class="how__step-scene" aria-hidden="true">
+              {% icon "steps/step-solve" size=160 %}
+            </div>
+            <div class="how__step-title">Решение</div>
+            <div class="how__step-desc">Каждый шаг с обоснованием и проверкой</div>
+          </li>
+          <li class="how__step">
+            <div class="how__step-scene" aria-hidden="true">
+              {% icon "steps/step-learn" size=160 %}
+            </div>
+            <div class="how__step-title">Теория</div>
+            <div class="how__step-desc">Свойства, теоремы, геометрический смысл</div>
+          </li>
+        {% endfor %}
+      </ol>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ================================================================
+     СЕКЦИЯ 5. POPULAR
+     ================================================================ -->
+<section class="popular section">
+  <div class="container">
+
+    <header class="section-head section-head--center">
+      <span class="section-kicker">Основные задачи</span>
+      <h2 class="section-title">С чего обычно начинают</h2>
+      <p class="section-lead">
+        Шесть типовых задач курса линейной алгебры. По каждой — полное
+        решение с промежуточными выкладками.
+      </p>
+    </header>
+
+    <div class="bento">
+      {% for item in popular %}
+        <a href="{% url item.url_name %}"
+           class="bento__card {% if item.size %}bento__card--{{ item.size }}{% endif %}">
+          <div class="bento__visual" aria-hidden="true">
+            <img src="{% static 'matrix_app/illustrations/popular/' %}{{ item.slug }}.svg"
+                 alt=""
+                 class="bento__scene-img"
+                 width="560" height="480"
+                 loading="lazy">
+          </div>
+          <div class="bento__body">
+            <div class="bento__title">{{ item.title }}</div>
+            <div class="bento__desc">{{ item.desc }}</div>
+          </div>
+        </a>
+      {% empty %}
+        <a href="{% url 'matrix_app:properties' %}" class="bento__card bento__card--large">
+          <div class="bento__visual" aria-hidden="true">
+            <img src="{% static 'matrix_app/illustrations/popular/determinant.svg' %}"
+                 alt=""
+                 class="bento__scene-img"
+                 width="560" height="480"
+                 loading="lazy">
+          </div>
+          <div class="bento__body">
+            <div class="bento__title">Определитель</div>
+            <div class="bento__desc">det A — площадь, объём, обратимость</div>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ================================================================
+     СЕКЦИЯ 6. МАТРИЦЫ В РЕАЛЬНОЙ ЖИЗНИ (школы)
+     ================================================================ -->
+<section class="modules-teaser section" id="modules">
+  <div class="container">
+
+    <header class="section-head">
+      <span class="section-kicker">Применение</span>
+      <h2 class="section-title">Матрицы в реальной жизни</h2>
+      <p class="section-lead">
+        {% if total_directions %}
+          {{ total_directions }} направлений — от педагогики до космических
+          технологий. Для каждой специальности: зачем матрицы, какие формулы,
+          и как это посчитать.
+        {% else %}
+          От педагогики до космических технологий. Для каждой специальности —
+          своя формула, свои примеры и возможность посчитать прямо в калькуляторе.
+        {% endif %}
+      </p>
+    </header>
+
+    <div class="modules-teaser__grid">
+      {% for school in MODULE_SCHOOLS %}
+        <a href="{% url 'matrix_app:school_detail' school.slug %}"
+           class="school-card">
+          <div class="school-card__emblem" aria-hidden="true">
+            {% icon school.icon size=110 %}
+          </div>
+          <h3 class="school-card__title">{{ school.title }}</h3>
+          <span class="school-card__count">
+            {% icon "modules" size=11 %}
+            <span>
+              {{ school.directions|length }}
+              {% with n=school.directions|length %}
+                {% if n == 1 %}направление{% elif n < 5 %}направления{% else %}направлений{% endif %}
+              {% endwith %}
+            </span>
+          </span>
+        </a>
+      {% endfor %}
+    </div>
+
+    <div class="modules-teaser__cta">
+      <a href="{% url 'matrix_app:modules' %}" class="btn btn-primary btn-lg">
+        {% icon "modules" size=16 %}
+        <span>Все направления</span>
+        <span class="btn-arrow" aria-hidden="true">
+          {% icon "arrow-right" size=14 %}
+        </span>
+      </a>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ================================================================
+     СЕКЦИЯ 7. БЫСТРЫЕ ССЫЛКИ
+     ================================================================ -->
+<section class="home-quick-links">
+  <div class="container">
+    <div class="home-quick-links__grid">
+
+      <a href="{% url 'matrix_app:calculator' %}" class="quick-link">
+        <span class="quick-link__icon" aria-hidden="true">
+          {% icon "calculator" size=20 %}
+        </span>
+        <span class="quick-link__text">
+          <span class="quick-link__title">Калькулятор</span>
+          <span class="quick-link__desc">Одна матрица, любая операция</span>
+        </span>
+        <span class="quick-link__arrow" aria-hidden="true">
+          {% icon "arrow-right" size=14 %}
+        </span>
+      </a>
+
+      <a href="{% url 'matrix_app:operations' %}" class="quick-link">
+        <span class="quick-link__icon" aria-hidden="true">
+          {% icon "operations" size=20 %}
+        </span>
+        <span class="quick-link__text">
+          <span class="quick-link__title">Операции A и B</span>
+          <span class="quick-link__desc">Сложение, умножение, цепочки</span>
+        </span>
+        <span class="quick-link__arrow" aria-hidden="true">
+          {% icon "arrow-right" size=14 %}
+        </span>
+      </a>
+
+      <a href="{% url 'matrix_app:systems' %}" class="quick-link">
+        <span class="quick-link__icon" aria-hidden="true">
+          {% icon "system" size=20 %}
+        </span>
+        <span class="quick-link__text">
+          <span class="quick-link__title">СЛАУ</span>
+          <span class="quick-link__desc">Ax = b, Кронекер-Капелли</span>
+        </span>
+        <span class="quick-link__arrow" aria-hidden="true">
+          {% icon "arrow-right" size=14 %}
+        </span>
+      </a>
+
+      <a href="{% url 'matrix_app:decompositions' %}" class="quick-link">
+        <span class="quick-link__icon" aria-hidden="true">
+          {% icon "decompositions" size=20 %}
+        </span>
+        <span class="quick-link__text">
+          <span class="quick-link__title">Разложения</span>
+          <span class="quick-link__desc">LU, QR, Холецкий, диагонализация</span>
+        </span>
+        <span class="quick-link__arrow" aria-hidden="true">
+          {% icon "arrow-right" size=14 %}
+        </span>
+      </a>
+
+      <a href="{% url 'matrix_app:eigen' %}" class="quick-link">
+        <span class="quick-link__icon" aria-hidden="true">
+          {% icon "eigen" size=20 %}
+        </span>
+        <span class="quick-link__text">
+          <span class="quick-link__title">Спектр</span>
+          <span class="quick-link__desc">Собственные значения и векторы</span>
+        </span>
+        <span class="quick-link__arrow" aria-hidden="true">
+          {% icon "arrow-right" size=14 %}
+        </span>
+      </a>
+
+      <a href="{% url 'matrix_app:properties' %}" class="quick-link">
+        <span class="quick-link__icon" aria-hidden="true">
+          {% icon "properties" size=20 %}
+        </span>
+        <span class="quick-link__text">
+          <span class="quick-link__title">Свойства матрицы</span>
+          <span class="quick-link__desc">Полный анализ всех характеристик</span>
+        </span>
+        <span class="quick-link__arrow" aria-hidden="true">
+          {% icon "arrow-right" size=14 %}
+        </span>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ================================================================
+     СЕКЦИЯ 8. ЧТО УМЕЕТ СЕРВИС
+     ================================================================ -->
+<section class="capabilities section">
+  <div class="container">
+
+    <header class="section-head section-head--center">
+      <span class="section-kicker">Почему MatrixLab</span>
+      <h2 class="section-title">Что делает сервис особенным</h2>
+      <p class="section-lead">
+        Шесть причин выбрать MatrixLab для работы с матрицами
+        и линейной алгеброй.
+      </p>
+    </header>
+
+    <div class="capabilities__grid">
+
+      <div class="cap-card">
+        <span class="cap-card__icon" aria-hidden="true">
+          {% icon "check-badge" size=24 %}
+        </span>
+        <h3 class="cap-card__title">Точные вычисления</h3>
+        <p class="cap-card__desc">
+          Дроби остаются дробями, корни — корнями, комплексные числа —
+          комплексными. Никаких округлений и потерь точности.
+        </p>
+      </div>
+
+      <div class="cap-card">
+        <span class="cap-card__icon" aria-hidden="true">
+          {% icon "list" size=24 %}
+        </span>
+        <h3 class="cap-card__title">Пошаговые решения</h3>
+        <p class="cap-card__desc">
+          Каждый шаг с обоснованием метода, формулой и пояснением.
+          Можно разобраться, а не просто списать ответ.
+        </p>
+      </div>
+
+      <div class="cap-card">
+        <span class="cap-card__icon" aria-hidden="true">
+          {% icon "sparkles" size=24 %}
+        </span>
+        <h3 class="cap-card__title">Проверка результата</h3>
+        <p class="cap-card__desc">
+          Сервис сам проверяет найденное решение: подстановкой,
+          обратным умножением или сверкой инвариантов.
+        </p>
+      </div>
+
+      <div class="cap-card">
+        <span class="cap-card__icon" aria-hidden="true">
+          {% icon "history" size=24 %}
+        </span>
+        <h3 class="cap-card__title">История и сохранённые</h3>
+        <p class="cap-card__desc">
+          Все операции сохраняются. Можно вернуться к любой задаче,
+          переименовать, повторить или использовать повторно.
+        </p>
+      </div>
+
+      <div class="cap-card">
+        <span class="cap-card__icon" aria-hidden="true">
+          {% icon "arrow-right" size=24 %}
+        </span>
+        <h3 class="cap-card__title">Экспорт результата</h3>
+        <p class="cap-card__desc">
+          Копирование решения в LaTeX, JSON или текстовый формат.
+          Удобно вставлять в отчёты и учебные работы.
+        </p>
+      </div>
+
+      <div class="cap-card">
+        <span class="cap-card__icon" aria-hidden="true">
+          {% icon "shield" size=24 %}
+        </span>
+        <h3 class="cap-card__title">Приватность</h3>
+        <p class="cap-card__desc">
+          Все данные хранятся только в вашем браузере и никуда
+          не передаются. Историю можно очистить в один клик или
+          методом очистки кэша вашего браузера.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ================================================================
+     СЕКЦИЯ 9. ДЛЯ КОГО
+     ================================================================ -->
+<section class="audience section">
+  <div class="container">
+
+    <header class="section-head section-head--center">
+      <span class="section-kicker">Аудитория</span>
+      <h2 class="section-title">Для кого этот сервис</h2>
+      <p class="section-lead">
+        MatrixLab помогает всем, кто работает с матрицами
+        и линейной алгеброй.
+      </p>
+    </header>
+
+    <div class="audience__grid">
+
+      <div class="audience-card">
+        <span class="audience-card__icon" aria-hidden="true">
+          {% icon "book-open" size=30 %}
+        </span>
+        <h3 class="audience-card__title">Студентам</h3>
+        <p class="audience-card__desc">
+          Решать задачи и разбираться в ходе решения. Проверять свои
+          ответы перед сдачей работы.
+        </p>
+      </div>
+
+      <div class="audience-card">
+        <span class="audience-card__icon" aria-hidden="true">
+          {% icon "users" size=30 %}
+        </span>
+        <h3 class="audience-card__title">Преподавателям</h3>
+        <p class="audience-card__desc">
+          Готовить примеры и задачи, проверять решения студентов,
+          иллюстрировать сложные темы.
+        </p>
+      </div>
+
+      <div class="audience-card">
+        <span class="audience-card__icon" aria-hidden="true">
+          {% icon "calculator" size=30 %}
+        </span>
+        <h3 class="audience-card__title">Инженерам</h3>
+        <p class="audience-card__desc">
+          Быстро решать рабочие задачи: анализ систем, устойчивость,
+          метод наименьших квадратов, разложения.
+        </p>
+      </div>
+
+      <div class="audience-card">
+        <span class="audience-card__icon" aria-hidden="true">
+          {% icon "sparkles" size=30 %}
+        </span>
+        <h3 class="audience-card__title">Исследователям</h3>
+        <p class="audience-card__desc">
+          Проверять гипотезы, разбирать краевые случаи, исследовать
+          свойства матриц в символьной форме.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ================================================================
+     СЕКЦИЯ 10. THEORY
+     ================================================================ -->
+<section class="theory section">
+  <div class="theory__bg" aria-hidden="true">
+    <img src="{% static 'matrix_app/icons/theory/theory-bg.svg' %}"
+         alt=""
+         class="theory__bg-img"
+         loading="lazy">
+  </div>
+
+  <div class="container theory__inner">
+
+    <div class="theory__content">
+      <span class="section-kicker">Теория</span>
+      <h2 class="section-title">Три определения, с которых всё начинается</h2>
+      <p class="theory__lead">
+        Линейное отображение, собственный вектор, разложение — три понятия,
+        на которых стоит весь курс. Каждое из них описывает одно и то же
+        преобразование с разных сторон.
+      </p>
+
+      <div class="theory__formulas">
+        <div class="theory__formula">
+          <span class="theory__formula-label">Линейное отображение</span>
+          <div class="theory__formula-body">A · v = w</div>
+          <p class="theory__formula-note">Вектор входит, вектор выходит</p>
+        </div>
+        <span class="theory__arrow" aria-hidden="true"></span>
+        <div class="theory__formula">
+          <span class="theory__formula-label">Собственный вектор</span>
+          <div class="theory__formula-body">A · v = λ · v</div>
+          <p class="theory__formula-note">Направление не меняется, длина — да</p>
+        </div>
+        <span class="theory__arrow" aria-hidden="true"></span>
+        <div class="theory__formula">
+          <span class="theory__formula-label">Разложение</span>
+          <div class="theory__formula-body">A = L · U</div>
+          <p class="theory__formula-note">Сложное — на простые множители</p>
+        </div>
+      </div>
+
+      <a href="{% url 'matrix_app:theory' %}" class="btn btn-ghost mt-24">
+        <span>Перейти к теории</span>
+        <span class="btn-arrow" aria-hidden="true">
+          {% icon "arrow-right" size=14 %}
+        </span>
+      </a>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ================================================================
+     СЕКЦИЯ 11. FAQ
+     ================================================================ -->
+<section class="faq section">
+  <div class="container">
+
+    <header class="section-head section-head--center">
+      <span class="section-kicker">Вопросы</span>
+      <h2 class="section-title">Часто спрашивают</h2>
+      <p class="section-lead">
+        Короткие ответы на типичные вопросы о сервисе.
+      </p>
+    </header>
+
+    <div class="faq__list">
+
+      <details class="faq-item">
+        <summary class="faq-item__q">
+          <span class="faq-item__icon" aria-hidden="true">
+            {% icon "arrow-right" size=14 %}
+          </span>
+          <span class="faq-item__q-text">Вычисления точные или приближённые?</span>
+        </summary>
+        <div class="faq-item__a">
+          <p>
+            Точные. Дроби остаются дробями, корни — корнями, комплексные
+            числа — комплексными. Никакого промежуточного перехода в
+            <code>float</code>, как в обычных калькуляторах.
+          </p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-item__q">
+          <span class="faq-item__icon" aria-hidden="true">
+            {% icon "arrow-right" size=14 %}
+          </span>
+          <span class="faq-item__q-text">Что можно вводить в матрицу?</span>
+        </summary>
+        <div class="faq-item__a">
+          <p>
+            Целые и отрицательные числа, дроби (<code>1/2</code>),
+            десятичные (<code>-4.5</code>), корни (<code>sqrt(2)</code>),
+            константы (<code>2*pi</code>), комплексные числа (<code>2+3i</code>),
+            символьные выражения с параметрами.
+          </p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-item__q">
+          <span class="faq-item__icon" aria-hidden="true">
+            {% icon "arrow-right" size=14 %}
+          </span>
+          <span class="faq-item__q-text">Какого размера матрицы поддерживаются?</span>
+        </summary>
+        <div class="faq-item__a">
+          <p>
+            До 10×10 в стандартном режиме. Для символьных вычислений —
+            до 5×5. Для СЛАУ расширенная матрица до 10×11.
+          </p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-item__q">
+          <span class="faq-item__icon" aria-hidden="true">
+            {% icon "arrow-right" size=14 %}
+          </span>
+          <span class="faq-item__q-text">Можно ли экспортировать решение?</span>
+        </summary>
+        <div class="faq-item__a">
+          <p>
+            Да. Результат можно скопировать в LaTeX, JSON или текстовом
+            виде и вставить в отчёт, статью или учебную работу.
+          </p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-item__q">
+          <span class="faq-item__icon" aria-hidden="true">
+            {% icon "arrow-right" size=14 %}
+          </span>
+          <span class="faq-item__q-text">Есть ли API?</span>
+        </summary>
+        <div class="faq-item__a">
+          <p>
+            Да. Все операции доступны через JSON API по адресу
+            <code>/api/&lt;operation&gt;/</code>. Подходит для интеграции
+            в учебные проекты, ботов и внешние приложения.
+          </p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-item__q">
+          <span class="faq-item__icon" aria-hidden="true">
+            {% icon "arrow-right" size=14 %}
+          </span>
+          <span class="faq-item__q-text">Где хранятся мои данные?</span>
+        </summary>
+        <div class="faq-item__a">
+          <p>
+            История вычислений и сохранённые матрицы хранятся в вашем
+            браузере и никуда не передаются. Историю можно очистить
+            в один клик или методом очистки кэша в браузере.
+          </p>
+        </div>
+      </details>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ================================================================
+     СЕКЦИЯ 12. CTA
+     ================================================================ -->
+<section class="cta-wrap section">
+  <div class="container">
+
+    <div class="cta">
+      <div class="cta__orbit" aria-hidden="true">
+        <img src="{% static 'matrix_app/icons/cta/cta-orbit.svg' %}"
+             alt=""
+             class="cta__orbit-img"
+             width="320" height="320"
+             loading="lazy">
+      </div>
+
+      <div class="cta__content">
+        <h2 class="cta__title">Введите матрицу — получите решение</h2>
+        <p class="cta__subtitle">
+          Каждый шаг с обоснованием. Проверка результата. Ссылка на теорию
+          по теме задачи.
+        </p>
+        <a href="{% url 'matrix_app:calculator' %}" class="btn btn-primary btn-lg">
+          <span>Открыть калькулятор</span>
+          <span class="btn-arrow" aria-hidden="true">
+            {% icon "arrow-right" size=14 %}
+          </span>
+        </a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ================================================================
+     РАЗДЕЛИТЕЛЬ
+     ================================================================ -->
+<div class="container">
+  <div class="divider-svg" aria-hidden="true"></div>
+</div>
+
+{% endblock %}

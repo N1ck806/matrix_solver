@@ -1,0 +1,463 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 560" fill="none"
+     role="img" aria-label="Eigenfaces: собственные лица через PCA">
+    <defs>
+        <linearGradient id="ef-bg" x1="0" y1="0" x2="800" y2="560" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#8B5CF6" stop-opacity="0.06"/>
+            <stop offset="1" stop-color="#06B6D4" stop-opacity="0.06"/>
+        </linearGradient>
+        <linearGradient id="ef-face1" x1="0" y1="0" x2="0" y2="1">
+            <stop stop-color="#FFFFFF"/>
+            <stop offset="1" stop-color="#EDE9FE"/>
+        </linearGradient>
+        <linearGradient id="ef-face2" x1="0" y1="0" x2="0" y2="1">
+            <stop stop-color="#FFFFFF"/>
+            <stop offset="1" stop-color="#CFFAFE"/>
+        </linearGradient>
+        <linearGradient id="ef-face3" x1="0" y1="0" x2="0" y2="1">
+            <stop stop-color="#FFFFFF"/>
+            <stop offset="1" stop-color="#FCE7F3"/>
+        </linearGradient>
+        <filter id="ef-glow" x="-40%" y="-40%" width="180%" height="180%">
+            <feGaussianBlur stdDeviation="3.5" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+    </defs>
+
+    <rect width="800" height="560" fill="url(#ef-bg)" rx="24"/>
+
+    <!-- Заголовок -->
+    <rect x="180" y="20" width="440" height="52" rx="26"
+          fill="#8B5CF6" fill-opacity="0.10"
+          stroke="#8B5CF6" stroke-opacity="0.4" stroke-width="1.5"/>
+    <text x="400" y="52" text-anchor="middle"
+          font-family="system-ui, -apple-system, sans-serif"
+          font-size="20" font-weight="800" fill="#7C3AED">
+        Eigenfaces: лица через собственные векторы
+    </text>
+
+    <!-- ============================================================
+         ЛЕВАЯ ПАНЕЛЬ: от лиц к векторам
+         ============================================================ -->
+    <g transform="translate(30, 100)">
+
+        <rect x="0" y="0" width="360" height="390" rx="14"
+              fill="#FFFFFF" fill-opacity="0.6"
+              stroke="#8B5CF6" stroke-opacity="0.25" stroke-width="1.2"/>
+
+        <text x="180" y="24" text-anchor="middle"
+              font-family="system-ui, sans-serif"
+              font-size="12" font-weight="800" fill="#7C3AED"
+              letter-spacing="1">ЛИЦА → ВЕКТОРЫ ПИКСЕЛЕЙ</text>
+
+        <!-- 4 лица 60×60, шаг 80 -->
+        <g transform="translate(30, 50)">
+
+            <!-- Лицо 1 -->
+            <g>
+                <rect x="0" y="0" width="60" height="60" rx="8"
+                      fill="url(#ef-face1)"
+                      stroke="#8B5CF6" stroke-opacity="0.5" stroke-width="1.3"/>
+                <!-- Пиксельная сетка 4×4 -->
+                <g opacity="0.85">
+                    <rect x="8"  y="8"  width="10" height="10" rx="2" fill="#8B5CF6" opacity="0.4"/>
+                    <rect x="20" y="8"  width="10" height="10" rx="2" fill="#8B5CF6" opacity="0.3"/>
+                    <rect x="32" y="8"  width="10" height="10" rx="2" fill="#8B5CF6" opacity="0.3"/>
+                    <rect x="44" y="8"  width="10" height="10" rx="2" fill="#8B5CF6" opacity="0.4"/>
+
+                    <rect x="8"  y="20" width="10" height="10" rx="2" fill="#8B5CF6" opacity="0.7"/>
+                    <rect x="20" y="20" width="10" height="10" rx="2" fill="#7C3AED"/>
+                    <rect x="32" y="20" width="10" height="10" rx="2" fill="#7C3AED"/>
+                    <rect x="44" y="20" width="10" height="10" rx="2" fill="#8B5CF6" opacity="0.7"/>
+
+                    <rect x="8"  y="32" width="10" height="10" rx="2" fill="#8B5CF6" opacity="0.3"/>
+                    <rect x="20" y="32" width="10" height="10" rx="2" fill="#8B5CF6" opacity="0.5"/>
+                    <rect x="32" y="32" width="10" height="10" rx="2" fill="#8B5CF6" opacity="0.5"/>
+                    <rect x="44" y="32" width="10" height="10" rx="2" fill="#8B5CF6" opacity="0.3"/>
+
+                    <rect x="8"  y="44" width="10" height="10" rx="2" fill="#8B5CF6" opacity="0.2"/>
+                    <rect x="20" y="44" width="10" height="10" rx="2" fill="#8B5CF6" opacity="0.3"/>
+                    <rect x="32" y="44" width="10" height="10" rx="2" fill="#8B5CF6" opacity="0.3"/>
+                    <rect x="44" y="44" width="10" height="10" rx="2" fill="#8B5CF6" opacity="0.2"/>
+                </g>
+                <text x="30" y="78" text-anchor="middle"
+                      font-family="ui-monospace, monospace" font-size="10"
+                      font-weight="800" fill="#7C3AED">f₁</text>
+            </g>
+
+            <!-- Лицо 2 -->
+            <g transform="translate(80, 0)">
+                <rect x="0" y="0" width="60" height="60" rx="8"
+                      fill="url(#ef-face2)"
+                      stroke="#0891B2" stroke-opacity="0.5" stroke-width="1.3"/>
+                <g opacity="0.85">
+                    <rect x="8"  y="8"  width="10" height="10" rx="2" fill="#0891B2" opacity="0.3"/>
+                    <rect x="20" y="8"  width="10" height="10" rx="2" fill="#0891B2" opacity="0.4"/>
+                    <rect x="32" y="8"  width="10" height="10" rx="2" fill="#0891B2" opacity="0.4"/>
+                    <rect x="44" y="8"  width="10" height="10" rx="2" fill="#0891B2" opacity="0.3"/>
+
+                    <rect x="8"  y="20" width="10" height="10" rx="2" fill="#0891B2" opacity="0.5"/>
+                    <rect x="20" y="20" width="10" height="10" rx="2" fill="#0891B2"/>
+                    <rect x="32" y="20" width="10" height="10" rx="2" fill="#0891B2"/>
+                    <rect x="44" y="20" width="10" height="10" rx="2" fill="#0891B2" opacity="0.5"/>
+
+                    <rect x="8"  y="32" width="10" height="10" rx="2" fill="#0891B2" opacity="0.4"/>
+                    <rect x="20" y="32" width="10" height="10" rx="2" fill="#0891B2" opacity="0.6"/>
+                    <rect x="32" y="32" width="10" height="10" rx="2" fill="#0891B2" opacity="0.6"/>
+                    <rect x="44" y="32" width="10" height="10" rx="2" fill="#0891B2" opacity="0.4"/>
+
+                    <rect x="8"  y="44" width="10" height="10" rx="2" fill="#0891B2" opacity="0.2"/>
+                    <rect x="20" y="44" width="10" height="10" rx="2" fill="#0891B2" opacity="0.3"/>
+                    <rect x="32" y="44" width="10" height="10" rx="2" fill="#0891B2" opacity="0.3"/>
+                    <rect x="44" y="44" width="10" height="10" rx="2" fill="#0891B2" opacity="0.2"/>
+                </g>
+                <text x="30" y="78" text-anchor="middle"
+                      font-family="ui-monospace, monospace" font-size="10"
+                      font-weight="800" fill="#0891B2">f₂</text>
+            </g>
+
+            <!-- Лицо 3 -->
+            <g transform="translate(160, 0)">
+                <rect x="0" y="0" width="60" height="60" rx="8"
+                      fill="url(#ef-face3)"
+                      stroke="#EC4899" stroke-opacity="0.5" stroke-width="1.3"/>
+                <g opacity="0.85">
+                    <rect x="8"  y="8"  width="10" height="10" rx="2" fill="#EC4899" opacity="0.4"/>
+                    <rect x="20" y="8"  width="10" height="10" rx="2" fill="#EC4899" opacity="0.3"/>
+                    <rect x="32" y="8"  width="10" height="10" rx="2" fill="#EC4899" opacity="0.3"/>
+                    <rect x="44" y="8"  width="10" height="10" rx="2" fill="#EC4899" opacity="0.4"/>
+
+                    <rect x="8"  y="20" width="10" height="10" rx="2" fill="#EC4899" opacity="0.6"/>
+                    <rect x="20" y="20" width="10" height="10" rx="2" fill="#BE185D"/>
+                    <rect x="32" y="20" width="10" height="10" rx="2" fill="#BE185D"/>
+                    <rect x="44" y="20" width="10" height="10" rx="2" fill="#EC4899" opacity="0.6"/>
+
+                    <rect x="8"  y="32" width="10" height="10" rx="2" fill="#EC4899" opacity="0.3"/>
+                    <rect x="20" y="32" width="10" height="10" rx="2" fill="#EC4899" opacity="0.5"/>
+                    <rect x="32" y="32" width="10" height="10" rx="2" fill="#EC4899" opacity="0.5"/>
+                    <rect x="44" y="32" width="10" height="10" rx="2" fill="#EC4899" opacity="0.3"/>
+
+                    <rect x="8"  y="44" width="10" height="10" rx="2" fill="#EC4899" opacity="0.2"/>
+                    <rect x="20" y="44" width="10" height="10" rx="2" fill="#EC4899" opacity="0.3"/>
+                    <rect x="32" y="44" width="10" height="10" rx="2" fill="#EC4899" opacity="0.3"/>
+                    <rect x="44" y="44" width="10" height="10" rx="2" fill="#EC4899" opacity="0.2"/>
+                </g>
+                <text x="30" y="78" text-anchor="middle"
+                      font-family="ui-monospace, monospace" font-size="10"
+                      font-weight="800" fill="#BE185D">f₃</text>
+            </g>
+
+            <!-- Лицо 4 -->
+            <g transform="translate(240, 0)">
+                <rect x="0" y="0" width="60" height="60" rx="8"
+                      fill="url(#ef-face1)"
+                      stroke="#8B5CF6" stroke-opacity="0.5" stroke-width="1.3"/>
+                <g opacity="0.85">
+                    <rect x="8"  y="8"  width="10" height="10" rx="2" fill="#8B5CF6" opacity="0.3"/>
+                    <rect x="20" y="8"  width="10" height="10" rx="2" fill="#8B5CF6" opacity="0.5"/>
+                    <rect x="32" y="8"  width="10" height="10" rx="2" fill="#8B5CF6" opacity="0.5"/>
+                    <rect x="44" y="8"  width="10" height="10" rx="2" fill="#8B5CF6" opacity="0.3"/>
+
+                    <rect x="8"  y="20" width="10" height="10" rx="2" fill="#8B5CF6" opacity="0.5"/>
+                    <rect x="20" y="20" width="10" height="10" rx="2" fill="#7C3AED" opacity="0.8"/>
+                    <rect x="32" y="20" width="10" height="10" rx="2" fill="#7C3AED" opacity="0.8"/>
+                    <rect x="44" y="20" width="10" height="10" rx="2" fill="#8B5CF6" opacity="0.5"/>
+
+                    <rect x="8"  y="32" width="10" height="10" rx="2" fill="#8B5CF6" opacity="0.4"/>
+                    <rect x="20" y="32" width="10" height="10" rx="2" fill="#8B5CF6" opacity="0.6"/>
+                    <rect x="32" y="32" width="10" height="10" rx="2" fill="#8B5CF6" opacity="0.6"/>
+                    <rect x="44" y="32" width="10" height="10" rx="2" fill="#8B5CF6" opacity="0.4"/>
+
+                    <rect x="8"  y="44" width="10" height="10" rx="2" fill="#8B5CF6" opacity="0.2"/>
+                    <rect x="20" y="44" width="10" height="10" rx="2" fill="#8B5CF6" opacity="0.4"/>
+                    <rect x="32" y="44" width="10" height="10" rx="2" fill="#8B5CF6" opacity="0.4"/>
+                    <rect x="44" y="44" width="10" height="10" rx="2" fill="#8B5CF6" opacity="0.2"/>
+                </g>
+                <text x="30" y="78" text-anchor="middle"
+                      font-family="ui-monospace, monospace" font-size="10"
+                      font-weight="800" fill="#7C3AED">f₄</text>
+            </g>
+        </g>
+
+        <!-- Стрелка вниз к вектору -->
+        <g transform="translate(180, 155)">
+            <line x1="0" y1="0" x2="0" y2="14"
+                  stroke="#7C3AED" stroke-width="2" stroke-linecap="round"/>
+            <polygon points="-5,14 0,22 5,14" fill="#7C3AED"/>
+            <text x="18" y="18" font-family="system-ui, sans-serif"
+                  font-size="10" font-weight="700" fill="#7C3AED">
+                разворачиваем
+            </text>
+        </g>
+
+        <!-- Вектор пикселей (один) -->
+        <g transform="translate(60, 190)">
+            <text x="120" y="0" text-anchor="middle"
+                  font-family="system-ui, sans-serif"
+                  font-size="10.5" fill="#6B7280">
+                Γ — вектор пикселей (N × 1)
+            </text>
+
+            <g transform="translate(15, 12)">
+                <rect x="0"  y="0" width="14" height="30" rx="2" fill="#8B5CF6" opacity="0.8"/>
+                <rect x="18" y="0" width="14" height="30" rx="2" fill="#8B5CF6" opacity="0.6"/>
+                <rect x="36" y="0" width="14" height="30" rx="2" fill="#8B5CF6" opacity="0.7"/>
+                <rect x="54" y="0" width="14" height="30" rx="2" fill="#8B5CF6" opacity="0.5"/>
+                <rect x="72" y="0" width="14" height="30" rx="2" fill="#8B5CF6" opacity="0.9"/>
+                <rect x="90" y="0" width="14" height="30" rx="2" fill="#8B5CF6" opacity="0.4"/>
+                <rect x="108" y="0" width="14" height="30" rx="2" fill="#8B5CF6" opacity="0.7"/>
+                <rect x="126" y="0" width="14" height="30" rx="2" fill="#8B5CF6" opacity="0.6"/>
+                <rect x="144" y="0" width="14" height="30" rx="2" fill="#8B5CF6" opacity="0.8"/>
+                <rect x="162" y="0" width="14" height="30" rx="2" fill="#8B5CF6" opacity="0.5"/>
+                <rect x="180" y="0" width="14" height="30" rx="2" fill="#8B5CF6" opacity="0.7"/>
+                <rect x="198" y="0" width="14" height="30" rx="2" fill="#8B5CF6" opacity="0.6"/>
+            </g>
+        </g>
+
+        <!-- Вычитание среднего -->
+        <g transform="translate(60, 250)">
+            <text x="120" y="0" text-anchor="middle"
+                  font-family="system-ui, sans-serif"
+                  font-size="10.5" font-weight="800" fill="#BE185D">
+                Φ = Γ − Ψ (вычитаем среднее Ψ)
+            </text>
+
+            <g transform="translate(15, 12)">
+                <rect x="0"  y="0" width="14" height="30" rx="2" fill="#EC4899" opacity="0.6"/>
+                <rect x="18" y="0" width="14" height="30" rx="2" fill="#EC4899" opacity="0.4"/>
+                <rect x="36" y="0" width="14" height="30" rx="2" fill="#EC4899" opacity="0.5"/>
+                <rect x="54" y="0" width="14" height="30" rx="2" fill="#EC4899" opacity="0.3"/>
+                <rect x="72" y="0" width="14" height="30" rx="2" fill="#EC4899" opacity="0.7"/>
+                <rect x="90" y="0" width="14" height="30" rx="2" fill="#EC4899" opacity="0.2"/>
+                <rect x="108" y="0" width="14" height="30" rx="2" fill="#EC4899" opacity="0.5"/>
+                <rect x="126" y="0" width="14" height="30" rx="2" fill="#EC4899" opacity="0.4"/>
+                <rect x="144" y="0" width="14" height="30" rx="2" fill="#EC4899" opacity="0.6"/>
+                <rect x="162" y="0" width="14" height="30" rx="2" fill="#EC4899" opacity="0.3"/>
+                <rect x="180" y="0" width="14" height="30" rx="2" fill="#EC4899" opacity="0.5"/>
+                <rect x="198" y="0" width="14" height="30" rx="2" fill="#EC4899" opacity="0.4"/>
+            </g>
+        </g>
+
+        <!-- Итог -->
+        <g transform="translate(30, 315)">
+            <rect x="0" y="0" width="300" height="60" rx="10"
+                  fill="#7C3AED" fill-opacity="0.08"
+                  stroke="#7C3AED" stroke-opacity="0.4" stroke-width="1.2"/>
+
+            <text x="150" y="22" text-anchor="middle"
+                  font-family="system-ui, sans-serif"
+                  font-size="11" font-weight="800" fill="#7C3AED"
+                  letter-spacing="0.8">Φ — ЦЕНТРИРОВАННЫЕ ДАННЫЕ</text>
+
+            <text x="150" y="44" text-anchor="middle"
+                  font-family="system-ui, monospace"
+                  font-size="12" font-weight="700" fill="#7C3AED">
+                далее → SVD разложение
+            </text>
+        </g>
+    </g>
+
+    <!-- ============================================================
+         СТРЕЛКА → SVD
+         ============================================================ -->
+    <g transform="translate(395, 290)">
+        <line x1="0" y1="0" x2="25" y2="0"
+              stroke="#7C3AED" stroke-width="3" stroke-linecap="round"/>
+        <polygon points="25,-6 39,0 25,6" fill="#7C3AED"/>
+        <text x="12" y="-12" text-anchor="middle"
+              font-family="system-ui, sans-serif"
+              font-size="11" font-weight="800" fill="#7C3AED">SVD</text>
+    </g>
+
+    <!-- ============================================================
+         ПРАВАЯ ПАНЕЛЬ: Eigenfaces
+         ============================================================ -->
+    <g transform="translate(450, 100)">
+
+        <rect x="0" y="0" width="320" height="390" rx="14"
+              fill="#FFFFFF" fill-opacity="0.6"
+              stroke="#8B5CF6" stroke-opacity="0.25" stroke-width="1.2"/>
+
+        <text x="160" y="24" text-anchor="middle"
+              font-family="system-ui, sans-serif"
+              font-size="12" font-weight="800" fill="#7C3AED"
+              letter-spacing="1">EIGENFACES (u₁..u₄)</text>
+
+        <!-- 4 eigenface по 60×60, шаг 75 -->
+        <g transform="translate(25, 45)">
+
+            <!-- Eigenface 1 -->
+            <g>
+                <rect x="0" y="0" width="60" height="60" rx="8"
+                      fill="url(#ef-face1)"
+                      stroke="#7C3AED" stroke-opacity="0.7" stroke-width="1.5"
+                      filter="url(#ef-glow)"/>
+                <g opacity="0.85">
+                    <rect x="10" y="10" width="12" height="12" rx="2" fill="#7C3AED" opacity="0.6"/>
+                    <rect x="24" y="10" width="12" height="12" rx="2" fill="#7C3AED" opacity="0.2"/>
+                    <rect x="38" y="10" width="12" height="12" rx="2" fill="#7C3AED" opacity="0.2"/>
+                    <rect x="10" y="24" width="12" height="12" rx="2" fill="#7C3AED" opacity="0.3"/>
+                    <rect x="24" y="24" width="12" height="12" rx="2" fill="#7C3AED"/>
+                    <rect x="38" y="24" width="12" height="12" rx="2" fill="#7C3AED" opacity="0.3"/>
+                    <rect x="10" y="38" width="12" height="12" rx="2" fill="#7C3AED" opacity="0.3"/>
+                    <rect x="24" y="38" width="12" height="12" rx="2" fill="#7C3AED" opacity="0.5"/>
+                    <rect x="38" y="38" width="12" height="12" rx="2" fill="#7C3AED" opacity="0.3"/>
+                </g>
+                <text x="30" y="78" text-anchor="middle"
+                      font-family="ui-monospace, monospace" font-size="11"
+                      font-weight="800" fill="#7C3AED">u₁</text>
+                <text x="30" y="92" text-anchor="middle"
+                      font-family="ui-monospace, monospace" font-size="9"
+                      fill="#6B7280">λ₁ = 0.45</text>
+            </g>
+
+            <!-- Eigenface 2 -->
+            <g transform="translate(75, 0)">
+                <rect x="0" y="0" width="60" height="60" rx="8"
+                      fill="url(#ef-face2)"
+                      stroke="#0891B2" stroke-opacity="0.7" stroke-width="1.5"
+                      filter="url(#ef-glow)"/>
+                <g opacity="0.85">
+                    <rect x="10" y="10" width="12" height="12" rx="2" fill="#0891B2" opacity="0.3"/>
+                    <rect x="24" y="10" width="12" height="12" rx="2" fill="#0891B2" opacity="0.6"/>
+                    <rect x="38" y="10" width="12" height="12" rx="2" fill="#0891B2" opacity="0.3"/>
+                    <rect x="10" y="24" width="12" height="12" rx="2" fill="#0891B2" opacity="0.2"/>
+                    <rect x="24" y="24" width="12" height="12" rx="2" fill="#0891B2" opacity="0.4"/>
+                    <rect x="38" y="24" width="12" height="12" rx="2" fill="#0891B2" opacity="0.2"/>
+                    <rect x="10" y="38" width="12" height="12" rx="2" fill="#0891B2" opacity="0.5"/>
+                    <rect x="24" y="38" width="12" height="12" rx="2" fill="#0891B2" opacity="0.7"/>
+                    <rect x="38" y="38" width="12" height="12" rx="2" fill="#0891B2" opacity="0.5"/>
+                </g>
+                <text x="30" y="78" text-anchor="middle"
+                      font-family="ui-monospace, monospace" font-size="11"
+                      font-weight="800" fill="#0891B2">u₂</text>
+                <text x="30" y="92" text-anchor="middle"
+                      font-family="ui-monospace, monospace" font-size="9"
+                      fill="#6B7280">λ₂ = 0.28</text>
+            </g>
+
+            <!-- Eigenface 3 -->
+            <g transform="translate(150, 0)">
+                <rect x="0" y="0" width="60" height="60" rx="8"
+                      fill="url(#ef-face3)"
+                      stroke="#EC4899" stroke-opacity="0.7" stroke-width="1.5"
+                      filter="url(#ef-glow)"/>
+                <g opacity="0.85">
+                    <rect x="10" y="10" width="12" height="12" rx="2" fill="#EC4899" opacity="0.2"/>
+                    <rect x="24" y="10" width="12" height="12" rx="2" fill="#EC4899" opacity="0.3"/>
+                    <rect x="38" y="10" width="12" height="12" rx="2" fill="#EC4899" opacity="0.6"/>
+                    <rect x="10" y="24" width="12" height="12" rx="2" fill="#EC4899" opacity="0.4"/>
+                    <rect x="24" y="24" width="12" height="12" rx="2" fill="#EC4899" opacity="0.2"/>
+                    <rect x="38" y="24" width="12" height="12" rx="2" fill="#EC4899" opacity="0.4"/>
+                    <rect x="10" y="38" width="12" height="12" rx="2" fill="#EC4899" opacity="0.6"/>
+                    <rect x="24" y="38" width="12" height="12" rx="2" fill="#EC4899" opacity="0.3"/>
+                    <rect x="38" y="38" width="12" height="12" rx="2" fill="#EC4899" opacity="0.7"/>
+                </g>
+                <text x="30" y="78" text-anchor="middle"
+                      font-family="ui-monospace, monospace" font-size="11"
+                      font-weight="800" fill="#BE185D">u₃</text>
+                <text x="30" y="92" text-anchor="middle"
+                      font-family="ui-monospace, monospace" font-size="9"
+                      fill="#6B7280">λ₃ = 0.15</text>
+            </g>
+
+            <!-- Eigenface 4 -->
+            <g transform="translate(225, 0)">
+                <rect x="0" y="0" width="60" height="60" rx="8"
+                      fill="url(#ef-face1)"
+                      stroke="#8B5CF6" stroke-opacity="0.5" stroke-width="1.5"/>
+                <g opacity="0.6">
+                    <rect x="10" y="10" width="12" height="12" rx="2" fill="#8B5CF6" opacity="0.3"/>
+                    <rect x="24" y="10" width="12" height="12" rx="2" fill="#8B5CF6" opacity="0.2"/>
+                    <rect x="38" y="10" width="12" height="12" rx="2" fill="#8B5CF6" opacity="0.4"/>
+                    <rect x="10" y="24" width="12" height="12" rx="2" fill="#8B5CF6" opacity="0.2"/>
+                    <rect x="24" y="24" width="12" height="12" rx="2" fill="#8B5CF6" opacity="0.4"/>
+                    <rect x="38" y="24" width="12" height="12" rx="2" fill="#8B5CF6" opacity="0.2"/>
+                    <rect x="10" y="38" width="12" height="12" rx="2" fill="#8B5CF6" opacity="0.4"/>
+                    <rect x="24" y="38" width="12" height="12" rx="2" fill="#8B5CF6" opacity="0.3"/>
+                    <rect x="38" y="38" width="12" height="12" rx="2" fill="#8B5CF6" opacity="0.3"/>
+                </g>
+                <text x="30" y="78" text-anchor="middle"
+                      font-family="ui-monospace, monospace" font-size="11"
+                      font-weight="800" fill="#7C3AED">u₄</text>
+                <text x="30" y="92" text-anchor="middle"
+                      font-family="ui-monospace, monospace" font-size="9"
+                      fill="#6B7280">λ₄ = 0.08</text>
+            </g>
+        </g>
+
+        <!-- Спектр λ с подписями u1..u5 -->
+        <g transform="translate(20, 165)">
+            <text x="140" y="0" text-anchor="middle"
+                  font-family="system-ui, sans-serif"
+                  font-size="11" font-weight="800" fill="#7C3AED"
+                  letter-spacing="0.8">СПЕКТР (ВАЖНОСТЬ)</text>
+
+            <g transform="translate(15, 15)">
+                <!-- Столбик 1 -->
+                <rect x="0"   y="0" width="38" height="60" rx="4" fill="#7C3AED" filter="url(#ef-glow)"/>
+                <text x="19" y="76" text-anchor="middle" font-family="ui-monospace, monospace"
+                      font-size="10" font-weight="800" fill="#7C3AED">u₁</text>
+                <text x="19" y="90" text-anchor="middle" font-family="ui-monospace, monospace"
+                      font-size="9" fill="#6B7280">0.45</text>
+
+                <!-- Столбик 2 -->
+                <rect x="48"  y="15" width="38" height="45" rx="4" fill="#A78BFA"/>
+                <text x="67"  y="76" text-anchor="middle" font-family="ui-monospace, monospace"
+                      font-size="10" font-weight="800" fill="#7C3AED">u₂</text>
+                <text x="67"  y="90" text-anchor="middle" font-family="ui-monospace, monospace"
+                      font-size="9" fill="#6B7280">0.28</text>
+
+                <!-- Столбик 3 -->
+                <rect x="96"  y="30" width="38" height="30" rx="4" fill="#C4B5FD"/>
+                <text x="115" y="76" text-anchor="middle" font-family="ui-monospace, monospace"
+                      font-size="10" font-weight="800" fill="#7C3AED">u₃</text>
+                <text x="115" y="90" text-anchor="middle" font-family="ui-monospace, monospace"
+                      font-size="9" fill="#6B7280">0.15</text>
+
+                <!-- Столбик 4 -->
+                <rect x="144" y="42" width="38" height="18" rx="4" fill="#DDD6FE"/>
+                <text x="163" y="76" text-anchor="middle" font-family="ui-monospace, monospace"
+                      font-size="10" font-weight="800" fill="#7C3AED">u₄</text>
+                <text x="163" y="90" text-anchor="middle" font-family="ui-monospace, monospace"
+                      font-size="9" fill="#6B7280">0.08</text>
+
+                <!-- Столбик 5 -->
+                <rect x="192" y="50" width="38" height="10" rx="4" fill="#EDE9FE"/>
+                <text x="211" y="76" text-anchor="middle" font-family="ui-monospace, monospace"
+                      font-size="10" font-weight="800" fill="#7C3AED">u₅</text>
+                <text x="211" y="90" text-anchor="middle" font-family="ui-monospace, monospace"
+                      font-size="9" fill="#6B7280">0.04</text>
+            </g>
+        </g>
+
+        <!-- Разделитель -->
+        <line x1="20" y1="285" x2="300" y2="285"
+              stroke="#8B5CF6" stroke-opacity="0.25" stroke-width="1"
+              stroke-dasharray="3 3"/>
+
+        <!-- Применение -->
+        <text x="160" y="308" text-anchor="middle"
+              font-family="system-ui, sans-serif"
+              font-size="11" font-weight="800" fill="#7C3AED"
+              letter-spacing="0.8">ПРИМЕНЕНИЕ</text>
+
+        <g font-family="system-ui, sans-serif" font-size="10.5" fill="#4B5563">
+            <text x="25" y="328">• Распознавание лиц</text>
+            <text x="25" y="346">• Сжатие изображений</text>
+            <text x="25" y="364">• Реконструкция лица</text>
+        </g>
+    </g>
+
+    <!-- Нижняя плашка -->
+    <g transform="translate(30, 505)">
+        <rect x="0" y="0" width="740" height="40" rx="12"
+              fill="#FFFFFF" fill-opacity="0.9"
+              stroke="#8B5CF6" stroke-opacity="0.3" stroke-width="1.2"/>
+
+        <text x="370" y="26" text-anchor="middle"
+              font-family="system-ui, sans-serif"
+              font-size="11" fill="#6B7280">
+            Каждое лицо — вектор пикселей. После вычитания среднего — SVD. Первые k собственных лиц описывают 95% вариаций.
+        </text>
+    </g>
+</svg>

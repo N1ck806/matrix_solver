@@ -1,0 +1,585 @@
+/* =============================================================================
+   MatrixLab — fonts.css
+   =============================================================================
+   Единая система шрифтов и типографики проекта.
+
+       1.  Принципы
+       2.  Локальные @font-face (Inter, JetBrains Mono)
+       3.  Базовая типографика html
+       4.  Оптическое выравнивание заголовков
+       5.  Абзацы и переносы
+       6.  Капс и трекинг
+       7.  Типографика для математики (MathJax)
+       8.  Моноширинные числа (tabular-nums)
+       9.  Длинные формулы и скроллбары
+      10.  Выделение текста (::selection)
+      11.  Тёмная тема
+      12.  Высокий контраст (prefers-contrast)
+      13.  Уменьшенная анимация (prefers-reduced-motion)
+      14.  Печать
+      15.  Утилитарные типографические классы
+      16.  Финальная очистка
+   ============================================================================= */
+
+
+/* =============================================================================
+   1. ПРИНЦИПЫ
+   =============================================================================
+   - Шрифты НЕ загружаются из интернета. Только local() fallback.
+   - Если пользователь хочет Inter — ставит локально или подключает свой
+     @font-face в local_settings.
+   - Системная цепочка: Inter → system-ui → -apple-system → Segoe UI → Roboto.
+   - Моноширинный: JetBrains Mono → SF Mono → Consolas → monospace.
+   ============================================================================= */
+
+
+/* =============================================================================
+   2. ЛОКАЛЬНЫЕ @FONT-FACE
+   ============================================================================= */
+
+/* --- Inter (опционально) --- */
+@font-face {
+    font-family: "Inter";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    font-optical-sizing: auto;
+    src: local("Inter"),
+         local("Inter Variable"),
+         local("Inter var"),
+         local("Inter-Regular"),
+         local("Inter-Regular.woff2");
+}
+
+/* --- Inter Italic --- */
+@font-face {
+    font-family: "Inter";
+    font-style: italic;
+    font-weight: 100 900;
+    font-display: swap;
+    src: local("Inter Italic"),
+         local("Inter-Italic"),
+         local("Inter Variable Italic");
+}
+
+/* --- JetBrains Mono --- */
+@font-face {
+    font-family: "JetBrains Mono";
+    font-style: normal;
+    font-weight: 400 800;
+    font-display: swap;
+    src: local("JetBrains Mono"),
+         local("JetBrainsMono-Regular"),
+         local("JetBrains Mono NL"),
+         local("JetBrainsMonoNL-Regular");
+}
+
+/* --- JetBrains Mono Italic --- */
+@font-face {
+    font-family: "JetBrains Mono";
+    font-style: italic;
+    font-weight: 400 800;
+    font-display: swap;
+    src: local("JetBrains Mono Italic"),
+         local("JetBrainsMono-Italic");
+}
+
+
+/* =============================================================================
+   3. БАЗОВАЯ ТИПОГРАФИКА HTML
+   ============================================================================= */
+
+html {
+    font-size: 16px;
+    font-family: var(--font-sans);
+    line-height: 1.6;
+
+    /* Сглаживание */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+
+    /* Кернинг, лигатуры, контекстные альтернативы */
+    font-feature-settings:
+        "kern" 1,
+        "liga" 1,
+        "calt" 1,
+        "ccmp" 1;
+
+    /* Оптический размер (Inter Variable) */
+    font-optical-sizing: auto;
+
+    /* Не синтезировать фейковые жирные/курсивные */
+    font-synthesis: none;
+
+    /* Переносы для длинных слов */
+    hyphens: auto;
+    -webkit-hyphens: auto;
+    -ms-hyphens: auto;
+
+    /* Язык для корректных переносов */
+    -webkit-locale: "ru";
+}
+
+
+/* =============================================================================
+   4. ОПТИЧЕСКОЕ ВЫРАВНИВАНИЕ ЗАГОЛОВКОВ
+   ============================================================================= */
+
+h1, h2, h3, h4, h5, h6 {
+    font-feature-settings:
+        "kern" 1,
+        "liga" 1,
+        "calt" 1,
+        "ss01" 1,   /* альтернативные формы (Inter) */
+        "cv11" 1;   /* одинарная "a" — опционально */
+
+    /* Красивые переносы */
+    text-wrap: balance;
+
+    /* Плотнее, чем body */
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+}
+
+/* Отдельно — крупные заголовки */
+h1 {
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+}
+
+h2 {
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+}
+
+/* Fallback для браузеров без text-wrap */
+@supports not (text-wrap: balance) {
+    h1, h2, h3, h4, h5, h6 {
+        text-wrap: normal;
+    }
+}
+
+
+/* =============================================================================
+   5. АБЗАЦЫ И ПЕРЕНОСЫ
+   ============================================================================= */
+
+p {
+    text-wrap: pretty;
+    line-height: 1.65;
+}
+
+/* Длинные тексты — ограничиваем ширину */
+.theory-article-body > p,
+.about-intro-content p,
+.kronecker-theorem p,
+.error-page-message {
+    max-width: 72ch;
+}
+
+/* Списки — чуть плотнее */
+li {
+    line-height: 1.55;
+}
+
+/* Мелкий текст — выше line-height для читаемости */
+small,
+.text-xs,
+.text-sm {
+    line-height: 1.5;
+}
+
+@supports not (text-wrap: pretty) {
+    p {
+        text-wrap: normal;
+    }
+}
+
+
+/* =============================================================================
+   6. КАПС И ТРЕКИНГ
+   =============================================================================
+   Uppercase-текст требует увеличенного letter-spacing, иначе буквы слипаются.
+   ============================================================================= */
+
+.text-uppercase,
+.ops-btn-label,
+.switch-btn span,
+.matrix-shape-badge,
+.saved-card-shape,
+.result-section-number,
+.step-number,
+.hero-badge,
+.footer-built {
+    letter-spacing: 0.04em;
+}
+
+/* Очень мелкий капс — больше трекинга */
+.text-uppercase.text-xs,
+.ops-btn-label,
+.hero-badge {
+    letter-spacing: 0.06em;
+}
+
+
+/* =============================================================================
+   7. ТИПОГРАФИКА ДЛЯ МАТЕМАТИКИ (MathJax)
+   ============================================================================= */
+
+/* --- Базовая настройка --- */
+mjx-container {
+    font-size: 1.05em !important;
+    line-height: 1.3 !important;
+
+    /* Не ломать кернинг MathJax */
+    font-feature-settings: normal;
+    font-variant-numeric: normal;
+}
+
+/* --- Display-формулы (на отдельной строке) --- */
+mjx-container[display="true"] {
+    margin: 0.6em 0 !important;
+    overflow-x: auto;
+    overflow-y: hidden;
+    max-width: 100%;
+    padding: 2px 0;
+
+    /* Плавный скролл на тач */
+    -webkit-overflow-scrolling: touch;
+}
+
+/* --- Инлайн-формулы --- */
+mjx-container:not([display]) {
+    display: inline-block;
+    vertical-align: -0.25em;
+    margin: 0 1px;
+}
+
+/* --- Внутри математики не применяем фоновый стиль code --- */
+mjx-container code {
+    background: transparent;
+    border: none;
+    padding: 0;
+    font-size: inherit;
+    color: inherit;
+    font-family: inherit;
+}
+
+/* --- Формулы внутри заголовков — не ломают line-height --- */
+h1 mjx-container,
+h2 mjx-container,
+h3 mjx-container {
+    font-size: 0.95em !important;
+}
+
+/* --- Формулы внутри таблиц --- */
+table mjx-container {
+    font-size: 0.98em !important;
+}
+
+
+/* =============================================================================
+   8. МОНОШИРИННЫЕ ЧИСЛА (tabular-nums)
+   =============================================================================
+   Числа в матрицах, времени, статистике — выравниваются по разрядам.
+   ============================================================================= */
+
+.mono-nums,
+.matrix-input-grid input,
+.matrix-output-grid input,
+.vector-input-grid input,
+.history-time-date,
+.history-time-clock,
+.eigen-value,
+.invariant-value,
+.matrix-shape-badge,
+.saved-card-shape,
+.footer-built,
+.history-stat-value,
+.props-feature li,
+.theory-list li,
+.kronecker-condition,
+.result-section-number,
+.step-number,
+.size-input {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1, "zero" 1, "ss01" 1;
+}
+
+/* Слэш-ноль для моноширинного */
+.mono-nums,
+.history-time-clock,
+.matrix-input-grid input {
+    font-feature-settings: "tnum" 1, "zero" 1;
+}
+
+
+/* =============================================================================
+   9. ДЛИННЫЕ ФОРМУЛЫ И СКРОЛЛБАРЫ
+   ============================================================================= */
+
+/* --- Общий контейнер --- */
+.MathJax_Display,
+mjx-container[display="true"] {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-medium) transparent;
+}
+
+/* --- WebKit --- */
+.MathJax_Display::-webkit-scrollbar,
+mjx-container[display="true"]::-webkit-scrollbar {
+    height: 6px;
+}
+
+.MathJax_Display::-webkit-scrollbar-track,
+mjx-container[display="true"]::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.MathJax_Display::-webkit-scrollbar-thumb,
+mjx-container[display="true"]::-webkit-scrollbar-thumb {
+    background: var(--border-medium);
+    border-radius: 3px;
+}
+
+.MathJax_Display::-webkit-scrollbar-thumb:hover,
+mjx-container[display="true"]::-webkit-scrollbar-thumb:hover {
+    background: var(--border-strong);
+}
+
+
+/* =============================================================================
+   10. ВЫДЕЛЕНИЕ ТЕКСТА (::selection)
+   ============================================================================= */
+
+::selection {
+    background: var(--accent-soft);
+    color: var(--text-primary);
+}
+
+::-moz-selection {
+    background: var(--accent-soft);
+    color: var(--text-primary);
+}
+
+/* Выделение внутри MathJax — не ломает цвета */
+mjx-container ::selection {
+    background: var(--accent-soft);
+}
+
+/* Выделение в матричных ячейках */
+.matrix-input-grid input::selection,
+.vector-input-grid input::selection {
+    background: var(--accent);
+    color: #fff;
+}
+
+
+/* =============================================================================
+   11. ТЁМНАЯ ТЕМА
+   ============================================================================= */
+
+[data-theme="dark"] mjx-container {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] ::selection {
+    background: rgba(129, 140, 248, 0.35);
+    color: var(--text-primary);
+}
+
+/* Тёмная тема: формулы не должны «светиться» */
+[data-theme="dark"] mjx-container mjx-math {
+    color: inherit;
+}
+
+
+/* =============================================================================
+   12. ВЫСОКИЙ КОНТРАСТ (prefers-contrast: more)
+   ============================================================================= */
+
+@media (prefers-contrast: more) {
+    html {
+        /* Убираем антиалиасинг для более чёткого текста */
+        -webkit-font-smoothing: auto;
+        -moz-osx-font-smoothing: auto;
+        text-rendering: geometricPrecision;
+    }
+
+    /* Более плотный line-height для читаемости */
+    body {
+        line-height: 1.7;
+    }
+
+    /* Более тёмный текст */
+    :root {
+        --text-primary: #000;
+        --text-secondary: #1a1a1a;
+    }
+
+    [data-theme="dark"] {
+        --text-primary: #fff;
+        --text-secondary: #e5e5e5;
+    }
+}
+
+
+/* =============================================================================
+   13. УМЕНЬШЕННАЯ АНИМАЦИЯ (prefers-reduced-motion)
+   ============================================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+    /* text-wrap: balance может пересчитываться — отключаем */
+    h1, h2, h3, h4, h5, h6 {
+        text-wrap: normal;
+    }
+
+    p {
+        text-wrap: normal;
+    }
+}
+
+
+/* =============================================================================
+   14. ПЕЧАТЬ
+   ============================================================================= */
+
+@media print {
+    html {
+        font-size: 12pt;
+        line-height: 1.4;
+        font-family: Georgia, "Times New Roman", serif;
+    }
+
+    /* Заголовки — serif для печати */
+    h1, h2, h3, h4, h5, h6 {
+        font-family: Georgia, "Times New Roman", serif;
+        line-height: 1.2;
+        page-break-after: avoid;
+    }
+
+    /* Формулы — чёрные */
+    mjx-container {
+        color: #000 !important;
+        font-size: 1em !important;
+    }
+
+    /* Не переносить формулы на новую страницу */
+    mjx-container[display="true"] {
+        page-break-inside: avoid;
+    }
+
+    /* Ссылки — с URL */
+    a[href]::after {
+        content: " (" attr(href) ")";
+        font-size: 0.85em;
+        color: #444;
+    }
+}
+
+
+/* =============================================================================
+   15. УТИЛИТАРНЫЕ ТИПОГРАФИЧЕСКИЕ КЛАССЫ
+   ============================================================================= */
+
+/* --- Не переносить --- */
+.no-wrap {
+    white-space: nowrap;
+}
+
+/* --- Переносить где угодно (для длинных формул) --- */
+.wrap-anywhere {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+/* --- Балансировка строк --- */
+.text-balance {
+    text-wrap: balance;
+}
+
+.text-pretty {
+    text-wrap: pretty;
+}
+
+/* --- Табличные числа --- */
+.tabular-nums {
+    font-variant-numeric: tabular-nums;
+}
+
+/* --- Пропорциональные числа --- */
+.proportional-nums {
+    font-variant-numeric: proportional-nums;
+}
+
+/* --- Древние цифры --- */
+.oldstyle-nums {
+    font-variant-numeric: oldstyle-nums;
+}
+
+/* --- Слэш-ноль --- */
+.slashed-zero {
+    font-variant-numeric: slashed-zero;
+}
+
+/* --- Малые капс --- */
+.small-caps {
+    font-variant-caps: small-caps;
+}
+
+/* --- Петит-капс --- */
+.petite-caps {
+    font-variant-caps: petite-caps;
+}
+
+/* --- Заголовки — без переносов --- */
+.no-hyphens {
+    hyphens: none;
+    -webkit-hyphens: none;
+}
+
+/* --- Принудительные переносы --- */
+.hyphens-auto {
+    hyphens: auto;
+    -webkit-hyphens: auto;
+}
+
+/* --- Моноширинный --- */
+.font-mono {
+    font-family: var(--font-mono);
+}
+
+
+/* =============================================================================
+   16. ФИНАЛЬНАЯ ОЧИСТКА
+   ============================================================================= */
+
+/* --- Убираем двойной рендер шрифтов при загрузке --- */
+.font-loading {
+    visibility: hidden;
+}
+
+.font-loaded {
+    visibility: visible;
+}
+
+/* --- Оптическое выравнивание для иконок рядом с текстом --- */
+.icon + span,
+span + .icon {
+    vertical-align: middle;
+}
+
+/* --- Формулы в кнопках — не ломают line-height --- */
+.btn mjx-container {
+    font-size: 1em !important;
+    vertical-align: middle;
+}
+
+/* --- Формулы в бейджах --- */
+.badge mjx-container,
+.hero-badge mjx-container {
+    font-size: 0.9em !important;
+}

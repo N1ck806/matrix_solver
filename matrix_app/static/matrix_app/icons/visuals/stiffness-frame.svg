@@ -1,0 +1,444 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 560" fill="none"
+     role="img" aria-label="Стержневая модель рамы: K · u = f">
+    <defs>
+        <linearGradient id="sf-bg" x1="0" y1="0" x2="800" y2="560" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#6366F1" stop-opacity="0.06"/>
+            <stop offset="1" stop-color="#8B5CF6" stop-opacity="0.06"/>
+        </linearGradient>
+        <linearGradient id="sf-col" x1="0" y1="0" x2="0" y2="1">
+            <stop stop-color="#A78BFA"/>
+            <stop offset="1" stop-color="#7C3AED"/>
+        </linearGradient>
+        <linearGradient id="sf-beam" x1="0" y1="0" x2="1" y2="0">
+            <stop stop-color="#22D3EE"/>
+            <stop offset="1" stop-color="#0891B2"/>
+        </linearGradient>
+        <radialGradient id="sf-node" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse"
+                        gradientTransform="translate(0 0) scale(9)">
+            <stop stop-color="#FFFFFF"/>
+            <stop offset="0.5" stop-color="#A78BFA"/>
+            <stop offset="1" stop-color="#7C3AED"/>
+        </radialGradient>
+        <radialGradient id="sf-fix" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse"
+                        gradientTransform="translate(0 0) scale(9)">
+            <stop stop-color="#FBCFE8"/>
+            <stop offset="0.5" stop-color="#EC4899"/>
+            <stop offset="1" stop-color="#BE185D"/>
+        </radialGradient>
+        <filter id="sf-glow" x="-40%" y="-40%" width="180%" height="180%">
+            <feGaussianBlur stdDeviation="3" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <marker id="sf-force" viewBox="0 0 10 10" refX="9" refY="5"
+                markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M0,0 L10,5 L0,10 Z" fill="#EC4899"/>
+        </marker>
+    </defs>
+
+    <rect width="800" height="560" fill="url(#sf-bg)" rx="24"/>
+
+    <!-- ЗАГОЛОВОК -->
+    <rect x="240" y="20" width="320" height="52" rx="26"
+          fill="#8B5CF6" fill-opacity="0.12"
+          stroke="#8B5CF6" stroke-opacity="0.5" stroke-width="1.5"/>
+    <text x="400" y="52" text-anchor="middle"
+          font-family="ui-monospace, monospace"
+          font-size="22" font-weight="800" fill="#7C3AED"
+          letter-spacing="1">K · u = f</text>
+
+    <!-- ============================================================
+         ЛЕВАЯ ПАНЕЛЬ: РАМА
+         ============================================================ -->
+    <g transform="translate(30, 100)">
+
+        <rect x="0" y="0" width="360" height="330" rx="14"
+              fill="#FFFFFF" fill-opacity="0.65"
+              stroke="#8B5CF6" stroke-opacity="0.3" stroke-width="1.2"/>
+
+        <text x="180" y="24" text-anchor="middle"
+              font-family="system-ui, sans-serif"
+              font-size="12" font-weight="800" fill="#7C3AED"
+              letter-spacing="1">РАМА ПОД НАГРУЗКОЙ</text>
+
+        <!-- Рама: origin (60, 270), высота 200, три стойки на x=0, 120, 240 -->
+        <g transform="translate(60, 270)">
+
+            <!-- Оси рамы -->
+            <g stroke="#CBD5E1" stroke-width="1" stroke-dasharray="3 3" opacity="0.6">
+                <line x1="-30" y1="0" x2="280" y2="0"/>
+                <line x1="0" y1="10" x2="0" y2="-260"/>
+            </g>
+            <text x="284" y="4" font-family="system-ui, sans-serif"
+                  font-size="10" font-weight="700" fill="#94A3B8">X</text>
+            <text x="-6" y="-266" text-anchor="end"
+                  font-family="system-ui, sans-serif"
+                  font-size="10" font-weight="700" fill="#94A3B8">Y</text>
+
+            <!-- ИСХОДНАЯ рама (пунктир, серый) -->
+            <g stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="5 4"
+               fill="none" opacity="0.7">
+                <line x1="0"   y1="-200" x2="0"   y2="0"/>
+                <line x1="120" y1="-200" x2="120" y2="0"/>
+                <line x1="240" y1="-200" x2="240" y2="0"/>
+                <line x1="0"   y1="-200" x2="120" y2="-200"/>
+                <line x1="120" y1="-200" x2="240" y2="-200"/>
+                <line x1="0"   y1="-100" x2="120" y2="-100"/>
+                <line x1="120" y1="-100" x2="240" y2="-100"/>
+            </g>
+
+            <!-- ДЕФОРМИРОВАННАЯ рама (сплошная, ровная — сдвиг верхних узлов на 18px вправо) -->
+            <g fill="none" stroke-linecap="round">
+                <!-- Стойки (деформированные, но прямые) -->
+                <g stroke="#7C3AED" stroke-width="8">
+                    <line x1="18"  y1="-200" x2="0"   y2="0"/>
+                    <line x1="138" y1="-200" x2="120" y2="0"/>
+                    <line x1="240" y1="-200" x2="240" y2="0"/>
+                </g>
+                <g stroke="#A78BFA" stroke-width="4">
+                    <line x1="18"  y1="-200" x2="0"   y2="0"/>
+                    <line x1="138" y1="-200" x2="120" y2="0"/>
+                    <line x1="240" y1="-200" x2="240" y2="0"/>
+                </g>
+
+                <!-- Балки (деформированные, прямые) -->
+                <g stroke="#0891B2" stroke-width="6">
+                    <line x1="18"  y1="-200" x2="138" y2="-200"/>
+                    <line x1="138" y1="-200" x2="240" y2="-200"/>
+                    <line x1="8"   y1="-100" x2="128" y2="-100"/>
+                    <line x1="128" y1="-100" x2="240" y2="-100"/>
+                </g>
+                <g stroke="#22D3EE" stroke-width="3.5">
+                    <line x1="18"  y1="-200" x2="138" y2="-200"/>
+                    <line x1="138" y1="-200" x2="240" y2="-200"/>
+                    <line x1="8"   y1="-100" x2="128" y2="-100"/>
+                    <line x1="128" y1="-100" x2="240" y2="-100"/>
+                </g>
+            </g>
+
+            <!-- Узлы деформированной рамы -->
+            <g filter="url(#sf-glow)">
+                <circle cx="18"  cy="-200" r="8" fill="url(#sf-node)"/>
+                <circle cx="138" cy="-200" r="8" fill="url(#sf-node)"/>
+                <circle cx="240" cy="-200" r="8" fill="url(#sf-node)"/>
+                <circle cx="8"   cy="-100" r="8" fill="url(#sf-node)"/>
+                <circle cx="128" cy="-100" r="8" fill="url(#sf-node)"/>
+                <circle cx="240" cy="-100" r="8" fill="url(#sf-node)"/>
+            </g>
+
+            <!-- Закрепления -->
+            <g filter="url(#sf-glow)">
+                <circle cx="0"   cy="0" r="8" fill="url(#sf-fix)"/>
+                <circle cx="120" cy="0" r="8" fill="url(#sf-fix)"/>
+                <circle cx="240" cy="0" r="8" fill="url(#sf-fix)"/>
+            </g>
+            <g fill="#BE185D" opacity="0.9">
+                <polygon points="0,10 -12,26 12,26"/>
+                <polygon points="120,10 108,26 132,26"/>
+                <polygon points="240,10 228,26 252,26"/>
+            </g>
+            <g stroke="#BE185D" stroke-width="1.2" opacity="0.7">
+                <line x1="-16" y1="28" x2="16" y2="28"/>
+                <line x1="104" y1="28" x2="136" y2="28"/>
+                <line x1="224" y1="28" x2="256" y2="28"/>
+            </g>
+
+            <!-- Сила F -->
+            <g transform="translate(240, -200)">
+                <line x1="60" y1="0" x2="12" y2="0"
+                      stroke="#EC4899" stroke-width="3"
+                      stroke-linecap="round" marker-end="url(#sf-force)"/>
+                <text x="66" y="5" font-family="system-ui, sans-serif"
+                      font-size="15" font-weight="800" fill="#EC4899">F</text>
+            </g>
+
+            <!-- Метки Δu — сдвиг верхнего узла -->
+            <g stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="3 2">
+                <line x1="0" y1="-215" x2="18" y2="-215"/>
+            </g>
+            <text x="9" y="-220" text-anchor="middle"
+                  font-family="system-ui, sans-serif"
+                  font-size="10" font-weight="800" fill="#B45309">Δu</text>
+        </g>
+
+        <text x="180" y="315" text-anchor="middle"
+              font-family="system-ui, sans-serif"
+              font-size="10.5" fill="#6B7280">
+            пунктир — исходная форма · цвет — деформированная
+        </text>
+    </g>
+
+    <!-- СТРЕЛКА → -->
+    <g transform="translate(400, 265)">
+        <line x1="0" y1="0" x2="28" y2="0"
+              stroke="#7C3AED" stroke-width="3" stroke-linecap="round"/>
+        <polygon points="28,-6 42,0 28,6" fill="#7C3AED"/>
+    </g>
+
+    <!-- ============================================================
+         ПРАВАЯ ПАНЕЛЬ: K · u = f в векторной форме
+         ============================================================ -->
+    <g transform="translate(455, 100)">
+
+        <rect x="0" y="0" width="315" height="330" rx="14"
+              fill="#FFFFFF" fill-opacity="0.65"
+              stroke="#8B5CF6" stroke-opacity="0.3" stroke-width="1.2"/>
+
+        <text x="157" y="24" text-anchor="middle"
+              font-family="system-ui, sans-serif"
+              font-size="12" font-weight="800" fill="#7C3AED"
+              letter-spacing="1">ВЕКТОРНОЕ УРАВНЕНИЕ</text>
+
+        <!-- K · u = f — три блока с мини-сеткой -->
+        <!-- K — матрица -->
+        <g transform="translate(20, 55)">
+            <rect x="0" y="0" width="70" height="90" rx="10"
+                  fill="#7C3AED" fill-opacity="0.12"
+                  stroke="#7C3AED" stroke-opacity="0.5" stroke-width="1.3"/>
+
+            <!-- Мини-сетка 4×4 -->
+            <g transform="translate(15, 15)">
+                <rect x="0"  y="0"  width="9" height="9" rx="1.5" fill="#7C3AED" opacity="0.9"/>
+                <rect x="11" y="0"  width="9" height="9" rx="1.5" fill="#7C3AED" opacity="0.3"/>
+                <rect x="22" y="0"  width="9" height="9" rx="1.5" fill="#7C3AED" opacity="0.2"/>
+                <rect x="33" y="0"  width="9" height="9" rx="1.5" fill="#7C3AED" opacity="0.15"/>
+
+                <rect x="0"  y="11" width="9" height="9" rx="1.5" fill="#7C3AED" opacity="0.3"/>
+                <rect x="11" y="11" width="9" height="9" rx="1.5" fill="#7C3AED" opacity="0.9"/>
+                <rect x="22" y="11" width="9" height="9" rx="1.5" fill="#7C3AED" opacity="0.3"/>
+                <rect x="33" y="11" width="9" height="9" rx="1.5" fill="#7C3AED" opacity="0.2"/>
+
+                <rect x="0"  y="22" width="9" height="9" rx="1.5" fill="#7C3AED" opacity="0.2"/>
+                <rect x="11" y="22" width="9" height="9" rx="1.5" fill="#7C3AED" opacity="0.3"/>
+                <rect x="22" y="22" width="9" height="9" rx="1.5" fill="#7C3AED" opacity="0.9"/>
+                <rect x="33" y="22" width="9" height="9" rx="1.5" fill="#7C3AED" opacity="0.3"/>
+
+                <rect x="0"  y="33" width="9" height="9" rx="1.5" fill="#7C3AED" opacity="0.15"/>
+                <rect x="11" y="33" width="9" height="9" rx="1.5" fill="#7C3AED" opacity="0.2"/>
+                <rect x="22" y="33" width="9" height="9" rx="1.5" fill="#7C3AED" opacity="0.3"/>
+                <rect x="33" y="33" width="9" height="9" rx="1.5" fill="#7C3AED" opacity="0.9"/>
+            </g>
+
+            <text x="35" y="68" text-anchor="middle"
+                  font-family="ui-monospace, monospace"
+                  font-size="13" font-weight="800" fill="#7C3AED">K</text>
+            <text x="35" y="82" text-anchor="middle"
+                  font-family="system-ui, sans-serif"
+                  font-size="9" fill="#6B7280">18 × 18</text>
+        </g>
+
+        <!-- × -->
+        <text x="102" y="105" text-anchor="middle"
+              font-family="system-ui, sans-serif"
+              font-size="18" font-weight="800" fill="#7C3AED">·</text>
+
+        <!-- u — вектор -->
+        <g transform="translate(115, 55)">
+            <rect x="0" y="0" width="50" height="90" rx="10"
+                  fill="#F59E0B" fill-opacity="0.12"
+                  stroke="#F59E0B" stroke-opacity="0.5" stroke-width="1.3"/>
+            <!-- Мини-столбец -->
+            <g transform="translate(18, 15)">
+                <rect x="0" y="0"  width="14" height="10" rx="2" fill="#F59E0B" opacity="0.9"/>
+                <rect x="0" y="13" width="14" height="10" rx="2" fill="#F59E0B" opacity="0.7"/>
+                <rect x="0" y="26" width="14" height="10" rx="2" fill="#F59E0B" opacity="0.9"/>
+                <rect x="0" y="39" width="14" height="10" rx="2" fill="#F59E0B" opacity="0.6"/>
+            </g>
+            <text x="25" y="68" text-anchor="middle"
+                  font-family="ui-monospace, monospace"
+                  font-size="13" font-weight="800" fill="#B45309">u</text>
+            <text x="25" y="82" text-anchor="middle"
+                  font-family="system-ui, sans-serif"
+                  font-size="9" fill="#6B7280">18 × 1</text>
+        </g>
+
+        <!-- = -->
+        <text x="177" y="105" text-anchor="middle"
+              font-family="system-ui, sans-serif"
+              font-size="18" font-weight="800" fill="#7C3AED">=</text>
+
+        <!-- f — вектор -->
+        <g transform="translate(195, 55)">
+            <rect x="0" y="0" width="50" height="90" rx="10"
+                  fill="#EC4899" fill-opacity="0.12"
+                  stroke="#EC4899" stroke-opacity="0.5" stroke-width="1.3"/>
+            <g transform="translate(18, 15)">
+                <rect x="0" y="0"  width="14" height="10" rx="2" fill="#EC4899" opacity="0.9"/>
+                <rect x="0" y="13" width="14" height="10" rx="2" fill="#EC4899" opacity="0.7"/>
+                <rect x="0" y="26" width="14" height="10" rx="2" fill="#EC4899" opacity="0.9"/>
+                <rect x="0" y="39" width="14" height="10" rx="2" fill="#EC4899" opacity="0.6"/>
+            </g>
+            <text x="25" y="68" text-anchor="middle"
+                  font-family="ui-monospace, monospace"
+                  font-size="13" font-weight="800" fill="#BE185D">f</text>
+            <text x="25" y="82" text-anchor="middle"
+                  font-family="system-ui, sans-serif"
+                  font-size="9" fill="#6B7280">18 × 1</text>
+        </g>
+
+        <!-- Пояснение под блоками -->
+        <text x="157" y="180" text-anchor="middle"
+              font-family="system-ui, sans-serif"
+              font-size="10" fill="#6B7280">
+            18 уравнений · 18 неизвестных · 18 нагрузок
+        </text>
+
+        <!-- Разделитель -->
+        <line x1="25" y1="200" x2="290" y2="200"
+              stroke="#8B5CF6" stroke-opacity="0.2" stroke-width="1"
+              stroke-dasharray="3 3"/>
+
+        <!-- Заголовок блока «Как собирается K» -->
+        <text x="157" y="222" text-anchor="middle"
+              font-family="system-ui, sans-serif"
+              font-size="11" font-weight="800" fill="#7C3AED"
+              letter-spacing="0.8">СБОРКА K ИЗ ЭЛЕМЕНТОВ</text>
+
+        <!-- Мини-схема: элемент → kₑ → K -->
+        <g transform="translate(35, 245)">
+            <!-- Элемент -->
+            <g>
+                <rect x="0" y="0" width="70" height="50" rx="8"
+                      fill="#FFFFFF" fill-opacity="0.95"
+                      stroke="#8B5CF6" stroke-opacity="0.4" stroke-width="1"/>
+                <text x="35" y="14" text-anchor="middle"
+                      font-family="system-ui, sans-serif"
+                      font-size="8.5" font-weight="800" fill="#7C3AED">
+                    ЭЛЕМЕНТ
+                </text>
+                <line x1="18" y1="34" x2="52" y2="34"
+                      stroke="#7C3AED" stroke-width="4" stroke-linecap="round"/>
+                <circle cx="18" cy="34" r="3.5" fill="#7C3AED"/>
+                <circle cx="52" cy="34" r="3.5" fill="#7C3AED"/>
+            </g>
+
+            <!-- Стрелка -->
+            <g transform="translate(75, 25)">
+                <line x1="0" y1="0" x2="12" y2="0"
+                      stroke="#7C3AED" stroke-width="2" stroke-linecap="round"/>
+                <polygon points="12,-4 20,0 12,4" fill="#7C3AED"/>
+            </g>
+
+            <!-- k_e -->
+            <g transform="translate(100, 0)">
+                <rect x="0" y="0" width="70" height="50" rx="8"
+                      fill="#FFFFFF" fill-opacity="0.95"
+                      stroke="#7C3AED" stroke-opacity="0.4" stroke-width="1"/>
+                <text x="35" y="14" text-anchor="middle"
+                      font-family="system-ui, sans-serif"
+                      font-size="8.5" font-weight="800" fill="#7C3AED">
+                    kₑ
+                </text>
+                <g transform="translate(20, 26)">
+                    <rect x="0"  y="0"  width="13" height="7" rx="1.5" fill="#7C3AED"/>
+                    <rect x="15" y="0"  width="13" height="7" rx="1.5" fill="#7C3AED" opacity="0.5"/>
+                    <rect x="0"  y="9"  width="13" height="7" rx="1.5" fill="#7C3AED" opacity="0.5"/>
+                    <rect x="15" y="9"  width="13" height="7" rx="1.5" fill="#7C3AED"/>
+                </g>
+            </g>
+
+            <!-- Стрелка -->
+            <g transform="translate(175, 25)">
+                <line x1="0" y1="0" x2="12" y2="0"
+                      stroke="#7C3AED" stroke-width="2" stroke-linecap="round"/>
+                <polygon points="12,-4 20,0 12,4" fill="#7C3AED"/>
+            </g>
+
+            <!-- K глобальная -->
+            <g transform="translate(200, 0)">
+                <rect x="0" y="0" width="70" height="50" rx="8"
+                      fill="#FFFFFF" fill-opacity="0.95"
+                      stroke="#7C3AED" stroke-opacity="0.4" stroke-width="1"/>
+                <text x="35" y="14" text-anchor="middle"
+                      font-family="system-ui, sans-serif"
+                      font-size="8.5" font-weight="800" fill="#7C3AED">
+                    K
+                </text>
+                <g transform="translate(20, 24)">
+                    <rect x="0"  y="0"  width="5" height="5" rx="1" fill="#7C3AED"/>
+                    <rect x="7"  y="0"  width="5" height="5" rx="1" fill="#7C3AED" opacity="0.3"/>
+                    <rect x="14" y="0"  width="5" height="5" rx="1" fill="#7C3AED" opacity="0.2"/>
+                    <rect x="21" y="0"  width="5" height="5" rx="1" fill="#7C3AED" opacity="0.15"/>
+
+                    <rect x="0"  y="7"  width="5" height="5" rx="1" fill="#7C3AED" opacity="0.3"/>
+                    <rect x="7"  y="7"  width="5" height="5" rx="1" fill="#7C3AED"/>
+                    <rect x="14" y="7"  width="5" height="5" rx="1" fill="#7C3AED" opacity="0.3"/>
+                    <rect x="21" y="7"  width="5" height="5" rx="1" fill="#7C3AED" opacity="0.2"/>
+
+                    <rect x="0"  y="14" width="5" height="5" rx="1" fill="#7C3AED" opacity="0.2"/>
+                    <rect x="7"  y="14" width="5" height="5" rx="1" fill="#7C3AED" opacity="0.3"/>
+                    <rect x="14" y="14" width="5" height="5" rx="1" fill="#7C3AED"/>
+                    <rect x="21" y="14" width="5" height="5" rx="1" fill="#7C3AED" opacity="0.3"/>
+
+                    <rect x="0"  y="21" width="5" height="5" rx="1" fill="#7C3AED" opacity="0.15"/>
+                    <rect x="7"  y="21" width="5" height="5" rx="1" fill="#7C3AED" opacity="0.2"/>
+                    <rect x="14" y="21" width="5" height="5" rx="1" fill="#7C3AED" opacity="0.3"/>
+                    <rect x="21" y="21" width="5" height="5" rx="1" fill="#7C3AED"/>
+                </g>
+            </g>
+        </g>
+
+        <!-- Формула сборки -->
+        <text x="157" y="318" text-anchor="middle"
+              font-family="ui-monospace, monospace"
+              font-size="11" font-weight="800" fill="#BE185D">
+            K = Σ Bₑᵀ · kₑ · Bₑ
+        </text>
+    </g>
+
+    <!-- ============================================================
+         НИЖНЯЯ ПЛАШКА: расшифровка
+         ============================================================ -->
+    <g transform="translate(30, 450)">
+        <rect x="0" y="0" width="740" height="60" rx="12"
+              fill="#FFFFFF" fill-opacity="0.92"
+              stroke="#8B5CF6" stroke-opacity="0.3" stroke-width="1.2"/>
+
+        <g font-family="system-ui, sans-serif" font-size="11">
+            <g transform="translate(30, 26)">
+                <text x="0" y="4" font-family="ui-monospace, monospace"
+                      font-size="14" font-weight="800" fill="#7C3AED">K</text>
+                <text x="22" y="4" fill="#4B5563">— матрица жёсткости</text>
+            </g>
+
+            <g transform="translate(215, 26)">
+                <text x="0" y="4" font-family="ui-monospace, monospace"
+                      font-size="14" font-weight="800" fill="#B45309">u</text>
+                <text x="22" y="4" fill="#4B5563">— перемещения узлов</text>
+            </g>
+
+            <g transform="translate(400, 26)">
+                <text x="0" y="4" font-family="ui-monospace, monospace"
+                      font-size="14" font-weight="800" fill="#BE185D">f</text>
+                <text x="22" y="4" fill="#4B5563">— внешние силы</text>
+            </g>
+
+            <g transform="translate(555, 26)">
+                <text x="0" y="4" font-family="ui-monospace, monospace"
+                      font-size="12" font-weight="800" fill="#EC4899">u = K⁻¹ · f</text>
+                <text x="95" y="4" fill="#6B7280" font-size="10.5">— решение</text>
+            </g>
+        </g>
+    </g>
+
+    <!-- Легенда -->
+    <g transform="translate(30, 535)" font-family="system-ui, sans-serif"
+       font-size="10.5" fill="#6B7280">
+        <rect x="0" y="-3" width="14" height="6" rx="2" fill="#7C3AED"/>
+        <text x="20" y="2">стойка</text>
+        <rect x="80" y="-3" width="14" height="6" rx="2" fill="#0891B2"/>
+        <text x="100" y="2">балка</text>
+        <circle cx="155" cy="0" r="5" fill="#7C3AED"/>
+        <text x="167" y="2">свободный узел</text>
+        <circle cx="285" cy="0" r="5" fill="#EC4899"/>
+        <text x="297" y="2">закрепление</text>
+        <line x1="385" y1="0" x2="411" y2="0"
+              stroke="#EC4899" stroke-width="3" stroke-linecap="round"/>
+        <text x="419" y="2">сила F</text>
+        <line x1="485" y1="0" x2="511" y2="0"
+              stroke="#94A3B8" stroke-width="1.2" stroke-dasharray="3 3"/>
+        <text x="519" y="2">исходная форма</text>
+        <line x1="640" y1="0" x2="666" y2="0"
+              stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="3 2"/>
+        <text x="674" y="2">смещение Δu</text>
+    </g>
+</svg>

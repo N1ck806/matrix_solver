@@ -1,0 +1,1045 @@
+{% extends "matrix_app/base.html" %}
+{% load static matrix_icons %}
+
+{% block title %}Разложения матриц — LU, QR, Холецкий, диагонализация{% endblock %}
+
+{% block meta_description %}
+LU, QR, разложение Холецкого, диагонализация и спектральное разложение
+матриц с пошаговым построением и проверкой восстановления исходной матрицы.
+{% endblock %}
+
+
+{% block extra_head %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'matrix_app/css/calculator.css' %}">
+<link rel="stylesheet" href="{% static 'matrix_app/css/result-block.css' %}">
+
+<style>
+/* =============================================================================
+   Разложения матриц — только специфика страницы.
+   -----------------------------------------------------------------------------
+   Из calculator.css уже приходят:
+     .page-head, .breadcrumbs, .page-title, .page-subtitle, .btn-*
+     .matrix-input-card, .matrix-input-head, .matrix-input-title, .matrix-letter,
+     .matrix-shape-badge, .matrix-input-tools, .mini-size, .size-btn--mini,
+     .size-input--mini, .matrix-input-body, .matrix-input-grid, .matrix-input-hint,
+     .matrix-input-footer, .matrix-input-chips, .chip, .chip--button,
+     .switch, .switch--inline, .switch-track, .switch-label,
+     .calc-placeholder, .calc-placeholder-icon, .calc-placeholder-tips,
+     .calc-placeholder-tip, .calc-placeholder-tip-num.
+
+   Из result-block.css:
+     .result-block, .result-section, .result-section-head, .result-section-number,
+     .result-section-title, .result-section-body, .result-task-text,
+     .result-task-formula, .result-actions, .result-error, .result-error-title,
+     .result-error-message, .result-checks-title, .result-checks-list.
+
+   Здесь:
+     .decomp-*         — селектор, контролы, справка;
+     .decomp-steps / .decomp-step*     — пошаговое построение;
+     .decomp-parts / .decomp-part*     — части разложения (L, U, Q, R, ...);
+     .decomp-checks / .decomp-check*   — проверки;
+     .decomp-reason                    — причина неприменимости;
+     .skeleton / .skeleton-line        — скелетон загрузки.
+   ============================================================================= */
+
+
+/* =============================================================================
+   0. ПЛАВНАЯ ПРОКРУТКА
+   ============================================================================= */
+html {
+    scroll-behavior: smooth;
+}
+
+
+/* =============================================================================
+   1. СЕЛЕКТОР РАЗЛОЖЕНИЙ
+   ============================================================================= */
+.decomp-selector {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 28px;
+}
+
+.decomp-btn {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 18px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    text-align: left;
+    cursor: pointer;
+    color: inherit;
+    transition:
+        transform var(--dur-base) var(--ease-out),
+        border-color var(--dur-base),
+        background-color var(--dur-base),
+        box-shadow var(--dur-base);
+}
+
+.decomp-btn:hover {
+    transform: translateY(-3px);
+    border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+    box-shadow: 0 16px 32px -12px var(--accent-glow);
+}
+
+.decomp-btn.is-active {
+    background: linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--accent-1) 10%, transparent),
+        color-mix(in srgb, var(--accent-2) 10%, transparent)
+    );
+    border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+    box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.04),
+        0 12px 32px -8px var(--accent-glow);
+}
+
+.decomp-symbol {
+    width: 46px;
+    height: 46px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--accent-1) 12%, transparent),
+        color-mix(in srgb, var(--accent-2) 12%, transparent)
+    );
+    color: var(--accent);
+    border-radius: var(--radius-md);
+    flex-shrink: 0;
+    transition: background var(--dur-base), color var(--dur-base), transform var(--dur-base);
+}
+
+.decomp-symbol .ml-icon,
+.decomp-symbol svg {
+    width: 22px;
+    height: 22px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+}
+
+.decomp-btn.is-active .decomp-symbol {
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    color: #fff;
+    box-shadow: 0 8px 16px -4px var(--accent-glow);
+    transform: scale(1.05);
+}
+
+.decomp-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.decomp-text strong {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.01em;
+}
+
+.decomp-text span {
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.4;
+}
+
+
+/* =============================================================================
+   2. КОНТРОЛЫ РАЗЛОЖЕНИЯ
+   ============================================================================= */
+.decomp-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 18px 22px;
+    background: linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--accent) 3%, transparent),
+        color-mix(in srgb, var(--accent) 6%, transparent)
+    );
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+}
+
+.decomp-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.decomp-buttons .btn .ml-icon,
+.decomp-buttons .btn svg {
+    width: 16px;
+    height: 16px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+    flex-shrink: 0;
+}
+
+.decomp-buttons .btn-primary {
+    box-shadow:
+        0 8px 20px -6px var(--accent-glow),
+        0 0 0 1px color-mix(in srgb, var(--accent) 10%, transparent);
+    transition: transform var(--dur-fast), box-shadow var(--dur-base);
+}
+
+.decomp-buttons .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 16px 32px -8px var(--accent-glow),
+        0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+
+/* =============================================================================
+   3. БЛОК РЕЗУЛЬТАТА — обёртка
+   ============================================================================= */
+.result-block.decomp-result {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.03),
+        0 8px 24px -8px var(--accent-glow);
+    padding: 24px;
+    margin-top: 20px;
+    animation: decompFadeIn var(--dur-base) var(--ease-out);
+}
+
+@keyframes decompFadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.decomp-result .result-section + .result-section {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px dashed color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+
+/* =============================================================================
+   4. ПОШАГОВОЕ ПОСТРОЕНИЕ
+   ============================================================================= */
+.decomp-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.decomp-step {
+    display: flex;
+    gap: 14px;
+    padding: 14px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    transition: border-color var(--dur-fast), box-shadow var(--dur-fast);
+}
+
+.decomp-step:hover {
+    border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+    box-shadow: 0 4px 12px -6px var(--accent-glow);
+}
+
+.decomp-step-num {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    color: #fff;
+    font-size: 12px;
+    font-weight: 800;
+    border-radius: 50%;
+    box-shadow: 0 4px 10px -3px var(--accent-glow);
+}
+
+.decomp-step-body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.decomp-step-title {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.005em;
+}
+
+.decomp-step-text {
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--text-dim);
+    margin: 0;
+}
+
+.decomp-step-formula {
+    padding: 10px 12px;
+    background: color-mix(in srgb, var(--accent) 5%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent) 12%, transparent);
+    border-radius: var(--radius-sm);
+    overflow-x: auto;
+    font-size: 13px;
+    color: var(--text);
+    text-align: center;
+}
+
+.decomp-step-empty {
+    padding: 16px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-dim);
+    background: color-mix(in srgb, var(--accent) 4%, transparent);
+    border: 1px dashed color-mix(in srgb, var(--accent) 20%, transparent);
+    border-radius: var(--radius-md);
+    margin: 0;
+}
+
+
+/* =============================================================================
+   5. ЧАСТИ РАЗЛОЖЕНИЯ (L, U, Q, R, P, D, ...)
+   ============================================================================= */
+.decomp-parts {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.decomp-part {
+    padding: 14px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    transition: border-color var(--dur-fast), box-shadow var(--dur-fast);
+}
+
+.decomp-part:hover {
+    border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+    box-shadow: 0 4px 12px -6px var(--accent-glow);
+}
+
+.decomp-part-label {
+    display: inline-block;
+    margin-bottom: 8px;
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-family: var(--font-mono);
+}
+
+.decomp-part-body {
+    overflow-x: auto;
+    font-size: 14px;
+    color: var(--text);
+    text-align: center;
+}
+
+
+/* =============================================================================
+   6. ПРОВЕРКИ
+   ============================================================================= */
+.decomp-checks {
+    margin-top: 18px;
+    padding: 14px 16px;
+    background: color-mix(in srgb, var(--accent) 4%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent) 15%, transparent);
+    border-radius: var(--radius-md);
+}
+
+.decomp-checks .result-checks-title {
+    margin: 0 0 10px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+}
+
+.decomp-checks .result-checks-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.decomp-check-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.decomp-check-mark {
+    width: 22px;
+    height: 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 800;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.decomp-check-item.is-ok .decomp-check-mark {
+    background: color-mix(in srgb, #10B981 15%, transparent);
+    color: #059669;
+}
+
+.decomp-check-item.is-fail .decomp-check-mark {
+    background: color-mix(in srgb, #EF4444 15%, transparent);
+    color: #DC2626;
+}
+
+.decomp-check-name {
+    font-weight: 600;
+    color: var(--text);
+    flex: 1;
+    min-width: 0;
+}
+
+.decomp-check-formula {
+    flex-basis: 100%;
+    padding: 8px 10px;
+    margin-top: 6px;
+    background: color-mix(in srgb, var(--accent) 5%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent) 12%, transparent);
+    border-radius: var(--radius-sm);
+    overflow-x: auto;
+    text-align: center;
+    font-size: 13px;
+}
+
+
+/* =============================================================================
+   7. ПРИЧИНА НЕПРИМЕНИМОСТИ
+   ============================================================================= */
+.decomp-reason {
+    margin-top: 16px;
+    padding: 14px 16px;
+    background: color-mix(in srgb, #F59E0B 7%, transparent);
+    border: 1px solid color-mix(in srgb, #F59E0B 25%, transparent);
+    border-radius: var(--radius-md);
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--text);
+}
+
+.decomp-reason::before {
+    content: "!";
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    margin-right: 10px;
+    background: linear-gradient(135deg, #F59E0B, #D97706);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 800;
+    border-radius: 50%;
+    vertical-align: middle;
+}
+
+
+/* =============================================================================
+   8. КНОПКИ ДЕЙСТВИЙ
+   ============================================================================= */
+.decomp-result .result-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px dashed color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+.decomp-result .result-actions .btn .ml-icon,
+.decomp-result .result-actions .btn svg {
+    width: 14px;
+    height: 14px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+    flex-shrink: 0;
+}
+
+
+/* =============================================================================
+   9. СКЕЛЕТОН ЗАГРУЗКИ
+   ============================================================================= */
+.skeleton {
+    background: linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--accent) 6%, transparent) 0%,
+        color-mix(in srgb, var(--accent) 12%, transparent) 50%,
+        color-mix(in srgb, var(--accent) 6%, transparent) 100%
+    );
+    background-size: 200% 100%;
+    animation: skeletonShimmer 1.5s ease-in-out infinite;
+    border-radius: var(--radius-sm);
+}
+
+.skeleton-line {
+    height: 18px;
+    width: 100%;
+    margin-bottom: 8px;
+}
+
+.skeleton-line.short {
+    width: 60%;
+}
+
+@keyframes skeletonShimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+
+/* =============================================================================
+   10. СПРАВКА
+   ============================================================================= */
+.section--decomp-info {
+    padding: 88px 0;
+}
+
+.decomp-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.decomp-info-card {
+    padding: 26px 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.03),
+        0 4px 16px -4px var(--accent-glow);
+    transition:
+        transform var(--dur-base) var(--ease-out),
+        box-shadow var(--dur-base),
+        border-color var(--dur-base);
+}
+
+.decomp-info-card:hover {
+    transform: translateY(-4px);
+    border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+    box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.04),
+        0 24px 48px -16px var(--accent-glow);
+}
+
+.decomp-info-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    margin-bottom: 16px;
+}
+
+.decomp-info-icon .ml-icon,
+.decomp-info-icon svg {
+    width: 22px;
+    height: 22px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+}
+
+.decomp-info-icon--indigo  { background: linear-gradient(135deg, #6366F1, #4F46E5); box-shadow: 0 8px 16px -4px rgba(99, 102, 241, 0.4); }
+.decomp-info-icon--emerald { background: linear-gradient(135deg, #10B981, #059669); box-shadow: 0 8px 16px -4px rgba(16, 185, 129, 0.4); }
+.decomp-info-icon--violet  { background: linear-gradient(135deg, #8B5CF6, #7C3AED); box-shadow: 0 8px 16px -4px rgba(139, 92, 246, 0.4); }
+.decomp-info-icon--amber   { background: linear-gradient(135deg, #F59E0B, #D97706); box-shadow: 0 8px 16px -4px rgba(245, 158, 11, 0.4); }
+.decomp-info-icon--cyan    { background: linear-gradient(135deg, #06B6D4, #0891B2); box-shadow: 0 8px 16px -4px rgba(6, 182, 212, 0.4); }
+
+.decomp-info-card h3 {
+    font-size: 17px;
+    font-weight: 700;
+    margin: 0 0 8px;
+    letter-spacing: -0.01em;
+    color: var(--text);
+}
+
+.decomp-info-formula {
+    display: block;
+    padding: 10px 12px;
+    background: color-mix(in srgb, var(--accent) 5%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent) 12%, transparent);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    color: var(--text);
+    margin: 0 0 14px;
+    font-variant-numeric: tabular-nums;
+    overflow-x: auto;
+}
+
+.decomp-info-card p {
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--text-dim);
+    margin: 0 0 14px;
+}
+
+.decomp-info-tag {
+    display: inline-block;
+    padding: 4px 10px;
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent) 15%, transparent);
+    border-radius: var(--radius-full);
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--accent);
+}
+
+
+/* =============================================================================
+   11. АДАПТИВ
+   ============================================================================= */
+@media (max-width: 992px) {
+    .decomp-selector { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+    .section--decomp-info { padding: 64px 0; }
+}
+
+@media (max-width: 640px) {
+    .decomp-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .decomp-buttons {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .decomp-buttons .btn { width: 100%; justify-content: center; }
+
+    .section--decomp-info { padding: 48px 0; }
+
+    .result-block.decomp-result { padding: 16px; }
+
+    .decomp-step { padding: 12px; }
+    .decomp-step-num { width: 24px; height: 24px; font-size: 11px; }
+    .decomp-part { padding: 12px; }
+
+    .decomp-result .result-actions { flex-direction: column; }
+    .decomp-result .result-actions .btn { width: 100%; justify-content: center; }
+}
+</style>
+{% endblock %}
+
+
+{% block content %}
+
+<!-- ================================================================
+     Заголовок
+     ================================================================ -->
+<section class="page-head">
+    <div class="container">
+        <nav class="breadcrumbs" aria-label="Навигационная цепочка">
+            <a href="{% url 'matrix_app:home' %}">Главная</a>
+            <span class="breadcrumbs-sep">/</span>
+            <span aria-current="page">Разложения</span>
+        </nav>
+        <div class="page-head-row">
+            <div>
+                <h1 class="page-title">Разложения матриц</h1>
+                <p class="page-subtitle">
+                    LU, QR, разложение Холецкого, диагонализация и спектральное
+                    разложение — с пошаговым построением и проверкой
+                    восстановления исходной матрицы.
+                </p>
+            </div>
+            <div class="page-head-actions">
+                <a href="#decomp-info" class="btn btn-soft btn-sm">
+                    {% icon "book-open" size=14 %}
+                    <span>Когда применять</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ================================================================
+     Рабочая область
+     ================================================================ -->
+<section class="calc-workspace">
+    <div class="container decompositions-layout">
+
+        <!-- Селектор разложений -->
+        <div class="decomp-selector" role="tablist" aria-label="Тип разложения">
+
+            <button type="button" class="decomp-btn is-active" data-decomp="lu"
+                    role="tab" aria-selected="true">
+                <span class="decomp-symbol" aria-hidden="true">{% icon "lu" size=22 %}</span>
+                <span class="decomp-text">
+                    <strong>$A = L \cdot U$</strong>
+                    <span>Нижняя и верхняя треугольные</span>
+                </span>
+            </button>
+
+            <button type="button" class="decomp-btn" data-decomp="qr"
+                    role="tab" aria-selected="false">
+                <span class="decomp-symbol" aria-hidden="true">{% icon "qr" size=22 %}</span>
+                <span class="decomp-text">
+                    <strong>$A = Q \cdot R$</strong>
+                    <span>Ортогональная и верхняя треугольная</span>
+                </span>
+            </button>
+
+            <button type="button" class="decomp-btn" data-decomp="cholesky"
+                    role="tab" aria-selected="false">
+                <span class="decomp-symbol" aria-hidden="true">{% icon "diagonal" size=22 %}</span>
+                <span class="decomp-text">
+                    <strong>$A = L \cdot L^{T}$</strong>
+                    <span>Симметричные положительно определённые</span>
+                </span>
+            </button>
+
+            <button type="button" class="decomp-btn" data-decomp="diagonalize"
+                    role="tab" aria-selected="false">
+                <span class="decomp-symbol" aria-hidden="true">{% icon "diagonalize" size=22 %}</span>
+                <span class="decomp-text">
+                    <strong>$A = P \cdot D \cdot P^{-1}$</strong>
+                    <span>Диагонализация через собственные векторы</span>
+                </span>
+            </button>
+
+            <button type="button" class="decomp-btn" data-decomp="spectral"
+                    role="tab" aria-selected="false">
+                <span class="decomp-symbol" aria-hidden="true">{% icon "diagonalize" size=22 %}</span>
+                <span class="decomp-text">
+                    <strong>$A = Q \cdot D \cdot Q^{T}$</strong>
+                    <span>Спектральное разложение симметричной</span>
+                </span>
+            </button>
+        </div>
+
+
+        <!-- Ввод матрицы -->
+        <div class="matrix-input-card" data-matrix-card="a">
+            <div class="matrix-input-head">
+                <div class="matrix-input-title">
+                    <span class="matrix-letter" data-matrix-letter aria-hidden="true">A</span>
+                    <h2>Матрица <span data-matrix-label>A</span></h2>
+                    <span class="matrix-shape-badge" data-matrix-shape-label="a">3 × 3</span>
+                </div>
+                <div class="matrix-input-tools">
+                    <div class="mini-size">
+                        <span>Строк</span>
+                        <button type="button" class="size-btn size-btn--mini"
+                                data-size-decr-a-rows aria-label="Уменьшить строки">−</button>
+                        <input type="number" class="size-input size-input--mini"
+                               value="3" min="1" max="{{ MAX_MATRIX_ROWS }}"
+                               data-a-rows data-rows-input aria-label="Строк">
+                        <button type="button" class="size-btn size-btn--mini"
+                                data-size-incr-a-rows aria-label="Увеличить строки">+</button>
+                    </div>
+                    <div class="mini-size">
+                        <span>Столбцов</span>
+                        <button type="button" class="size-btn size-btn--mini"
+                                data-size-decr-a-cols aria-label="Уменьшить столбцы">−</button>
+                        <input type="number" class="size-input size-input--mini"
+                               value="3" min="1" max="{{ MAX_MATRIX_COLS }}"
+                               data-a-cols data-cols-input aria-label="Столбцов">
+                        <button type="button" class="size-btn size-btn--mini"
+                                data-size-incr-a-cols aria-label="Увеличить столбцы">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="matrix-input-body">
+                <div class="matrix-scroll">
+                    <div class="matrix-input-grid"
+                         id="matrix-a-input"
+                         data-matrix-input
+                         data-rows="3"
+                         data-cols="3"></div>
+                </div>
+                <p class="matrix-input-hint">
+                    <strong>Замечание:</strong> LU, Холецкий, диагонализация и
+                    спектральное требуют <em>квадратную</em> матрицу
+                    <em>n × n</em>. QR работает и для прямоугольных при
+                    <em>m ≥ n</em>. Холецкий и спектральное — только для
+                    <em>симметричных</em> матриц.
+                </p>
+            </div>
+
+            <div class="matrix-input-footer matrix-input-footer--compact">
+                <div class="matrix-input-chips">
+                    <button type="button" class="chip chip--button"
+                            data-matrix-action="zero" data-matrix-target="a">
+                        {% icon "zero-matrix" size=14 %}<span>Нули</span>
+                    </button>
+                    <button type="button" class="chip chip--button"
+                            data-matrix-action="identity" data-matrix-target="a">
+                        {% icon "identity" size=14 %}<span>Единичная</span>
+                    </button>
+                    <button type="button" class="chip chip--button"
+                            data-matrix-action="symmetric" data-matrix-target="a">
+                        {% icon "check-badge" size=14 %}<span>Симметричная</span>
+                    </button>
+                    <button type="button" class="chip chip--button"
+                            data-matrix-action="random" data-matrix-target="a">
+                        {% icon "sparkles" size=14 %}<span>Случайная</span>
+                    </button>
+                    <button type="button" class="chip chip--button"
+                            data-matrix-action="square" data-matrix-target="a">
+                        {% icon "square-matrix" size=14 %}<span>Квадратная</span>
+                    </button>
+                    <button type="button" class="chip chip--button"
+                            data-matrix-action="transpose" data-matrix-target="a">
+                        {% icon "transpose" size=14 %}<span>Трансп.</span>
+                    </button>
+                    <button type="button" class="chip chip--button"
+                            data-matrix-action="copy" data-matrix-target="a">
+                        {% icon "copy" size=14 %}<span>Копировать</span>
+                    </button>
+                    <button type="button" class="chip chip--button"
+                            data-matrix-action="paste" data-matrix-target="a">
+                        {% icon "clipboard" size=14 %}<span>Вставить</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="decomp-controls">
+                <label class="switch switch--inline">
+                    <input type="checkbox" data-decomp-check checked>
+                    <span class="switch-track"></span>
+                    <span class="switch-label">Проверка восстановления A</span>
+                </label>
+                <div class="decomp-buttons">
+                    <button type="button" class="btn btn-primary" data-decomp-run>
+                        {% icon "arrow-right" size=16 %}
+                        <span>Разложить</span>
+                    </button>
+                    <button type="button" class="btn btn-ghost" data-decomp-reset>
+                        {% icon "trash" size=14 %}
+                        <span>Очистить</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- ============================================================
+             Результат — рендерится через decompositions.js
+             в селекторы [data-decomp-*].
+             ============================================================ -->
+        <div class="result-block decomp-result"
+             id="decomp-result"
+             data-decomp-result
+             hidden>
+
+            <section class="result-section result-section--task">
+                <header class="result-section-head">
+                    <span class="result-section-number">1</span>
+                    <h3 class="result-section-title">Задание</h3>
+                </header>
+                <div class="result-section-body">
+                    <p class="result-task-text" data-decomp-task-text></p>
+                    <div class="result-task-formula" data-decomp-task-formula></div>
+                </div>
+            </section>
+
+            <section class="result-section result-section--steps">
+                <header class="result-section-head">
+                    <span class="result-section-number">2</span>
+                    <h3 class="result-section-title">Построение</h3>
+                </header>
+                <div class="result-section-body decomp-steps" data-decomp-steps></div>
+            </section>
+
+            <section class="result-section result-section--result">
+                <header class="result-section-head">
+                    <span class="result-section-number">3</span>
+                    <h3 class="result-section-title">Результат</h3>
+                </header>
+                <div class="result-section-body">
+                    <div class="decomp-parts" data-decomp-parts></div>
+
+                    <div class="decomp-checks" data-decomp-checks hidden>
+                        <h4 class="result-checks-title">Проверка</h4>
+                        <ul class="result-checks-list" data-decomp-checks-list></ul>
+                    </div>
+
+                    <div class="decomp-reason" data-decomp-reason hidden></div>
+
+                    <div class="result-actions" data-decomp-actions>
+                        <button type="button" class="btn btn-soft btn-sm" data-copy-result>
+                            {% icon "copy" size=14 %}
+                            <span>Копировать</span>
+                        </button>
+                        <button type="button" class="btn btn-soft btn-sm" data-export-result>
+                            {% icon "download" size=14 %}
+                            <span>Скачать</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <div class="result-error" data-decomp-error hidden>
+                <h4 class="result-error-title">Разложение неприменимо</h4>
+                <p class="result-error-message" data-decomp-error-message></p>
+            </div>
+        </div>
+
+        <!-- Заглушка -->
+        <div class="calc-placeholder" data-decomp-placeholder>
+            <div class="calc-placeholder-icon" aria-hidden="true">
+                {% icon "lu" size=40 %}
+            </div>
+            <h3>Результат появится здесь</h3>
+            <p>
+                Введите матрицу, выберите разложение и нажмите                <b>«Разложить»</b>.
+            </p>
+            <div class="calc-placeholder-tips">
+                <div class="calc-placeholder-tip">
+                    <span class="calc-placeholder-tip-num">1</span>
+                    <span>Введите матрицу</span>
+                </div>
+                <div class="calc-placeholder-tip">
+                    <span class="calc-placeholder-tip-num">2</span>
+                    <span>Выберите разложение</span>
+                </div>
+                <div class="calc-placeholder-tip">
+                    <span class="calc-placeholder-tip-num">3</span>
+                    <span>Нажмите «Разложить»</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+
+<!-- ================================================================
+     Справка по разложениям
+     ================================================================ -->
+<section class="section section--decomp-info" id="decomp-info">
+    <div class="container">
+        <header class="section-head">
+            <h2 class="section-title">Когда применять какое разложение</h2>
+            <p class="section-subtitle">
+                Краткий гид по выбору метода для конкретной задачи.
+            </p>
+        </header>
+
+        <div class="decomp-info-grid">
+
+            <article class="decomp-info-card">
+                <div class="decomp-info-icon decomp-info-icon--indigo">
+                    {% icon "lu" size=22 %}
+                </div>
+                <h3>LU-разложение</h3>
+                <p class="decomp-info-formula">$A = L \cdot U$</p>
+                <p>Когда нужно решать одну и ту же систему с разными правыми частями или вычислять определитель как произведение диагоналей $U$.</p>
+                <span class="decomp-info-tag">Применимо к любой матрице (с пивотингом)</span>
+            </article>
+
+            <article class="decomp-info-card">
+                <div class="decomp-info-icon decomp-info-icon--emerald">
+                    {% icon "qr" size=22 %}
+                </div>
+                <h3>QR-разложение</h3>
+                <p class="decomp-info-formula">$A = Q \cdot R$</p>
+                <p>Для метода наименьших квадратов, QR-алгоритма поиска собственных значений и численно устойчивого решения систем.</p>
+                <span class="decomp-info-tag">Требуется $m \ge n$</span>
+            </article>
+
+            <article class="decomp-info-card">
+                <div class="decomp-info-icon decomp-info-icon--violet">
+                    {% icon "diagonal" size=22 %}
+                </div>
+                <h3>Холецкого</h3>
+                <p class="decomp-info-formula">$A = L \cdot L^{T}$</p>
+                <p>Ускоренное разложение для симметричных положительно определённых матриц. Вдвое быстрее LU.</p>
+                <span class="decomp-info-tag">Симметричная положительно определённая</span>
+            </article>
+
+            <article class="decomp-info-card">
+                <div class="decomp-info-icon decomp-info-icon--amber">
+                    {% icon "diagonalize" size=22 %}
+                </div>
+                <h3>Диагонализация</h3>
+                <p class="decomp-info-formula">$A = P \cdot D \cdot P^{-1}$</p>
+                <p>Быстрое вычисление $A^n$, решение систем ОДУ $x' = Ax$, понимание структуры преобразования.</p>
+                <span class="decomp-info-tag">Диагонализируемая матрица</span>
+            </article>
+
+            <article class="decomp-info-card">
+                <div class="decomp-info-icon decomp-info-icon--cyan">
+                    {% icon "diagonalize" size=22 %}
+                </div>
+                <h3>Спектральное</h3>
+                <p class="decomp-info-formula">$A = Q \cdot D \cdot Q^{T}$</p>
+                <p>Ортогональная диагонализация симметричной матрицы. Широко используется в PCA, квантовой механике, теории колебаний.</p>
+                <span class="decomp-info-tag">Только симметричная</span>
+            </article>
+
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+
+{% block extra_scripts %}
+{{ block.super }}
+<script src="{% static 'matrix_app/js/calculator.js' %}"></script>
+<script src="{% static 'matrix_app/js/decompositions.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var placeholder = document.querySelector('[data-decomp-placeholder]');
+    var resultBlock = document.querySelector('[data-decomp-result]');
+    if (placeholder && resultBlock) {
+        var observer = new MutationObserver(function () {
+            placeholder.hidden = !resultBlock.hidden;
+        });
+        observer.observe(resultBlock, { attributes: true, attributeFilter: ['hidden'] });
+    }
+
+    var infoLink = document.querySelector('[href="#decomp-info"]');
+    if (infoLink) {
+        infoLink.addEventListener('click', function (e) {
+            var target = document.querySelector('#decomp-info');
+            if (!target) return;
+            e.preventDefault();
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            history.replaceState(null, '', '#decomp-info');
+        });
+    }
+});
+</script>
+{% endblock %}

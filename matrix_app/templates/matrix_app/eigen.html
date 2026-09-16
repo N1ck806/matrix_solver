@@ -1,0 +1,1190 @@
+{% extends "matrix_app/base.html" %}
+{% load static matrix_icons %}
+
+{% block title %}Спектр матрицы — собственные значения и векторы{% endblock %}
+
+{% block meta_description %}
+Собственные значения и собственные векторы матрицы: характеристический
+многочлен, кратности, диагонализируемость. Пошаговое решение на SymPy.
+{% endblock %}
+
+
+{% block extra_head %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'matrix_app/css/calculator.css' %}">
+<link rel="stylesheet" href="{% static 'matrix_app/css/result-block.css' %}">
+
+<style>
+/* =============================================================================
+   Спектр матрицы — только специфика страницы.
+   -----------------------------------------------------------------------------
+   Из calculator.css уже приходят:
+     .page-head, .breadcrumbs, .page-title, .page-subtitle, .btn-*
+     .calc-workspace, .matrix-input-card, .matrix-input-head, .matrix-input-title,
+     .matrix-letter, .matrix-shape-badge, .matrix-input-tools, .mini-size,
+     .size-btn--mini, .size-input--mini, .matrix-input-body, .matrix-scroll,
+     .matrix-input-grid, .matrix-input-hint, .matrix-input-footer,
+     .matrix-input-chips, .chip--button, .calc-placeholder, .calc-placeholder-*.
+
+   Из result-block.css:
+     .result-block, .result-section, .result-section-head, .result-section-number,
+     .result-section-title, .result-section-body, .result-task-text,
+     .result-task-formula, .result-error, .result-error-title,
+     .result-error-message, .result-actions.
+
+   Здесь — .eigen-* (табы, контролы, результат), .examples-*, .eigen-info-*.
+   ============================================================================= */
+
+
+/* =============================================================================
+   0. ПЛАВНАЯ ПРОКРУТКА
+   ============================================================================= */
+html {
+    scroll-behavior: smooth;
+}
+
+
+/* =============================================================================
+   1. РАСКЛАДКА
+   ============================================================================= */
+.eigen-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+
+/* =============================================================================
+   2. ТАБЫ ОПЕРАЦИЙ СПЕКТРА
+   ============================================================================= */
+.eigen-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px 22px;
+    background: linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--accent) 3%, transparent),
+        color-mix(in srgb, var(--accent) 6%, transparent)
+    );
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+}
+
+.eigen-op-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.eigen-op {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 14px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-full);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition:
+        transform var(--dur-fast) var(--ease-out),
+        border-color var(--dur-fast),
+        color var(--dur-fast),
+        background-color var(--dur-fast),
+        box-shadow var(--dur-fast);
+}
+
+.eigen-op:hover {
+    border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+    color: var(--accent);
+    transform: translateY(-1px);
+}
+
+.eigen-op.is-active {
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 8px 20px -6px var(--accent-glow);
+}
+
+.eigen-op-symbol {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+    color: var(--accent);
+    border-radius: 7px;
+    transition: background var(--dur-fast), color var(--dur-fast);
+}
+
+.eigen-op-symbol .ml-icon,
+.eigen-op-symbol svg {
+    width: 16px;
+    height: 16px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+}
+
+.eigen-op.is-active .eigen-op-symbol {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+
+.eigen-op-label {
+    white-space: nowrap;
+}
+
+.eigen-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.eigen-buttons .btn .ml-icon,
+.eigen-buttons .btn svg {
+    width: 16px;
+    height: 16px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+    flex-shrink: 0;
+}
+
+.eigen-buttons .btn-primary {
+    box-shadow:
+        0 8px 20px -6px var(--accent-glow),
+        0 0 0 1px color-mix(in srgb, var(--accent) 10%, transparent);
+    transition: transform var(--dur-fast), box-shadow var(--dur-base);
+}
+
+.eigen-buttons .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 16px 32px -8px var(--accent-glow),
+        0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+
+/* =============================================================================
+   3. РЕЗУЛЬТАТ — обёртка
+   ============================================================================= */
+.result-block[data-eigen-result] {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.03),
+        0 8px 24px -8px var(--accent-glow);
+    padding: 24px;
+    animation: eigenFadeIn var(--dur-base) var(--ease-out);
+}
+
+@keyframes eigenFadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.result-block[data-eigen-result] .result-section + .result-section {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px dashed color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+
+/* =============================================================================
+   4. ХАРАКТЕРИСТИЧЕСКИЙ МНОГОЧЛЕН
+   ============================================================================= */
+.eigen-charpoly {
+    padding: 16px 18px;
+    background: color-mix(in srgb, var(--accent) 5%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent) 12%, transparent);
+    border-radius: var(--radius-md);
+    overflow-x: auto;
+    font-size: 15px;
+    color: var(--text);
+}
+
+.eigen-charpoly-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+}
+
+.eigen-charpoly-row + .eigen-charpoly-row {
+    border-top: 1px dashed color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.eigen-charpoly-label {
+    flex-shrink: 0;
+    min-width: 64px;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--accent);
+    font-family: var(--font-mono);
+}
+
+.eigen-charpoly-value {
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+    font-size: 15px;
+    color: var(--text);
+}
+
+
+/* =============================================================================
+   5. СОБСТВЕННЫЕ ЗНАЧЕНИЯ
+   ============================================================================= */
+.eigen-values-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.eigen-value-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    transition: border-color var(--dur-fast), box-shadow var(--dur-fast);
+}
+
+.eigen-value-item:hover {
+    border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+    box-shadow: 0 4px 12px -6px var(--accent-glow);
+}
+
+.eigen-value-lambda {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 60px;
+    padding: 6px 10px;
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+    color: var(--accent);
+    border-radius: var(--radius-sm);
+    font-weight: 700;
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+}
+
+.eigen-value-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+    flex: 1;
+}
+
+.eigen-value-detail-title {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.eigen-value-detail-sub {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-size: 12px;
+    color: var(--text-dim);
+}
+
+.eigen-value-detail-sub b {
+    color: var(--accent);
+    font-weight: 700;
+}
+
+
+/* =============================================================================
+   6. ИНВАРИАНТЫ (tr, det)
+   ============================================================================= */
+.eigen-invariants {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+}
+
+.invariant-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 16px;
+    background: color-mix(in srgb, var(--accent) 4%, transparent);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+}
+
+.invariant-label {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.invariant-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+    overflow-x: auto;
+}
+
+
+/* =============================================================================
+   7. СОБСТВЕННЫЕ ВЕКТОРЫ
+   ============================================================================= */
+.eigen-vectors-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.eigen-vector-item {
+    padding: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    transition: border-color var(--dur-fast), box-shadow var(--dur-fast);
+}
+
+.eigen-vector-item:hover {
+    border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+    box-shadow: 0 4px 12px -6px var(--accent-glow);
+}
+
+.eigen-vector-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.eigen-vector-head .eigen-value-lambda {
+    min-width: auto;
+}
+
+.eigen-vector-mults {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-size: 12px;
+    color: var(--text-dim);
+    font-weight: 600;
+}
+
+.eigen-vector-mults b {
+    color: var(--accent);
+    font-weight: 700;
+}
+
+.eigen-vector-basis {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.eigen-vector-basis-item {
+    padding: 10px 14px;
+    background: color-mix(in srgb, var(--accent) 4%, transparent);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow-x: auto;
+    font-size: 14px;
+    color: var(--text);
+    text-align: center;
+}
+
+.eigen-vector-empty {
+    padding: 12px;
+    font-size: 13px;
+    color: var(--text-dim);
+    text-align: center;
+    background: color-mix(in srgb, var(--accent) 4%, transparent);
+    border: 1px dashed color-mix(in srgb, var(--accent) 20%, transparent);
+    border-radius: var(--radius-sm);
+    margin: 0;
+}
+
+
+/* =============================================================================
+   8. ДИАГОНАЛИЗИРУЕМОСТЬ
+   ============================================================================= */
+.eigen-diag {
+    padding: 16px 18px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+}
+
+.eigen-diag.is-yes {
+    background: color-mix(in srgb, #10B981 8%, transparent);
+    border-color: color-mix(in srgb, #10B981 25%, transparent);
+}
+
+.eigen-diag.is-no {
+    background: color-mix(in srgb, #F59E0B 8%, transparent);
+    border-color: color-mix(in srgb, #F59E0B 25%, transparent);
+}
+
+.eigen-diag-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.eigen-diag-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: color-mix(in srgb, #10B981 20%, transparent);
+    color: #10B981;
+    font-weight: 800;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.eigen-diag.is-no .eigen-diag-icon {
+    background: color-mix(in srgb, #F59E0B 20%, transparent);
+    color: #F59E0B;
+}
+
+.eigen-diag-text {
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--text-dim);
+    margin: 0;
+}
+
+
+/* =============================================================================
+   9. СКЕЛЕТОН ЗАГРУЗКИ
+   ============================================================================= */
+.skeleton {
+    background: linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--accent) 6%, transparent) 0%,
+        color-mix(in srgb, var(--accent) 12%, transparent) 50%,
+        color-mix(in srgb, var(--accent) 6%, transparent) 100%
+    );
+    background-size: 200% 100%;
+    animation: skeletonShimmer 1.5s ease-in-out infinite;
+    border-radius: var(--radius-sm);
+}
+
+.skeleton-line {
+    height: 18px;
+    width: 100%;
+    margin-bottom: 8px;
+}
+
+.skeleton-line.short {
+    width: 60%;
+}
+
+@keyframes skeletonShimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+
+/* =============================================================================
+   10. СПРАВКА
+   ============================================================================= */
+.section--eigen-info {
+    padding: 88px 0 40px;
+}
+
+.section--examples {
+    padding: 40px 0 96px;
+}
+
+.eigen-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.eigen-info-card {
+    padding: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.03),
+        0 4px 16px -4px var(--accent-glow);
+    transition:
+        transform var(--dur-base) var(--ease-out),
+        box-shadow var(--dur-base),
+        border-color var(--dur-base);
+}
+
+.eigen-info-card:hover {
+    transform: translateY(-4px);
+    border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+    box-shadow: 0 20px 40px -16px var(--accent-glow);
+}
+
+.eigen-info-icon {
+    width: 48px;
+    height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    border-radius: var(--radius-md);
+    margin-bottom: 16px;
+}
+
+.eigen-info-icon .ml-icon,
+.eigen-info-icon svg {
+    width: 22px;
+    height: 22px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+}
+
+.eigen-info-icon--violet  { background: linear-gradient(135deg, #8B5CF6, #EC4899); box-shadow: 0 8px 18px -6px rgba(139, 92, 246, 0.5); }
+.eigen-info-icon--blue    { background: linear-gradient(135deg, #3B82F6, #06B6D4); box-shadow: 0 8px 18px -6px rgba(59, 130, 246, 0.5); }
+.eigen-info-icon--emerald { background: linear-gradient(135deg, #10B981, #059669); box-shadow: 0 8px 18px -6px rgba(16, 185, 129, 0.5); }
+.eigen-info-icon--amber   { background: linear-gradient(135deg, #F59E0B, #EF4444); box-shadow: 0 8px 18px -6px rgba(245, 158, 11, 0.5); }
+
+.eigen-info-card h3 {
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    margin: 0 0 10px;
+    color: var(--text);
+}
+
+.eigen-info-card p {
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--text-dim);
+    margin: 0 0 10px;
+}
+
+.eigen-info-card p:last-child { margin-bottom: 0; }
+
+.eigen-info-card strong { color: var(--text); font-weight: 700; }
+
+.eigen-info-formula {
+    padding: 12px 14px;
+    margin: 10px 0;
+    background: color-mix(in srgb, var(--accent) 5%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent) 12%, transparent);
+    border-radius: var(--radius-sm);
+    text-align: center;
+    font-size: 14px;
+    color: var(--text);
+    overflow-x: auto;
+}
+
+.eigen-info-list {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.eigen-info-list li {
+    position: relative;
+    padding-left: 20px;
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--text-dim);
+}
+
+.eigen-info-list li::before {
+    content: "";
+    position: absolute;
+    left: 4px;
+    top: 8px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+}
+
+
+/* =============================================================================
+   11. ПРИМЕРЫ
+   ============================================================================= */
+.examples-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+.example-card {
+    text-align: left;
+    padding: 18px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition:
+        transform var(--dur-base) var(--ease-out),
+        border-color var(--dur-base),
+        box-shadow var(--dur-base);
+    color: inherit;
+    font: inherit;
+}
+
+.example-card:hover {
+    transform: translateY(-4px);
+    border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+    box-shadow: 0 20px 40px -16px var(--accent-glow);
+}
+
+.example-card-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    color: var(--text);
+}
+
+.example-card-head strong {
+    font-size: 14px;
+    font-weight: 700;
+    flex: 1;
+}
+
+.example-card-head .ml-icon,
+.example-card-head svg {
+    color: var(--accent);
+    transition: transform var(--dur-fast);
+    flex-shrink: 0;
+    width: 14px;
+    height: 14px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+}
+
+.example-card:hover .example-card-head .ml-icon,
+.example-card:hover .example-card-head svg {
+    transform: translateX(4px);
+}
+
+.example-card-icon {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    color: var(--accent);
+    border-radius: 9px;
+    flex-shrink: 0;
+}
+
+.example-card-icon .ml-icon,
+.example-card-icon svg {
+    width: 16px;
+    height: 16px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+}
+
+.example-card-icon--violet {
+    background: color-mix(in srgb, #8B5CF6 12%, transparent);
+    color: #8B5CF6;
+}
+
+.example-card-icon--blue {
+    background: color-mix(in srgb, #3B82F6 12%, transparent);
+    color: #3B82F6;
+}
+
+.example-card p {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin: 0;
+    line-height: 1.55;
+}
+
+
+/* =============================================================================
+   12. АДАПТИВ
+   ============================================================================= */
+@media (max-width: 992px) {
+    .section--eigen-info { padding: 64px 0 32px; }
+    .section--examples { padding: 32px 0 64px; }
+}
+
+@media (max-width: 640px) {
+    .matrix-input-head {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .matrix-input-tools { width: 100%; }
+
+    .eigen-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .eigen-op-tabs {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding-bottom: 4px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .eigen-op { flex-shrink: 0; }
+
+    .eigen-buttons {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .eigen-buttons .btn { width: 100%; justify-content: center; }
+
+    .eigen-info-grid,
+    .examples-grid { grid-template-columns: 1fr; }
+
+    .result-block[data-eigen-result] { padding: 16px; }
+
+    .eigen-value-item { padding: 10px 12px; }
+    .eigen-vector-item { padding: 12px; }
+    .eigen-charpoly { padding: 12px 14px; }
+    .eigen-charpoly-row { gap: 8px; }
+    .eigen-charpoly-label { min-width: 52px; font-size: 11.5px; }
+}
+</style>
+{% endblock %}
+
+
+{% block content %}
+
+<!-- ================================================================
+     Заголовок
+     ================================================================ -->
+<section class="page-head">
+    <div class="container">
+        <nav class="breadcrumbs" aria-label="Навигационная цепочка">
+            <a href="{% url 'matrix_app:home' %}">Главная</a>
+            <span class="breadcrumbs-sep">/</span>
+            <span aria-current="page">Спектр</span>
+        </nav>
+        <div class="page-head-row">
+            <div>
+                <h1 class="page-title">Спектр матрицы</h1>
+                <p class="page-subtitle">
+                    Характеристический многочлен $\det(A - \lambda I)$,
+                    собственные значения с кратностями, собственные векторы
+                    и проверка диагонализируемости.
+                </p>
+            </div>
+            <div class="page-head-actions">
+                <a href="#eigen-info" class="btn btn-soft btn-sm">
+                    {% icon "book-open" size=14 %}
+                    <span>О спектре</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ================================================================
+     Рабочая область
+     ================================================================ -->
+<section class="calc-workspace">
+    <div class="container eigen-layout">
+
+        <!-- ========================================================
+             Матрица A
+             ======================================================== -->
+        <div class="matrix-input-card" data-matrix-card="a">
+            <div class="matrix-input-head">
+                <div class="matrix-input-title">
+                    <span class="matrix-letter" data-matrix-letter aria-hidden="true">A</span>
+                    <h2>Матрица <span data-matrix-label>A</span></h2>
+                    <span class="matrix-shape-badge" data-matrix-shape-label="a">3 × 3</span>
+                </div>
+                <div class="matrix-input-tools">
+                    <div class="mini-size">
+                        <span>Размер</span>
+                        <button type="button" class="size-btn size-btn--mini"
+                                data-size-decr-a-rows aria-label="Уменьшить размер">−</button>
+                        <input type="number" class="size-input size-input--mini"
+                               value="3" min="1" max="{{ MAX_MATRIX_ROWS }}"
+                               data-a-rows data-n-input
+                               aria-label="Размер матрицы">
+                        <button type="button" class="size-btn size-btn--mini"
+                                data-size-incr-a-rows aria-label="Увеличить размер">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="matrix-input-body">
+                <div class="matrix-scroll">
+                    <div class="matrix-input-grid"
+                         id="matrix-a-input"
+                         data-matrix-input
+                         data-rows="3"
+                         data-cols="3"></div>
+                </div>
+                <p class="matrix-input-hint">
+                    <strong>Важно:</strong> для спектрального анализа матрица
+                    должна быть квадратной.
+                </p>
+            </div>
+
+            <div class="matrix-input-footer matrix-input-footer--compact">
+                <div class="matrix-input-chips">
+                    <button type="button" class="chip chip--button"
+                            data-matrix-action="zero" data-matrix-target="a">
+                        {% icon "zero-matrix" size=14 %}<span>Нули</span>
+                    </button>
+                    <button type="button" class="chip chip--button"
+                            data-matrix-action="identity" data-matrix-target="a">
+                        {% icon "identity" size=14 %}<span>Единичная</span>
+                    </button>
+                    <button type="button" class="chip chip--button"
+                            data-matrix-action="symmetric" data-matrix-target="a">
+                        {% icon "check-badge" size=14 %}<span>Симметричная</span>
+                    </button>
+                    <button type="button" class="chip chip--button"
+                            data-matrix-action="random" data-matrix-target="a">
+                        {% icon "sparkles" size=14 %}<span>Случайная</span>
+                    </button>
+                    <button type="button" class="chip chip--button"
+                            data-matrix-action="transpose" data-matrix-target="a">
+                        {% icon "transpose" size=14 %}<span>Трансп.</span>
+                    </button>
+                    <button type="button" class="chip chip--button"
+                            data-matrix-action="copy" data-matrix-target="a">
+                        {% icon "copy" size=14 %}<span>Копировать</span>
+                    </button>
+                    <button type="button" class="chip chip--button"
+                            data-matrix-action="paste" data-matrix-target="a">
+                        {% icon "clipboard" size=14 %}<span>Вставить</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Операции спектра -->
+            <div class="eigen-controls">
+                <div class="eigen-op-tabs" role="tablist" aria-label="Операции спектра">
+                    <button type="button" class="eigen-op is-active"
+                            data-eigen-op="eigenvalues"
+                            role="tab" aria-selected="true">
+                        <span class="eigen-op-symbol" aria-hidden="true">{% icon "lambda" size=16 %}</span>
+                        <span class="eigen-op-label">Собственные значения</span>
+                    </button>
+                    <button type="button" class="eigen-op"
+                            data-eigen-op="eigenvectors"
+                            role="tab" aria-selected="false">
+                        <span class="eigen-op-symbol" aria-hidden="true">{% icon "vector" size=16 %}</span>
+                        <span class="eigen-op-label">Собственные векторы</span>
+                    </button>
+                    <button type="button" class="eigen-op"
+                            data-eigen-op="char_poly"
+                            role="tab" aria-selected="false">
+                        <span class="eigen-op-symbol" aria-hidden="true">{% icon "sigma" size=16 %}</span>
+                        <span class="eigen-op-label">Характеристический многочлен</span>
+                    </button>
+                    <button type="button" class="eigen-op"
+                            data-eigen-op="full"
+                            role="tab" aria-selected="false">
+                        <span class="eigen-op-symbol" aria-hidden="true">{% icon "check-badge" size=16 %}</span>
+                        <span class="eigen-op-label">Полный анализ</span>
+                    </button>
+                </div>
+
+                <div class="eigen-buttons">
+                    <button type="button" class="btn btn-primary" data-eigen-run>
+                        {% icon "arrow-right" size=16 %}
+                        <span>Найти спектр</span>
+                    </button>
+                    <button type="button" class="btn btn-ghost" data-eigen-reset>
+                        {% icon "trash" size=14 %}
+                        <span>Очистить</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- ========================================================
+             Результат (5 секций)
+             ======================================================== -->
+        <div class="result-block"
+             id="eigen-result"
+             data-eigen-result
+             hidden>
+
+            <section class="result-section result-section--task">
+                <header class="result-section-head">
+                    <span class="result-section-number">1</span>
+                    <h3 class="result-section-title">Задание</h3>
+                </header>
+                <div class="result-section-body">
+                    <p class="result-task-text" data-eigen-task-text></p>
+                    <div class="result-task-formula" data-eigen-task-formula></div>
+                </div>
+            </section>
+
+            <section class="result-section" data-eigen-charpoly hidden>
+                <header class="result-section-head">
+                    <span class="result-section-number">2</span>
+                    <h3 class="result-section-title">Характеристический многочлен</h3>
+                </header>
+                <div class="result-section-body">
+                    <div class="eigen-charpoly" data-eigen-charpoly-body></div>
+                </div>
+            </section>
+
+            <section class="result-section" data-eigen-values hidden>
+                <header class="result-section-head">
+                    <span class="result-section-number">3</span>
+                    <h3 class="result-section-title">Собственные значения</h3>
+                </header>
+                <div class="result-section-body">
+                    <div class="eigen-values-list" data-eigen-values-body></div>
+                    <div class="eigen-invariants">
+                        <div class="invariant-item">
+                            <span class="invariant-label">Сумма λᵢ (след)</span>
+                            <span class="invariant-value" data-eigen-trace></span>
+                        </div>
+                        <div class="invariant-item">
+                            <span class="invariant-label">Произведение λᵢ (det)</span>
+                            <span class="invariant-value" data-eigen-det></span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="result-section" data-eigen-vectors hidden>
+                <header class="result-section-head">
+                    <span class="result-section-number">4</span>
+                    <h3 class="result-section-title">Собственные векторы</h3>
+                </header>
+                <div class="result-section-body">
+                    <div class="eigen-vectors-list" data-eigen-vectors-body></div>
+                </div>
+            </section>
+
+            <section class="result-section" data-eigen-diagonalizable hidden>
+                <header class="result-section-head">
+                    <span class="result-section-number">5</span>
+                    <h3 class="result-section-title">Диагонализируемость</h3>
+                </header>
+                <div class="result-section-body">
+                    <div class="eigen-diag" data-eigen-diag-body></div>
+                </div>
+            </section>
+
+            <div class="result-error" data-eigen-error hidden>
+                <h4 class="result-error-title">Не удалось найти спектр</h4>
+                <p class="result-error-message" data-eigen-error-message></p>
+            </div>
+        </div>
+
+        <!-- Заглушка -->
+        <div class="calc-placeholder" data-eigen-placeholder>
+            <div class="calc-placeholder-icon" aria-hidden="true">
+                {% icon "lambda" size=48 %}
+            </div>
+            <h3>Результат появится здесь</h3>
+            <p>
+                Введите квадратную матрицу, выберите операцию спектра
+                и нажмите <b>«Найти спектр»</b>.
+            </p>
+            <div class="calc-placeholder-tips">
+                <div class="calc-placeholder-tip">
+                    <span class="calc-placeholder-tip-num">1</span>
+                    <span>Введите матрицу</span>
+                </div>
+                <div class="calc-placeholder-tip">
+                    <span class="calc-placeholder-tip-num">2</span>
+                    <span>Выберите операцию</span>
+                </div>
+                <div class="calc-placeholder-tip">
+                    <span class="calc-placeholder-tip-num">3</span>
+                    <span>Нажмите «Найти спектр»</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+
+<!-- ================================================================
+     Справочная информация
+     ================================================================ -->
+<section class="section section--eigen-info" id="eigen-info">
+    <div class="container">
+        <header class="section-head">
+            <h2 class="section-title">Что такое собственные значения?</h2>
+            <p class="section-subtitle">
+                Понимание спектра — ключ к анализу линейных преобразований.
+            </p>
+        </header>
+
+        <div class="eigen-info-grid">
+
+            <article class="eigen-info-card">
+                <div class="eigen-info-icon eigen-info-icon--violet">
+                    {% icon "lambda" size=22 %}
+                </div>
+                <h3>Определение</h3>
+                <p>
+                    Число $\lambda$ называется <strong>собственным значением</strong>
+                    матрицы $A$, если существует ненулевой вектор $v$, такой что
+                </p>
+                <div class="eigen-info-formula">$$A v = \lambda v$$</div>
+                <p>Вектор $v$ при этом называется <strong>собственным вектором</strong>, отвечающим $\lambda$.</p>
+            </article>
+
+            <article class="eigen-info-card">
+                <div class="eigen-info-icon eigen-info-icon--blue">
+                    {% icon "determinant" size=22 %}
+                </div>
+                <h3>Как находятся</h3>
+                <p>Из характеристического уравнения</p>
+                <div class="eigen-info-formula">$$\det(A - \lambda I) = 0$$</div>
+                <p>Это многочлен степени $n$ относительно $\lambda$, его корни — собственные значения матрицы $n \times n$.</p>
+            </article>
+
+            <article class="eigen-info-card">
+                <div class="eigen-info-icon eigen-info-icon--emerald">
+                    {% icon "matrix-grid" size=22 %}
+                </div>
+                <h3>Кратности</h3>
+                <p><strong>Алгебраическая кратность</strong> — кратность $\lambda$ как корня характеристического многочлена.</p>
+                <p><strong>Геометрическая кратность</strong> — размерность собственного подпространства $\ker(A - \lambda I)$.</p>
+                <p>Всегда: геометрическая $\le$ алгебраическая.</p>
+            </article>
+
+            <article class="eigen-info-card">
+                <div class="eigen-info-icon eigen-info-icon--amber">
+                    {% icon "sparkles" size=22 %}
+                </div>
+                <h3>Смысл и применения</h3>
+                <p>Собственные значения показывают, во сколько раз преобразование растягивает векторы вдоль собственных направлений.</p>
+                <ul class="eigen-info-list">
+                    <li>Устойчивость динамических систем</li>
+                    <li>Метод главных компонент (PCA)</li>
+                    <li>Квантовая механика, теория колебаний</li>
+                    <li>Марковские цепи, PageRank</li>
+                </ul>
+            </article>
+
+        </div>
+    </div>
+</section>
+
+
+<!-- ================================================================
+     Примеры
+     ================================================================ -->
+<section class="section section--examples">
+    <div class="container">
+        <header class="section-head section-head--compact">
+            <h2 class="section-title">Примеры для спектра</h2>
+        </header>
+
+        <div class="examples-grid">
+            <button type="button" class="example-card" data-load-example="matrix_2x2">
+                <div class="example-card-head">
+                    <span class="example-card-icon">
+                        {% icon "matrix-grid" size=16 %}
+                    </span>
+                    <strong>Матрица 2×2</strong>
+                    {% icon "arrow-right" size=14 %}
+                </div>
+                <p>Простой пример с вещественными собственными значениями.</p>
+            </button>
+
+            <button type="button" class="example-card" data-load-example="symmetric">
+                <div class="example-card-head">
+                    <span class="example-card-icon example-card-icon--violet">
+                        {% icon "check-badge" size=16 %}
+                    </span>
+                    <strong>Симметричная 3×3</strong>
+                    {% icon "arrow-right" size=14 %}
+                </div>
+                <p>Спектр вещественный, ортогональный базис собственных векторов.</p>
+            </button>
+
+            <button type="button" class="example-card" data-load-example="matrix_3x3">
+                <div class="example-card-head">
+                    <span class="example-card-icon example-card-icon--blue">
+                        {% icon "matrix-grid" size=16 %}
+                    </span>
+                    <strong>Матрица 3×3</strong>
+                    {% icon "arrow-right" size=14 %}
+                </div>
+                <p>Общий случай: характеристический многочлен третьей степени.</p>
+            </button>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+
+{% block extra_scripts %}
+{{ block.super }}
+<script src="{% static 'matrix_app/js/calculator.js' %}"></script>
+<script src="{% static 'matrix_app/js/eigen.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var placeholder = document.querySelector('[data-eigen-placeholder]');
+    var resultBlock = document.querySelector('[data-eigen-result]');
+    if (placeholder && resultBlock) {
+        var observer = new MutationObserver(function () {
+            placeholder.hidden = !resultBlock.hidden;
+        });
+        observer.observe(resultBlock, { attributes: true, attributeFilter: ['hidden'] });
+    }
+
+    var infoLink = document.querySelector('[href="#eigen-info"]');
+    if (infoLink) {
+        infoLink.addEventListener('click', function (e) {
+            var target = document.querySelector('#eigen-info');
+            if (!target) return;
+            e.preventDefault();
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            history.replaceState(null, '', '#eigen-info');
+        });
+    }
+});
+</script>
+{% endblock %}

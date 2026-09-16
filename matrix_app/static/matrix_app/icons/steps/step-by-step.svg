@@ -1,0 +1,193 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" fill="none"
+     role="img" aria-label="Пошаговое решение"
+     class="ml-feature-svg ml-feature-svg--step-by-step"
+     preserveAspectRatio="xMidYMid meet"
+     font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">
+
+  <defs>
+    <radialGradient id="st-core" cx="0.38" cy="0.32" r="0.78">
+      <stop offset="0" stop-color="#A7F3D0">
+        <animate attributeName="stop-color"
+                 values="#A7F3D0;#6EE7B7;#34D399;#A7F3D0"
+                 dur="14s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="0.45" stop-color="#34D399">
+        <animate attributeName="stop-color"
+                 values="#34D399;#10B981;#059669;#34D399"
+                 dur="14s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="1" stop-color="#064E3B"/>
+    </radialGradient>
+
+    <radialGradient id="st-glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"    stop-color="#FFFFFF" stop-opacity="1"/>
+      <stop offset="0.35" stop-color="#D1FAE5" stop-opacity="0.7"/>
+      <stop offset="0.7"  stop-color="#6EE7B7" stop-opacity="0.3"/>
+      <stop offset="1"    stop-color="#10B981" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="st-hl" cx="0.34" cy="0.24" r="0.72">
+      <stop offset="0"   stop-color="#FFFFFF" stop-opacity="0.95"/>
+      <stop offset="0.4" stop-color="#FFFFFF" stop-opacity="0.18"/>
+      <stop offset="1"   stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="st-orbit" x1="0" y1="0" x2="96" y2="96"
+                    gradientUnits="userSpaceOnUse">
+      <stop offset="0"   stop-color="#A7F3D0"/>
+      <stop offset="0.5" stop-color="#34D399"/>
+      <stop offset="1"   stop-color="#059669"/>
+    </linearGradient>
+
+    <linearGradient id="st-orbit-2" x1="96" y1="0" x2="0" y2="96"
+                    gradientUnits="userSpaceOnUse">
+      <stop offset="0"   stop-color="#FCD34D"/>
+      <stop offset="1"   stop-color="#10B981"/>
+    </linearGradient>
+
+    <linearGradient id="st-text" x1="0" y1="0" x2="96" y2="0"
+                    gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#047857">
+        <animate attributeName="stop-color"
+                 values="#047857;#10B981;#6EE7B7;#047857"
+                 dur="8s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="1" stop-color="#10B981">
+        <animate attributeName="stop-color"
+                 values="#10B981;#6EE7B7;#A7F3D0;#10B981"
+                 dur="8s" repeatCount="indefinite"/>
+      </stop>
+    </linearGradient>
+
+    <radialGradient id="st-spark" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"   stop-color="#FFFFFF"/>
+      <stop offset="0.4" stop-color="#A7F3D0"/>
+      <stop offset="1"   stop-color="#10B981" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="st-spark-warm" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"   stop-color="#FFFFFF"/>
+      <stop offset="0.4" stop-color="#FDE68A"/>
+      <stop offset="1"   stop-color="#F59E0B" stop-opacity="0"/>
+    </radialGradient>
+
+    <filter id="st-spark-glow" x="-400%" y="-400%" width="900%" height="900%">
+      <feGaussianBlur stdDeviation="1.8"/>
+    </filter>
+    <filter id="st-core-shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2.2"/>
+      <feOffset dx="0" dy="1.6"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.38"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="st-orbit-glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1"/>
+    </filter>
+
+    <clipPath id="st-core-clip">
+      <circle cx="48" cy="46" r="13"/>
+    </clipPath>
+  </defs>
+
+  <!-- Фоновый ореол -->
+  <circle cx="48" cy="48" r="46" fill="url(#st-glow)" opacity="0.16">
+    <animate attributeName="r" values="46;48;46" dur="6s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.16;0.22;0.16" dur="6s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Орбиты -->
+  <g transform="translate(48 46)">
+    <g>
+      <animateTransform attributeName="transform" type="rotate"
+                        from="0 0 0" to="360 0 0" dur="24s" repeatCount="indefinite"/>
+      <ellipse cx="0" cy="0" rx="32" ry="9.5"
+               fill="none" stroke="url(#st-orbit)"
+               stroke-width="1.5" opacity="0.85"
+               transform="rotate(-28)"/>
+      <ellipse cx="0" cy="0" rx="32" ry="9.5"
+               fill="none" stroke="#34D399" stroke-width="3.2"
+               opacity="0.14" filter="url(#st-orbit-glow)"
+               transform="rotate(-28)"/>
+      <g transform="rotate(-28)">
+        <circle cx="32" cy="0" r="2.4"
+                fill="url(#st-spark)" filter="url(#st-spark-glow)">
+          <animate attributeName="r" values="2.4;3;2.4" dur="2.4s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="32" cy="0" r="1.05" fill="#FFFFFF"/>
+      </g>
+    </g>
+
+    <g>
+      <animateTransform attributeName="transform" type="rotate"
+                        from="360 0 0" to="0 0 0" dur="34s" repeatCount="indefinite"/>
+      <ellipse cx="0" cy="0" rx="30" ry="8"
+               fill="none" stroke="url(#st-orbit-2)"
+               stroke-width="0.9" opacity="0.55"
+               transform="rotate(38)"/>
+      <g transform="rotate(38)">
+        <circle cx="-30" cy="0" r="1.4"
+                fill="url(#st-spark-warm)" filter="url(#st-spark-glow)">
+          <animate attributeName="r" values="1.4;1.9;1.4" dur="3s" repeatCount="indefinite"/>
+        </circle>
+      </g>
+    </g>
+  </g>
+
+  <!-- Ядро: сфера с тремя шагами и галочкой -->
+  <g filter="url(#st-core-shadow)">
+    <circle cx="48" cy="46" r="17.5" fill="url(#st-glow)" opacity="0.5">
+      <animate attributeName="r" values="17.5;19.5;17.5" dur="5s" repeatCount="indefinite"/>
+    </circle>
+
+    <circle cx="48" cy="46" r="13" fill="url(#st-core)"/>
+    <circle cx="48" cy="46" r="13" fill="url(#st-hl)"/>
+    <circle cx="48" cy="46" r="12.5" fill="none"
+            stroke="#FFFFFF" stroke-opacity="0.4" stroke-width="0.7"/>
+
+    <g clip-path="url(#st-core-clip)">
+      <!-- Вертикальная линия-связка шагов -->
+      <path d="M43 52 L43 40"
+            stroke="#064E3B" stroke-opacity="0.45" stroke-width="0.9"
+            stroke-dasharray="1.4 1.8" stroke-linecap="round"/>
+
+      <!-- Три шага -->
+      <circle cx="43" cy="52" r="2.1" fill="#FFFFFF"/>
+      <circle cx="43" cy="46" r="2.1" fill="#FFFFFF"/>
+      <circle cx="43" cy="40" r="2.1" fill="#FFFFFF"/>
+
+      <!-- Галочка справа от верхнего шага -->
+      <path d="M48 40 L50.5 43 L55 37"
+            stroke="#FFFFFF" stroke-width="1.8"
+            stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+      <!-- Тонкие линии шагов -->
+      <path d="M46 52 H53" stroke="#064E3B" stroke-opacity="0.55" stroke-width="0.8" stroke-linecap="round"/>
+      <path d="M46 46 H51" stroke="#064E3B" stroke-opacity="0.55" stroke-width="0.8" stroke-linecap="round"/>
+      <path d="M46 40 H47.5" stroke="#064E3B" stroke-opacity="0.55" stroke-width="0.8" stroke-linecap="round"/>
+    </g>
+
+    <!-- Пульс ядра -->
+    <circle cx="48" cy="46" r="2.4" fill="url(#st-glow)" opacity="0.85">
+      <animate attributeName="r" values="2.4;3.2;2.4" dur="3.6s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <!-- Частицы -->
+  <circle cx="14" cy="14" r="1.3" fill="url(#st-spark-warm)" filter="url(#st-spark-glow)">
+    <animate attributeName="opacity" values="1;0.4;1" dur="4s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="82" cy="18" r="1.4" fill="url(#st-spark)" filter="url(#st-spark-glow)">
+    <animate attributeName="opacity" values="0.9;0.3;0.9" dur="5s" begin="0.8s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="84" cy="80" r="1.2" fill="url(#st-spark)" filter="url(#st-spark-glow)">
+    <animate attributeName="opacity" values="1;0.4;1" dur="4.5s" begin="1.2s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="12" cy="82" r="1" fill="url(#st-spark-warm)" filter="url(#st-spark-glow)">
+    <animate attributeName="opacity" values="0.7;0.2;0.7" dur="3.5s" begin="0.4s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Подпись внизу -->
+  <text x="48" y="86" font-size="8" font-weight="700"
+        letter-spacing="0.06em" text-anchor="middle"
+        fill="url(#st-text)">пошагово</text>
+</svg>

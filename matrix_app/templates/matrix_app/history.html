@@ -1,0 +1,643 @@
+{% extends "matrix_app/base.html" %}
+{% load static matrix_icons %}
+
+{% block title %}История вычислений{% endblock %}
+
+{% block meta_description %}
+История вычислений MatrixLab: последние операции, быстрый доступ
+к результату, повтор и удаление записей.
+{% endblock %}
+
+
+{% block extra_head %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'matrix_app/css/calculator.css' %}">
+
+<style>
+/* =============================================================================
+   История вычислений — только специфика страницы.
+   -----------------------------------------------------------------------------
+   Из main.css / calculator.css уже приходят:
+     .page-head, .breadcrumbs, .page-title, .page-subtitle, .page-head-actions,
+     .btn, .btn-ghost, .btn-primary, .btn-sm,
+     .modal, .modal-backdrop, .modal-dialog, .modal-head, .modal-body,
+     .modal-close, .icon-btn, .icon-btn--danger.
+
+   Здесь — только .history-* и уточнения модалки.
+   ============================================================================= */
+
+
+/* =============================================================================
+   1. РАСКЛАДКА
+   ============================================================================= */
+.history-layout {
+    padding: 40px 0 96px;
+}
+
+
+/* =============================================================================
+   2. СТАТИСТИКА
+   ============================================================================= */
+.history-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.history-stat {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 22px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-xs);
+    transition:
+        transform var(--dur-base) var(--ease-out),
+        box-shadow var(--dur-base),
+        border-color var(--dur-base);
+}
+
+.history-stat:hover {
+    transform: translateY(-3px);
+    border-color: var(--accent);
+    box-shadow: var(--shadow);
+}
+
+.history-stat-icon {
+    width: 48px;
+    height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent-soft);
+    border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+    border-radius: var(--radius-md);
+    color: var(--accent);
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.history-stat-icon .ml-icon,
+.history-stat-icon svg {
+    width: 22px;
+    height: 22px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+}
+
+.history-stat--total .history-stat-icon {
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 8px 18px -6px var(--accent-glow);
+}
+
+.history-stat-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.history-stat-value {
+    font-size: var(--fs-xl);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.15;
+}
+
+.history-stat-label {
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    color: var(--text-dim);
+}
+
+
+/* =============================================================================
+   3. СПИСОК ИСТОРИИ
+   ============================================================================= */
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.history-item {
+    display: grid;
+    grid-template-columns: 96px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 20px;
+    padding: 18px 22px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-xs);
+    transition:
+        transform var(--dur-base) var(--ease-out),
+        box-shadow var(--dur-base),
+        border-color var(--dur-base),
+        background-color var(--dur-base);
+}
+
+.history-item:hover {
+    transform: translateY(-3px);
+    border-color: var(--accent);
+    box-shadow: var(--shadow);
+}
+
+.history-item-time {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding-right: 20px;
+    border-right: 1px solid var(--border);
+    min-width: 0;
+}
+
+.history-time-date {
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    color: var(--text-dim);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.history-time-clock {
+    font-size: var(--fs-lg);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.history-item-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+}
+
+.history-item-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.history-op-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 12px 5px 10px;
+    background: var(--accent-soft);
+    border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+    border-radius: var(--radius-full);
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    color: var(--accent);
+    white-space: nowrap;
+}
+
+.history-op-badge .ml-icon,
+.history-op-badge svg {
+    width: 12px;
+    height: 12px;
+    display: block;
+    flex-shrink: 0;
+    stroke: currentColor;
+    fill: none;
+}
+
+.history-shape {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    background: color-mix(in srgb, var(--accent-5) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent-5) 30%, transparent);
+    border-radius: var(--radius-full);
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--accent-5);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.history-shape .ml-icon,
+.history-shape svg {
+    width: 11px;
+    height: 11px;
+    display: block;
+    flex-shrink: 0;
+    stroke: currentColor;
+    fill: none;
+}
+
+.history-item-preview {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    min-width: 0;
+}
+
+.history-preview-in,
+.history-preview-out {
+    display: inline-block;
+    max-width: 100%;
+    padding: 5px 12px;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.history-preview-in {
+    background: var(--accent-soft);
+    border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+    color: var(--text-dim);
+}
+
+.history-preview-out {
+    background: color-mix(in srgb, var(--success) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--success) 25%, transparent);
+    color: var(--success);
+    font-weight: 700;
+}
+
+.history-preview-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent);
+    flex-shrink: 0;
+    opacity: 0.7;
+}
+
+.history-preview-arrow .ml-icon,
+.history-preview-arrow svg {
+    width: 12px;
+    height: 12px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+}
+
+.history-item-actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.history-item-actions .icon-btn {
+    width: 34px;
+    height: 34px;
+}
+
+
+/* =============================================================================
+   4. ПУСТАЯ ИСТОРИЯ
+   ============================================================================= */
+.history-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 72px 24px;
+    background: var(--surface);
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius-xl);
+}
+
+.history-empty-icon {
+    width: 96px;
+    height: 96px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    background: var(--accent-soft);
+    border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+    border-radius: var(--radius-xl);
+    color: var(--accent);
+}
+
+.history-empty-icon .ml-icon,
+.history-empty-icon svg {
+    width: 48px;
+    height: 48px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+}
+
+.history-empty h2 {
+    font-size: clamp(20px, 2.4vw, 26px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0 0 10px;
+    color: var(--text);
+}
+
+.history-empty p {
+    font-size: var(--fs-base);
+    line-height: var(--lh-loose);
+    color: var(--text-dim);
+    margin: 0 0 24px;
+    max-width: 420px;
+}
+
+
+/* =============================================================================
+   5. МОДАЛКА — уточнения поверх calculator.css
+   ============================================================================= */
+.modal-dialog--lg {
+    max-width: 720px;
+}
+
+.modal-head-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.modal-head-icon {
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    color: #fff;
+    border-radius: var(--radius-sm);
+    box-shadow: 0 6px 14px -4px var(--accent-glow);
+    flex-shrink: 0;
+}
+
+.modal-head-icon .ml-icon,
+.modal-head-icon svg {
+    width: 18px;
+    height: 18px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+}
+
+
+/* =============================================================================
+   6. АДАПТИВ
+   ============================================================================= */
+@media (max-width: 992px) {
+    .history-layout { padding: 32px 0 64px; }
+}
+
+@media (max-width: 720px) {
+    .history-item {
+        grid-template-columns: 1fr;
+        gap: 14px;
+        padding: 18px;
+    }
+
+    .history-item-time {
+        flex-direction: row;
+        align-items: baseline;
+        gap: 8px;
+        padding-right: 0;
+        padding-bottom: 12px;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .history-time-clock { font-size: var(--fs-base); }
+
+    .history-item-actions {
+        justify-content: flex-end;
+        padding-top: 4px;
+        border-top: 1px dashed var(--border);
+    }
+
+    .history-item-preview { font-size: var(--fs-xs); }
+}
+
+@media (max-width: 640px) {
+    .history-stats { grid-template-columns: 1fr; }
+    .history-empty { padding: 48px 20px; }
+    .history-empty .btn-primary { width: 100%; justify-content: center; }
+}
+</style>
+{% endblock %}
+
+
+{% block content %}
+
+<section class="page-head">
+    <div class="container">
+        <nav class="breadcrumbs" aria-label="Навигационная цепочка">
+            <a href="{% url 'matrix_app:home' %}">Главная</a>
+            <span class="breadcrumbs-sep">/</span>
+            <span aria-current="page">История</span>
+        </nav>
+        <div class="page-head-row">
+            <div>
+                <h1 class="page-title">История вычислений</h1>
+                <p class="page-subtitle">
+                    Последние операции, выполненные в этом браузере. Историю
+                    можно открыть, повторить или удалить.
+                </p>
+            </div>
+            {% if history_count %}
+                <div class="page-head-actions">
+                    <button type="button"
+                            class="btn btn-ghost btn-sm"
+                            data-history-clear>
+                        {% icon "trash" size=14 %}
+                        <span>Очистить историю</span>
+                    </button>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+
+<section class="history-layout">
+    <div class="container">
+
+        {% if history_entries %}
+
+            <div class="history-stats">
+                <div class="history-stat history-stat--total">
+                    <span class="history-stat-icon" aria-hidden="true">
+                        {% icon "history" size=20 %}
+                    </span>
+                    <div class="history-stat-body">
+                        <span class="history-stat-value">{{ history_count }}</span>
+                        <span class="history-stat-label">записей</span>
+                    </div>
+                </div>
+                <div class="history-stat">
+                    <span class="history-stat-icon" aria-hidden="true">
+                        {% icon "clock" size=20 %}
+                    </span>
+                    <div class="history-stat-body">
+                        <span class="history-stat-value">
+                            {% if history_entries.0.created_at %}
+                                {{ history_entries.0.created_at|date:"H:i" }}
+                            {% else %}—{% endif %}
+                        </span>
+                        <span class="history-stat-label">последняя запись</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="history-list" data-history-list>
+                {% for entry in history_entries %}
+                    <article class="history-item"
+                             data-history-item="{{ entry.pk }}"
+                             data-history-operation="{{ entry.operation }}"
+                             data-history-date="{{ entry.created_at|date:'Y-m-d' }}">
+
+                        <div class="history-item-time">
+                            <time datetime="{{ entry.created_at|date:'c' }}">
+                                <span class="history-time-date">{{ entry.created_at|date:"d.m.Y" }}</span>
+                                <span class="history-time-clock">{{ entry.created_at|date:"H:i" }}</span>
+                            </time>
+                        </div>
+
+                        <div class="history-item-body">
+                            <div class="history-item-head">
+                                <span class="history-op-badge">
+                                    {% if entry.operation == "determinant" %}{% icon "determinant" size=12 %}
+                                    {% elif entry.operation == "inverse" %}{% icon "inverse" size=12 %}
+                                    {% elif entry.operation == "rank" %}{% icon "rank" size=12 %}
+                                    {% elif entry.operation == "rref" or entry.operation == "echelon" %}{% icon "matrix-grid" size=12 %}
+                                    {% elif entry.operation == "transpose" %}{% icon "transpose" size=12 %}
+                                    {% elif entry.operation == "trace" %}{% icon "trace" size=12 %}
+                                    {% elif entry.operation == "eigenvalues" or entry.operation == "eigenvectors" or entry.operation == "char_poly" %}{% icon "lambda" size=12 %}
+                                    {% elif entry.operation == "lu" %}{% icon "lu" size=12 %}
+                                    {% elif entry.operation == "qr" %}{% icon "qr" size=12 %}
+                                    {% elif entry.operation == "cholesky" %}{% icon "diagonal" size=12 %}
+                                    {% elif entry.operation == "diagonalize" %}{% icon "diagonalize" size=12 %}
+                                    {% elif entry.operation == "properties" %}{% icon "check-badge" size=12 %}
+                                    {% elif entry.operation == "solve_gauss" or entry.operation == "kronecker_capelli" %}{% icon "system" size=12 %}
+                                    {% elif entry.operation == "add" %}{% icon "plus" size=12 %}
+                                    {% elif entry.operation == "subtract" %}{% icon "minus" size=12 %}
+                                    {% elif entry.operation == "multiply" %}{% icon "close" size=12 %}
+                                    {% elif entry.operation == "scalar_multiply" %}{% icon "sigma" size=12 %}
+                                    {% elif entry.operation == "power" %}{% icon "sparkles" size=12 %}
+                                    {% elif entry.operation == "compare" %}{% icon "list" size=12 %}
+                                    {% else %}{% icon "matrix-grid" size=12 %}
+                                    {% endif %}
+                                    <span>{{ entry.operation_label|default:entry.get_operation_display }}</span>
+                                </span>
+                                {% if entry.matrix_shape %}
+                                    <span class="history-shape">
+                                        {% icon "square-matrix" size=11 %}
+                                        <span>{{ entry.matrix_shape }}</span>
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                            <div class="history-item-preview">
+                                {% if entry.input_preview %}
+                                    <span class="history-preview-in">{{ entry.input_preview }}</span>
+                                {% endif %}
+                                {% if entry.result_preview %}
+                                    <span class="history-preview-arrow" aria-hidden="true">
+                                        {% icon "arrow-right" size=12 %}
+                                    </span>
+                                    <span class="history-preview-out">{{ entry.result_preview }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="history-item-actions">
+                            <button type="button" class="icon-btn"
+                                    data-history-open="{{ entry.pk }}"
+                                    title="Открыть"
+                                    aria-label="Открыть запись">
+                                {% icon "eye" size=14 %}
+                            </button>
+                            <button type="button" class="icon-btn"
+                                    data-history-repeat="{{ entry.pk }}"
+                                    title="Повторить"
+                                    aria-label="Повторить операцию">
+                                {% icon "repeat" size=14 %}
+                            </button>
+                            <button type="button" class="icon-btn icon-btn--danger"
+                                    data-history-delete="{{ entry.pk }}"
+                                    title="Удалить"
+                                    aria-label="Удалить запись">
+                                {% icon "close" size=14 %}
+                            </button>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+
+        {% else %}
+            <div class="history-empty">
+                <div class="history-empty-icon" aria-hidden="true">
+                    {% icon "history" size=48 %}
+                </div>
+                <h2>История пока пуста</h2>
+                <p>Здесь появятся ваши вычисления после первого запуска.</p>
+                <a href="{% url 'matrix_app:calculator' %}" class="btn btn-primary">
+                    {% icon "calculator" size=16 %}
+                    <span>Открыть калькулятор</span>
+                </a>
+            </div>
+        {% endif %}
+
+    </div>
+</section>
+
+
+<!-- ================================================================
+     Модалка просмотра записи
+     ================================================================ -->
+<div class="modal"
+     id="history-modal"
+     data-history-modal
+     hidden>
+    <div class="modal-backdrop" data-history-modal-close></div>
+    <div class="modal-dialog modal-dialog--lg"
+         role="dialog"
+         aria-labelledby="history-modal-title"
+         aria-modal="true">
+        <header class="modal-head">
+            <div class="modal-head-title">
+                <div class="modal-head-icon" aria-hidden="true">
+                    {% icon "history" size=18 %}
+                </div>
+                <h3 id="history-modal-title" data-history-modal-title>Запись истории</h3>
+            </div>
+            <button type="button"
+                    class="modal-close"
+                    data-history-modal-close
+                    aria-label="Закрыть">
+                {% icon "close" size=16 %}
+            </button>
+        </header>
+        <div class="modal-body" data-history-modal-body></div>
+    </div>
+</div>
+
+{% endblock %}
+
+
+{% block extra_scripts %}
+{{ block.super }}
+<script src="{% static 'matrix_app/js/history.js' %}"></script>
+{% endblock %}

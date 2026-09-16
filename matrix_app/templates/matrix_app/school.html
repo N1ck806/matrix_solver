@@ -1,0 +1,524 @@
+{% extends "matrix_app/base.html" %}
+{% load static %}
+{% load matrix_icons %}
+
+{% block title %}{{ school.title }} — Применение матриц{% endblock %}
+{% block meta_description %}{{ school.subtitle }}{% endblock %}
+
+
+{% block extra_head %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'matrix_app/css/school-page.css' %}">
+<link rel="stylesheet" href="{% static 'matrix_app/css/result-block.css' %}">
+{% endblock %}
+
+
+{% block content %}
+
+<div class="school-page">
+
+<!-- ================================================================
+     Хлебные крошки
+     ================================================================ -->
+<section class="page-head">
+    <div class="container">
+        <nav class="breadcrumbs" aria-label="Навигационная цепочка">
+            <a href="{% url 'matrix_app:home' %}">Главная</a>
+            <span class="breadcrumbs-sep">/</span>
+            <a href="{% url 'matrix_app:modules' %}">Применение</a>
+            <span class="breadcrumbs-sep">/</span>
+            <span aria-current="page">{{ school.title }}</span>
+        </nav>
+    </div>
+</section>
+
+
+<!-- ================================================================
+     Hero школы
+     ================================================================ -->
+<section class="school-hero">
+    <div class="container school-hero__grid">
+
+        <div class="school-hero__emblem" aria-hidden="true">
+            {% icon school.icon size=180 %}
+        </div>
+
+        <div class="school-hero__text">
+            <span class="school-hero__kicker">
+                {% icon "modules" size=12 %}
+                <span>Школа</span>
+            </span>
+
+            <h1 class="school-hero__title">{{ school.title }}</h1>
+            <p class="school-hero__subtitle">{{ school.subtitle|safe }}</p>
+
+            {% if school_info.intro %}
+                <p class="school-hero__intro">{{ school_info.intro|safe }}</p>
+            {% endif %}
+
+            <div class="school-hero__meta">
+                <span class="school-hero__meta-item">
+                    {% icon "modules" size=13 %}
+                    <span>
+                        {{ school.directions|length }}
+                        {% with n=school.directions|length %}
+                            {% if n == 1 %}направление{% elif n < 5 %}направления{% else %}направлений{% endif %}
+                        {% endwith %}
+                    </span>
+                </span>
+                <span class="school-hero__meta-item">
+                    {% icon "sigma" size=13 %}
+                    <span>
+                        {{ school.directions|length }}
+                        {% with n=school.directions|length %}
+                            {% if n == 1 %}формула{% elif n < 5 %}формулы{% else %}формул{% endif %}
+                        {% endwith %}
+                    </span>
+                </span>
+                <span class="school-hero__meta-item">
+                    {% icon "calculator" size=13 %}
+                    <span>
+                        {{ school.directions|length }}
+                        {% with n=school.directions|length %}
+                            {% if n == 1 %}пример{% elif n < 5 %}примера{% else %}примеров{% endif %}
+                        {% endwith %}
+                    </span>
+                </span>
+            </div>
+
+            {% if school_info.highlights %}
+                <ul class="school-hero__highlights">
+                    {% for h in school_info.highlights %}
+                        <li>{{ h|safe }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+
+<!-- ================================================================
+     Рабочая область
+     ================================================================ -->
+<section class="school-layout">
+    <div class="container school-grid">
+
+        <!-- ========================================================
+             Боковое оглавление
+             ======================================================== -->
+        <aside class="school-toc" aria-label="Оглавление направлений">
+
+            <div class="school-toc__search">
+                <span class="school-toc__search-icon" aria-hidden="true">
+                    {% icon "search" size=16 %}
+                </span>
+                <input type="text"
+                       class="school-toc__search-input"
+                       placeholder="Найти направление…"
+                       data-school-search
+                       aria-label="Поиск по направлениям">
+            </div>
+
+            <h2 class="school-toc__title">
+                {% icon "modules" size=16 %}
+                <span>Направления</span>
+            </h2>
+
+            <nav class="school-toc__nav">
+                <ul class="school-toc__list">
+                    {% for direction in directions %}
+                        <li class="school-toc__item"
+                            data-school-item
+                            data-direction-title="{{ direction.title|lower }}"
+                            data-direction-tagline="{{ direction.tagline|default:''|lower }}">
+                            <a href="#{{ direction.slug }}"
+                               class="school-toc__link"
+                               data-school-link="{{ direction.slug }}">
+                                <span class="school-toc__link-icon" aria-hidden="true">
+                                    {% icon direction.icon size=14 %}
+                                </span>
+                                <span class="school-toc__link-text">
+                                    {{ direction.title }}
+                                </span>
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+
+                <div class="school-toc__empty" data-school-empty hidden>
+                    {% icon "search" size=24 %}
+                    <p>Ничего не найдено</p>
+                </div>
+            </nav>
+
+            <div class="school-toc__foot">
+                <a href="{% url 'matrix_app:modules' %}"
+                   class="school-toc__back">
+                    {% icon "arrow-left" size=14 %}
+                    <span>Все школы</span>
+                </a>
+            </div>
+        </aside>
+
+
+        <!-- ========================================================
+             Контент
+             ======================================================== -->
+        <div class="school-content">
+
+            <!-- Заголовок раздела -->
+            <header class="school-section-head">
+                <span class="school-section-kicker">Направления школы</span>
+                <h2 class="school-section-title">
+                    {% with n=directions|length %}
+                        {{ n }}
+                        {% if n == 1 %}направление{% elif n < 5 %}направления{% else %}направлений{% endif %}
+                    {% endwith %}
+                    — от теории к практике
+                </h2>
+                <p class="school-section-lead">
+                    Каждое направление — отдельная страница с теорией,
+                    формулами, условиями применимости и разобранными примерами.
+                </p>
+            </header>
+
+
+            <!-- Сетка карточек -->
+            <div class="school-directions">
+                {% for direction in directions %}
+                    <article class="direction-card"
+                             id="{{ direction.slug }}"
+                             data-direction-card
+                             data-direction-title="{{ direction.title|lower }}"
+                             data-direction-tagline="{{ direction.tagline|default:''|lower }}">
+
+                        <header class="direction-card__head">
+                            <span class="direction-card__icon" aria-hidden="true">
+                                {% icon direction.icon size=20 %}
+                            </span>
+                            <div class="direction-card__head-text">
+                                <h3 class="direction-card__title">
+                                    <a href="{% url 'matrix_app:direction_detail' school.slug direction.slug %}"
+                                       class="direction-card__title-link">
+                                        {{ direction.title }}
+                                    </a>
+                                </h3>
+                                <p class="direction-card__tagline">{{ direction.tagline|safe }}</p>
+                            </div>
+                        </header>
+
+                        <div class="direction-card__body">
+                            <p class="direction-card__description">{{ direction.description|safe }}</p>
+
+                            {% if direction.formula %}
+                                <div class="direction-card__formula">
+                                    <span class="direction-card__formula-label">
+                                        {% icon "sigma" size=12 %}
+                                        <span>Ключевая формула</span>
+                                    </span>
+                                    <span class="direction-card__formula-body">
+                                        $${{ direction.formula }}$$
+                                    </span>
+                                    {% if direction.formula_note %}
+                                        <p class="direction-card__formula-note">{{ direction.formula_note|safe }}</p>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+
+                            {% if direction.uses %}
+                                <ul class="direction-card__uses">
+                                    {% for use in direction.uses %}
+                                        <li>{{ use }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+
+                            <!-- Превью: чем наполнена страница направления -->
+                            {% if direction.content %}
+                                <div class="direction-card__preview">
+                                    {% if direction.content.theory %}
+                                        <span class="direction-card__preview-item">
+                                            {% icon "book-open" size=12 %}
+                                            <span>{{ direction.content.theory|length }} блоков теории</span>
+                                        </span>
+                                    {% endif %}
+                                    {% if direction.content.notation %}
+                                        <span class="direction-card__preview-item">
+                                            {% icon "sigma" size=12 %}
+                                            <span>{{ direction.content.notation|length }} обозначений</span>
+                                        </span>
+                                    {% endif %}
+                                    {% if direction.content.conditions %}
+                                        <span class="direction-card__preview-item">
+                                            {% icon "check-badge" size=12 %}
+                                            <span>{{ direction.content.conditions|length }} условий</span>
+                                        </span>
+                                    {% endif %}
+                                    {% if direction.content.solved_examples %}
+                                        <span class="direction-card__preview-item">
+                                            {% icon "calculator" size=12 %}
+                                            <span>{{ direction.content.solved_examples|length }} примеров</span>
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+
+                            <div class="direction-card__actions">
+                                <a href="{% url 'matrix_app:direction_detail' school.slug direction.slug %}"
+                                   class="btn btn-primary btn-sm">
+                                    {% icon "book-open" size=14 %}
+                                    <span>Открыть направление</span>
+                                </a>
+                            </div>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+
+
+            <!-- ========================================================
+                 Мини-калькулятор
+                 ======================================================== -->
+            <section class="school-calc" id="calculator">
+                <header class="school-calc__head">
+                    <span class="school-calc__kicker">Быстрый расчёт</span>
+                    <h2 class="school-calc__title">Попробуйте прямо сейчас</h2>
+                    <p class="school-calc__subtitle">
+                        Введите матрицу, выберите пресет — и получите результат
+                        с пошаговым решением.
+                    </p>
+                </header>
+
+                {% if presets %}
+                    <div class="school-calc__presets" role="tablist" aria-label="Тематические пресеты">
+                        {% for preset in presets %}
+                            <button type="button"
+                                    class="preset-btn {% if forloop.first %}is-active{% endif %}"
+                                    data-preset-choice="{{ preset.code }}"
+                                    role="tab"
+                                    aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+                                    aria-controls="school-calc-panel">
+                                <span class="preset-icon" aria-hidden="true">
+                                    {% icon preset.icon size=20 %}
+                                </span>
+                                <span class="preset-text">
+                                    <span class="preset-label">{{ preset.label }}</span>
+                                    <span class="preset-subtitle">{{ preset.subtitle }}</span>
+                                </span>
+                            </button>
+                        {% endfor %}
+                    </div>
+
+                    <div class="preset-hint" id="school-calc-panel" role="tabpanel">
+                        <span class="preset-hint-icon" aria-hidden="true">
+                            {% icon "info" size=22 %}
+                        </span>
+                        <span data-preset-hint-text>
+                            {% with first=presets|first %}
+                                {% if first %}{{ first.description }}{% endif %}
+                            {% endwith %}
+                        </span>
+                    </div>
+                {% endif %}
+
+                <div class="mini-calc">
+                    <div class="mini-calc-input">
+                        <span class="mini-calc-label">
+                            {% icon "matrix-grid" size=14 %}
+                            <span>Матрица</span>
+                        </span>
+
+                        <div class="school-matrix-frame">
+                            <div class="school-matrix-card"
+                                 data-matrix-card="a"
+                                 data-no-persist="1">
+                                <div id="school-matrix-input"
+                                     data-matrix-input
+                                     data-rows="3"
+                                     data-cols="3"
+                                     data-matrix-letter="a"
+                                     data-no-persist="1"></div>
+                            </div>
+                        </div>
+
+                        <div class="school-matrix-controls">
+                            <label class="school-matrix-size-label">
+                                {% icon "matrix-grid" size=13 %}
+                                <span>Строк:</span>
+                                <input type="number" min="1" max="10" value="3"
+                                       class="school-matrix-size-input"
+                                       data-a-rows>
+                            </label>
+                            <label class="school-matrix-size-label">
+                                {% icon "matrix-grid" size=13 %}
+                                <span>Столбцов:</span>
+                                <input type="number" min="1" max="10" value="3"
+                                       class="school-matrix-size-input"
+                                       data-a-cols>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="mini-calc-actions">
+                        <button type="button"
+                                class="btn btn-primary btn-lg"
+                                data-modules-run>
+                            {% icon "arrow-right" size=16 %}
+                            <span>Вычислить</span>
+                        </button>
+                        <button type="button"
+                                class="btn btn-ghost"
+                                data-modules-reset>
+                            {% icon "close" size=14 %}
+                            <span>Очистить</span>
+                        </button>
+                    </div>
+
+                    <div class="mini-calc-result">
+                        {% include "matrix_app/partials/_result_block.html" with result_id="school-result" show_steps=True show_actions=True %}
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- ========================================================
+                 Навигация: prev/next школа
+                 ======================================================== -->
+            {% if prev_school or next_school %}
+                <nav class="school-nav" aria-label="Другие школы">
+                    {% if prev_school %}
+                        <a href="{% url 'matrix_app:school_detail' prev_school.slug %}"
+                           class="school-nav__item school-nav__item--prev">
+                            <span class="school-nav__icon">{% icon "arrow-left" size=18 %}</span>
+                            <span class="school-nav__text">
+                                <span class="school-nav__label">Предыдущая школа</span>
+                                <span class="school-nav__title">{{ prev_school.title }}</span>
+                            </span>
+                        </a>
+                    {% else %}
+                        <span class="school-nav__spacer"></span>
+                    {% endif %}
+
+                    {% if next_school %}
+                        <a href="{% url 'matrix_app:school_detail' next_school.slug %}"
+                           class="school-nav__item school-nav__item--next">
+                            <span class="school-nav__text">
+                                <span class="school-nav__label">Следующая школа</span>
+                                <span class="school-nav__title">{{ next_school.title }}</span>
+                            </span>
+                            <span class="school-nav__icon">{% icon "arrow-right" size=18 %}</span>
+                        </a>
+                    {% else %}
+                        <span class="school-nav__spacer"></span>
+                    {% endif %}
+                </nav>
+            {% endif %}
+
+        </div>
+    </div>
+</section>
+
+</div><!-- /.school-page -->
+
+{% endblock %}
+
+
+{% block extra_scripts %}
+{{ block.super }}
+
+<!--
+  Порядок важен:
+    1. body[data-no-persist="1"] — до matrix.js, чтобы редактор
+       не восстанавливался из localStorage.
+    2. matrix.js сам вызывает ML.initMatrixModule() при DOMContentLoaded.
+    3. calculator.js сам вызывает mountModules() через detectMode —
+       на странице есть [data-modules-run].
+-->
+<script>
+    (function () {
+        function markNoPersist() {
+            if (document.body) document.body.dataset.noPersist = '1';
+        }
+        if (document.body) markNoPersist();
+        else document.addEventListener('DOMContentLoaded', markNoPersist);
+    })();
+</script>
+
+<script src="{% static 'matrix_app/js/matrix.js' %}"></script>
+<script src="{% static 'matrix_app/js/calculator.js' %}"></script>
+
+<script>
+    /*
+     * Страница школы: поиск по направлениям, активная ссылка при
+     * скролле, плавная прокрутка. Обработчики data-modules-run /
+     * data-modules-reset живут в calculator.js — здесь их НЕ дублируем.
+     */
+    (function () {
+        document.addEventListener('DOMContentLoaded', function () {
+            if (!window.MatrixLab) return;
+            var ML = window.MatrixLab;
+
+            // --- Поиск по направлениям (title + tagline) ---
+            var searchInput = document.querySelector('[data-school-search]');
+            var items = document.querySelectorAll('[data-school-item]');
+            var emptyState = document.querySelector('[data-school-empty]');
+
+            if (searchInput && items.length) {
+                var filter = ML.debounce(function () {
+                    var q = (searchInput.value || '').toLowerCase().trim();
+                    var visible = 0;
+                    items.forEach(function (item) {
+                        var title = item.dataset.directionTitle || '';
+                        var tagline = item.dataset.directionTagline || '';
+                        var match = !q
+                            || title.indexOf(q) !== -1
+                            || tagline.indexOf(q) !== -1;
+                        item.hidden = !match;
+                        if (match) visible += 1;
+                    });
+                    if (emptyState) emptyState.hidden = visible > 0;
+                }, 150);
+
+                searchInput.addEventListener('input', filter);
+            }
+
+            // --- Активная ссылка при скролле ---
+            var links = document.querySelectorAll('[data-school-link]');
+            var cards = document.querySelectorAll('[data-direction-card]');
+            var byId = {};
+            links.forEach(function (l) { byId[l.dataset.schoolLink] = l; });
+
+            if (cards.length && 'IntersectionObserver' in window) {
+                var observer = new IntersectionObserver(function (entries) {
+                    entries.forEach(function (entry) {
+                        if (!entry.isIntersecting) return;
+                        var link = byId[entry.target.id];
+                        if (!link) return;
+                        links.forEach(function (l) {
+                            l.classList.remove('is-active');
+                        });
+                        link.classList.add('is-active');
+                    });
+                }, { rootMargin: '-20% 0px -60% 0px', threshold: 0 });
+
+                cards.forEach(function (c) { observer.observe(c); });
+            }
+
+            // --- Плавная прокрутка по TOC ---
+            links.forEach(function (link) {
+                link.addEventListener('click', function (e) {
+                    var href = link.getAttribute('href');
+                    if (!href || href.charAt(0) !== '#') return;
+                    var target = document.querySelector(href);
+                    if (!target) return;
+                    e.preventDefault();
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    history.replaceState(null, '', href);
+                });
+            });
+        });
+    })();
+</script>
+
+{% endblock %}

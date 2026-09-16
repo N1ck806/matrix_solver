@@ -1,0 +1,204 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" fill="none"
+     role="img" aria-label="Матрица выравнивания перевода">
+    <defs>
+        <linearGradient id="ta-bg" x1="0" y1="0" x2="800" y2="600" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#6366F1" stop-opacity="0.06"/>
+            <stop offset="1" stop-color="#06B6D4" stop-opacity="0.06"/>
+        </linearGradient>
+        <linearGradient id="ta-source" x1="0" y1="0" x2="0" y2="1">
+            <stop stop-color="#FFFFFF" stop-opacity="0.95"/>
+            <stop offset="1" stop-color="#EDE9FE" stop-opacity="0.9"/>
+        </linearGradient>
+        <linearGradient id="ta-target" x1="0" y1="0" x2="0" y2="1">
+            <stop stop-color="#FFFFFF" stop-opacity="0.95"/>
+            <stop offset="1" stop-color="#CFFAFE" stop-opacity="0.9"/>
+        </linearGradient>
+        <filter id="ta-glow" x="-40%" y="-40%" width="180%" height="180%">
+            <feGaussianBlur stdDeviation="5" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+    </defs>
+
+    <rect width="800" height="600" fill="url(#ta-bg)" rx="24"/>
+
+    <!-- Заголовок -->
+    <rect x="180" y="28" width="440" height="56" rx="28"
+          fill="#8B5CF6" fill-opacity="0.10"
+          stroke="#8B5CF6" stroke-opacity="0.45" stroke-width="1.5"/>
+    <text x="400" y="64" text-anchor="middle"
+          font-family="system-ui, -apple-system, sans-serif"
+          font-size="22" font-weight="800" fill="#7C3AED">
+        Выравнивание перевода
+    </text>
+
+    <!-- Оригинал (слева) -->
+    <g transform="translate(60, 130)">
+        <text x="100" y="-8" text-anchor="middle"
+              font-family="system-ui, sans-serif"
+              font-size="13" font-weight="800" fill="#7C3AED">
+            Оригинал (EN)
+        </text>
+
+        <g>
+            <rect x="0" y="0"  width="200" height="40" rx="8" fill="url(#ta-source)"
+                  stroke="#8B5CF6" stroke-opacity="0.4" stroke-width="1.2"/>
+            <text x="100" y="26" text-anchor="middle"
+                  font-family="system-ui, sans-serif" font-size="14" font-weight="700"
+                  fill="#7C3AED">The</text>
+
+            <rect x="0" y="46" width="200" height="40" rx="8" fill="url(#ta-source)"
+                  stroke="#8B5CF6" stroke-opacity="0.4" stroke-width="1.2"/>
+            <text x="100" y="72" text-anchor="middle"
+                  font-family="system-ui, sans-serif" font-size="14" font-weight="700"
+                  fill="#7C3AED">cat</text>
+
+            <rect x="0" y="92" width="200" height="40" rx="8" fill="url(#ta-source)"
+                  stroke="#8B5CF6" stroke-opacity="0.4" stroke-width="1.2"/>
+            <text x="100" y="118" text-anchor="middle"
+                  font-family="system-ui, sans-serif" font-size="14" font-weight="700"
+                  fill="#7C3AED">sits</text>
+
+            <rect x="0" y="138" width="200" height="40" rx="8" fill="url(#ta-source)"
+                  stroke="#8B5CF6" stroke-opacity="0.4" stroke-width="1.2"/>
+            <text x="100" y="164" text-anchor="middle"
+                  font-family="system-ui, sans-serif" font-size="14" font-weight="700"
+                  fill="#7C3AED">on</text>
+
+            <rect x="0" y="184" width="200" height="40" rx="8" fill="url(#ta-source)"
+                  stroke="#8B5CF6" stroke-opacity="0.4" stroke-width="1.2"/>
+            <text x="100" y="210" text-anchor="middle"
+                  font-family="system-ui, sans-serif" font-size="14" font-weight="700"
+                  fill="#7C3AED">the mat</text>
+        </g>
+    </g>
+
+    <!-- Перевод (справа) -->
+    <g transform="translate(540, 130)">
+        <text x="100" y="-8" text-anchor="middle"
+              font-family="system-ui, sans-serif"
+              font-size="13" font-weight="800" fill="#0891B2">
+            Перевод (RU)
+        </text>
+
+        <g>
+            <rect x="0" y="0"  width="200" height="40" rx="8" fill="url(#ta-target)"
+                  stroke="#06B6D4" stroke-opacity="0.4" stroke-width="1.2"/>
+            <text x="100" y="26" text-anchor="middle"
+                  font-family="system-ui, sans-serif" font-size="14" font-weight="700"
+                  fill="#0891B2">Кот</text>
+
+            <rect x="0" y="46" width="200" height="40" rx="8" fill="url(#ta-target)"
+                  stroke="#06B6D4" stroke-opacity="0.4" stroke-width="1.2"/>
+            <text x="100" y="72" text-anchor="middle"
+                  font-family="system-ui, sans-serif" font-size="14" font-weight="700"
+                  fill="#0891B2">сидит</text>
+
+            <rect x="0" y="92" width="200" height="40" rx="8" fill="url(#ta-target)"
+                  stroke="#06B6D4" stroke-opacity="0.4" stroke-width="1.2"/>
+            <text x="100" y="118" text-anchor="middle"
+                  font-family="system-ui, sans-serif" font-size="14" font-weight="700"
+                  fill="#0891B2">на</text>
+
+            <rect x="0" y="138" width="200" height="40" rx="8" fill="url(#ta-target)"
+                  stroke="#06B6D4" stroke-opacity="0.4" stroke-width="1.2"/>
+            <text x="100" y="164" text-anchor="middle"
+                  font-family="system-ui, sans-serif" font-size="14" font-weight="700"
+                  fill="#0891B2">коврике</text>
+
+            <rect x="0" y="184" width="200" height="40" rx="8" fill="url(#ta-target)"
+                  stroke="#06B6D4" stroke-opacity="0.4" stroke-width="1.2"/>
+            <text x="100" y="210" text-anchor="middle"
+                  font-family="system-ui, sans-serif" font-size="14" font-weight="700"
+                  fill="#0891B2">.</text>
+        </g>
+    </g>
+
+    <!-- Стрелки выравнивания (линии между блоками) -->
+    <g stroke="#EC4899" stroke-width="2" fill="none" opacity="0.65"
+       stroke-linecap="round">
+        <!-- The ↔ (удалено — нет соответствия) -->
+        <!-- cat → Кот (сдвиг вверх) -->
+        <path d="M 260 196 Q 400 175 540 175"/>
+        <!-- sits → сидит -->
+        <path d="M 260 242 Q 400 220 540 220"/>
+        <!-- on → на -->
+        <path d="M 260 288 Q 400 265 540 265"/>
+        <!-- the mat → коврике -->
+        <path d="M 260 334 Q 400 310 540 310"/>
+    </g>
+
+    <!-- Матрица M (слева внизу) -->
+    <g transform="translate(60, 400)">
+        <rect x="0" y="0" width="320" height="140" rx="14"
+              fill="#FFFFFF" fill-opacity="0.95"
+              stroke="#8B5CF6" stroke-opacity="0.45" stroke-width="1.5"/>
+
+        <text x="160" y="24" text-anchor="middle"
+              font-family="system-ui, sans-serif"
+              font-size="12" font-weight="800" fill="#7C3AED"
+              letter-spacing="1.2">МАТРИЦА M (5 × 5)</text>
+
+        <!-- Матрица 5×5 -->
+        <g transform="translate(60, 40)">
+            <!-- Диагональ и смещения -->
+            <rect x="0"   y="0"   width="30" height="16" rx="3" fill="#8B5CF6" opacity="0.9"/>
+            <rect x="34"  y="18"  width="30" height="16" rx="3" fill="#8B5CF6" opacity="0.9"/>
+            <rect x="68"  y="36"  width="30" height="16" rx="3" fill="#8B5CF6" opacity="0.9"/>
+            <rect x="102" y="54"  width="30" height="16" rx="3" fill="#8B5CF6" opacity="0.9"/>
+            <rect x="136" y="72"  width="30" height="16" rx="3" fill="#8B5CF6" opacity="0.9"/>
+
+            <!-- Слабые связи -->
+            <rect x="34"  y="0"   width="30" height="16" rx="3" fill="#8B5CF6" opacity="0.3"/>
+            <rect x="0"   y="18"  width="30" height="16" rx="3" fill="#8B5CF6" opacity="0.3"/>
+            <rect x="68"  y="18"  width="30" height="16" rx="3" fill="#8B5CF6" opacity="0.25"/>
+            <rect x="102" y="36"  width="30" height="16" rx="3" fill="#8B5CF6" opacity="0.25"/>
+        </g>
+
+        <text x="160" y="128" text-anchor="middle"
+              font-family="ui-monospace, monospace"
+              font-size="11" fill="#6B7280">
+            M[i][j] — вероятность соответствия
+        </text>
+    </g>
+
+    <!-- Метрики -->
+    <g transform="translate(420, 400)">
+        <rect x="0" y="0" width="320" height="140" rx="14"
+              fill="#FFFFFF" fill-opacity="0.95"
+              stroke="#EC4899" stroke-opacity="0.4" stroke-width="1.5"/>
+
+        <text x="160" y="24" text-anchor="middle"
+              font-family="system-ui, sans-serif"
+              font-size="12" font-weight="800" fill="#BE185D"
+              letter-spacing="1.2">МЕТРИКИ КАЧЕСТВА</text>
+
+        <g font-family="system-ui, sans-serif" font-size="13">
+            <text x="30" y="56" fill="#4B5563">BLEU:</text>
+            <text x="120" y="56" font-family="ui-monospace, monospace"
+                  font-weight="800" fill="#EC4899">0.82</text>
+            <text x="30" y="84" fill="#4B5563">PO (порядок):</text>
+            <text x="200" y="84" font-family="ui-monospace, monospace"
+                  font-weight="800" fill="#8B5CF6">0.75</text>
+            <text x="30" y="112" fill="#4B5563">METEOR:</text>
+            <text x="120" y="112" font-family="ui-monospace, monospace"
+                  font-weight="800" fill="#0891B2">0.68</text>
+        </g>
+
+        <!-- Прогресс-бары -->
+        <g transform="translate(220, 50)">
+            <rect x="0" y="0" width="80" height="6" rx="3" fill="#F3F4F6"/>
+            <rect x="0" y="0" width="66" height="6" rx="3" fill="#EC4899"/>
+            <rect x="0" y="28" width="80" height="6" rx="3" fill="#F3F4F6"/>
+            <rect x="0" y="28" width="60" height="6" rx="3" fill="#8B5CF6"/>
+            <rect x="0" y="56" width="80" height="6" rx="3" fill="#F3F4F6"/>
+            <rect x="0" y="56" width="54" height="6" rx="3" fill="#0891B2"/>
+        </g>
+    </g>
+
+    <!-- Плашка-интерпретация -->
+    <text x="400" y="575" text-anchor="middle"
+          font-family="system-ui, sans-serif"
+          font-size="12" font-weight="600" fill="#6B7280">
+        Диагональ M — прямое соответствие; смещения — перестановки при переводе
+    </text>
+</svg>

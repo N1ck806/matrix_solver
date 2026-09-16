@@ -1,0 +1,311 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 280" fill="none"
+     role="img" aria-label="Изучение теории"
+     class="ml-step ml-step--learn"
+     preserveAspectRatio="xMidYMid meet"
+     font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">
+
+  <defs>
+
+    <radialGradient id="sl-neon" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"    stop-color="#FFFFFF" stop-opacity="1"/>
+      <stop offset="0.25" stop-color="#A7F3D0" stop-opacity="0.95"/>
+      <stop offset="0.5"  stop-color="#34D399" stop-opacity="0.75"/>
+      <stop offset="0.78" stop-color="#059669" stop-opacity="0.45"/>
+      <stop offset="1"    stop-color="#064E3B" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="sl-glass" cx="0.4" cy="0.32" r="0.72">
+      <stop offset="0"    stop-color="#FFFFFF" stop-opacity="0.35"/>
+      <stop offset="0.4"  stop-color="#D1FAE5" stop-opacity="0.18"/>
+      <stop offset="0.75" stop-color="#34D399" stop-opacity="0.22"/>
+      <stop offset="1"    stop-color="#064E3B" stop-opacity="0.4"/>
+    </radialGradient>
+
+    <radialGradient id="sl-fresnel" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"    stop-color="#FFFFFF" stop-opacity="0"/>
+      <stop offset="0.8"  stop-color="#FFFFFF" stop-opacity="0.05"/>
+      <stop offset="0.94" stop-color="#A7F3D0" stop-opacity="0.5"/>
+      <stop offset="1"    stop-color="#FFFFFF" stop-opacity="0.8"/>
+    </radialGradient>
+
+    <radialGradient id="sl-key" cx="0.28" cy="0.18" r="0.42">
+      <stop offset="0"   stop-color="#FFFFFF" stop-opacity="0.95"/>
+      <stop offset="0.4" stop-color="#FFFFFF" stop-opacity="0.22"/>
+      <stop offset="1"   stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="sl-fill" cx="0.78" cy="0.85" r="0.55">
+      <stop offset="0" stop-color="#FCD34D" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#FCD34D" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="sl-rim" x1="0" y1="0" x2="0.7" y2="1">
+      <stop offset="0"    stop-color="#FCD34D" stop-opacity="0"/>
+      <stop offset="0.55" stop-color="#FCD34D" stop-opacity="0.55"/>
+      <stop offset="1"    stop-color="#FDE68A" stop-opacity="0"/>
+    </linearGradient>
+
+    <radialGradient id="sl-bounce" cx="0.5" cy="1" r="0.6">
+      <stop offset="0" stop-color="#064E3B" stop-opacity="0.24"/>
+      <stop offset="1" stop-color="#064E3B" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="sl-orbit-1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0"   stop-color="#A7F3D0" stop-opacity="0.95"/>
+      <stop offset="0.5" stop-color="#34D399" stop-opacity="0.85"/>
+      <stop offset="1"   stop-color="#059669" stop-opacity="0.9"/>
+    </linearGradient>
+
+    <linearGradient id="sl-orbit-2" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0"   stop-color="#FCD34D" stop-opacity="0.85"/>
+      <stop offset="0.5" stop-color="#F59E0B" stop-opacity="0.75"/>
+      <stop offset="1"   stop-color="#D97706" stop-opacity="0.8"/>
+    </linearGradient>
+
+    <linearGradient id="sl-book" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#D1FAE5" stop-opacity="0.85"/>
+    </linearGradient>
+
+    <radialGradient id="sl-spark-white" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"   stop-color="#FFFFFF"/>
+      <stop offset="0.4" stop-color="#D1FAE5"/>
+      <stop offset="1"   stop-color="#34D399" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="sl-spark-gold" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"   stop-color="#FFFFFF"/>
+      <stop offset="0.4" stop-color="#FDE68A"/>
+      <stop offset="1"   stop-color="#F59E0B" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="sl-spark-mint" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"   stop-color="#FFFFFF"/>
+      <stop offset="0.4" stop-color="#6EE7B7"/>
+      <stop offset="1"   stop-color="#10B981" stop-opacity="0"/>
+    </radialGradient>
+
+    <filter id="sl-bloom-sm" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1.4"/>
+    </filter>
+    <filter id="sl-bloom-md" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3"/>
+    </filter>
+    <filter id="sl-bloom-lg" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6.5"/>
+    </filter>
+    <filter id="sl-shadow-floor" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="9"/>
+    </filter>
+    <filter id="sl-core-shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="5"/>
+      <feOffset dx="0" dy="5"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.42"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+  </defs>
+
+  <!-- Фоновый ореол -->
+  <circle cx="140" cy="140" r="120" fill="url(#sl-neon)" opacity="0.1">
+    <animate attributeName="r" values="120;126;120" dur="8s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Тень на пол -->
+  <ellipse cx="140" cy="234" rx="72" ry="9"
+           fill="#064E3B" opacity="0.22"
+           filter="url(#sl-shadow-floor)">
+    <animate attributeName="rx" values="72;78;72" dur="7s" repeatCount="indefinite"/>
+  </ellipse>
+
+  <!-- Орбита 1 (emerald) -->
+  <g transform="translate(140 138)">
+    <g>
+      <animateTransform attributeName="transform" type="rotate"
+                        from="0 0 0" to="360 0 0" dur="34s" repeatCount="indefinite"/>
+      <ellipse cx="0" cy="0" rx="112" ry="24"
+               fill="none" stroke="url(#sl-orbit-1)"
+               stroke-width="1.6" opacity="0.8"
+               transform="rotate(-22)"/>
+      <ellipse cx="0" cy="0" rx="112" ry="24"
+               fill="none" stroke="#34D399" stroke-width="5"
+               opacity="0.14" filter="url(#sl-bloom-md)"
+               transform="rotate(-22)"/>
+      <g transform="rotate(-22)">
+        <circle cx="112" cy="0" r="3.2"
+                fill="url(#sl-spark-mint)" filter="url(#sl-bloom-sm)">
+          <animate attributeName="r" values="3.2;4.2;3.2" dur="2.6s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="112" cy="0" r="1.4" fill="#FFFFFF"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- Орбита 2 (gold) -->
+  <g transform="translate(140 138)">
+    <g>
+      <animateTransform attributeName="transform" type="rotate"
+                        from="360 0 0" to="0 0 0" dur="26s" repeatCount="indefinite"/>
+      <ellipse cx="0" cy="0" rx="88" ry="20"
+               fill="none" stroke="url(#sl-orbit-2)"
+               stroke-width="1.3" opacity="0.75"
+               transform="rotate(38)"/>
+      <ellipse cx="0" cy="0" rx="88" ry="20"
+               fill="none" stroke="#FCD34D" stroke-width="4"
+               opacity="0.12" filter="url(#sl-bloom-md)"
+               transform="rotate(38)"/>
+      <g transform="rotate(38)">
+        <circle cx="-88" cy="0" r="2.8"
+                fill="url(#sl-spark-gold)" filter="url(#sl-bloom-sm)">
+          <animate attributeName="r" values="2.8;3.6;2.8" dur="2.4s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="-88" cy="0" r="1.3" fill="#FFFFFF"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- Луч входа -->
+  <g opacity="0.8">
+    <path d="M20 138 L88 138"
+          stroke="#34D399" stroke-width="1.4"
+          stroke-linecap="round" stroke-dasharray="3 4"
+          opacity="0.7"/>
+    <circle cx="20" cy="138" r="3"
+            fill="url(#sl-spark-mint)" filter="url(#sl-bloom-sm)">
+      <animate attributeName="opacity" values="1;0.3;1" dur="2.4s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="20" cy="138" r="1.4" fill="#FFFFFF"/>
+  </g>
+
+  <!-- Луч выхода -->
+  <g opacity="0.8">
+    <path d="M192 138 L260 138"
+          stroke="#FCD34D" stroke-width="1.4"
+          stroke-linecap="round" stroke-dasharray="3 4"
+          opacity="0.7"/>
+    <circle cx="260" cy="138" r="3"
+            fill="url(#sl-spark-gold)" filter="url(#sl-bloom-sm)">
+      <animate attributeName="opacity" values="1;0.3;1" dur="2.4s" begin="1.2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="260" cy="138" r="1.4" fill="#FFFFFF"/>
+  </g>
+
+  <!-- ЯДРО: скруглённый квадрат — «открытая книга» -->
+  <g filter="url(#sl-core-shadow)">
+
+    <rect x="78" y="78" width="124" height="124" rx="40"
+          fill="url(#sl-neon)" opacity="0.28"
+          filter="url(#sl-bloom-lg)">
+      <animate attributeName="opacity" values="0.28;0.18;0.28" dur="5.6s" repeatCount="indefinite"/>
+    </rect>
+
+    <rect x="88" y="88" width="104" height="104" rx="32"
+          fill="url(#sl-glass)"/>
+    <rect x="88" y="88" width="104" height="104" rx="32"
+          fill="url(#sl-neon)" opacity="0.85"/>
+    <rect x="88" y="88" width="104" height="104" rx="32"
+          fill="url(#sl-fresnel)"/>
+
+    <!-- ============================================================
+         СИМВОЛ: открытая книга с закладкой
+         Две страницы, корешок по центру, светящаяся закладка
+         ============================================================ -->
+    <g stroke-linecap="round" stroke-linejoin="round">
+
+      <!-- Левая страница -->
+      <path d="M104 108 Q120 102, 138 106 L138 176 Q120 172, 104 178 Z"
+            fill="url(#sl-book)" fill-opacity="0.85"
+            stroke="#FFFFFF" stroke-opacity="0.9" stroke-width="0.9"/>
+
+      <!-- Правая страница -->
+      <path d="M138 106 Q156 102, 172 108 L172 178 Q156 172, 138 176 Z"
+            fill="url(#sl-book)" fill-opacity="0.85"
+            stroke="#FFFFFF" stroke-opacity="0.9" stroke-width="0.9"/>
+
+      <!-- Корешок -->
+      <line x1="138" y1="106" x2="138" y2="176"
+            stroke="#FFFFFF" stroke-opacity="0.5" stroke-width="0.8"/>
+
+      <!-- Строчки текста на левой странице -->
+      <g stroke="#047857" stroke-opacity="0.6" stroke-width="0.7">
+        <line x1="112" y1="122" x2="130" y2="120"/>
+        <line x1="112" y1="132" x2="130" y2="130"/>
+        <line x1="112" y1="142" x2="130" y2="140"/>
+        <line x1="112" y1="152" x2="126" y2="150"/>
+      </g>
+
+      <!-- Строчки текста на правой странице -->
+      <g stroke="#047857" stroke-opacity="0.6" stroke-width="0.7">
+        <line x1="146" y1="120" x2="164" y2="122"/>
+        <line x1="146" y1="130" x2="164" y2="132"/>
+        <line x1="146" y1="140" x2="164" y2="142"/>
+        <line x1="146" y1="150" x2="160" y2="152"/>
+      </g>
+
+      <!-- Закладка (золотая) — свисает с правой страницы -->
+      <path d="M156 108 L156 128 L160 124 L164 128 L164 108 Z"
+            fill="#FCD34D" fill-opacity="0.95"
+            stroke="#FFFFFF" stroke-opacity="0.8" stroke-width="0.7"/>
+      <circle cx="160" cy="118" r="1.6" fill="#FFFFFF" opacity="0.95"/>
+
+      <!-- Лёгкое свечение от книги -->
+      <ellipse cx="138" cy="150" rx="34" ry="10"
+               fill="#34D399" fill-opacity="0.2"
+               filter="url(#sl-bloom-md)"/>
+    </g>
+
+    <!-- Key light -->
+    <ellipse cx="112" cy="102" rx="26" ry="14"
+             fill="url(#sl-key)" transform="rotate(-24 112 102)"/>
+    <ellipse cx="108" cy="98" rx="8" ry="4.5"
+             fill="#FFFFFF" opacity="0.9"
+             transform="rotate(-28 108 98)"/>
+
+    <!-- Fill снизу-справа (gold) -->
+    <ellipse cx="172" cy="182" rx="28" ry="14"
+             fill="url(#sl-fill)" transform="rotate(-20 172 182)"/>
+
+    <!-- Rim: золотая полоска справа -->
+    <path d="M192 112 Q192 160 158 192"
+          fill="none" stroke="url(#sl-rim)" stroke-width="1.8"
+          stroke-linecap="round" opacity="0.75"/>
+
+    <!-- Bounce -->
+    <ellipse cx="140" cy="196" rx="38" ry="8"
+             fill="url(#sl-bounce)"/>
+
+    <!-- Обводка ядра -->
+    <rect x="88" y="88" width="104" height="104" rx="32"
+          fill="none" stroke="#FFFFFF" stroke-opacity="0.3" stroke-width="0.8"/>
+
+    <!-- 4 неоновые точки по углам -->
+    <circle cx="102" cy="102" r="1.8" fill="#FFFFFF" opacity="0.9">
+      <animate attributeName="r" values="1.8;2.4;1.8" dur="3.6s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="178" cy="102" r="1.8" fill="#FFFFFF" opacity="0.9">
+      <animate attributeName="r" values="1.8;2.4;1.8" dur="3.6s" begin="0.9s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="102" cy="178" r="1.8" fill="#FFFFFF" opacity="0.9">
+      <animate attributeName="r" values="1.8;2.4;1.8" dur="3.6s" begin="1.8s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="178" cy="178" r="1.8" fill="#FFFFFF" opacity="0.9">
+      <animate attributeName="r" values="1.8;2.4;1.8" dur="3.6s" begin="2.7s" repeatCount="indefinite"/>
+    </circle>
+
+  </g>
+
+  <!-- Частицы -->
+  <circle cx="40" cy="52" r="1.8" fill="url(#sl-spark-mint)" filter="url(#sl-bloom-sm)">
+    <animate attributeName="opacity" values="1;0.4;1" dur="5s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="242" cy="48" r="2" fill="url(#sl-spark-gold)" filter="url(#sl-bloom-sm)">
+    <animate attributeName="opacity" values="0.9;0.3;0.9" dur="6s" begin="0.6s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="40" cy="240" r="1.8" fill="url(#sl-spark-gold)" filter="url(#sl-bloom-sm)">
+    <animate attributeName="cy" values="240;234;240" dur="6.5s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="244" cy="234" r="2.2" fill="url(#sl-spark-mint)" filter="url(#sl-bloom-sm)">
+    <animate attributeName="opacity" values="0.9;0.35;0.9" dur="5.6s" begin="1.2s" repeatCount="indefinite"/>
+  </circle>
+
+</svg>

@@ -1,0 +1,715 @@
+{% load static matrix_icons %}
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5.0">
+
+    <!-- SEO -->
+    <title>{% block title %}{{ APP_NAME }}{% endblock %} — {{ APP_NAME }}</title>
+    <meta name="description" content="{% block meta_description %}{{ APP_DESCRIPTION }}{% endblock %}">
+    {% block canonical %}{% endblock %}
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{% block og_title %}{{ APP_NAME }}{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}{{ APP_DESCRIPTION }}{% endblock %}">
+    <meta property="og:site_name" content="{{ APP_NAME }}">
+    {% if SITE_URL %}<meta property="og:url" content="{{ SITE_URL }}{{ request.path }}">{% endif %}
+
+    <!-- PWA / mobile -->
+    <meta name="theme-color" content="#F7F8FC" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0B0E1A" media="(prefers-color-scheme: dark)">
+    <meta name="color-scheme" content="light dark">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="{{ APP_NAME }}">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+
+    <!-- CSRF для JS -->
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <meta name="csrf-header" content="X-CSRFToken">
+    <meta name="api-prefix" content="/api/">
+
+    <!-- Иконки вкладки -->
+    <link rel="icon" type="image/svg+xml" sizes="any"
+          href="{% static 'matrix_app/icons/brand/favicon.svg' %}">
+    <link rel="apple-touch-icon"
+          href="{% static 'matrix_app/icons/brand/favicon.svg' %}">
+
+    <!-- Preconnect к CDN -->
+    {% for origin in CDN_PRECONNECT %}
+        <link rel="preconnect" href="{{ origin }}" crossorigin>
+        <link rel="dns-prefetch" href="{{ origin }}">
+    {% endfor %}
+
+    <!-- Общие стили -->
+    <link rel="stylesheet" href="{% static 'matrix_app/css/main.css' %}">
+    <link rel="stylesheet" href="{% static 'matrix_app/css/animations.css' %}">
+    <link rel="stylesheet" href="{% static 'matrix_app/css/responsive.css' %}">
+    <link rel="stylesheet" href="{% static 'matrix_app/css/mobile.css' %}"
+          media="(max-width: 992px)">
+
+    <!-- Единый конфиг для window.MatrixLab -->
+    {{ MATRIXLAB_CONFIG|json_script:"ml-config" }}
+
+    <!-- Тема и признаки устройства — до отрисовки, без FOUC -->
+    <script>
+        (function () {
+            try {
+                var saved = localStorage.getItem('matrixlab.theme');
+                var prefersDark = window.matchMedia
+                    && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (saved === 'dark' || (!saved && prefersDark)) {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                }
+                var isTouch = ('ontouchstart' in window) ||
+                              (navigator.maxTouchPoints > 0);
+                if (isTouch) document.documentElement.classList.add('is-touch');
+                if (window.matchMedia('(max-width: 992px)').matches) {
+                    document.documentElement.classList.add('is-mobile');
+                }
+            } catch (e) { /* noop */ }
+        })();
+    </script>
+
+    <!-- MathJax -->
+    <script>
+        window.MathJax = {
+            loader: { load: ['[tex]/ams', '[tex]/boldsymbol'] },
+            tex: {
+                packages: {'[+]': ['ams', 'boldsymbol']},
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true,
+                processEnvironments: true,
+                tags: 'none',
+                macros: {
+                    rank: '\\operatorname{rank}',
+                    tr:   '\\operatorname{tr}',
+                    adj:  '\\operatorname{adj}',
+                    det:  '\\operatorname{det}',
+                    diag: '\\operatorname{diag}',
+                    Ker:  '\\operatorname{Ker}',
+                    Im:   '\\operatorname{Im}',
+                    R:    '\\mathbb{R}',
+                    C:    '\\mathbb{C}',
+                    N:    '\\mathbb{N}',
+                    Z:    '\\mathbb{Z}',
+                    Q:    '\\mathbb{Q}'
+                }
+            },
+            svg: { fontCache: 'global' },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+                ignoreHtmlClass: 'no-mathjax',
+                enableMenu: false
+            },
+            startup: {
+                typeset: true,
+                ready: function () {
+                    MathJax.startup.defaultReady();
+                    MathJax.startup.promise.then(function () {
+                        document.dispatchEvent(new Event('mathjax-ready'));
+                    });
+                }
+            }
+        };
+    </script>
+    {% if CDN.mathjax %}
+        <script defer src="{{ CDN.mathjax }}"></script>
+    {% endif %}
+
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body class="app-body {% block body_class %}{% endblock %}"
+      data-page="{% block page_id %}{{ ACTIVE_PAGE|default:'' }}{% endblock %}"
+      data-active-group="{{ ACTIVE_GROUP|default:'' }}">
+
+    <a href="#main-content" class="skip-link">Перейти к содержимому</a>
+
+    {% block body_start %}{% endblock %}
+
+    <!-- ================================================================
+         ЛЕВЫЙ САЙДБАР
+         ================================================================ -->
+    <aside class="app-sidebar" id="app-sidebar" data-app-sidebar aria-label="Основная навигация">
+
+        <!-- Шапка сайдбара: логотип + кнопка закрытия (только мобилка) -->
+        <div class="sidebar-head">
+            <a href="{% url 'matrix_app:home' %}" class="sidebar-logo"
+               aria-label="{{ APP_NAME }} — на главную">
+                <span class="sidebar-logo-mark" aria-hidden="true">
+                    {% icon "logo-mark" size=32 %}
+                </span>
+                <span class="sidebar-logo-text">
+                    <strong>{{ APP_NAME }}</strong>
+                    <span>линейная алгебра</span>
+                </span>
+            </a>
+
+            <button type="button"
+                    class="sidebar-close"
+                    data-sidebar-close
+                    aria-label="Закрыть меню">
+                {% icon "close" size=18 %}
+            </button>
+        </div>
+
+        <!-- Навигация -->
+        <nav class="sidebar-nav" aria-label="Разделы">
+
+            <!-- ========================================================
+                 ИНСТРУМЕНТЫ
+                 ======================================================== -->
+            <p class="sidebar-nav__group-title">
+                <span>Инструменты</span>
+            </p>
+            <ul class="sidebar-nav__list">
+                <li>
+                    <a href="{% url 'matrix_app:calculator' %}"
+                       class="sidebar-link {% if ACTIVE_PAGE == 'matrix_app:calculator' %}is-active{% endif %}"
+                       {% if ACTIVE_PAGE == 'matrix_app:calculator' %}aria-current="page"{% endif %}>
+                        <span class="sidebar-link__icon" aria-hidden="true">
+                            {% icon "calculator" size=18 %}
+                        </span>
+                        <span class="sidebar-link__label">Калькулятор</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'matrix_app:operations' %}"
+                       class="sidebar-link {% if ACTIVE_PAGE == 'matrix_app:operations' %}is-active{% endif %}"
+                       {% if ACTIVE_PAGE == 'matrix_app:operations' %}aria-current="page"{% endif %}>
+                        <span class="sidebar-link__icon" aria-hidden="true">
+                            {% icon "operations" size=18 %}
+                        </span>
+                        <span class="sidebar-link__label">Операции</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'matrix_app:properties' %}"
+                       class="sidebar-link {% if ACTIVE_PAGE == 'matrix_app:properties' %}is-active{% endif %}"
+                       {% if ACTIVE_PAGE == 'matrix_app:properties' %}aria-current="page"{% endif %}>
+                        <span class="sidebar-link__icon" aria-hidden="true">
+                            {% icon "properties" size=18 %}
+                        </span>
+                        <span class="sidebar-link__label">Свойства</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'matrix_app:systems' %}"
+                       class="sidebar-link {% if ACTIVE_PAGE == 'matrix_app:systems' %}is-active{% endif %}"
+                       {% if ACTIVE_PAGE == 'matrix_app:systems' %}aria-current="page"{% endif %}>
+                        <span class="sidebar-link__icon" aria-hidden="true">
+                            {% icon "systems" size=18 %}
+                        </span>
+                        <span class="sidebar-link__label">СЛАУ</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'matrix_app:decompositions' %}"
+                       class="sidebar-link {% if ACTIVE_PAGE == 'matrix_app:decompositions' %}is-active{% endif %}"
+                       {% if ACTIVE_PAGE == 'matrix_app:decompositions' %}aria-current="page"{% endif %}>
+                        <span class="sidebar-link__icon" aria-hidden="true">
+                            {% icon "decompositions" size=18 %}
+                        </span>
+                        <span class="sidebar-link__label">Разложения</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'matrix_app:eigen' %}"
+                       class="sidebar-link {% if ACTIVE_PAGE == 'matrix_app:eigen' %}is-active{% endif %}"
+                       {% if ACTIVE_PAGE == 'matrix_app:eigen' %}aria-current="page"{% endif %}>
+                        <span class="sidebar-link__icon" aria-hidden="true">
+                            {% icon "eigen" size=18 %}
+                        </span>
+                        <span class="sidebar-link__label">Спектр</span>
+                    </a>
+                </li>
+            </ul>
+
+            <!-- ========================================================
+                 ПРИМЕНЕНИЕ — школы
+                 ======================================================== -->
+            <p class="sidebar-nav__group-title sidebar-nav__group-title--with-link">
+                <a href="{% url 'matrix_app:modules' %}"
+                   class="sidebar-nav__group-link
+                          {% if ACTIVE_PAGE == 'matrix_app:modules' %}is-active{% endif %}">
+                    <span>Применение</span>
+                    {% icon "arrow-right" size=12 %}
+                </a>
+            </p>
+            <ul class="sidebar-nav__list sidebar-nav__list--schools">
+
+                <!-- Обзор всех школ -->
+                <li>
+                    <a href="{% url 'matrix_app:modules' %}"
+                       class="sidebar-school-link sidebar-school-link--overview
+                              {% if ACTIVE_PAGE == 'matrix_app:modules' %}is-active{% endif %}"
+                       {% if ACTIVE_PAGE == 'matrix_app:modules' %}aria-current="page"{% endif %}>
+                        <span class="sidebar-school-link__icon" aria-hidden="true">
+                            {% icon "modules" size=16 %}
+                        </span>
+                        <span class="sidebar-school-link__body">
+                            <span class="sidebar-school-link__title">Все школы</span>
+                            <span class="sidebar-school-link__count">обзор</span>
+                        </span>
+                    </a>
+                </li>
+
+                <!-- 5 школ -->
+                {% for school in MODULE_SCHOOLS %}
+                    <li>
+                        <a href="{% url 'matrix_app:school_detail' school.slug %}"
+                           class="sidebar-school-link
+                                  {% if ACTIVE_SCHOOL_SLUG == school.slug %}is-active{% endif %}"
+                           {% if ACTIVE_SCHOOL_SLUG == school.slug %}aria-current="page"{% endif %}>
+                            <span class="sidebar-school-link__icon" aria-hidden="true">
+                                {% icon school.icon size=16 %}
+                            </span>
+                            <span class="sidebar-school-link__body">
+                                <span class="sidebar-school-link__title">{{ school.title }}</span>
+                                <span class="sidebar-school-link__count">
+                                    {{ school.directions|length }}
+                                    {% with n=school.directions|length %}
+                                        {% if n == 1 %}направление{% elif n < 5 %}направления{% else %}направлений{% endif %}
+                                    {% endwith %}
+                                </span>
+                            </span>
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+
+            <!-- ========================================================
+                 ОБУЧЕНИЕ
+                 ======================================================== -->
+            <p class="sidebar-nav__group-title">
+                <span>Обучение</span>
+            </p>
+            <ul class="sidebar-nav__list">
+                <li>
+                    <a href="{% url 'matrix_app:theory' %}"
+                       class="sidebar-link {% if ACTIVE_PAGE == 'matrix_app:theory' %}is-active{% endif %}">
+                        <span class="sidebar-link__icon" aria-hidden="true">
+                            {% icon "theory" size=18 %}
+                        </span>
+                        <span class="sidebar-link__label">Теория</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'matrix_app:types' %}"
+                       class="sidebar-link {% if ACTIVE_PAGE == 'matrix_app:types' %}is-active{% endif %}">
+                        <span class="sidebar-link__icon" aria-hidden="true">
+                            {% icon "types" size=18 %}
+                        </span>
+                        <span class="sidebar-link__label">Виды матриц</span>
+                    </a>
+                </li>
+            </ul>
+
+            <!-- ========================================================
+                 ЛИЧНОЕ
+                 ======================================================== -->
+            <p class="sidebar-nav__group-title">
+                <span>Личное</span>
+            </p>
+            <ul class="sidebar-nav__list">
+                <li>
+                    <a href="{% url 'matrix_app:saved_matrices' %}"
+                       class="sidebar-link {% if ACTIVE_PAGE == 'matrix_app:saved_matrices' %}is-active{% endif %}">
+                        <span class="sidebar-link__icon" aria-hidden="true">
+                            {% icon "bookmark" size=18 %}
+                        </span>
+                        <span class="sidebar-link__label">Сохранённые</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'matrix_app:history' %}"
+                       class="sidebar-link {% if ACTIVE_PAGE == 'matrix_app:history' %}is-active{% endif %}">
+                        <span class="sidebar-link__icon" aria-hidden="true">
+                            {% icon "history" size=18 %}
+                        </span>
+                        <span class="sidebar-link__label">История</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'matrix_app:about' %}"
+                       class="sidebar-link {% if ACTIVE_PAGE == 'matrix_app:about' %}is-active{% endif %}">
+                        <span class="sidebar-link__icon" aria-hidden="true">
+                            {% icon "info" size=18 %}
+                        </span>
+                        <span class="sidebar-link__label">О проекте</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- CTA внизу сайдбара -->
+        <div class="sidebar-foot">
+            <a href="{% url 'matrix_app:calculator' %}" class="sidebar-cta">
+                <span>Начать решение</span>
+                {% icon "arrow-right" size=16 %}
+            </a>
+        </div>
+    </aside>
+
+    <!-- Затемнение под сайдбаром на мобилке -->
+    <div class="app-sidebar-backdrop" data-sidebar-backdrop hidden></div>
+
+    <!-- ================================================================
+         ОБЁРТКА: шапка + основной контент + футер
+         ================================================================ -->
+    <div class="app-shell">
+
+        <!-- ================================================================
+             ШАПКА — бургер, крошки, поиск, тема, CTA
+             ================================================================ -->
+        <header class="app-header {% block header_class %}{% endblock %}" data-app-header>
+
+            <div class="app-header__accent-line" aria-hidden="true"></div>
+
+            <div class="header-inner">
+
+                <!-- Бургер (только мобилка) -->
+                <button type="button"
+                        class="sidebar-toggle"
+                        data-sidebar-toggle
+                        aria-label="Открыть меню"
+                        aria-expanded="false"
+                        aria-controls="app-sidebar">
+                    <span></span><span></span><span></span>
+                </button>
+
+                <!-- Хлебные крошки / заголовок страницы -->
+                <div class="header-title">
+                    {% block breadcrumbs %}
+                        <span class="header-title__current">
+                            {% block page_title %}{{ APP_NAME }}{% endblock %}
+                        </span>
+                    {% endblock %}
+                </div>
+
+                <!-- Правые действия -->
+                <div class="header-actions">
+
+                    <!-- Поиск — открывает модалку -->
+                    <button type="button"
+                            class="header-action header-action--search"
+                            data-search-open
+                            aria-label="Поиск по сайту (Ctrl+K)"
+                            title="Поиск (Ctrl+K)">
+                        {% icon "search" size=22 %}
+                    </button>
+
+                    <!-- Тема -->
+                    <button type="button"
+                            class="theme-toggle"
+                            data-theme-toggle
+                            aria-label="Переключить тему"
+                            title="Переключить тему">
+                        <span class="theme-toggle-track" aria-hidden="true">
+                            <span class="theme-toggle-icon theme-toggle-icon--sun">
+                                {% icon "sun" size=14 %}
+                            </span>
+                            <span class="theme-toggle-icon theme-toggle-icon--moon">
+                                {% icon "moon" size=14 %}
+                            </span>
+                            <span class="theme-toggle-thumb"></span>
+                        </span>
+                    </button>
+
+                    <!-- CTA (скрыт на мобилке через CSS) -->
+                    <a href="{% url 'matrix_app:calculator' %}"
+                       class="btn btn-primary btn-sm header-cta">
+                        <span>Начать решение</span>
+                        <span class="header-cta__icon" aria-hidden="true">
+                            {% icon "arrow-right" size=14 %}
+                        </span>
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <!-- ================================================================
+             FLASH-СООБЩЕНИЯ
+             ================================================================ -->
+        {% if messages %}
+            <div class="flash-messages" role="status" aria-live="polite">
+                {% for message in messages %}
+                    <div class="flash flash--{{ message.tags|default:'info' }}">
+                        <span class="flash-text">{{ message }}</span>
+                        <button type="button" class="flash-close" aria-label="Закрыть">×</button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- ================================================================
+             ОСНОВНОЙ КОНТЕНТ
+             ================================================================ -->
+        <main class="app-main" id="main-content" tabindex="-1">
+            {% block content %}{% endblock %}
+        </main>
+
+        <!-- ================================================================
+             FAB
+             ================================================================ -->
+        {% block fab %}
+            <button type="button"
+                    class="mobile-fab"
+                    data-mobile-fab
+                    aria-label="Открыть калькулятор"
+                    data-haptic="light">
+                <span class="mobile-fab__orbit" aria-hidden="true"></span>
+                <span class="mobile-fab-symbol" aria-hidden="true">λ</span>
+            </button>
+        {% endblock %}
+
+        <!-- ================================================================
+             НИЖНЯЯ НАВИГАЦИЯ (мобильная)
+             ================================================================ -->
+        <nav class="mobile-tabbar" data-mobile-tabbar aria-label="Быстрая навигация">
+            <a href="{% url 'matrix_app:home' %}"
+               class="mobile-tabbar-item {% if ACTIVE_PAGE == 'matrix_app:home' %}is-active{% endif %}"
+               data-haptic="light">
+                <span class="mobile-tabbar-symbol" aria-hidden="true">◆</span>
+                <span>Главная</span>
+            </a>
+            <a href="{% url 'matrix_app:calculator' %}"
+               class="mobile-tabbar-item {% if ACTIVE_PAGE == 'matrix_app:calculator' %}is-active{% endif %}"
+               data-haptic="light">
+                <span class="mobile-tabbar-symbol" aria-hidden="true">=</span>
+                <span>Считать</span>
+            </a>
+            <a href="{% url 'matrix_app:operations' %}"
+               class="mobile-tabbar-item {% if ACTIVE_PAGE == 'matrix_app:operations' %}is-active{% endif %}"
+               data-haptic="light">
+                <span class="mobile-tabbar-symbol" aria-hidden="true">×</span>
+                <span>Операции</span>
+            </a>
+            <a href="{% url 'matrix_app:modules' %}"
+               class="mobile-tabbar-item {% if ACTIVE_PAGE == 'matrix_app:modules' or ACTIVE_SCHOOL_SLUG %}is-active{% endif %}"
+               data-haptic="light">
+                <span class="mobile-tabbar-symbol" aria-hidden="true">◈</span>
+                <span>Школы</span>
+            </a>
+            <button type="button"
+                    class="mobile-tabbar-item mobile-tabbar-item--more"
+                    data-mobile-tabbar-more
+                    aria-label="Ещё"
+                    data-haptic="light">
+                <span class="mobile-tabbar-symbol" aria-hidden="true">⋯</span>
+                <span>Ещё</span>
+            </button>
+        </nav>
+
+        <div class="footer-divider" aria-hidden="true">
+            <span class="footer-divider__line"></span>
+            <span class="footer-divider__dot"></span>
+        </div>
+
+        <!-- ================================================================
+             ФУТЕР
+             ================================================================ -->
+        <footer class="app-footer">
+            <div class="app-footer__grid-bg" aria-hidden="true"></div>
+
+            <div class="footer-inner">
+
+                <!-- Колонка 1: бренд -->
+                <div class="footer-col footer-col--brand">
+                    <div class="footer-logo">
+                        <span class="footer-logo-mark" aria-hidden="true">
+                            {% icon "logo-mark" size=28 %}
+                        </span>
+                        <strong>{{ APP_NAME }}</strong>
+                    </div>
+                    <p class="footer-desc">
+                        Инструмент для изучения матриц и линейной алгебры.
+                        Точные вычисления, пошаговые решения, интерактивный интерфейс.
+                    </p>
+                    <div class="footer-tags">
+                        <span class="footer-tag">Точная арифметика</span>
+                        <span class="footer-tag">Пошагово</span>
+                        <span class="footer-tag">Экспорт</span>
+                    </div>
+                </div>
+
+                <!-- Колонка 2: Инструменты -->
+                <div class="footer-col">
+                    <h4>Инструменты</h4>
+                    <ul>
+                        <li><a href="{% url 'matrix_app:calculator' %}"><span>Калькулятор</span></a></li>
+                        <li><a href="{% url 'matrix_app:operations' %}"><span>Операции</span></a></li>
+                        <li><a href="{% url 'matrix_app:properties' %}"><span>Свойства</span></a></li>
+                        <li><a href="{% url 'matrix_app:systems' %}"><span>СЛАУ</span></a></li>
+                        <li><a href="{% url 'matrix_app:decompositions' %}"><span>Разложения</span></a></li>
+                        <li><a href="{% url 'matrix_app:eigen' %}"><span>Спектр</span></a></li>
+                    </ul>
+                </div>
+
+                <!-- Колонка 3: Обучение -->
+                <div class="footer-col">
+                    <h4>Обучение</h4>
+                    <ul>
+                        <li><a href="{% url 'matrix_app:theory' %}"><span>Теория</span></a></li>
+                        <li><a href="{% url 'matrix_app:types' %}"><span>Виды матриц</span></a></li>
+                        <li><a href="{% url 'matrix_app:modules' %}"><span>Применение</span></a></li>
+                    </ul>
+
+                    <h4 class="footer-col__subhead">Личное</h4>
+                    <ul>
+                        <li><a href="{% url 'matrix_app:saved_matrices' %}"><span>Сохранённые</span></a></li>
+                        <li><a href="{% url 'matrix_app:history' %}"><span>История</span></a></li>
+                    </ul>
+                </div>
+
+                <!-- Колонка 4: Возможности -->
+                <div class="footer-col">
+                    <h4>Что вы получите</h4>
+                    <ul class="footer-features">
+                        <li>
+                            <span class="footer-feature-icon" aria-hidden="true">✓</span>
+                            <span>Точные вычисления: дроби, корни и символы без округлений</span>
+                        </li>
+                        <li>
+                            <span class="footer-feature-icon" aria-hidden="true">✓</span>
+                            <span>Пошаговое решение с формулами и пояснениями</span>
+                        </li>
+                        <li>
+                            <span class="footer-feature-icon" aria-hidden="true">✓</span>
+                            <span>Проверка результата: подстановка, инварианты, обратное умножение</span>
+                        </li>
+                        <li>
+                            <span class="footer-feature-icon" aria-hidden="true">✓</span>
+                            <span>Экспорт в LaTeX, Markdown, JSON и текстовый отчёт</span>
+                        </li>
+                        <li>
+                            <span class="footer-feature-icon" aria-hidden="true">✓</span>
+                            <span>История и сохранённые матрицы — вернуться к любой задаче</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div class="footer-bottom-inner">
+                    <span>© {{ CURRENT_YEAR }} {{ APP_NAME }}</span>
+                    <span class="footer-built">Линейная алгебра · Точные вычисления</span>
+                </div>
+            </div>
+        </footer>
+
+    </div><!-- /.app-shell -->
+
+    <!-- ================================================================
+         МОДАЛКА ПОИСКА
+         ================================================================ -->
+    <div class="search-modal" data-search-modal hidden
+         role="dialog" aria-modal="true" aria-labelledby="search-modal-title">
+
+        <div class="search-modal__backdrop" data-search-close></div>
+
+        <div class="search-modal__panel" role="document">
+
+            <form class="search-modal__form"
+                  action="{% url 'matrix_app:search' %}"
+                  method="get"
+                  role="search"
+                  autocomplete="off">
+                <span class="search-modal__icon" aria-hidden="true">
+                    {% icon "search" size=22 %}
+                </span>
+                <input type="search"
+                       name="q"
+                       id="search-modal-title"
+                       class="search-modal__input"
+                       placeholder="Определитель, обратная, LU, СЛАУ…"
+                       autocomplete="off"
+                       spellcheck="false"
+                       data-search-input>
+                <button type="button"
+                        class="search-modal__close"
+                        data-search-close
+                        aria-label="Закрыть поиск">
+                    {% icon "close" size=18 %}
+                </button>
+            </form>
+
+            <div class="search-modal__body" data-search-results>
+                <p class="search-modal__hint">
+                    Введите запрос — начнём искать по разделам, операциям
+                    и теории. Например: «обратная», «LU», «собственные», «СЛАУ».
+                </p>
+            </div>
+
+            <div class="search-modal__foot">
+                <span class="search-modal__kbd"><kbd>Enter</kbd> — найти</span>
+                <span class="search-modal__kbd"><kbd>Esc</kbd> — закрыть</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================
+         МОБИЛЬНОЕ МЕНЮ — старая шторка (оставлена для совместимости,
+         скрыта через CSS; в новой логике сайдбар работает как оверлей)
+         ================================================================ -->
+    <div class="mobile-nav-backdrop" data-mobile-nav-backdrop hidden></div>
+
+    <!-- ================================================================
+         УВЕДОМЛЕНИЯ, ЗАГРУЗЧИК
+         ================================================================ -->
+    <div class="toast-container"
+         data-toast-container
+         aria-live="polite"
+         aria-atomic="false"></div>
+
+    <div class="global-loader"
+         data-global-loader
+         role="status"
+         aria-live="polite"
+         hidden>
+        <div class="loader-spinner" aria-hidden="true">
+            <span></span><span></span><span></span>
+        </div>
+        <span class="loader-text">Вычисляем…</span>
+    </div>
+
+
+    <!-- ================================================================
+         СКРИПТЫ
+         ================================================================ -->
+    <noscript>
+        <div class="noscript-warning">
+            Для работы MatrixLab требуется JavaScript.
+            Пожалуйста, включите его в настройках браузера.
+        </div>
+    </noscript>
+
+    <script>
+        window.MatrixLab = window.MatrixLab || {};
+        try {
+            var cfgEl = document.getElementById('ml-config');
+            window.MatrixLab.config = cfgEl
+                ? JSON.parse(cfgEl.textContent)
+                : {};
+        } catch (e) {
+            window.MatrixLab.config = {};
+        }
+    </script>
+
+    <script src="{% static 'matrix_app/js/main.js' %}"></script>
+    <script src="{% static 'matrix_app/js/matrix.js' %}"></script>
+    <script src="{% static 'matrix_app/js/steps.js' %}"></script>
+    <script src="{% static 'matrix_app/js/export.js' %}"></script>
+    <script defer src="{% static 'matrix_app/js/mobile.js' %}"></script>
+
+    {% block extra_scripts %}{% endblock %}
+    {% block body_end %}{% endblock %}
+
+</body>
+</html>

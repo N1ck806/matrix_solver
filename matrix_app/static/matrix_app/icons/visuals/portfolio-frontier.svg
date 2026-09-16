@@ -1,0 +1,167 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" fill="none"
+     role="img" aria-label="Эффективная граница Марковица">
+    <defs>
+        <linearGradient id="pf-bg" x1="0" y1="0" x2="800" y2="600" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#10B981" stop-opacity="0.06"/>
+            <stop offset="1" stop-color="#6366F1" stop-opacity="0.06"/>
+        </linearGradient>
+        <linearGradient id="pf-frontier" x1="0" y1="1" x2="1" y2="0">
+            <stop stop-color="#10B981"/>
+            <stop offset="0.5" stop-color="#06B6D4"/>
+            <stop offset="1" stop-color="#8B5CF6"/>
+        </linearGradient>
+        <radialGradient id="pf-cloud" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse"
+                        gradientTransform="translate(400 320) scale(200)">
+            <stop stop-color="#10B981" stop-opacity="0.15"/>
+            <stop offset="1" stop-color="#10B981" stop-opacity="0"/>
+        </radialGradient>
+        <filter id="pf-glow" x="-40%" y="-40%" width="180%" height="180%">
+            <feGaussianBlur stdDeviation="6" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+    </defs>
+
+    <rect width="800" height="600" fill="url(#pf-bg)" rx="24"/>
+
+    <!-- Заголовок -->
+    <rect x="180" y="28" width="440" height="56" rx="28"
+          fill="#10B981" fill-opacity="0.12"
+          stroke="#10B981" stroke-opacity="0.45" stroke-width="1.5"/>
+    <text x="400" y="64" text-anchor="middle"
+          font-family="system-ui, -apple-system, sans-serif"
+          font-size="22" font-weight="800" fill="#047857">
+        Эффективная граница Марковица
+    </text>
+
+    <!-- Облако портфелей -->
+    <ellipse cx="400" cy="360" rx="260" ry="150"
+             fill="url(#pf-cloud)" transform="rotate(-20 400 360)"/>
+
+    <!-- Оси графика -->
+    <g stroke="#CBD5E1" stroke-width="1.5">
+        <!-- Y-ось (доходность) -->
+        <line x1="100" y1="120" x2="100" y2="480" stroke="#94A3B8"/>
+        <polygon points="100,116 94,124 106,124" fill="#94A3B8"/>
+        <text x="95" y="106" text-anchor="end"
+              font-family="system-ui, sans-serif"
+              font-size="13" font-weight="800" fill="#059669">
+            μ (доходность)
+        </text>
+
+        <!-- X-ось (риск) -->
+        <line x1="100" y1="480" x2="720" y2="480" stroke="#94A3B8"/>
+        <polygon points="726,480 718,474 718,486" fill="#94A3B8"/>
+        <text x="720" y="500" text-anchor="middle"
+              font-family="system-ui, sans-serif"
+              font-size="13" font-weight="800" fill="#0891B2">
+            σ (риск)
+        </text>
+    </g>
+
+    <!-- Сетка -->
+    <g stroke="#E5E7EB" stroke-width="0.8" opacity="0.6">
+        <line x1="100" y1="200" x2="720" y2="200"/>
+        <line x1="100" y1="280" x2="720" y2="280"/>
+        <line x1="100" y1="360" x2="720" y2="360"/>
+        <line x1="100" y1="440" x2="720" y2="440"/>
+
+        <line x1="220" y1="120" x2="220" y2="480"/>
+        <line x1="340" y1="120" x2="340" y2="480"/>
+        <line x1="460" y1="120" x2="460" y2="480"/>
+        <line x1="580" y1="120" x2="580" y2="480"/>
+    </g>
+
+    <!-- Облако точек-портфелей -->
+    <g opacity="0.55">
+        <circle cx="180" cy="440" r="3.5" fill="#94A3B8"/>
+        <circle cx="220" cy="410" r="3.5" fill="#94A3B8"/>
+        <circle cx="260" cy="420" r="3.5" fill="#94A3B8"/>
+        <circle cx="290" cy="380" r="3.5" fill="#94A3B8"/>
+        <circle cx="340" cy="360" r="3.5" fill="#94A3B8"/>
+        <circle cx="380" cy="350" r="3.5" fill="#94A3B8"/>
+        <circle cx="420" cy="320" r="3.5" fill="#94A3B8"/>
+        <circle cx="470" cy="300" r="3.5" fill="#94A3B8"/>
+        <circle cx="510" cy="280" r="3.5" fill="#94A3B8"/>
+        <circle cx="560" cy="250" r="3.5" fill="#94A3B8"/>
+        <circle cx="600" cy="230" r="3.5" fill="#94A3B8"/>
+        <circle cx="640" cy="210" r="3.5" fill="#94A3B8"/>
+        <circle cx="200" cy="380" r="3" fill="#CBD5E1"/>
+        <circle cx="250" cy="350" r="3" fill="#CBD5E1"/>
+        <circle cx="310" cy="300" r="3" fill="#CBD5E1"/>
+        <circle cx="360" cy="270" r="3" fill="#CBD5E1"/>
+        <circle cx="430" cy="260" r="3" fill="#CBD5E1"/>
+        <circle cx="500" cy="220" r="3" fill="#CBD5E1"/>
+        <circle cx="560" cy="200" r="3" fill="#CBD5E1"/>
+        <circle cx="620" cy="180" r="3" fill="#CBD5E1"/>
+        <circle cx="220" cy="360" r="3" fill="#CBD5E1"/>
+        <circle cx="300" cy="330" r="3" fill="#CBD5E1"/>
+    </g>
+
+    <!-- Эффективная граница -->
+    <path d="M 170 420 Q 300 380 420 300 Q 540 220 680 150"
+          fill="none" stroke="url(#pf-frontier)" stroke-width="4"
+          stroke-linecap="round" filter="url(#pf-glow)"/>
+
+    <!-- Точки на границе: портфели -->
+    <circle cx="200" cy="408" r="7" fill="#10B981" filter="url(#pf-glow)"/>
+    <text x="200" y="425" text-anchor="middle"
+          font-family="system-ui, sans-serif"
+          font-size="10" font-weight="700" fill="#047857">A</text>
+
+    <circle cx="400" cy="315" r="7" fill="#06B6D4" filter="url(#pf-glow)"/>
+    <text x="400" y="332" text-anchor="middle"
+          font-family="system-ui, sans-serif"
+          font-size="10" font-weight="700" fill="#0891B2">B</text>
+
+    <circle cx="600" cy="220" r="7" fill="#8B5CF6" filter="url(#pf-glow)"/>
+    <text x="600" y="237" text-anchor="middle"
+          font-family="system-ui, sans-serif"
+          font-size="10" font-weight="700" fill="#7C3AED">C</text>
+
+    <!-- Точка минимального риска -->
+    <circle cx="200" cy="408" r="12" fill="none" stroke="#10B981" stroke-width="2" opacity="0.6"/>
+
+    <!-- Стрелка: оптимальный портфель -->
+    <g>
+        <text x="640" y="140" text-anchor="middle"
+              font-family="system-ui, sans-serif"
+              font-size="12" font-weight="800" fill="#7C3AED">
+            эффективная граница
+        </text>
+        <path d="M 640 155 Q 640 180 620 190"
+              fill="none" stroke="#7C3AED" stroke-width="1.5"
+              stroke-dasharray="3 3"/>
+    </g>
+
+    <!-- Формула внизу слева -->
+    <g transform="translate(60, 510)">
+        <rect x="0" y="0" width="320" height="60" rx="14"
+              fill="#FFFFFF" fill-opacity="0.95"
+              stroke="#10B981" stroke-opacity="0.45" stroke-width="1.5"/>
+        <text x="160" y="26" text-anchor="middle"
+              font-family="system-ui, sans-serif"
+              font-size="13" font-weight="800" fill="#047857"
+              letter-spacing="1">ОПТИМАЛЬНЫЙ ПОРТФЕЛЬ</text>
+        <text x="160" y="48" text-anchor="middle"
+              font-family="ui-monospace, monospace"
+              font-size="13" font-weight="700" fill="#059669">
+            w* = Σ⁻¹μ / (1ᵀΣ⁻¹μ)
+        </text>
+    </g>
+
+    <!-- Формула внизу справа -->
+    <g transform="translate(420, 510)">
+        <rect x="0" y="0" width="320" height="60" rx="14"
+              fill="#FFFFFF" fill-opacity="0.95"
+              stroke="#06B6D4" stroke-opacity="0.45" stroke-width="1.5"/>
+        <text x="160" y="26" text-anchor="middle"
+              font-family="system-ui, sans-serif"
+              font-size="13" font-weight="800" fill="#0891B2"
+              letter-spacing="1">РИСК ПОРТФЕЛЯ</text>
+        <text x="160" y="48" text-anchor="middle"
+              font-family="ui-monospace, monospace"
+              font-size="13" font-weight="700" fill="#0891B2">
+            σ² = wᵀ Σ w
+        </text>
+    </g>
+</svg>

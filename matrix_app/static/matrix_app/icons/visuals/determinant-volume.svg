@@ -1,0 +1,127 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" fill="none"
+     role="img" aria-label="Геометрический смысл определителя">
+    <defs>
+        <linearGradient id="dv-bg" x1="0" y1="0" x2="800" y2="600" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#6366F1" stop-opacity="0.06"/>
+            <stop offset="1" stop-color="#EC4899" stop-opacity="0.06"/>
+        </linearGradient>
+        <linearGradient id="dv-square" x1="0" y1="0" x2="1" y2="1">
+            <stop stop-color="#A78BFA"/>
+            <stop offset="1" stop-color="#7C3AED"/>
+        </linearGradient>
+        <linearGradient id="dv-parallelogram" x1="0" y1="0" x2="1" y2="1">
+            <stop stop-color="#F0ABFC"/>
+            <stop offset="1" stop-color="#EC4899"/>
+        </linearGradient>
+        <filter id="dv-glow" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="8" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <marker id="dv-arrow" viewBox="0 0 10 10" refX="9" refY="5"
+                markerWidth="7" markerHeight="7" orient="auto">
+            <path d="M0,0 L10,5 L0,10 Z" fill="#7C3AED"/>
+        </marker>
+    </defs>
+
+    <rect width="800" height="600" fill="url(#dv-bg)" rx="24"/>
+
+    <!-- Заголовок -->
+    <rect x="180" y="40" width="440" height="60" rx="30"
+          fill="#8B5CF6" fill-opacity="0.12"
+          stroke="#8B5CF6" stroke-opacity="0.4" stroke-width="1.5"/>
+    <text x="400" y="78" text-anchor="middle"
+          font-family="system-ui, -apple-system, sans-serif"
+          font-size="24" font-weight="800" fill="#7C3AED">
+        det A = площадь образа
+    </text>
+
+    <!-- Единичный квадрат (слева) -->
+    <g transform="translate(140, 180)">
+        <text x="70" y="-20" text-anchor="middle"
+              font-family="system-ui, sans-serif"
+              font-size="14" font-weight="700" fill="#7C3AED">
+            Единичный квадрат
+        </text>
+        <!-- Оси -->
+        <line x1="0" y1="150" x2="180" y2="150" stroke="#CBD5E1" stroke-width="1"/>
+        <line x1="0" y1="0" x2="0" y2="150" stroke="#CBD5E1" stroke-width="1"/>
+        <!-- Квадрат -->
+        <rect x="0" y="60" width="90" height="90"
+              fill="url(#dv-square)" opacity="0.85"
+              stroke="#7C3AED" stroke-width="2"/>
+        <!-- Подписи -->
+        <text x="45" y="185" text-anchor="middle"
+              font-family="system-ui, sans-serif" font-size="12" fill="#6B7280">
+            Площадь = 1
+        </text>
+        <!-- Метка единицы -->
+        <g stroke="#7C3AED" stroke-width="1.5">
+            <line x1="0" y1="140" x2="90" y2="140"/>
+            <line x1="0" y1="135" x2="0" y2="145"/>
+            <line x1="90" y1="135" x2="90" y2="145"/>
+        </g>
+    </g>
+
+    <!-- Стрелка преобразования -->
+    <g>
+        <line x1="360" y1="300" x2="440" y2="300"
+              stroke="#7C3AED" stroke-width="3"
+              marker-end="url(#dv-arrow)" stroke-linecap="round"/>
+        <text x="400" y="285" text-anchor="middle"
+              font-family="system-ui, sans-serif"
+              font-size="13" font-weight="700" fill="#7C3AED">A</text>
+        <!-- Пульсация стрелки -->
+        <circle r="4" fill="#EC4899" filter="url(#dv-glow)">
+            <animateMotion dur="2s" repeatCount="indefinite"
+                           path="M360,300 L440,300"/>
+            <animate attributeName="opacity" values="1;0.4;1" dur="2s" repeatCount="indefinite"/>
+        </circle>
+    </g>
+
+    <!-- Параллелограмм (справа) -->
+    <g transform="translate(500, 180)">
+        <text x="90" y="-20" text-anchor="middle"
+              font-family="system-ui, sans-serif"
+              font-size="14" font-weight="700" fill="#EC4899">
+            Образ A·квадрата
+        </text>
+        <!-- Оси -->
+        <line x1="0" y1="150" x2="200" y2="150" stroke="#CBD5E1" stroke-width="1"/>
+        <line x1="0" y1="0" x2="0" y2="150" stroke="#CBD5E1" stroke-width="1"/>
+        <!-- Параллелограмм: A = [[2, 1], [1, 2]] -->
+        <!-- (0,0) -> (90, 30) -> (150, 120) -> (60, 90) -->
+        <polygon points="0,150 90,120 150,60 60,90"
+                 fill="url(#dv-parallelogram)" opacity="0.8"
+                 stroke="#EC4899" stroke-width="2"/>
+        <!-- Векторы-столбцы -->
+        <line x1="0" y1="150" x2="90" y2="120"
+              stroke="#8B5CF6" stroke-width="2.5" marker-end="url(#dv-arrow)"/>
+        <line x1="0" y1="150" x2="60" y2="90"
+              stroke="#EC4899" stroke-width="2.5" marker-end="url(#dv-arrow)"/>
+        <!-- Подписи -->
+        <text x="100" y="185" text-anchor="middle"
+              font-family="system-ui, sans-serif" font-size="12" fill="#6B7280">
+            Площадь = |det A|
+        </text>
+    </g>
+
+    <!-- Формула det A -->
+    <rect x="240" y="490" width="320" height="60" rx="16"
+          fill="#FFFFFF" fill-opacity="0.9"
+          stroke="#8B5CF6" stroke-opacity="0.4" stroke-width="1.5"
+          filter="url(#dv-glow)"/>
+    <text x="400" y="527" text-anchor="middle"
+          font-family="system-ui, sans-serif"
+          font-size="20" font-weight="800" fill="#7C3AED">
+        det A = ad − bc
+    </text>
+
+    <!-- Нижняя плашка -->
+    <rect x="180" y="565" width="440" height="26" rx="13"
+          fill="#EC4899" fill-opacity="0.08"/>
+    <text x="400" y="583" text-anchor="middle"
+          font-family="system-ui, sans-serif"
+          font-size="12" font-weight="600" fill="#BE185D">
+        det A = 0 → площадь нулевая → преобразование необратимо
+    </text>
+</svg>

@@ -1,0 +1,1272 @@
+/* =============================================================================
+   MatrixLab — responsive.css
+   =============================================================================
+   Единая система адаптивности проекта.
+
+       1.  Принципы и точки останова
+       2.  Тач-устройства (hover: none)
+       3.  Очень широкие экраны (1600px+)
+       4.  1200px — небольшие ноутбуки
+       5.  992px — планшеты
+       6.  768px — планшеты вертикально / крупные телефоны
+       7.  640px — телефоны
+       8.  480px — маленькие телефоны
+       9.  360px — очень узкие экраны
+      10.  Landscape-ориентация (max-height: 500px)
+      11.  Печать (print)
+      12.  Тёмная тема — точечные адаптации
+      13.  High-DPI / Retina
+      14.  Утилитарные responsive-классы
+      15.  Контейнерные запросы (прогрессивное улучшение)
+      16.  Финальная очистка
+   ============================================================================= */
+
+
+/* =============================================================================
+   1. ПРИНЦИПЫ И ТОЧКИ ОСТАНОВА
+   =============================================================================
+   - Desktop-first: базовые стили в main.css / calculator.css.
+   - Все размеры — через CSS-переменные, чтобы менять в одном месте.
+   - Точки останова: 1600, 1200, 992, 768, 640, 480, 360.
+   - Дополнительно: landscape, print, dark, high-DPI, container queries.
+   ============================================================================= */
+
+
+/* =============================================================================
+   2. ТАЧ-УСТРОЙСТВА (hover: none)
+   =============================================================================
+   На сенсорных экранах hover «залипает» после тапа. Убираем подъёмы и
+   трансформации, оставляем только цветовые отклики.
+   ============================================================================= */
+
+@media (hover: none) {
+    /* Карточки — без подъёма */
+    .feature-card:hover,
+    .example-card:hover,
+    .prop-detail-card:hover,
+    .decomp-info-card:hover,
+    .eigen-info-card:hover,
+    .about-audience-card:hover,
+    .about-tech-card:hover,
+    .about-principle:hover,
+    .saved-card:hover,
+    .card:hover {
+        transform: none;
+        box-shadow: var(--shadow-sm);
+    }
+
+    /* Иконки — без вращения */
+    .feature-card:hover .feature-icon {
+        transform: none;
+    }
+
+    /* Стрелки — без сдвига */
+    .example-card:hover .example-card-arrow {
+        transform: none;
+        color: inherit;
+    }
+
+    /* История — без сдвига */
+    .history-item:hover {
+        transform: none;
+    }
+
+    /* Кнопки — без подъёма, но с активным состоянием */
+    .btn-primary:hover:not(:disabled),
+    .btn-soft:hover:not(:disabled) {
+        transform: none;
+    }
+
+    /* Активное нажатие — оставляем тактильный отклик */
+    .btn-primary:active:not(:disabled) {
+        transform: scale(0.98);
+    }
+
+    /* Навигация — без масштабирования иконок */
+    .nav-link:hover .icon,
+    .mobile-nav-link:hover .icon {
+        transform: none;
+    }
+}
+
+
+/* =============================================================================
+   3. ОЧЕНЬ ШИРОКИЕ ЭКРАНЫ (1600px+)
+   =============================================================================
+   Ограничиваем ширину текста для читаемости и центрируем контент.
+   ============================================================================= */
+
+@media (min-width: 1600px) {
+    :root {
+        --container-max: 1320px;
+        --space-section: 96px;
+    }
+
+    /* Читаемость длинных текстов */
+    .theory-article-body > p,
+    .about-intro-content p,
+    .kronecker-theorem p,
+    .error-page-message,
+    .hero-subtitle,
+    .section-subtitle {
+        max-width: 72ch;
+    }
+
+    /* Hero — больше воздуха */
+    .hero {
+        padding: var(--space-20) 0;
+    }
+
+    /* Сетки — максимум 4 колонки, не больше */
+    .feature-grid,
+    .examples-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+
+/* =============================================================================
+   4. 1200px И НИЖЕ — небольшие ноутбуки, планшеты в альбомной ориентации
+   ============================================================================= */
+
+@media (max-width: 1200px) {
+    :root {
+        --container-padding: 20px;
+        --space-section: 72px;
+    }
+
+    /* --- Футер: три колонки, бренд на всю ширину --- */
+    .footer-inner {
+        grid-template-columns: 1.4fr 1fr 1fr;
+    }
+
+    .footer-col:last-child {
+        grid-column: 1 / -1;
+    }
+
+    /* --- Операции: чуть меньше отступ --- */
+    .ops-matrices {
+        gap: var(--space-4);
+    }
+
+    /* --- Теория: сайдбар сужается --- */
+    .theory-layout-grid {
+        grid-template-columns: 240px minmax(0, 1fr);
+        gap: var(--space-6);
+    }
+
+    /* --- Hero: уменьшаем вертикальные отступы --- */
+    .hero {
+        padding: var(--space-16) 0;
+    }
+
+    /* --- Сетки: 3 колонки максимум --- */
+    .feature-grid,
+    .examples-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    /* --- Матричные карточки в hero — меньше --- */
+    .hero .matrix-card--a,
+    .hero .matrix-card--b {
+        transform: scale(0.92);
+    }
+}
+
+
+/* =============================================================================
+   5. 992px И НИЖЕ — планшеты
+   ============================================================================= */
+
+@media (max-width: 992px) {
+    :root {
+        --text-5xl: 42px;
+        --text-4xl: 34px;
+        --text-3xl: 26px;
+        --space-section: 64px;
+    }
+
+    /* --- Навигация: гамбургер --- */
+    .main-nav    { display: none; }
+    .nav-toggle  { display: flex; }
+    .header-cta  { display: none; }
+    .mobile-nav  { display: block; }
+
+    /* --- Рабочая область: одна колонка, панель снизу --- */
+    .calc-workspace-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .calc-panel {
+        position: static;
+        order: 2;
+    }
+
+    .calc-main {
+        order: 1;
+    }
+
+    /* --- Операции A и B — друг под другом --- */
+    .ops-matrices {
+        grid-template-columns: 1fr;
+    }
+
+    /* --- Теория: одна колонка, TOC сверху --- */
+    .theory-layout-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .theory-toc {
+        position: static;
+        max-height: none;
+        margin-bottom: var(--space-6);
+    }
+
+    /* --- О проекте: одна колонка, визуал сверху --- */
+    .about-intro {
+        grid-template-columns: 1fr;
+        gap: var(--space-6);
+    }
+
+    .about-intro-visual {
+        order: -1;
+    }
+
+    /* --- Футер: две колонки, бренд сверху --- */
+    .footer-inner {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-6);
+    }
+
+    .footer-col--brand {
+        grid-column: 1 / -1;
+    }
+
+    /* --- Секции --- */
+    .section {
+        padding: var(--space-12) 0;
+    }
+
+    /* --- Операции: компактнее --- */
+    .ops-selector {
+        gap: var(--space-1);
+    }
+
+    .ops-btn {
+        min-width: 90px;
+        padding: var(--space-2) var(--space-3);
+    }
+
+    /* --- Сетки: 2 колонки --- */
+    .feature-grid,
+    .examples-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    /* --- Hero: скрываем часть декора --- */
+    .hero .formula-chip--3,
+    .hero .formula-chip--4 {
+        display: none;
+    }
+}
+
+
+/* =============================================================================
+   6. 768px И НИЖЕ — планшеты вертикально / крупные телефоны
+   ============================================================================= */
+
+@media (max-width: 768px) {
+    :root {
+        --container-padding: 16px;
+        --text-5xl: 36px;
+        --text-4xl: 28px;
+        --text-3xl: 22px;
+        --text-2xl: 20px;
+        --space-section: 56px;
+
+        /* Размеры матричных ячеек — централизованно */
+        --matrix-cell-w: 60px;
+        --matrix-cell-h: 36px;
+        --matrix-cell-font: var(--text-sm);
+    }
+
+    /* --- Page head --- */
+    .page-head {
+        padding: var(--space-6) 0 var(--space-4);
+    }
+
+    .page-head-row {
+        flex-direction: column;
+        gap: var(--space-4);
+    }
+
+    .page-head-actions {
+        width: 100%;
+    }
+
+    /* --- Секции --- */
+    .section {
+        padding: var(--space-10) 0;
+    }
+
+    .section-head {
+        margin-bottom: var(--space-6);
+    }
+
+    /* --- Рабочая область --- */
+    .calc-workspace {
+        padding: var(--space-6) 0 var(--space-12);
+    }
+
+    /* --- Матричные карточки --- */
+    .matrix-input-head,
+    .matrix-input-body {
+        padding: var(--space-4);
+    }
+
+    .matrix-input-grid input,
+    .vector-input-grid input {
+        width: var(--matrix-cell-w);
+        height: var(--matrix-cell-h);
+        font-size: var(--matrix-cell-font);
+    }
+
+    /* --- Результат --- */
+    .result-toolbar {
+        padding: var(--space-3);
+    }
+
+    .result-section {
+        padding: var(--space-4);
+    }
+
+    .result-section-head {
+        gap: var(--space-2);
+    }
+
+    .result-task-formula,
+    .result-output,
+    .step-formula {
+        padding: var(--space-3);
+        font-size: var(--text-sm);
+    }
+
+    /* Действия результата — сетка 2×N */
+    .result-actions {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-2);
+    }
+
+    .result-actions .btn {
+        width: 100%;
+    }
+
+    /* --- Кнопки --- */
+    .btn-lg {
+        padding: 12px 20px;
+        font-size: var(--text-base);
+    }
+
+    /* --- Модалки --- */
+    .modal-dialog {
+        max-width: 100%;
+        border-radius: var(--radius-lg);
+    }
+
+    .modal-head,
+    .modal-body,
+    .modal-foot {
+        padding: var(--space-4);
+    }
+
+    /* --- Формы --- */
+    .form-grid--2 {
+        grid-template-columns: 1fr;
+    }
+
+    /* --- Примеры и сетки --- */
+    .examples-grid,
+    .props-features,
+    .eigen-info-grid,
+    .decomp-info-grid,
+    .about-tech,
+    .about-principles,
+    .about-capabilities,
+    .about-audience,
+    .types-grid,
+    .decomp-selector,
+    .eigen-op-tabs,
+    .feature-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* --- История: grid-areas --- */
+    .history-item {
+        display: grid;
+        gap: var(--space-3);
+        grid-template-areas:
+            "time actions"
+            "body body";
+    }
+
+    .history-item-time    { grid-area: time;    min-width: 0; }
+    .history-item-body    { grid-area: body; }
+    .history-item-actions { grid-area: actions; }
+
+    /* --- Футер --- */
+    .footer-inner {
+        grid-template-columns: 1fr;
+        gap: var(--space-6);
+    }
+
+    .footer-bottom-inner {
+        flex-direction: column;
+        text-align: center;
+        gap: var(--space-2);
+    }
+
+    /* --- Ошибки --- */
+    .error-page-code {
+        gap: 0;
+    }
+
+    .error-page-digit {
+        font-size: clamp(64px, 18vw, 100px);
+    }
+
+    /* --- Тосты --- */
+    .toast-container {
+        right: 12px;
+        left: 12px;
+        width: auto;
+        top: calc(var(--header-height) + 8px);
+    }
+
+    /* --- Теория --- */
+    .theory-article {
+        padding: var(--space-5);
+    }
+
+    .theory-article-head h2 {
+        font-size: var(--text-xl);
+    }
+
+    /* --- Hero: скрываем декор --- */
+    .hero .formula-chip {
+        display: none;
+    }
+
+    .hero .matrix-card--a,
+    .hero .matrix-card--b {
+        display: none;
+    }
+}
+
+
+/* =============================================================================
+   7. 640px И НИЖЕ — телефоны
+   ============================================================================= */
+
+@media (max-width: 640px) {
+    :root {
+        --container-padding: 14px;
+        --space-8: 24px;
+        --space-10: 32px;
+        --space-12: 40px;
+        --space-16: 48px;
+        --space-section: 48px;
+
+        --matrix-cell-w: 52px;
+        --matrix-cell-h: 34px;
+        --matrix-cell-font: 13px;
+    }
+
+    /* --- Логотип: без подписи --- */
+    .logo-sub {
+        display: none;
+    }
+
+    /* --- Шапка --- */
+    .header-inner {
+        gap: var(--space-3);
+    }
+
+    /* --- Заголовки --- */
+    .page-title {
+        font-size: var(--text-2xl);
+    }
+
+    .page-subtitle {
+        font-size: var(--text-sm);
+    }
+
+    .section-title {
+        font-size: var(--text-2xl);
+    }
+
+    .section-subtitle {
+        font-size: var(--text-base);
+    }
+
+    /* --- Калькулятор --- */
+    .calc-card {
+        padding: var(--space-4);
+    }
+
+    /* --- Матрицы --- */
+    .matrix-input-grid input,
+    .vector-input-grid input {
+        width: var(--matrix-cell-w);
+        height: var(--matrix-cell-h);
+        font-size: var(--matrix-cell-font);
+        padding: 0 6px;
+    }
+
+    .matrix-letter {
+        width: 28px;
+        height: 28px;
+        font-size: var(--text-sm);
+    }
+
+    .matrix-input-title h2 {
+        font-size: var(--text-sm);
+    }
+
+    /* --- Инструменты матрицы --- */
+    .matrix-input-tools {
+        gap: var(--space-1);
+    }
+
+    .icon-btn {
+        padding: 6px;
+    }
+
+    .icon-btn span {
+        display: none;
+    }
+
+    /* --- Список операций --- */
+    .op-item-body {
+        padding: 8px;
+    }
+
+    /* --- Результат --- */
+    .result-section-number {
+        width: 24px;
+        height: 24px;
+        font-size: var(--text-xs);
+    }
+
+    .result-section-title {
+        font-size: var(--text-base);
+    }
+
+    .result-view-switch {
+        width: 100%;
+    }
+
+    .switch-btn {
+        flex: 1;
+        justify-content: center;
+        padding: 6px 8px;
+    }
+
+    .switch-btn span {
+        font-size: 11px;
+    }
+
+    /* --- Пошаговое решение --- */
+    .step {
+        padding: var(--space-3);
+        gap: var(--space-3);
+    }
+
+    .step-number {
+        width: 24px;
+        height: 24px;
+        font-size: 11px;
+    }
+
+    .step-title {
+        font-size: var(--text-sm);
+    }
+
+    .step-text {
+        font-size: var(--text-xs);
+    }
+
+    /* --- Кнопки панели --- */
+    .calc-actions .btn {
+        padding: 10px 14px;
+        font-size: var(--text-sm);
+    }
+
+    /* --- Ошибки --- */
+    .error-page {
+        padding: var(--space-10) 0;
+    }
+
+    .error-page-title {
+        font-size: var(--text-2xl);
+    }
+
+    .error-page-message {
+        font-size: var(--text-base);
+    }
+
+    /* --- Модалки: снизу, на всю ширину --- */
+    .modal {
+        align-items: flex-end;
+        padding: 0;
+    }
+
+    .modal-dialog {
+        border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+        max-height: 90vh;
+        animation: modal-in-mobile var(--t-base) cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* --- Спектр --- */
+    .eigen-value-item,
+    .eigen-invariants {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-2);
+    }
+
+    /* --- Свойства --- */
+    .props-summary {
+        grid-template-columns: 1fr;
+    }
+
+    /* --- СЛАУ --- */
+    .methods-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .method-item-body {
+        justify-content: center;
+        text-align: center;
+    }
+
+    /* --- Контролы вертикально --- */
+    .systems-controls,
+    .decomp-controls,
+    .props-actions,
+    .ops-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .systems-buttons,
+    .decomp-buttons,
+    .props-buttons,
+    .ops-buttons {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .systems-buttons .btn,
+    .decomp-buttons .btn,
+    .props-buttons .btn,
+    .ops-buttons .btn {
+        width: 100%;
+    }
+
+    /* --- Операции --- */
+    .ops-selector {
+        padding: var(--space-2);
+    }
+
+    .ops-btn {
+        min-width: calc(50% - var(--space-1));
+        flex: 1 1 auto;
+        padding: var(--space-2);
+    }
+
+    .ops-btn-label  { font-size: 10px; }
+    .ops-btn-symbol { font-size: var(--text-sm); }
+
+    /* --- Примеры --- */
+    .example-card {
+        padding: var(--space-3) var(--space-4);
+    }
+
+    /* --- Сохранённые --- */
+    .saved-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* --- Теория --- */
+    .theory-toc {
+        padding: var(--space-4);
+    }
+
+    /* --- Футер --- */
+    .footer-inner {
+        gap: var(--space-5);
+    }
+}
+
+
+/* =============================================================================
+   8. 480px И НИЖЕ — маленькие телефоны
+   ============================================================================= */
+
+@media (max-width: 480px) {
+    :root {
+        --container-padding: 12px;
+        --header-height: 56px;
+
+        --matrix-cell-w: 46px;
+        --matrix-cell-h: 32px;
+        --matrix-cell-font: 12px;
+    }
+
+    /* --- Логотип --- */
+    .logo-text strong {
+        font-size: var(--text-base);
+    }
+
+    /* --- Шапка --- */
+    .theme-toggle {
+        width: 32px;
+        height: 32px;
+    }
+
+    /* --- Матрицы --- */
+    .matrix-input-grid input,
+    .vector-input-grid input {
+        width: var(--matrix-cell-w);
+        height: var(--matrix-cell-h);
+        font-size: var(--matrix-cell-font);
+    }
+
+    /* --- Размерные контролы --- */
+    .size-btn {
+        width: 26px;
+        height: 26px;
+        font-size: var(--text-base);
+    }
+
+    .size-input {
+        width: 36px;
+        height: 26px;
+    }
+
+    /* --- Операции --- */
+    .op-item-icon {
+        min-width: 24px;
+        height: 24px;
+        padding: 0 4px;
+        font-size: 11px;
+    }
+
+    .op-item-label {
+        font-size: var(--text-xs);
+    }
+
+    /* --- Результат --- */
+    .result-toolbar {
+        gap: var(--space-2);
+    }
+
+    .result-section {
+        padding: var(--space-3);
+    }
+
+    .result-section-head {
+        margin-bottom: var(--space-3);
+    }
+
+    /* --- Ошибки --- */
+    .error-page-digit {
+        font-size: clamp(56px, 22vw, 88px);
+    }
+
+    /* --- Кнопки --- */
+    .btn {
+        padding: 9px 14px;
+        font-size: var(--text-sm);
+    }
+
+    .btn-lg {
+        padding: 11px 18px;
+        font-size: var(--text-base);
+    }
+
+    /* --- Все сетки в одну колонку --- */
+    .props-features,
+    .eigen-info-grid,
+    .decomp-info-grid,
+    .about-tech,
+    .about-principles,
+    .about-capabilities,
+    .about-audience,
+    .types-grid,
+    .saved-grid,
+    .examples-grid,
+    .decomp-selector,
+    .eigen-op-tabs,
+    .feature-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* --- Hero: минимум декора --- */
+    .hero {
+        padding: var(--space-10) 0;
+    }
+
+    .hero-badge {
+        font-size: 11px;
+        padding: 4px 8px;
+    }
+}
+
+
+/* =============================================================================
+   9. 360px И НИЖЕ — очень узкие экраны
+   =============================================================================
+   Samsung Galaxy S8, iPhone SE (1st gen), старые Android.
+   ============================================================================= */
+
+@media (max-width: 360px) {
+    :root {
+        --container-padding: 10px;
+        --header-height: 52px;
+
+        --matrix-cell-w: 42px;
+        --matrix-cell-h: 30px;
+        --matrix-cell-font: 11px;
+    }
+
+    /* --- Логотип: только иконка --- */
+    .logo-text strong {
+        font-size: var(--text-sm);
+    }
+
+    /* --- Матрицы --- */
+    .matrix-input-grid input,
+    .vector-input-grid input {
+        width: var(--matrix-cell-w);
+        height: var(--matrix-cell-h);
+        font-size: var(--matrix-cell-font);
+        padding: 0 4px;
+    }
+
+    /* --- Размерные контролы --- */
+    .size-btn {
+        width: 22px;
+        height: 22px;
+        font-size: var(--text-sm);
+    }
+
+    .size-input {
+        width: 32px;
+        height: 22px;
+        font-size: var(--text-xs);
+    }
+
+    /* --- Кнопки --- */
+    .btn {
+        padding: 8px 12px;
+        font-size: var(--text-xs);
+    }
+
+    /* --- Операции: вертикально --- */
+    .ops-btn {
+        min-width: 100%;
+        flex: 1 1 100%;
+    }
+
+    .ops-btn-label {
+        font-size: 9px;
+    }
+
+    /* --- Результат --- */
+    .result-actions {
+        grid-template-columns: 1fr;
+    }
+
+    /* --- Тосты --- */
+    .toast-container {
+        right: 8px;
+        left: 8px;
+        top: calc(var(--header-height) + 6px);
+    }
+
+    /* --- Модалки --- */
+    .modal-head,
+    .modal-body,
+    .modal-foot {
+        padding: var(--space-3);
+    }
+}
+
+
+/* =============================================================================
+   10. LANDSCAPE-ОРИЕНТАЦИЯ НА ТЕЛЕФОНАХ (max-height: 500px)
+   =============================================================================
+   При повороте телефона высота становится критичной. Убираем лишний декор,
+   модалки открываем сверху, hero сжимаем.
+   ============================================================================= */
+
+@media (max-height: 500px) and (orientation: landscape) {
+    :root {
+        --header-height: 52px;
+        --space-section: 32px;
+    }
+
+    /* --- Модалки: сверху, без скруглений снизу --- */
+    .modal {
+        align-items: flex-start;
+    }
+
+    .modal-dialog {
+        max-height: 100vh;
+        border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+        animation: modal-in var(--t-fast) ease both;
+    }
+
+    /* --- Hero: минимум --- */
+    .hero {
+        min-height: auto;
+        padding: var(--space-6) 0;
+    }
+
+    .hero .matrix-card--a,
+    .hero .matrix-card--b,
+    .hero .formula-chip {
+        display: none;
+    }
+
+    /* --- Секции --- */
+    .section {
+        padding: var(--space-6) 0;
+    }
+
+    /* --- Матричные карточки: ещё компактнее --- */
+    .matrix-input-grid input,
+    .vector-input-grid input {
+        height: 28px;
+        font-size: 11px;
+    }
+
+    /* --- Футер: минимальный --- */
+    .footer-inner {
+        gap: var(--space-4);
+    }
+}
+
+
+/* =============================================================================
+   11. ПЕЧАТЬ (print)
+   =============================================================================
+   Убираем всю интерактивную обвязку, оставляем только содержимое.
+   ============================================================================= */
+
+@media print {
+    /* --- Скрываем интерактив --- */
+    .app-header,
+    .app-footer,
+    .mobile-nav,
+    .nav-toggle,
+    .calc-panel,
+    .result-toolbar,
+    .result-actions,
+    .toast-container,
+    .global-loader,
+    .matrix-input-tools,
+    .page-head-actions,
+    .ops-selector,
+    .systems-controls,
+    .decomp-controls,
+    .props-actions,
+    .eigen-controls,
+    .eigen-buttons,
+    .decomp-buttons,
+    .props-buttons,
+    .systems-buttons,
+    .ops-buttons,
+    .calc-actions,
+    .theme-toggle,
+    .saved-card-actions,
+    .history-item-actions {
+        display: none !important;
+    }
+
+    /* --- Базовые цвета --- */
+    body {
+        background: #fff;
+        color: #000;
+    }
+
+    /* --- Карточки без теней --- */
+    .result-block,
+    .matrix-input-card,
+    .theory-article,
+    .about-section,
+    .card {
+        box-shadow: none;
+        border-color: #ccc;
+    }
+
+    /* --- Разрывы страниц --- */
+    .result-section {
+        page-break-inside: avoid;
+    }
+
+    .theory-article {
+        page-break-before: always;
+    }
+
+    .theory-article:first-of-type {
+        page-break-before: auto;
+    }
+
+    /* --- Ссылки: показываем URL --- */
+    a {
+        color: #000;
+        text-decoration: underline;
+    }
+
+    a::after {
+        content: " (" attr(href) ")";
+        font-size: 11px;
+        color: #666;
+    }
+
+    /* --- Матрицы: рамки чёрные --- */
+    .matrix-input-grid input,
+    .matrix-output-grid input {
+        border-color: #999 !important;
+        background: #fff !important;
+        color: #000 !important;
+    }
+
+    /* --- MathJax: чёрный --- */
+    .MathJax {
+        color: #000 !important;
+    }
+}
+
+
+/* =============================================================================
+   12. ТЁМНАЯ ТЕМА — точечные адаптации под мобильные
+   ============================================================================= */
+
+/* --- Матричные ячейки --- */
+[data-theme="dark"] .matrix-input-grid input,
+[data-theme="dark"] .vector-input-grid input {
+    background: var(--bg-subtle);
+}
+
+[data-theme="dark"] .matrix-input-grid input:focus,
+[data-theme="dark"] .vector-input-grid input:focus {
+    background: var(--bg-card);
+}
+
+/* --- Результат --- */
+[data-theme="dark"] .result-output {
+    background: var(--accent-soft);
+    border-color: rgba(129, 140, 248, 0.2);
+}
+
+/* --- Кронекер --- */
+[data-theme="dark"] .kronecker-formula {
+    background: var(--accent-soft);
+}
+
+/* --- О проекте --- */
+[data-theme="dark"] .about-visual-formula {
+    background: var(--bg-card);
+}
+
+/* --- Разложения --- */
+[data-theme="dark"] .decomp-part {
+    background: var(--bg-card-alt);
+}
+
+/* --- Модалки на мобильных: тёмный фон снизу --- */
+@media (max-width: 640px) {
+    [data-theme="dark"] .modal-dialog {
+        background: var(--bg-card);
+        border-top: 1px solid var(--border-subtle);
+    }
+}
+
+
+/* =============================================================================
+   13. HIGH-DPI / RETINA
+   =============================================================================
+   Тонкие границы, чёткие иконки. Пока ничего критичного, но оставляем
+   точку расширения.
+   ============================================================================= */
+
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    /* Границы 1px на retina выглядят толще — можно утоньшить */
+    .card,
+    .matrix-input-card,
+    .result-section {
+        border-width: 0.5px;
+    }
+
+    /* Тонкие разделители */
+    .footer-bottom,
+    .result-toolbar {
+        border-width: 0.5px;
+    }
+}
+
+
+/* =============================================================================
+   14. УТИЛИТАРНЫЕ RESPONSIVE-КЛАССЫ
+   =============================================================================
+   Для быстрого скрытия/показа на разных экранах.
+   ============================================================================= */
+
+/* --- Скрыть на мобильных --- */
+@media (max-width: 768px) {
+    .hide-mobile { display: none !important; }
+}
+
+/* --- Скрыть на планшетах --- */
+@media (max-width: 992px) {
+    .hide-tablet { display: none !important; }
+}
+
+/* --- Скрыть на десктопе --- */
+@media (min-width: 993px) {
+    .hide-desktop { display: none !important; }
+}
+
+/* --- Показать только на мобильных --- */
+@media (min-width: 769px) {
+    .show-mobile-only { display: none !important; }
+}
+
+/* --- Показать только на десктопе --- */
+@media (max-width: 992px) {
+    .show-desktop-only { display: none !important; }
+}
+
+/* --- Полная ширина на мобильных --- */
+@media (max-width: 640px) {
+    .full-width-mobile {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+}
+
+/* --- Центрирование текста на мобильных --- */
+@media (max-width: 640px) {
+    .text-center-mobile {
+        text-align: center !important;
+    }
+}
+
+/* --- Скрыть при печати --- */
+@media print {
+    .no-print { display: none !important; }
+}
+
+/* --- Показать только при печати --- */
+@media screen {
+    .print-only { display: none !important; }
+}
+
+
+/* =============================================================================
+   15. КОНТЕЙНЕРНЫЕ ЗАПРОСЫ (прогрессивное улучшение)
+   =============================================================================
+   Если браузер поддерживает container queries — карточки адаптируются
+   к ширине родителя, а не экрана. Это позволяет переиспользовать
+   компоненты в разных контекстах.
+   ============================================================================= */
+
+@supports (container-type: inline-size) {
+    /* --- Карточки примеров --- */
+    .example-card {
+        container-type: inline-size;
+    }
+
+    @container (max-width: 280px) {
+        .example-card-title {
+            font-size: var(--text-sm);
+        }
+
+        .example-card-meta {
+            font-size: var(--text-xs);
+        }
+    }
+
+    /* --- Сохранённые матрицы --- */
+    .saved-card {
+        container-type: inline-size;
+    }
+
+    @container (max-width: 240px) {
+        .saved-card-preview {
+            display: none;
+        }
+
+        .saved-card-actions {
+            flex-direction: column;
+        }
+    }
+
+    /* --- Секции результата --- */
+    .result-section {
+        container-type: inline-size;
+    }
+
+    @container (max-width: 400px) {
+        .result-section-head {
+            flex-wrap: wrap;
+        }
+
+        .result-section-actions {
+            width: 100%;
+            justify-content: flex-start;
+        }
+    }
+}
+
+
+/* =============================================================================
+   16. ФИНАЛЬНАЯ ОЧИСТКА
+   ============================================================================= */
+
+/* --- Отключаем анимации при печати --- */
+@media print {
+    *,
+    *::before,
+    *::after {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+/* --- Плавный переход при смене размера окна --- */
+@media (prefers-reduced-motion: no-preference) {
+    .calc-workspace-grid,
+    .theory-layout-grid,
+    .footer-inner,
+    .ops-matrices,
+    .feature-grid,
+    .examples-grid {
+        transition:
+            grid-template-columns var(--t-base),
+            gap var(--t-base);
+    }
+}
+
+/* --- Убираем ховер-эффекты на устройствах без hover --- */
+@media (hover: none) {
+    .btn-primary:hover:not(:disabled)::after,
+    .btn-soft:hover:not(:disabled)::after {
+        opacity: 0;
+    }
+}
