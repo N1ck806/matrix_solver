@@ -1,106 +1,85 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 620" fill="none"
-     role="img" aria-label="Матрица A преобразует векторы v и u и площадь между ними"
+     role="img" aria-label="Матрица A преобразует векторы v и u"
      class="ml-hero-transform"
      preserveAspectRatio="xMidYMid meet"
      font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">
 
   <defs>
 
-    <!-- ============================================================
-         ЯДРО: свет и стекло
-         ============================================================ -->
+    <!-- ЯДРО -->
     <radialGradient id="hx-neon" cx="0.5" cy="0.5" r="0.5">
       <stop offset="0"    stop-color="#FFFFFF" stop-opacity="1"/>
-      <stop offset="0.18" stop-color="#F5D0FE" stop-opacity="0.95"/>
-      <stop offset="0.42" stop-color="#D946EF" stop-opacity="0.85"/>
-      <stop offset="0.72" stop-color="#A855F7" stop-opacity="0.55"/>
+      <stop offset="0.2"  stop-color="#F5D0FE" stop-opacity="0.95"/>
+      <stop offset="0.45" stop-color="#D946EF" stop-opacity="0.85"/>
+      <stop offset="0.75" stop-color="#A855F7" stop-opacity="0.5"/>
       <stop offset="1"    stop-color="#5B21B6" stop-opacity="0"/>
     </radialGradient>
 
-    <radialGradient id="hx-glass" cx="0.4" cy="0.32" r="0.72">
-      <stop offset="0"    stop-color="#FFFFFF" stop-opacity="0.35"/>
-      <stop offset="0.35" stop-color="#E9D5FF" stop-opacity="0.18"/>
-      <stop offset="0.7"  stop-color="#A855F7" stop-opacity="0.22"/>
-      <stop offset="1"    stop-color="#4C1D95" stop-opacity="0.38"/>
+    <radialGradient id="hx-glass" cx="0.38" cy="0.3" r="0.75">
+      <stop offset="0"    stop-color="#FFFFFF" stop-opacity="0.4"/>
+      <stop offset="0.4"  stop-color="#E9D5FF" stop-opacity="0.2"/>
+      <stop offset="0.75" stop-color="#A855F7" stop-opacity="0.22"/>
+      <stop offset="1"    stop-color="#4C1D95" stop-opacity="0.4"/>
     </radialGradient>
 
     <radialGradient id="hx-fresnel" cx="0.5" cy="0.5" r="0.5">
-      <stop offset="0"    stop-color="#FFFFFF" stop-opacity="0"/>
-      <stop offset="0.72" stop-color="#FFFFFF" stop-opacity="0.05"/>
-      <stop offset="0.92" stop-color="#F5D0FE" stop-opacity="0.55"/>
+      <stop offset="0.7"  stop-color="#FFFFFF" stop-opacity="0"/>
+      <stop offset="0.92" stop-color="#F5D0FE" stop-opacity="0.5"/>
       <stop offset="1"    stop-color="#FFFFFF" stop-opacity="0.85"/>
     </radialGradient>
 
-    <radialGradient id="hx-key" cx="0.28" cy="0.18" r="0.42">
-      <stop offset="0"   stop-color="#FFFFFF" stop-opacity="0.95"/>
-      <stop offset="0.35" stop-color="#FFFFFF" stop-opacity="0.25"/>
-      <stop offset="1"   stop-color="#FFFFFF" stop-opacity="0"/>
-    </radialGradient>
-
-    <radialGradient id="hx-fill" cx="0.75" cy="0.85" r="0.55">
-      <stop offset="0"   stop-color="#FBCFE8" stop-opacity="0.4"/>
-      <stop offset="1"   stop-color="#FBCFE8" stop-opacity="0"/>
+    <radialGradient id="hx-key" cx="0.3" cy="0.2" r="0.5">
+      <stop offset="0"    stop-color="#FFFFFF" stop-opacity="0.9"/>
+      <stop offset="0.4"  stop-color="#FFFFFF" stop-opacity="0.2"/>
+      <stop offset="1"    stop-color="#FFFFFF" stop-opacity="0"/>
     </radialGradient>
 
     <linearGradient id="hx-rim" x1="0" y1="0" x2="0.6" y2="1">
-      <stop offset="0"   stop-color="#22D3EE" stop-opacity="0"/>
+      <stop offset="0"    stop-color="#22D3EE" stop-opacity="0"/>
       <stop offset="0.55" stop-color="#22D3EE" stop-opacity="0.55"/>
-      <stop offset="1"   stop-color="#67E8F9" stop-opacity="0"/>
+      <stop offset="1"    stop-color="#67E8F9" stop-opacity="0"/>
     </linearGradient>
 
-    <radialGradient id="hx-bounce" cx="0.5" cy="1" r="0.6">
-      <stop offset="0"   stop-color="#EC4899" stop-opacity="0.28"/>
-      <stop offset="1"   stop-color="#EC4899" stop-opacity="0"/>
-    </radialGradient>
-
-    <!-- ============================================================
-         ОРБИТЫ
-         ============================================================ -->
+    <!-- ОРБИТЫ -->
     <linearGradient id="hx-orbit-rose" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0"   stop-color="#F0ABFC" stop-opacity="0.95"/>
-      <stop offset="0.5" stop-color="#EC4899" stop-opacity="0.85"/>
-      <stop offset="1"   stop-color="#BE185D" stop-opacity="0.9"/>
+      <stop offset="0"   stop-color="#F0ABFC"/>
+      <stop offset="0.5" stop-color="#EC4899"/>
+      <stop offset="1"   stop-color="#BE185D"/>
     </linearGradient>
 
-    <linearGradient id="hx-orbit-cyan" x1="0" y1="1" x2="1" y2="0">
-      <stop offset="0"   stop-color="#67E8F9" stop-opacity="0.95"/>
-      <stop offset="0.5" stop-color="#22D3EE" stop-opacity="0.85"/>
-      <stop offset="1"   stop-color="#0891B2" stop-opacity="0.9"/>
+    <linearGradient id="hx-orbit-cyan" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#67E8F9"/>
+      <stop offset="1" stop-color="#0891B2"/>
     </linearGradient>
 
     <linearGradient id="hx-orbit-violet" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0"   stop-color="#A855F7" stop-opacity="0.75"/>
-      <stop offset="0.5" stop-color="#D946EF" stop-opacity="0.7"/>
-      <stop offset="1"   stop-color="#7C3AED" stop-opacity="0.75"/>
+      <stop offset="0" stop-color="#C4B5FD"/>
+      <stop offset="1" stop-color="#7C3AED"/>
     </linearGradient>
 
     <linearGradient id="hx-orbit-mint" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0"   stop-color="#6EE7B7" stop-opacity="0.85"/>
-      <stop offset="1"   stop-color="#059669" stop-opacity="0.85"/>
+      <stop offset="0" stop-color="#6EE7B7"/>
+      <stop offset="1" stop-color="#059669"/>
     </linearGradient>
 
-    <!-- ============================================================
-         ЯЧЕЙКИ МАТРИЦЫ
-         ============================================================ -->
+    <!-- ЯЧЕЙКИ -->
     <linearGradient id="hx-cell-front" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.95"/>
-      <stop offset="0.5" stop-color="#F5D0FE" stop-opacity="0.85"/>
-      <stop offset="1" stop-color="#D946EF" stop-opacity="0.75"/>
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="0.5" stop-color="#F5D0FE"/>
+      <stop offset="1" stop-color="#D946EF"/>
     </linearGradient>
 
     <linearGradient id="hx-cell-top" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.98"/>
-      <stop offset="1" stop-color="#F0ABFC" stop-opacity="0.9"/>
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#F0ABFC"/>
     </linearGradient>
 
     <linearGradient id="hx-cell-side" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#A855F7" stop-opacity="0.9"/>
-      <stop offset="1" stop-color="#7C3AED" stop-opacity="0.75"/>
+      <stop offset="0" stop-color="#A855F7"/>
+      <stop offset="1" stop-color="#7C3AED"/>
     </linearGradient>
 
-    <!-- ============================================================
-         ВЕКТОРЫ
-         ============================================================ -->
+    <!-- ВЕКТОРЫ -->
     <linearGradient id="hx-vec-v" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#67E8F9"/>
       <stop offset="1" stop-color="#0891B2"/>
@@ -111,37 +90,28 @@
       <stop offset="1" stop-color="#BE185D"/>
     </linearGradient>
 
-    <linearGradient id="hx-vec-w" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#6EE7B7"/>
-      <stop offset="1" stop-color="#059669"/>
-    </linearGradient>
-
-    <!-- ============================================================
-         ПЛОЩАДЬ (параллелограмм)
-         ============================================================ -->
+    <!-- ПЛОЩАДИ -->
     <linearGradient id="hx-area-in" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#22D3EE" stop-opacity="0.18"/>
       <stop offset="1" stop-color="#D946EF" stop-opacity="0.18"/>
     </linearGradient>
 
     <linearGradient id="hx-area-out" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#22D3EE" stop-opacity="0.28"/>
-      <stop offset="0.5" stop-color="#A855F7" stop-opacity="0.3"/>
-      <stop offset="1" stop-color="#EC4899" stop-opacity="0.28"/>
+      <stop offset="0"   stop-color="#22D3EE" stop-opacity="0.26"/>
+      <stop offset="0.5" stop-color="#A855F7" stop-opacity="0.28"/>
+      <stop offset="1"   stop-color="#EC4899" stop-opacity="0.26"/>
     </linearGradient>
 
-    <!-- ============================================================
-         ПАНЕЛИ / ЧИПЫ
-         ============================================================ -->
+    <!-- ЧИПЫ -->
     <linearGradient id="hx-panel" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.08"/>
       <stop offset="1" stop-color="#A855F7" stop-opacity="0.14"/>
     </linearGradient>
 
     <linearGradient id="hx-panel-edge" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#F0ABFC"/>
+      <stop offset="0"   stop-color="#F0ABFC"/>
       <stop offset="0.5" stop-color="#A855F7"/>
-      <stop offset="1" stop-color="#22D3EE"/>
+      <stop offset="1"   stop-color="#22D3EE"/>
     </linearGradient>
 
     <linearGradient id="hx-chip-pink" x1="0" y1="0" x2="1" y2="0">
@@ -169,9 +139,7 @@
       <stop offset="1" stop-color="#F59E0B"/>
     </linearGradient>
 
-    <!-- ============================================================
-         ЧАСТИЦЫ
-         ============================================================ -->
+    <!-- ЧАСТИЦЫ -->
     <radialGradient id="hx-spark-white" cx="0.5" cy="0.5" r="0.5">
       <stop offset="0"   stop-color="#FFFFFF"/>
       <stop offset="0.4" stop-color="#F5D0FE"/>
@@ -202,9 +170,7 @@
       <stop offset="1"   stop-color="#10B981" stop-opacity="0"/>
     </radialGradient>
 
-    <!-- ============================================================
-         ФИЛЬТРЫ
-         ============================================================ -->
+    <!-- ФИЛЬТРЫ -->
     <filter id="hx-bloom-sm" x="-50%" y="-50%" width="200%" height="200%">
       <feGaussianBlur stdDeviation="1.6"/>
     </filter>
@@ -214,8 +180,8 @@
     <filter id="hx-bloom-lg" x="-50%" y="-50%" width="200%" height="200%">
       <feGaussianBlur stdDeviation="7"/>
     </filter>
-    <filter id="hx-dof-far" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="1.1"/>
+    <filter id="hx-dof" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1.2"/>
     </filter>
     <filter id="hx-shadow-floor" x="-30%" y="-30%" width="160%" height="160%">
       <feGaussianBlur stdDeviation="14"/>
@@ -224,253 +190,188 @@
       <feGaussianBlur in="SourceAlpha" stdDeviation="7"/>
       <feOffset dx="0" dy="7"/>
       <feComponentTransfer><feFuncA type="linear" slope="0.45"/></feComponentTransfer>
-      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
     </filter>
     <filter id="hx-chip-shadow" x="-50%" y="-50%" width="200%" height="200%">
       <feGaussianBlur in="SourceAlpha" stdDeviation="2.4"/>
       <feOffset dx="0" dy="3"/>
       <feComponentTransfer><feFuncA type="linear" slope="0.35"/></feComponentTransfer>
-      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
-    <filter id="hx-flare" x="-100%" y="-100%" width="300%" height="300%">
-      <feGaussianBlur stdDeviation="1.4"/>
-    </filter>
-    <filter id="hx-text-glow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="1.2"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
     </filter>
 
-    <!-- ============================================================
-         МАСКИ
-         ============================================================ -->
-    <clipPath id="hx-core-clip">
-      <circle cx="450" cy="300" r="96"/>
-    </clipPath>
-
-    <clipPath id="hx-front-top">
+    <!-- КЛИПЫ ДЛЯ ПОЛОВИН ОРБИТ -->
+    <clipPath id="hx-top-half">
       <rect x="0" y="0" width="900" height="300"/>
     </clipPath>
-
-    <clipPath id="hx-front-bottom">
+    <clipPath id="hx-bottom-half">
       <rect x="0" y="300" width="900" height="320"/>
     </clipPath>
 
   </defs>
 
-  <!-- ================================================================
-       СЛОЙ 0. СЕТКА КООРДИНАТ (лёгкая, изометрия)
-       ================================================================ -->
-  <g opacity="0.05">
-    <line x1="100" y1="520" x2="800" y2="520" stroke="#FFFFFF" stroke-width="0.6"/>
-    <line x1="100" y1="480" x2="800" y2="480" stroke="#FFFFFF" stroke-width="0.6"/>
-    <line x1="100" y1="440" x2="800" y2="440" stroke="#FFFFFF" stroke-width="0.6"/>
-    <line x1="100" y1="400" x2="800" y2="400" stroke="#FFFFFF" stroke-width="0.6"/>
-    <line x1="100" y1="360" x2="800" y2="360" stroke="#FFFFFF" stroke-width="0.6"/>
-    <line x1="200" y1="120" x2="200" y2="560" stroke="#FFFFFF" stroke-width="0.6"/>
-    <line x1="300" y1="120" x2="300" y2="560" stroke="#FFFFFF" stroke-width="0.6"/>
-    <line x1="400" y1="120" x2="400" y2="560" stroke="#FFFFFF" stroke-width="0.6"/>
-    <line x1="500" y1="120" x2="500" y2="560" stroke="#FFFFFF" stroke-width="0.6"/>
-    <line x1="600" y1="120" x2="600" y2="560" stroke="#FFFFFF" stroke-width="0.6"/>
-    <line x1="700" y1="120" x2="700" y2="560" stroke="#FFFFFF" stroke-width="0.6"/>
-  </g>
 
   <!-- ================================================================
-       СЛОЙ 1. ФОНОВЫЙ ОРЕОЛ
+       01. ФОН — мягкое свечение
        ================================================================ -->
-  <circle cx="450" cy="300" r="320" fill="url(#hx-neon)" opacity="0.1">
-    <animate attributeName="r" values="320;330;320" dur="9s" repeatCount="indefinite"/>
+  <circle cx="450" cy="300" r="320" fill="url(#hx-neon)" opacity="0.08">
+    <animate attributeName="r" values="320;328;320" dur="10s" repeatCount="indefinite"/>
   </circle>
 
-  <!-- ================================================================
-       СЛОЙ 2. ВОЛНЫ-КОЛЬЦА (распространение преобразования)
-       ================================================================ -->
-  <g transform="translate(450 300)" opacity="0.35">
-    <circle cx="0" cy="0" r="140" fill="none"
-            stroke="#A855F7" stroke-width="0.8" opacity="0.5">
-      <animate attributeName="r" values="140;180;140" dur="6s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" values="0.5;0;0.5" dur="6s" repeatCount="indefinite"/>
-    </circle>
-    <circle cx="0" cy="0" r="140" fill="none"
-            stroke="#22D3EE" stroke-width="0.8" opacity="0.5">
-      <animate attributeName="r" values="140;180;140" dur="6s" begin="2s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" values="0.5;0;0.5" dur="6s" begin="2s" repeatCount="indefinite"/>
-    </circle>
-    <circle cx="0" cy="0" r="140" fill="none"
-            stroke="#EC4899" stroke-width="0.8" opacity="0.5">
-      <animate attributeName="r" values="140;180;140" dur="6s" begin="4s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" values="0.5;0;0.5" dur="6s" begin="4s" repeatCount="indefinite"/>
-    </circle>
-  </g>
 
   <!-- ================================================================
-       СЛОЙ 3. ТЕНЬ НА ПОЛ
+       02. ТЕНЬ ПОД ЯДРОМ
        ================================================================ -->
-  <ellipse cx="450" cy="470" rx="180" ry="20"
-           fill="#4C1D95" opacity="0.26"
+  <ellipse cx="450" cy="472" rx="160" ry="16"
+           fill="#4C1D95" opacity="0.3"
            filter="url(#hx-shadow-floor)">
-    <animate attributeName="rx" values="180;192;180" dur="7s" repeatCount="indefinite"/>
+    <animate attributeName="rx" values="160;172;160" dur="8s" repeatCount="indefinite"/>
   </ellipse>
 
-  <!-- ================================================================
-       СЛОЙ 4. ПАРАЛЛЕЛОГРАММЫ ПЛОЩАДИ
-       ================================================================ -->
-
-  <!-- ВХОД: параллелограмм между v и u -->
-  <g opacity="0.85">
-    <path d="M100 460 L180 460 L220 400 L140 400 Z"
-          fill="url(#hx-area-in)"
-          stroke="#22D3EE" stroke-opacity="0.4" stroke-width="0.9"/>
-    <line x1="100" y1="460" x2="180" y2="460" stroke="#22D3EE" stroke-opacity="0.6" stroke-width="0.8"/>
-    <line x1="100" y1="460" x2="140" y2="400" stroke="#F0ABFC" stroke-opacity="0.6" stroke-width="0.8"/>
-    <text x="160" y="480" font-size="11" font-weight="700"
-          fill="#67E8F9" text-anchor="middle" opacity="0.85" letter-spacing="0.04em">S = 1</text>
-  </g>
-
-  <!-- ВЫХОД: параллелограмм между A·v и A·u (больше) -->
-  <g opacity="0.85">
-    <path d="M680 400 L800 400 L840 260 L720 260 Z"
-          fill="url(#hx-area-out)"
-          stroke="#EC4899" stroke-opacity="0.5" stroke-width="1.1"/>
-    <!-- Сетка -->
-    <g stroke="#FFFFFF" stroke-opacity="0.12" stroke-width="0.5">
-      <line x1="700" y1="380" x2="820" y2="380"/>
-      <line x1="720" y1="360" x2="840" y2="360"/>
-      <line x1="740" y1="340" x2="860" y2="340"/>
-      <line x1="760" y1="320" x2="880" y2="320"/>
-      <line x1="780" y1="300" x2="900" y2="300"/>
-    </g>
-    <text x="770" y="428" font-size="13" font-weight="800"
-          fill="#FDE68A" text-anchor="middle" letter-spacing="0.05em">S = 5</text>
-  </g>
-
-  <!-- Стрелка-связь между площадями -->
-  <path d="M240 440 Q 450 540 660 420"
-        fill="none" stroke="#A855F7" stroke-width="1"
-        opacity="0.4" stroke-dasharray="4 6" stroke-linecap="round"/>
-  <path d="M654 426 L662 420 L658 430"
-        stroke="#A855F7" stroke-width="1" opacity="0.6"
-        stroke-linecap="round" stroke-linejoin="round" fill="none"/>
 
   <!-- ================================================================
-       СЛОЙ 5. ДАЛЬНЯЯ ОРБИТА (циан) — за ядром
+       03. ДАЛЬНЯЯ ОРБИТА — целиком ЗА ядром
        ================================================================ -->
-  <g filter="url(#hx-dof-far)" transform="translate(450 300)">
+  <g transform="translate(450 300)" filter="url(#hx-dof)" opacity="0.75">
     <g>
       <animateTransform attributeName="transform" type="rotate"
-                        from="0 0 0" to="360 0 0" dur="38s" repeatCount="indefinite"/>
-      <ellipse cx="0" cy="0" rx="290" ry="70"
+                        from="0" to="360" dur="40s" repeatCount="indefinite"/>
+      <ellipse cx="0" cy="0" rx="290" ry="72"
                fill="none" stroke="url(#hx-orbit-cyan)"
-               stroke-width="2.2" opacity="0.75"
-               transform="rotate(-24)"/>
-      <ellipse cx="0" cy="0" rx="290" ry="70"
+               stroke-width="2" transform="rotate(-22)"/>
+      <ellipse cx="0" cy="0" rx="290" ry="72"
                fill="none" stroke="#22D3EE" stroke-width="6"
-               opacity="0.14" filter="url(#hx-bloom-md)"
-               transform="rotate(-24)"/>
-      <g transform="rotate(-24)">
-        <circle cx="290" cy="0" r="4.5"
-                fill="url(#hx-spark-cyan)" filter="url(#hx-bloom-sm)">
-          <animate attributeName="r" values="4.5;5.8;4.5" dur="3s" repeatCount="indefinite"/>
-        </circle>
-        <circle cx="290" cy="0" r="2" fill="#FFFFFF"/>
+               opacity="0.12" filter="url(#hx-bloom-md)"
+               transform="rotate(-22)"/>
+      <g transform="rotate(-22)">
+        <circle cx="290" cy="0" r="4" fill="#A5F3FC" filter="url(#hx-bloom-sm)"/>
+        <circle cx="290" cy="0" r="1.8" fill="#FFFFFF"/>
       </g>
     </g>
   </g>
 
+
   <!-- ================================================================
-       СЛОЙ 6. СРЕДНЯЯ ОРБИТА (роза) — нижняя половина ЗА ядром
+       04. СРЕДНЯЯ ОРБИТА — нижняя половина (за ядром)
        ================================================================ -->
-  <g clip-path="url(#hx-front-bottom)" transform="translate(450 300)">
-    <g>
-      <animateTransform attributeName="transform" type="rotate"
-                        from="0 0 0" to="360 0 0" dur="26s" repeatCount="indefinite"/>
-      <ellipse cx="0" cy="0" rx="220" ry="54"
-               fill="none" stroke="url(#hx-orbit-rose)"
-               stroke-width="2.6" opacity="0.95"
-               transform="rotate(22)"/>
-      <ellipse cx="0" cy="0" rx="220" ry="54"
-               fill="none" stroke="#EC4899" stroke-width="7"
-               opacity="0.16" filter="url(#hx-bloom-md)"
-               transform="rotate(22)"/>
-      <ellipse cx="0" cy="0" rx="220" ry="54"
-               fill="none" stroke="#FBCFE8" stroke-width="0.8"
-               opacity="0.4" transform="rotate(22)"/>
+  <g clip-path="url(#hx-bottom-half)">
+    <g transform="translate(450 300)">
+      <g>
+        <animateTransform attributeName="transform" type="rotate"
+                          from="0" to="360" dur="28s" repeatCount="indefinite"/>
+        <ellipse cx="0" cy="0" rx="220" ry="56"
+                 fill="none" stroke="url(#hx-orbit-rose)"
+                 stroke-width="2.4" transform="rotate(20)"/>
+        <ellipse cx="0" cy="0" rx="220" ry="56"
+                 fill="none" stroke="#EC4899" stroke-width="7"
+                 opacity="0.14" filter="url(#hx-bloom-md)"
+                 transform="rotate(20)"/>
+      </g>
     </g>
   </g>
 
+
   <!-- ================================================================
-       СЛОЙ 7. ВЕКТОР v → ВХОДИТ В ЯДРО
+       05. ПЛОЩАДИ — вход (слева) и выход (справа)
+       ================================================================ -->
+  <g opacity="0.9">
+    <path d="M100 460 L180 460 L220 400 L140 400 Z"
+          fill="url(#hx-area-in)"
+          stroke="#22D3EE" stroke-opacity="0.45" stroke-width="0.9"/>
+    <text x="160" y="482" font-size="11" font-weight="700"
+          fill="#67E8F9" text-anchor="middle" opacity="0.85"
+          letter-spacing="0.04em">S = 1</text>
+  </g>
+
+  <g opacity="0.9">
+    <path d="M680 400 L800 400 L840 260 L720 260 Z"
+          fill="url(#hx-area-out)"
+          stroke="#EC4899" stroke-opacity="0.55" stroke-width="1.1"/>
+    <text x="770" y="430" font-size="13" font-weight="800"
+          fill="#FDE68A" text-anchor="middle" letter-spacing="0.05em">S = 5</text>
+  </g>
+
+  <!-- Пунктирная связь между площадями -->
+  <path d="M240 440 Q 450 540 660 420"
+        fill="none" stroke="#A855F7" stroke-width="1"
+        opacity="0.35" stroke-dasharray="4 6" stroke-linecap="round"/>
+
+
+  <!-- ================================================================
+       06. ВЕКТОР v — входит в ядро
        ================================================================ -->
   <g>
-    <line x1="180" y1="220" x2="356" y2="270"
+    <line x1="180" y1="220" x2="354" y2="270"
           stroke="url(#hx-vec-v)" stroke-width="3"
-          stroke-linecap="round" opacity="0.95"/>
-    <path d="M348 265 L356 270 L348 276"
+          stroke-linecap="round"/>
+    <path d="M346 264 L354 270 L346 276"
           stroke="#22D3EE" stroke-width="3"
           stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-    <circle cx="180" cy="220" r="6"
-            fill="url(#hx-spark-cyan)" filter="url(#hx-bloom-sm)">
-      <animate attributeName="r" values="6;7.2;6" dur="3s" repeatCount="indefinite"/>
-    </circle>
-    <circle cx="180" cy="220" r="2.4" fill="#FFFFFF"/>
-    <text x="164" y="212" font-size="17" font-weight="800" font-style="italic"
+    <circle cx="180" cy="220" r="5"
+            fill="url(#hx-spark-cyan)" filter="url(#hx-bloom-sm)"/>
+    <circle cx="180" cy="220" r="2" fill="#FFFFFF"/>
+    <text x="162" y="212" font-size="17" font-weight="800" font-style="italic"
           fill="#67E8F9" text-anchor="middle">v</text>
-    <text x="164" y="232" font-size="11" font-weight="600"
+    <text x="162" y="232" font-size="10" font-weight="600"
           fill="#67E8F9" opacity="0.7" text-anchor="middle">(2, 1)</text>
   </g>
 
+
   <!-- ================================================================
-       СЛОЙ 8. ВЕКТОР u → ВХОДИТ В ЯДРО (второй вектор)
+       07. ВЕКТОР u — входит в ядро
        ================================================================ -->
   <g>
-    <line x1="180" y1="380" x2="356" y2="330"
+    <line x1="180" y1="380" x2="354" y2="330"
           stroke="url(#hx-vec-u)" stroke-width="3"
-          stroke-linecap="round" opacity="0.95"/>
-    <path d="M348 325 L356 330 L348 336"
+          stroke-linecap="round"/>
+    <path d="M346 324 L354 330 L346 336"
           stroke="#F0ABFC" stroke-width="3"
           stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-    <circle cx="180" cy="380" r="6"
-            fill="url(#hx-spark-pink)" filter="url(#hx-bloom-sm)">
-      <animate attributeName="r" values="6;7.2;6" dur="3s" begin="1.2s" repeatCount="indefinite"/>
-    </circle>
-    <circle cx="180" cy="380" r="2.4" fill="#FFFFFF"/>
-    <text x="164" y="372" font-size="17" font-weight="800" font-style="italic"
+    <circle cx="180" cy="380" r="5"
+            fill="url(#hx-spark-pink)" filter="url(#hx-bloom-sm)"/>
+    <circle cx="180" cy="380" r="2" fill="#FFFFFF"/>
+    <text x="162" y="372" font-size="17" font-weight="800" font-style="italic"
           fill="#F0ABFC" text-anchor="middle">u</text>
-    <text x="164" y="392" font-size="11" font-weight="600"
+    <text x="162" y="392" font-size="10" font-weight="600"
           fill="#F0ABFC" opacity="0.7" text-anchor="middle">(1, 3)</text>
   </g>
 
+
   <!-- ================================================================
-       СЛОЙ 9. ЯДРО: стеклянная сфера с матрицей 2×2 внутри
+       08. ЯДРО — стеклянная сфера с матрицей A = [[2,1],[1,3]]
        ================================================================ -->
   <g filter="url(#hx-core-shadow)">
 
-    <!-- Внешний ореол -->
+    <!-- Ореол -->
     <circle cx="450" cy="300" r="126" fill="url(#hx-neon)" opacity="0.4"
             filter="url(#hx-bloom-lg)">
-      <animate attributeName="r" values="126;136;126" dur="5.6s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" values="0.4;0.25;0.4" dur="5.6s" repeatCount="indefinite"/>
+      <animate attributeName="r" values="126;134;126" dur="6s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.4;0.28;0.4" dur="6s" repeatCount="indefinite"/>
     </circle>
 
+    <!-- Стекло -->
     <circle cx="450" cy="300" r="96" fill="url(#hx-glass)"/>
-    <circle cx="450" cy="300" r="96" fill="url(#hx-neon)" opacity="0.85">
-      <animate attributeName="opacity" values="0.85;0.7;0.85" dur="4.8s" repeatCount="indefinite"/>
+    <circle cx="450" cy="300" r="96" fill="url(#hx-neon)" opacity="0.82">
+      <animate attributeName="opacity" values="0.82;0.7;0.82" dur="5s" repeatCount="indefinite"/>
     </circle>
     <circle cx="450" cy="300" r="96" fill="url(#hx-fresnel)"/>
 
-    <!-- ============================================================
-         МАТРИЦА A = [[2,1],[1,3]] ВНУТРИ СФЕРЫ
-         Объёмные плитки с числами
-         ============================================================ -->
+    <!-- Матрица A -->
     <g transform="translate(450 300)">
-      <!-- [ -->
+      <!-- Скобки -->
       <path d="M-64 -44 L-72 -44 L-72 44 L-64 44"
             fill="none" stroke="#F5D0FE" stroke-opacity="0.9"
             stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-      <!-- ] -->
       <path d="M64 -44 L72 -44 L72 44 L64 44"
             fill="none" stroke="#F5D0FE" stroke-opacity="0.9"
             stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
 
-      <!-- Плитка 2 (левый верх) -->
+      <!-- 2 -->
       <g transform="translate(-40 -40)">
         <path d="M0 6 L6 0 L38 0 L32 6 Z" fill="url(#hx-cell-top)"/>
         <path d="M32 6 L38 0 L38 32 L32 38 Z" fill="url(#hx-cell-side)"/>
@@ -480,7 +381,7 @@
               fill="#7C3AED" text-anchor="middle">2</text>
       </g>
 
-      <!-- Плитка 1 (правый верх) -->
+      <!-- 1 -->
       <g transform="translate(4 -40)">
         <path d="M0 6 L6 0 L38 0 L32 6 Z" fill="url(#hx-cell-top)"/>
         <path d="M32 6 L38 0 L38 32 L32 38 Z" fill="url(#hx-cell-side)"/>
@@ -490,7 +391,7 @@
               fill="#7C3AED" text-anchor="middle">1</text>
       </g>
 
-      <!-- Плитка 1 (левый низ) -->
+      <!-- 1 -->
       <g transform="translate(-40 4)">
         <path d="M0 6 L6 0 L38 0 L32 6 Z" fill="url(#hx-cell-top)"/>
         <path d="M32 6 L38 0 L38 32 L32 38 Z" fill="url(#hx-cell-side)"/>
@@ -500,7 +401,7 @@
               fill="#7C3AED" text-anchor="middle">1</text>
       </g>
 
-      <!-- Плитка 3 (правый низ) -->
+      <!-- 3 -->
       <g transform="translate(4 4)">
         <path d="M0 6 L6 0 L38 0 L32 6 Z" fill="url(#hx-cell-top)"/>
         <path d="M32 6 L38 0 L38 32 L32 38 Z" fill="url(#hx-cell-side)"/>
@@ -510,188 +411,129 @@
               fill="#7C3AED" text-anchor="middle">3</text>
       </g>
 
-      <!-- Подсветка главной диагонали -->
+      <!-- Диагональ -->
       <line x1="-24" y1="-24" x2="40" y2="40"
-            stroke="#FDE68A" stroke-width="1.4" opacity="0.6"
+            stroke="#FDE68A" stroke-width="1.4" opacity="0.55"
             stroke-dasharray="3 4" stroke-linecap="round"/>
     </g>
 
-    <!-- 4 неоновые точки -->
-    <circle cx="396" cy="246" r="6" fill="#FFFFFF">
-      <animate attributeName="r" values="6;8;6" dur="3.6s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" values="1;0.55;1" dur="3.6s" repeatCount="indefinite"/>
-    </circle>
-    <circle cx="504" cy="246" r="6" fill="#FFFFFF">
-      <animate attributeName="r" values="6;8;6" dur="3.6s" begin="0.9s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" values="1;0.55;1" dur="3.6s" begin="0.9s" repeatCount="indefinite"/>
-    </circle>
-    <circle cx="396" cy="354" r="6" fill="#FFFFFF">
-      <animate attributeName="r" values="6;8;6" dur="3.6s" begin="1.8s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" values="1;0.55;1" dur="3.6s" begin="1.8s" repeatCount="indefinite"/>
-    </circle>
-    <circle cx="504" cy="354" r="6" fill="#FFFFFF">
-      <animate attributeName="r" values="6;8;6" dur="3.6s" begin="2.7s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" values="1;0.55;1" dur="3.6s" begin="2.7s" repeatCount="indefinite"/>
-    </circle>
-
-    <!-- Лучи-вспышки -->
-    <g stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" opacity="0.6">
-      <path d="M450 186 V210">
-        <animate attributeName="opacity" values="0.6;1;0.6" dur="3.2s" repeatCount="indefinite"/>
-      </path>
-      <path d="M450 414 V390">
-        <animate attributeName="opacity" values="0.6;1;0.6" dur="3.2s" begin="0.8s" repeatCount="indefinite"/>
-      </path>
-      <path d="M336 300 H360">
-        <animate attributeName="opacity" values="0.6;1;0.6" dur="3.2s" begin="1.6s" repeatCount="indefinite"/>
-      </path>
-      <path d="M564 300 H540">
-        <animate attributeName="opacity" values="0.6;1;0.6" dur="3.2s" begin="2.4s" repeatCount="indefinite"/>
-      </path>
-    </g>
-
-    <!-- Key light -->
-    <ellipse cx="408" cy="252" rx="34" ry="24"
-             fill="url(#hx-key)" transform="rotate(-24 408 252)"/>
-    <ellipse cx="398" cy="242" rx="9" ry="6"
+    <!-- Блики -->
+    <ellipse cx="410" cy="250" rx="32" ry="22"
+             fill="url(#hx-key)" transform="rotate(-24 410 250)"/>
+    <ellipse cx="400" cy="240" rx="8" ry="5"
              fill="#FFFFFF" opacity="0.9"
-             transform="rotate(-28 398 242)"/>
-
-    <!-- Fill -->
-    <ellipse cx="498" cy="366" rx="46" ry="30"
-             fill="url(#hx-fill)" transform="rotate(-20 498 366)"/>
-
-    <!-- Rim: циановая полоска -->
+             transform="rotate(-28 400 240)"/>
     <path d="M544 272 A96 96 0 0 1 500 380"
           fill="none" stroke="url(#hx-rim)" stroke-width="2.4"
           stroke-linecap="round" opacity="0.8"/>
-
-    <!-- Bounce -->
-    <ellipse cx="450" cy="388" rx="64" ry="18"
-             fill="url(#hx-bounce)"/>
-
     <circle cx="450" cy="300" r="96" fill="none"
             stroke="#FFFFFF" stroke-opacity="0.3" stroke-width="1"/>
   </g>
 
+
   <!-- ================================================================
-       СЛОЙ 10. РОЗОВАЯ ОРБИТА — верхняя половина ПЕРЕД ядром
+       09. СРЕДНЯЯ ОРБИТА — верхняя половина (перед ядром)
        ================================================================ -->
-  <g clip-path="url(#hx-front-top)" transform="translate(450 300)">
-    <g>
-      <animateTransform attributeName="transform" type="rotate"
-                        from="0 0 0" to="360 0 0" dur="26s" repeatCount="indefinite"/>
-      <ellipse cx="0" cy="0" rx="220" ry="54"
-               fill="none" stroke="url(#hx-orbit-rose)"
-               stroke-width="2.6" opacity="0.95"
-               transform="rotate(22)"/>
-      <g transform="rotate(22)">
-        <circle cx="-220" cy="0" r="5.5"
-                fill="url(#hx-spark-pink)" filter="url(#hx-bloom-sm)">
-          <animate attributeName="r" values="5.5;7;5.5" dur="2.8s" repeatCount="indefinite"/>
-        </circle>
-        <circle cx="-220" cy="0" r="2.4" fill="#FFFFFF"/>
+  <g clip-path="url(#hx-top-half)">
+    <g transform="translate(450 300)">
+      <g>
+        <animateTransform attributeName="transform" type="rotate"
+                          from="0" to="360" dur="28s" repeatCount="indefinite"/>
+        <ellipse cx="0" cy="0" rx="220" ry="56"
+                 fill="none" stroke="url(#hx-orbit-rose)"
+                 stroke-width="2.4" transform="rotate(20)"/>
+        <g transform="rotate(20)">
+          <circle cx="-220" cy="0" r="5"
+                  fill="#FBCFE8" filter="url(#hx-bloom-sm)"/>
+          <circle cx="-220" cy="0" r="2.2" fill="#FFFFFF"/>
+        </g>
       </g>
     </g>
   </g>
 
+
   <!-- ================================================================
-       СЛОЙ 11. ВНУТРЕННЯЯ ОРБИТА (фиолетовая)
+       10. ВНУТРЕННЯЯ ФИОЛЕТОВАЯ ОРБИТА
        ================================================================ -->
   <g transform="translate(450 300)">
     <g>
       <animateTransform attributeName="transform" type="rotate"
-                        from="360 0 0" to="0 0 0" dur="44s" repeatCount="indefinite"/>
+                        from="360" to="0" dur="44s" repeatCount="indefinite"/>
       <ellipse cx="0" cy="0" rx="160" ry="38"
                fill="none" stroke="url(#hx-orbit-violet)"
-               stroke-width="1.6" opacity="0.75"
-               transform="rotate(-52)"/>
-      <g transform="rotate(-52)">
-        <circle cx="160" cy="0" r="4"
-                fill="url(#hx-spark-cyan)" filter="url(#hx-bloom-sm)">
-          <animate attributeName="r" values="4;5.2;4" dur="2.4s" repeatCount="indefinite"/>
-        </circle>
-        <circle cx="160" cy="0" r="1.8" fill="#FFFFFF"/>
+               stroke-width="1.4" opacity="0.7"
+               transform="rotate(-50)"/>
+      <g transform="rotate(-50)">
+        <circle cx="160" cy="0" r="3.4"
+                fill="#A5F3FC" filter="url(#hx-bloom-sm)"/>
+        <circle cx="160" cy="0" r="1.4" fill="#FFFFFF"/>
       </g>
     </g>
   </g>
 
+
   <!-- ================================================================
-       СЛОЙ 12. ОРБИТА-МЯТАЯ (новое — четвёртая орбита)
+       11. МЯТНАЯ ОРБИТА
        ================================================================ -->
   <g transform="translate(450 300)">
     <g>
       <animateTransform attributeName="transform" type="rotate"
-                        from="0 0 0" to="360 0 0" dur="52s" repeatCount="indefinite"/>
+                        from="0" to="360" dur="52s" repeatCount="indefinite"/>
       <ellipse cx="0" cy="0" rx="180" ry="44"
                fill="none" stroke="url(#hx-orbit-mint)"
                stroke-width="1.2" opacity="0.55"
-               transform="rotate(68)"/>
-      <g transform="rotate(68)">
+               transform="rotate(66)"/>
+      <g transform="rotate(66)">
         <circle cx="-180" cy="0" r="3"
-                fill="url(#hx-spark-mint)" filter="url(#hx-bloom-sm)">
-          <animate attributeName="r" values="3;4;3" dur="3s" repeatCount="indefinite"/>
-        </circle>
+                fill="#6EE7B7" filter="url(#hx-bloom-sm)"/>
         <circle cx="-180" cy="0" r="1.4" fill="#FFFFFF"/>
       </g>
     </g>
   </g>
 
+
   <!-- ================================================================
-       СЛОЙ 13. ВЕКТОР A·v → ВЫХОДИТ УДЛИНЁННЫМ
+       12. ВЕКТОР A·v — выходит удлинённым
        ================================================================ -->
   <g>
-    <line x1="546" y1="330" x2="720" y2="390"
+    <line x1="546" y1="330" x2="718" y2="390"
           stroke="url(#hx-vec-v)" stroke-width="3.4"
-          stroke-linecap="round" opacity="0.95"/>
-    <path d="M712 384 L720 390 L712 397"
+          stroke-linecap="round"/>
+    <path d="M710 384 L718 390 L710 397"
           stroke="#22D3EE" stroke-width="3.4"
           stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-    <circle cx="720" cy="390" r="7"
-            fill="url(#hx-spark-cyan)" filter="url(#hx-bloom-md)">
-      <animate attributeName="r" values="7;9;7" dur="3s" begin="1.4s" repeatCount="indefinite"/>
-    </circle>
-    <circle cx="720" cy="390" r="3" fill="#FFFFFF"/>
+    <circle cx="718" cy="390" r="5.5"
+            fill="url(#hx-spark-cyan)" filter="url(#hx-bloom-md)"/>
+    <circle cx="718" cy="390" r="2.4" fill="#FFFFFF"/>
     <text x="736" y="400" font-size="17" font-weight="800" font-style="italic"
           fill="#67E8F9" text-anchor="middle">A·v</text>
-    <text x="736" y="420" font-size="11" font-weight="600"
+    <text x="736" y="418" font-size="10" font-weight="600"
           fill="#67E8F9" opacity="0.7" text-anchor="middle">(5, 5)</text>
   </g>
 
+
   <!-- ================================================================
-       СЛОЙ 14. ВЕКТОР A·u → ВЫХОДИТ УДЛИНЁННЫМ
+       13. ВЕКТОР A·u
        ================================================================ -->
   <g>
-    <line x1="546" y1="270" x2="720" y2="210"
+    <line x1="546" y1="270" x2="718" y2="210"
           stroke="url(#hx-vec-u)" stroke-width="3.4"
-          stroke-linecap="round" opacity="0.95"/>
-    <path d="M712 214 L720 210 L716 218"
+          stroke-linecap="round"/>
+    <path d="M710 214 L718 210 L714 218"
           stroke="#EC4899" stroke-width="3.4"
           stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-    <circle cx="720" cy="210" r="7"
-            fill="url(#hx-spark-pink)" filter="url(#hx-bloom-md)">
-      <animate attributeName="r" values="7;9;7" dur="3s" begin="2.1s" repeatCount="indefinite"/>
-    </circle>
-    <circle cx="720" cy="210" r="3" fill="#FFFFFF"/>
+    <circle cx="718" cy="210" r="5.5"
+            fill="url(#hx-spark-pink)" filter="url(#hx-bloom-md)"/>
+    <circle cx="718" cy="210" r="2.4" fill="#FFFFFF"/>
     <text x="736" y="204" font-size="17" font-weight="800" font-style="italic"
           fill="#F0ABFC" text-anchor="middle">A·u</text>
-    <text x="736" y="222" font-size="11" font-weight="600"
+    <text x="736" y="222" font-size="10" font-weight="600"
           fill="#F0ABFC" opacity="0.7" text-anchor="middle">(5, 10)</text>
   </g>
 
-  <!-- ================================================================
-       СЛОЙ 15. ДУГИ-ПОВОРОТЫ между входами и выходами
-       ================================================================ -->
-  <path d="M380 240 A180 180 0 0 1 520 340"
-        fill="none" stroke="#A855F7" stroke-width="1.2"
-        opacity="0.4" stroke-dasharray="4 6" stroke-linecap="round"/>
-
-  <path d="M380 360 A180 180 0 0 0 520 260"
-        fill="none" stroke="#A855F7" stroke-width="1.2"
-        opacity="0.4" stroke-dasharray="4 6" stroke-linecap="round"/>
 
   <!-- ================================================================
-       СЛОЙ 16. ФОРМУЛА-ПАНЕЛЬ СВЕРХУ: A·v = w
+       14. ФОРМУЛА СВЕРХУ
        ================================================================ -->
   <g filter="url(#hx-chip-shadow)" transform="translate(450 84)">
     <rect x="-200" y="-30" width="400" height="60" rx="16"
@@ -713,216 +555,188 @@
           fill="#A5F3FC" text-anchor="middle">A·v = (5, 5)</text>
   </g>
 
+
   <!-- ================================================================
-       СЛОЙ 17. ЧИПЫ ПО УГЛАМ (6 штук)
+       15. ЧИПЫ ПО УГЛАМ
        ================================================================ -->
-
-  <!-- Чип A⁻¹ (левый верх) -->
-  <g transform="translate(88 110)" filter="url(#hx-chip-shadow)">
-    <rect x="-44" y="-24" width="96" height="48" rx="14"
-          fill="#FFFFFF" fill-opacity="0.04"/>
-    <rect x="-44" y="-24" width="96" height="48" rx="14"
-          fill="none" stroke="url(#hx-chip-pink)" stroke-width="1.2"/>
-    <circle cx="-32" cy="0" r="2.6" fill="#EC4899">
-      <animate attributeName="r" values="2.6;3.4;2.6" dur="2.8s" repeatCount="indefinite"/>
-    </circle>
-    <text x="8" y="7" font-size="19" font-weight="800" font-style="italic"
-          text-anchor="middle" fill="#FBCFE8">A⁻¹</text>
-    <animateTransform attributeName="transform" type="translate"
-                      values="88 110; 88 103; 88 110"
-                      dur="5s" repeatCount="indefinite"/>
+  <g filter="url(#hx-chip-shadow)">
+    <g transform="translate(88 110)">
+      <rect x="-44" y="-24" width="96" height="48" rx="14"
+            fill="#FFFFFF" fill-opacity="0.04"/>
+      <rect x="-44" y="-24" width="96" height="48" rx="14"
+            fill="none" stroke="url(#hx-chip-pink)" stroke-width="1.2"/>
+      <circle cx="-32" cy="0" r="2.4" fill="#EC4899"/>
+      <text x="8" y="7" font-size="18" font-weight="800" font-style="italic"
+            text-anchor="middle" fill="#FBCFE8">A⁻¹</text>
+      <animateTransform attributeName="transform" type="translate"
+                        values="88 110; 88 106; 88 110"
+                        dur="5s" repeatCount="indefinite"/>
+    </g>
   </g>
 
-  <!-- Чип λ (правый верх) -->
-  <g transform="translate(812 110)" filter="url(#hx-chip-shadow)">
-    <rect x="-42" y="-24" width="88" height="48" rx="14"
-          fill="#FFFFFF" fill-opacity="0.04"/>
-    <rect x="-42" y="-24" width="88" height="48" rx="14"
-          fill="none" stroke="url(#hx-chip-cyan)" stroke-width="1.2"/>
-    <circle cx="-30" cy="0" r="2.6" fill="#0891B2">
-      <animate attributeName="r" values="2.6;3.4;2.6" dur="2.8s" begin="0.6s" repeatCount="indefinite"/>
-    </circle>
-    <text x="6" y="9" font-size="24" font-weight="900" font-style="italic"
-          text-anchor="middle" fill="#A5F3FC">λ</text>
-    <animateTransform attributeName="transform" type="translate"
-                      values="812 110; 812 102; 812 110"
-                      dur="6s" repeatCount="indefinite"/>
+  <g filter="url(#hx-chip-shadow)">
+    <g transform="translate(812 110)">
+      <rect x="-42" y="-24" width="88" height="48" rx="14"
+            fill="#FFFFFF" fill-opacity="0.04"/>
+      <rect x="-42" y="-24" width="88" height="48" rx="14"
+            fill="none" stroke="url(#hx-chip-cyan)" stroke-width="1.2"/>
+      <circle cx="-30" cy="0" r="2.4" fill="#0891B2"/>
+      <text x="6" y="9" font-size="22" font-weight="900" font-style="italic"
+            text-anchor="middle" fill="#A5F3FC">λ</text>
+      <animateTransform attributeName="transform" type="translate"
+                        values="812 110; 812 105; 812 110"
+                        dur="6s" repeatCount="indefinite"/>
+    </g>
   </g>
 
-  <!-- Чип det A (левый низ) -->
-  <g transform="translate(88 500)" filter="url(#hx-chip-shadow)">
-    <rect x="-46" y="-24" width="100" height="48" rx="14"
-          fill="#FFFFFF" fill-opacity="0.04"/>
-    <rect x="-46" y="-24" width="100" height="48" rx="14"
-          fill="none" stroke="url(#hx-chip-gold)" stroke-width="1.2"/>
-    <circle cx="-34" cy="0" r="2.6" fill="#F59E0B">
-      <animate attributeName="r" values="2.6;3.4;2.6" dur="2.8s" begin="1.2s" repeatCount="indefinite"/>
-    </circle>
-    <text x="8" y="-2" font-size="11" font-weight="800"
-          fill="#FDE68A" text-anchor="middle">det A</text>
-    <text x="8" y="12" font-size="14" font-weight="900"
-          fill="#FDE68A" text-anchor="middle">= 5</text>
-    <animateTransform attributeName="transform" type="translate"
-                      values="88 500; 88 492; 88 500"
-                      dur="5.6s" repeatCount="indefinite"/>
+  <g filter="url(#hx-chip-shadow)">
+    <g transform="translate(88 500)">
+      <rect x="-46" y="-24" width="100" height="48" rx="14"
+            fill="#FFFFFF" fill-opacity="0.04"/>
+      <rect x="-46" y="-24" width="100" height="48" rx="14"
+            fill="none" stroke="url(#hx-chip-gold)" stroke-width="1.2"/>
+      <circle cx="-34" cy="0" r="2.4" fill="#F59E0B"/>
+      <text x="8" y="-2" font-size="10" font-weight="800"
+            fill="#FDE68A" text-anchor="middle">det A</text>
+      <text x="8" y="12" font-size="14" font-weight="900"
+            fill="#FDE68A" text-anchor="middle">= 5</text>
+      <animateTransform attributeName="transform" type="translate"
+                        values="88 500; 88 496; 88 500"
+                        dur="5.6s" repeatCount="indefinite"/>
+    </g>
   </g>
 
-  <!-- Чип rank (правый низ) -->
-  <g transform="translate(812 500)" filter="url(#hx-chip-shadow)">
-    <rect x="-42" y="-24" width="88" height="48" rx="14"
-          fill="#FFFFFF" fill-opacity="0.04"/>
-    <rect x="-42" y="-24" width="88" height="48" rx="14"
-          fill="none" stroke="url(#hx-chip-mint)" stroke-width="1.2"/>
-    <circle cx="-30" cy="0" r="2.6" fill="#059669">
-      <animate attributeName="r" values="2.6;3.4;2.6" dur="2.8s" begin="1.8s" repeatCount="indefinite"/>
-    </circle>
-    <text x="6" y="-2" font-size="11" font-weight="800"
-          fill="#6EE7B7" text-anchor="middle">rank</text>
-    <text x="6" y="12" font-size="14" font-weight="900"
-          fill="#6EE7B7" text-anchor="middle">= 2</text>
-    <animateTransform attributeName="transform" type="translate"
-                      values="812 500; 812 492; 812 500"
-                      dur="6.4s" repeatCount="indefinite"/>
+  <g filter="url(#hx-chip-shadow)">
+    <g transform="translate(812 500)">
+      <rect x="-42" y="-24" width="88" height="48" rx="14"
+            fill="#FFFFFF" fill-opacity="0.04"/>
+      <rect x="-42" y="-24" width="88" height="48" rx="14"
+            fill="none" stroke="url(#hx-chip-mint)" stroke-width="1.2"/>
+      <circle cx="-30" cy="0" r="2.4" fill="#059669"/>
+      <text x="6" y="-2" font-size="10" font-weight="800"
+            fill="#6EE7B7" text-anchor="middle">rank</text>
+      <text x="6" y="12" font-size="14" font-weight="900"
+            fill="#6EE7B7" text-anchor="middle">= 2</text>
+      <animateTransform attributeName="transform" type="translate"
+                        values="812 500; 812 496; 812 500"
+                        dur="6.4s" repeatCount="indefinite"/>
+    </g>
   </g>
 
-  <!-- Чип A·v = λv (левый центр) -->
-  <g transform="translate(88 300)" filter="url(#hx-chip-shadow)">
+  <g filter="url(#hx-chip-shadow)" transform="translate(88 300)">
     <rect x="-56" y="-22" width="120" height="44" rx="14"
           fill="#FFFFFF" fill-opacity="0.04"/>
     <rect x="-56" y="-22" width="120" height="44" rx="14"
           fill="none" stroke="url(#hx-chip-violet)" stroke-width="1.2"/>
-    <circle cx="-44" cy="0" r="2.4" fill="#7C3AED">
-      <animate attributeName="r" values="2.4;3.2;2.4" dur="2.8s" begin="2.4s" repeatCount="indefinite"/>
-    </circle>
+    <circle cx="-44" cy="0" r="2.2" fill="#7C3AED"/>
     <text x="4" y="6" font-size="13" font-weight="800" font-style="italic"
           fill="#C4B5FD" text-anchor="middle">A·v = λv</text>
   </g>
 
-  <!-- Чип A·u = (5,10) (правый центр) -->
-  <g transform="translate(812 300)" filter="url(#hx-chip-shadow)">
+  <g filter="url(#hx-chip-shadow)" transform="translate(812 300)">
     <rect x="-56" y="-22" width="120" height="44" rx="14"
           fill="#FFFFFF" fill-opacity="0.04"/>
     <rect x="-56" y="-22" width="120" height="44" rx="14"
           fill="none" stroke="url(#hx-chip-cyan)" stroke-width="1.2"/>
-    <circle cx="-44" cy="0" r="2.4" fill="#0891B2">
-      <animate attributeName="r" values="2.4;3.2;2.4" dur="2.8s" begin="3s" repeatCount="indefinite"/>
-    </circle>
-    <text x="4" y="6" font-size="13" font-weight="800" font-style="italic"
+    <circle cx="-44" cy="0" r="2.2" fill="#0891B2"/>
+    <text x="4" y="6" font-size="12" font-weight="800" font-style="italic"
           fill="#A5F3FC" text-anchor="middle">A·u = (5,10)</text>
   </g>
 
+
   <!-- ================================================================
-       СЛОЙ 18. ЧАСТИЦЫ — 30+ на 4 уровнях глубины
+       16. ЧАСТИЦЫ — четыре группы по глубине
        ================================================================ -->
 
-  <!-- Уровень 1: дальний, приглушённый -->
-  <g opacity="0.5" filter="url(#hx-dof-far)">
-    <circle cx="140" cy="60" r="1.6" fill="url(#hx-spark-cyan)">
+  <!-- Дальний план -->
+  <g opacity="0.5" filter="url(#hx-dof)">
+    <circle cx="140" cy="60"  r="1.6" fill="#A5F3FC">
       <animate attributeName="opacity" values="0.8;0.3;0.8" dur="6s" repeatCount="indefinite"/>
     </circle>
-    <circle cx="760" cy="60" r="1.4" fill="url(#hx-spark-pink)">
+    <circle cx="760" cy="60"  r="1.4" fill="#FBCFE8">
       <animate attributeName="opacity" values="0.7;0.2;0.7" dur="7s" begin="1s" repeatCount="indefinite"/>
     </circle>
-    <circle cx="60" cy="240" r="1.2" fill="url(#hx-spark-white)">
+    <circle cx="60"  cy="240" r="1.2" fill="#F5D0FE">
       <animate attributeName="opacity" values="0.6;0.15;0.6" dur="5.5s" begin="2s" repeatCount="indefinite"/>
     </circle>
-    <circle cx="840" cy="260" r="1.5" fill="url(#hx-spark-warm)">
+    <circle cx="840" cy="260" r="1.5" fill="#FDE68A">
       <animate attributeName="opacity" values="0.75;0.25;0.75" dur="6.8s" begin="0.5s" repeatCount="indefinite"/>
     </circle>
-    <circle cx="200" cy="580" r="1.4" fill="url(#hx-spark-cyan)">
+    <circle cx="200" cy="580" r="1.4" fill="#A5F3FC">
       <animate attributeName="opacity" values="0.65;0.2;0.65" dur="6.2s" begin="1.5s" repeatCount="indefinite"/>
     </circle>
-    <circle cx="700" cy="580" r="1.3" fill="url(#hx-spark-pink)">
+    <circle cx="700" cy="580" r="1.3" fill="#FBCFE8">
       <animate attributeName="opacity" values="0.7;0.2;0.7" dur="5.8s" begin="2.4s" repeatCount="indefinite"/>
-    </circle>
-    <circle cx="300" cy="100" r="1.4" fill="url(#hx-spark-mint)">
-      <animate attributeName="opacity" values="0.7;0.25;0.7" dur="6.4s" begin="3s" repeatCount="indefinite"/>
-    </circle>
-    <circle cx="600" cy="560" r="1.6" fill="url(#hx-spark-warm)">
-      <animate attributeName="opacity" values="0.65;0.2;0.65" dur="5.6s" begin="0.8s" repeatCount="indefinite"/>
     </circle>
   </g>
 
-  <!-- Уровень 2: средний -->
-  <circle cx="94" cy="180" r="3" fill="url(#hx-spark-cyan)" filter="url(#hx-bloom-sm)">
-    <animate attributeName="cx" values="94;86;94" dur="7s" repeatCount="indefinite"/>
-    <animate attributeName="cy" values="180;170;180" dur="7s" repeatCount="indefinite"/>
-    <animate attributeName="opacity" values="1;0.5;1" dur="4.5s" repeatCount="indefinite"/>
-  </circle>
-  <circle cx="94" cy="180" r="1.4" fill="#FFFFFF"/>
+  <!-- Средний план -->
+  <g>
+    <circle cx="94"  cy="180" r="2.6" fill="#A5F3FC" filter="url(#hx-bloom-sm)">
+      <animateTransform attributeName="transform" type="translate"
+                        values="0 0; -6 -8; 0 0" dur="7s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.9;0.4;0.9" dur="4.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="800" cy="200" r="2.8" fill="#FDE68A" filter="url(#hx-bloom-sm)">
+      <animateTransform attributeName="transform" type="translate"
+                        values="0 0; 6 -6; 0 0" dur="8s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.9;0.4;0.9" dur="5.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="100" cy="400" r="2.4" fill="#FBCFE8" filter="url(#hx-bloom-sm)">
+      <animateTransform attributeName="transform" type="translate"
+                        values="0 0; -6 6; 0 0" dur="7.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="800" cy="400" r="2.6" fill="#A5F3FC" filter="url(#hx-bloom-sm)">
+      <animate attributeName="opacity" values="0.9;0.35;0.9" dur="5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="450" cy="30"  r="2.4" fill="#F5D0FE" filter="url(#hx-bloom-sm)">
+      <animate attributeName="opacity" values="1;0.4;1" dur="4.8s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="450" cy="590" r="2.4" fill="#F5D0FE" filter="url(#hx-bloom-sm)">
+      <animate attributeName="opacity" values="1;0.4;1" dur="5.2s" begin="0.8s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="260" cy="580" r="2" fill="#A5F3FC" filter="url(#hx-bloom-sm)">
+      <animate attributeName="opacity" values="0.9;0.3;0.9" dur="5.2s" begin="0.8s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="640" cy="580" r="1.8" fill="#FBCFE8" filter="url(#hx-bloom-sm)">
+      <animate attributeName="opacity" values="0.85;0.25;0.85" dur="5.6s" begin="1.4s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="620" cy="120" r="2.2" fill="#6EE7B7" filter="url(#hx-bloom-sm)">
+      <animateTransform attributeName="transform" type="translate"
+                        values="0 0; 5 0; 0 0" dur="6s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.9;0.4;0.9" dur="3.8s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="280" cy="320" r="1.8" fill="#FDE68A" filter="url(#hx-bloom-sm)">
+      <animateTransform attributeName="transform" type="translate"
+                        values="0 0; 0 -6; 0 0" dur="6.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="620" cy="480" r="2.2" fill="#6EE7B7" filter="url(#hx-bloom-sm)">
+      <animateTransform attributeName="transform" type="translate"
+                        values="0 0; 6 0; 0 0" dur="7.2s" begin="1.2s" repeatCount="indefinite"/>
+    </circle>
+  </g>
 
-  <circle cx="800" cy="200" r="3.2" fill="url(#hx-spark-warm)" filter="url(#hx-bloom-sm)">
-    <animate attributeName="cx" values="800;808;800" dur="8s" repeatCount="indefinite"/>
-    <animate attributeName="cy" values="200;192;200" dur="8s" repeatCount="indefinite"/>
-    <animate attributeName="opacity" values="1;0.55;1" dur="5.5s" repeatCount="indefinite"/>
-  </circle>
-  <circle cx="800" cy="200" r="1.5" fill="#FFFFFF"/>
+  <!-- Ближний план — крупные вспышки -->
+  <g>
+    <circle cx="150" cy="80" r="10" fill="url(#hx-spark-pink)" opacity="0.35" filter="url(#hx-bloom-md)">
+      <animate attributeName="opacity" values="0.35;0.15;0.35" dur="7s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="150" cy="80" r="2.4" fill="#FFFFFF"/>
 
-  <circle cx="100" cy="400" r="2.8" fill="url(#hx-spark-pink)" filter="url(#hx-bloom-sm)">
-    <animate attributeName="cx" values="100;92;100" dur="7.5s" repeatCount="indefinite"/>
-    <animate attributeName="cy" values="400;408;400" dur="7.5s" repeatCount="indefinite"/>
-  </circle>
+    <circle cx="760" cy="560" r="11" fill="url(#hx-spark-cyan)" opacity="0.38" filter="url(#hx-bloom-md)">
+      <animate attributeName="opacity" values="0.38;0.16;0.38" dur="6.4s" begin="1.2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="760" cy="560" r="2.6" fill="#FFFFFF"/>
 
-  <circle cx="800" cy="400" r="3" fill="url(#hx-spark-cyan)" filter="url(#hx-bloom-sm)">
-    <animate attributeName="opacity" values="0.95;0.35;0.95" dur="5s" repeatCount="indefinite"/>
-  </circle>
+    <circle cx="340" cy="120" r="9" fill="url(#hx-spark-mint)" opacity="0.32" filter="url(#hx-bloom-md)">
+      <animate attributeName="opacity" values="0.32;0.14;0.32" dur="5.8s" begin="0.6s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="340" cy="120" r="2" fill="#FFFFFF"/>
 
-  <circle cx="450" cy="30" r="2.8" fill="url(#hx-spark-white)" filter="url(#hx-bloom-sm)">
-    <animate attributeName="opacity" values="1;0.4;1" dur="4.8s" repeatCount="indefinite"/>
-  </circle>
-
-  <circle cx="450" cy="590" r="2.8" fill="url(#hx-spark-white)" filter="url(#hx-bloom-sm)">
-    <animate attributeName="opacity" values="1;0.4;1" dur="5.2s" begin="0.8s" repeatCount="indefinite"/>
-  </circle>
-
-  <circle cx="260" cy="580" r="2.4" fill="url(#hx-spark-cyan)" filter="url(#hx-bloom-sm)">
-    <animate attributeName="opacity" values="0.9;0.3;0.9" dur="5.2s" begin="0.8s" repeatCount="indefinite"/>
-  </circle>
-
-  <circle cx="640" cy="580" r="2" fill="url(#hx-spark-pink)" filter="url(#hx-bloom-sm)">
-    <animate attributeName="opacity" values="0.85;0.25;0.85" dur="5.6s" begin="1.4s" repeatCount="indefinite"/>
-  </circle>
-
-  <circle cx="620" cy="120" r="2.4" fill="url(#hx-spark-mint)" filter="url(#hx-bloom-sm)">
-    <animate attributeName="cx" values="620;626;620" dur="6s" repeatCount="indefinite"/>
-    <animate attributeName="opacity" values="1;0.4;1" dur="3.8s" repeatCount="indefinite"/>
-  </circle>
-
-  <circle cx="280" cy="320" r="2" fill="url(#hx-spark-warm)" filter="url(#hx-bloom-sm)">
-    <animate attributeName="cy" values="320;312;320" dur="6.5s" repeatCount="indefinite"/>
-  </circle>
-
-  <circle cx="620" cy="480" r="2.4" fill="url(#hx-spark-mint)" filter="url(#hx-bloom-sm)">
-    <animate attributeName="cx" values="620;628;620" dur="7.2s" begin="1.2s" repeatCount="indefinite"/>
-  </circle>
-
-  <!-- Уровень 3: крупные ближние -->
-  <circle cx="150" cy="80" r="10" fill="url(#hx-spark-pink)" opacity="0.4" filter="url(#hx-bloom-md)">
-    <animate attributeName="opacity" values="0.4;0.18;0.4" dur="7s" repeatCount="indefinite"/>
-  </circle>
-  <circle cx="150" cy="80" r="2.6" fill="#FFFFFF"/>
-
-  <circle cx="760" cy="560" r="11" fill="url(#hx-spark-cyan)" opacity="0.42" filter="url(#hx-bloom-md)">
-    <animate attributeName="opacity" values="0.42;0.18;0.42" dur="6.4s" begin="1.2s" repeatCount="indefinite"/>
-  </circle>
-  <circle cx="760" cy="560" r="2.8" fill="#FFFFFF"/>
-
-  <circle cx="340" cy="120" r="9" fill="url(#hx-spark-mint)" opacity="0.35" filter="url(#hx-bloom-md)">
-    <animate attributeName="opacity" values="0.35;0.15;0.35" dur="5.8s" begin="0.6s" repeatCount="indefinite"/>
-  </circle>
-  <circle cx="340" cy="120" r="2.2" fill="#FFFFFF"/>
-
-  <circle cx="560" cy="500" r="9" fill="url(#hx-spark-gold, url(#hx-spark-warm))" opacity="0.4" filter="url(#hx-bloom-md)">
-    <animate attributeName="opacity" values="0.4;0.18;0.4" dur="6s" begin="2s" repeatCount="indefinite"/>
-  </circle>
-  <circle cx="560" cy="500" r="2.4" fill="#FFFFFF"/>
-
-  <!-- ================================================================
-       СЛОЙ 19. ЛИНЗОВЫЕ ВСПЫШКИ НА ЯДРЕ
-       ================================================================ -->
-  <g opacity="0.85" filter="url(#hx-flare)">
-    <circle cx="404" cy="248" r="18" fill="#FFFFFF" opacity="0.35"/>
-    <circle cx="396" cy="240" r="7" fill="#FFFFFF" opacity="0.9"/>
+    <circle cx="560" cy="500" r="9" fill="url(#hx-spark-warm)" opacity="0.36" filter="url(#hx-bloom-md)">
+      <animate attributeName="opacity" values="0.36;0.16;0.36" dur="6s" begin="2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="560" cy="500" r="2.2" fill="#FFFFFF"/>
   </g>
 
 </svg>

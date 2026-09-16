@@ -94,8 +94,7 @@
         return ML.validators.isEmptyMatrix(m);
     }
 
-    /* Возвращает экземпляр MatrixInput, если matrix.js уже его создал.
-       Если нет — null. Не пытаемся создать руками. */
+    /* Возвращает экземпляр MatrixInput, если matrix.js уже его создал. */
     function findMatrixInput(root) {
         const scope = root || document;
         const grid = scope.querySelector('[data-matrix-input]');
@@ -104,10 +103,24 @@
         return (ML.matrixInputs && ML.matrixInputs[grid.id]) || null;
     }
 
-    function findResultBlock(root) {
-        const scope = root || document;
-        return scope.querySelector('[data-eigen-result]')
-            || scope.querySelector('[data-result-block]');
+    /* Ищем блок результата ВСЕГДА от документа — он может лежать
+       за пределами карточки матрицы. */
+    function findResultBlock(scope) {
+        if (scope && scope.querySelector) {
+            const local = scope.querySelector('[data-eigen-result]');
+            if (local) return local;
+        }
+        return document.querySelector('[data-eigen-result]')
+            || document.querySelector('[data-result-block]');
+    }
+
+    function findPlaceholder(scope) {
+        if (scope && scope.querySelector) {
+            const local = scope.querySelector('[data-eigen-placeholder]');
+            if (local) return local;
+        }
+        return document.querySelector('[data-eigen-placeholder]')
+            || document.querySelector('[data-calc-placeholder]');
     }
 
     function findRunBtn(root) {
@@ -246,8 +259,6 @@
 
         const mi = findMatrixInput(scope);
         if (!mi) {
-            /* Редактор ещё не создан — оставляем кнопку кликабельной,
-               чтобы клик ушёл в runOperation и там показал тост. */
             runBtn.disabled = false;
             runBtn.title = tr('eigen.editorNotFound',
                 'Редактор матрицы не найден');
@@ -341,6 +352,9 @@
         const scope = root || document;
         const block = findResultBlock(scope);
         if (!block) return;
+
+        const placeholder = findPlaceholder(scope);
+        if (placeholder) placeholder.hidden = true;
 
         block.hidden = false;
 
@@ -442,132 +456,142 @@
     function renderResult(root, payload, options) {
         options = options || {};
         const scope = root || document;
-        const block = findResultBlock(scope);
-        if (!block || !payload) return;
+
+        // ВАЖНО: блок результата ищем от документа, не от scope.
+        const block = findResultBlock();
+        if (!block || !payload) {
+            console.warn('[eigen] renderResult: блок результата не найден');
+            return;
+        }
 
         const op = options.op || currentOp;
         const extra = payload.extra || {};
         const result = payload.result;
 
+        // Показываем блок, скрываем плейсхолдер.
         block.hidden = false;
+        const placeholder = findPlaceholder();
+        if (placeholder) placeholder.hidden = true;
 
-        const taskSection = block.querySelector('.result-section--task');
-        if (taskSection) taskSection.hidden = false;
+        try {
+            const taskSection = block.querySelector('.result-section--task');
+            if (taskSection) taskSection.hidden = false;
 
-        const charpolySection = block.querySelector('[data-eigen-charpoly]');
-        const valuesSection = block.querySelector('[data-eigen-values]');
-        const vectorsSection = block.querySelector('[data-eigen-vectors]');
-        const diagSection = block.querySelector('[data-eigen-diagonalizable]');
+            const charpolySection = block.querySelector('[data-eigen-charpoly]');
+            const valuesSection = block.querySelector('[data-eigen-values]');
+            const vectorsSection = block.querySelector('[data-eigen-vectors]');
+            const diagSection = block.querySelector('[data-eigen-diagonalizable]');
 
-        if (charpolySection) charpolySection.hidden = true;
-        if (valuesSection) valuesSection.hidden = true;
-        if (vectorsSection) vectorsSection.hidden = true;
-        if (diagSection) diagSection.hidden = true;
+            if (charpolySection) charpolySection.hidden = true;
+            if (valuesSection) valuesSection.hidden = true;
+            if (vectorsSection) vectorsSection.hidden = true;
+            if (diagSection) diagSection.hidden = true;
 
-        const error = block.querySelector('[data-eigen-error]');
-        if (error) error.hidden = true;
+            const error = block.querySelector('[data-eigen-error]');
+            if (error) error.hidden = true;
 
-        const taskText = block.querySelector('[data-eigen-task-text]');
-        if (taskText) {
-            taskText.textContent = options.taskText
-                || opInfo(op).taskText || '';
-        }
-        const taskFormula = block.querySelector('[data-eigen-task-formula]');
-        if (taskFormula) {
-            const latex = options.taskLatex || '';
-            taskFormula.innerHTML = latex ? ('$$' + latex + '$$') : '';
-        }
-
-        // Характеристический многочлен
-        const charpolyBody = block.querySelector('[data-eigen-charpoly-body]');
-        if (charpolyBody && (extra.char_poly_latex || extra.factored_latex)) {
-            let html = '';
-            if (extra.char_poly_latex) {
-                html += '<div class="eigen-charpoly-row">'
-                    +   '<div class="eigen-charpoly-label">p(λ) =</div>'
-                    +   '<div class="eigen-charpoly-value">$$'
-                    +     extra.char_poly_latex + '$$</div>'
-                    + '</div>';
+            const taskText = block.querySelector('[data-eigen-task-text]');
+            if (taskText) {
+                taskText.textContent = options.taskText
+                    || opInfo(op).taskText || '';
             }
-            if (extra.factored_latex
-                && extra.factored_latex !== extra.char_poly_latex) {
-                html += '<div class="eigen-charpoly-row">'
-                    +   '<div class="eigen-charpoly-label">p(λ) =</div>'
-                    +   '<div class="eigen-charpoly-value">$$'
-                    +     extra.factored_latex + '$$</div>'
-                    + '</div>';
+            const taskFormula = block.querySelector('[data-eigen-task-formula]');
+            if (taskFormula) {
+                const latex = options.taskLatex || '';
+                taskFormula.innerHTML = latex ? ('$$' + latex + '$$') : '';
             }
-            if (html) {
-                charpolyBody.innerHTML = html;
-                if (charpolySection) charpolySection.hidden = false;
+
+            // Характеристический многочлен
+            const charpolyBody = block.querySelector('[data-eigen-charpoly-body]');
+            if (charpolyBody && (extra.char_poly_latex || extra.factored_latex)) {
+                let html = '';
+                if (extra.char_poly_latex) {
+                    html += '<div class="eigen-charpoly-row">'
+                        +   '<div class="eigen-charpoly-label">p(λ) =</div>'
+                        +   '<div class="eigen-charpoly-value">$$'
+                        +     extra.char_poly_latex + '$$</div>'
+                        + '</div>';
+                }
+                if (extra.factored_latex
+                    && extra.factored_latex !== extra.char_poly_latex) {
+                    html += '<div class="eigen-charpoly-row">'
+                        +   '<div class="eigen-charpoly-label">p(λ) =</div>'
+                        +   '<div class="eigen-charpoly-value">$$'
+                        +     extra.factored_latex + '$$</div>'
+                        + '</div>';
+                }
+                if (html) {
+                    charpolyBody.innerHTML = html;
+                    if (charpolySection) charpolySection.hidden = false;
+                }
             }
-        }
 
-        // Собственные значения
-        const valuesBody = block.querySelector('[data-eigen-values-body]');
-        const traceEl = block.querySelector('[data-eigen-trace]');
-        const detEl = block.querySelector('[data-eigen-det]');
+            // Собственные значения
+            const valuesBody = block.querySelector('[data-eigen-values-body]');
+            const traceEl = block.querySelector('[data-eigen-trace]');
+            const detEl = block.querySelector('[data-eigen-det]');
 
-        const eigenvalues = isArr(result) ? result : [];
-        const showValues = (op === 'eigenvalues' || op === 'full'
-            || op === 'eigenvectors') && eigenvalues.length > 0;
+            const eigenvalues = isArr(result) ? result : [];
+            const showValues = (op === 'eigenvalues' || op === 'full'
+                || op === 'eigenvectors') && eigenvalues.length > 0;
 
-        if (valuesBody && showValues) {
-            valuesBody.innerHTML = eigenvalues
-                .map(buildEigenValueItem)
-                .join('');
-            if (valuesSection) valuesSection.hidden = false;
+            if (valuesBody && showValues) {
+                valuesBody.innerHTML = eigenvalues
+                    .map(buildEigenValueItem)
+                    .join('');
+                if (valuesSection) valuesSection.hidden = false;
 
-            if (traceEl) {
-                traceEl.textContent = extra.trace_check
-                    ? String(extra.trace_check)
-                    : '—';
+                if (traceEl) {
+                    traceEl.textContent = extra.trace_check
+                        ? String(extra.trace_check)
+                        : '—';
+                }
+                if (detEl) {
+                    detEl.textContent = extra.det_check
+                        ? String(extra.det_check)
+                        : '—';
+                }
             }
-            if (detEl) {
-                detEl.textContent = extra.det_check
-                    ? String(extra.det_check)
-                    : '—';
+
+            // Собственные векторы
+            const vectorsBody = block.querySelector('[data-eigen-vectors-body]');
+            const showVectors = (op === 'eigenvectors' || op === 'full')
+                && eigenvalues.length > 0
+                && eigenvalues[0].eigenvectors_latex !== undefined;
+
+            if (vectorsBody && showVectors) {
+                vectorsBody.innerHTML = eigenvalues
+                    .map(buildEigenVectorItem)
+                    .join('');
+                if (vectorsSection) vectorsSection.hidden = false;
             }
-        }
 
-        // Собственные векторы
-        const vectorsBody = block.querySelector('[data-eigen-vectors-body]');
-        const showVectors = (op === 'eigenvectors' || op === 'full')
-            && eigenvalues.length > 0
-            && eigenvalues[0].eigenvectors_latex !== undefined;
+            // Диагонализируемость
+            const diagBody = block.querySelector('[data-eigen-diag-body]');
+            if (diagBody && extra.is_diagonalizable !== undefined) {
+                const yes = !!extra.is_diagonalizable;
+                const reason = extra.diagonalization_reason
+                    || (yes
+                        ? tr('eigen.diagYes', 'Матрица диагонализируема.')
+                        : tr('eigen.diagNo', 'Матрица не диагонализируема.'));
 
-        if (vectorsBody && showVectors) {
-            vectorsBody.innerHTML = eigenvalues
-                .map(buildEigenVectorItem)
-                .join('');
-            if (vectorsSection) vectorsSection.hidden = false;
-        }
+                diagBody.className = 'eigen-diag ' + (yes ? 'is-yes' : 'is-no');
+                diagBody.innerHTML = ''
+                    + '<div class="eigen-diag-head">'
+                    +   '<span class="eigen-diag-icon">'
+                    +     (yes ? '✓' : '!') + '</span>'
+                    +   '<span>' + ML.escapeHtml(yes
+                        ? tr('eigen.diagYesTitle', 'Диагонализируема')
+                        : tr('eigen.diagNoTitle', 'Не диагонализируема'))
+                    +   '</span>'
+                    + '</div>'
+                    + '<p class="eigen-diag-text">'
+                    +   ML.escapeHtml(reason) + '</p>';
 
-        // Диагонализируемость
-        const diagBody = block.querySelector('[data-eigen-diag-body]');
-        if (diagBody && extra.is_diagonalizable !== undefined) {
-            const yes = !!extra.is_diagonalizable;
-            const reason = extra.diagonalization_reason
-                || (yes
-                    ? tr('eigen.diagYes',
-                        'Матрица диагонализируема.')
-                    : tr('eigen.diagNo',
-                        'Матрица не диагонализируема.'));
-
-            diagBody.className = 'eigen-diag ' + (yes ? 'is-yes' : 'is-no');
-            diagBody.innerHTML = ''
-                + '<div class="eigen-diag-head">'
-                +   '<span class="eigen-diag-icon">'
-                +     (yes ? '✓' : '!') + '</span>'
-                +   '<span>' + ML.escapeHtml(yes
-                    ? tr('eigen.diagYesTitle', 'Диагонализируема')
-                    : tr('eigen.diagNoTitle', 'Не диагонализируема'))
-                +   '</span>'
-                + '</div>'
-                + '<p class="eigen-diag-text">'
-                +   ML.escapeHtml(reason) + '</p>';
-
-            if (diagSection) diagSection.hidden = false;
+                if (diagSection) diagSection.hidden = false;
+            }
+        } catch (err) {
+            console.error('[eigen] renderResult error:', err);
         }
 
         if (ML.mathjax && typeof ML.mathjax.typeset === 'function') {
@@ -591,18 +615,16 @@
 
         ctx = ctx || {};
         const scope = ctx.root || document;
-        const resultBlock = ctx.resultBlock || findResultBlock(scope);
-        const placeholder = ctx.placeholder
-            || scope.querySelector(
-                '[data-eigen-placeholder], [data-calc-placeholder]'
-            );
+
+        // ВАЖНО: resultBlock и placeholder ищем глобально.
+        const resultBlock = ctx.resultBlock || findResultBlock();
+        const placeholder = ctx.placeholder || findPlaceholder();
 
         const mi = ctx.mi || findMatrixInput(scope);
         if (!mi) {
             ML.toast.warning(
                 tr('eigen.noMatrix', 'Нет матрицы'),
-                tr('eigen.editorNotFound',
-                    'Редактор матрицы не найден.')
+                tr('eigen.editorNotFound', 'Редактор матрицы не найден.')
             );
             _isRunning = false;
             return null;
@@ -680,6 +702,7 @@
         ML.loader.show(
             tr('common.computing', 'Анализируем спектр…')
         );
+
         if (resultBlock) {
             resultBlock.hidden = false;
             const valuesBody = resultBlock.querySelector(
@@ -696,6 +719,7 @@
             );
             if (valuesSection) valuesSection.hidden = false;
         }
+        if (placeholder) placeholder.hidden = true;
 
         try {
             let response;
@@ -711,8 +735,7 @@
             if (response && response.success === false) {
                 const backendMsg = response.error
                     || response.message
-                    || tr('eigen.backendError',
-                        'Бэкенд вернул ошибку.');
+                    || tr('eigen.backendError', 'Бэкенд вернул ошибку.');
                 const backendCode = response.code || 'backend_error';
                 throw Object.assign(
                     new Error(backendMsg),
@@ -725,7 +748,6 @@
                 taskText: info.taskText,
                 taskLatex: 'A = ' + ML.format.matrixToLatex(matrix)
             });
-            if (placeholder) placeholder.hidden = true;
 
             _cachePut(op, matrix, response);
 
@@ -780,7 +802,7 @@
     async function runComposite(op, snapshot) {
         try {
             const unified = await ML.api.post(EIGEN_FULL_URL, snapshot, {
-                timeout: 120000
+                timeout: 500000
             });
             if (unified && unified.success !== false) {
                 return unified;
@@ -792,8 +814,8 @@
         }
 
         const [eigRes, vecRes] = await Promise.allSettled([
-            ML.api.post(OPS.eigenvalues.url, snapshot, { timeout: 90000 }),
-            ML.api.post(OPS.eigenvectors.url, snapshot, { timeout: 90000 })
+            ML.api.post(OPS.eigenvalues.url, snapshot, { timeout: 500000 }),
+            ML.api.post(OPS.eigenvectors.url, snapshot, { timeout: 500000 })
         ]);
 
         const eigResp = eigRes.status === 'fulfilled' ? eigRes.value : null;
@@ -860,13 +882,8 @@
             kind: 'text',
             result: result,
             latex: safeEig.latex || safeVec.latex || '',
-            explanation: safeEig.explanation
-                || safeVec.explanation
-                || '',
-            extra: Object.assign({},
-                safeEig.extra || {},
-                safeVec.extra || {}
-            ),
+            explanation: safeEig.explanation || safeVec.explanation || '',
+            extra: Object.assign({}, safeEig.extra || {}, safeVec.extra || {}),
             task: safeEig.task || safeVec.task || {},
             steps: mergedSteps,
             checks: mergedChecks
@@ -884,40 +901,26 @@
         const mi = findMatrixInput(scope) || findMatrixInput(document);
 
         if (!mi) {
-            ML.toast.error(
-                tr('eigen.editorNotFound', 'Редактор не найден'),
-                ''
-            );
+            ML.toast.error(tr('eigen.editorNotFound', 'Редактор не найден'), '');
             return null;
         }
 
         const op = (btn && btn.dataset.presetOp) || null;
         const autorun = !btn || btn.dataset.presetAutorun !== '0';
 
-        ML.loader.show(
-            tr('eigen.loadingExample', 'Загружаем пример…')
-        );
+        ML.loader.show(tr('eigen.loadingExample', 'Загружаем пример…'));
 
         try {
-            const resp = await ML.api.post(
-                '/api/example/' + slug + '/', {}
-            );
+            const resp = await ML.api.post('/api/example/' + slug + '/', {});
             const data = (resp && resp.result) || {};
             const matrix = data.matrix;
 
             if (!isArr(matrix) || !matrix.length) {
-                ML.toast.warning(
-                    tr('eigen.exampleEmpty', 'Пример пустой'),
-                    slug
-                );
+                ML.toast.warning(tr('eigen.exampleEmpty', 'Пример пустой'), slug);
                 return null;
             }
 
-            mi.setSize(
-                matrix.length,
-                matrix[0].length,
-                { preserve: false }
-            );
+            mi.setSize(matrix.length, matrix[0].length, { preserve: false });
             mi.write(matrix);
 
             _cacheClear();
@@ -932,16 +935,11 @@
             );
 
             ML.emit('eigen:example-loaded', {
-                slug: slug,
-                op: op,
-                autorun: autorun
+                slug: slug, op: op, autorun: autorun
             });
 
             if (autorun) {
-                await runOperation(op || currentOp, {
-                    root: scope,
-                    mi: mi
-                });
+                await runOperation(op || currentOp, { root: scope, mi: mi });
             }
 
             return data;
@@ -956,13 +954,10 @@
         }
     }
 
-    /* Инлайн-пример: JSON прямо в data-eigen-example. */
     async function loadExample(rawJson, btn) {
         let data;
         try {
-            data = typeof rawJson === 'string'
-                ? JSON.parse(rawJson)
-                : rawJson;
+            data = typeof rawJson === 'string' ? JSON.parse(rawJson) : rawJson;
         } catch (e) {
             console.error('[eigen] Некорректный JSON примера:', e);
             return null;
@@ -974,21 +969,14 @@
         const mi = findMatrixInput(scope) || findMatrixInput(document);
 
         if (!mi) {
-            ML.toast.error(
-                tr('eigen.editorNotFound', 'Редактор не найден'),
-                ''
-            );
+            ML.toast.error(tr('eigen.editorNotFound', 'Редактор не найден'), '');
             return null;
         }
 
         const op = data.op || null;
         const autorun = data.autorun !== false;
 
-        mi.setSize(
-            data.matrix.length,
-            data.matrix[0].length,
-            { preserve: false }
-        );
+        mi.setSize(data.matrix.length, data.matrix[0].length, { preserve: false });
         mi.write(data.matrix);
 
         _cacheClear();
@@ -1003,17 +991,14 @@
         );
 
         if (autorun) {
-            await runOperation(op || currentOp, {
-                root: scope,
-                mi: mi
-            });
+            await runOperation(op || currentOp, { root: scope, mi: mi });
         }
 
         return data;
     }
 
     // =========================================================================
-    // 11. ДЕЛЕГИРОВАННЫЕ ОБРАБОТЧИКИ (все клики)
+    // 11. ДЕЛЕГИРОВАННЫЕ ОБРАБОТЧИКИ
     // =========================================================================
 
     let _delegated = false;
@@ -1023,7 +1008,6 @@
         _delegated = true;
 
         document.addEventListener('click', function (e) {
-            // 1) Табы операций
             const opBtn = e.target.closest('[data-eigen-op]');
             if (opBtn) {
                 e.preventDefault();
@@ -1032,23 +1016,19 @@
                 return;
             }
 
-            // 2) Кнопка «Найти спектр»
             const runBtn = e.target.closest('[data-eigen-run]');
             if (runBtn) {
                 e.preventDefault();
                 const scope = findPageRoot(runBtn);
                 runOperation(currentOp, {
                     root: scope,
-                    resultBlock: findResultBlock(scope),
-                    placeholder: scope.querySelector(
-                        '[data-eigen-placeholder], [data-calc-placeholder]'
-                    ),
+                    resultBlock: findResultBlock(),
+                    placeholder: findPlaceholder(),
                     mi: findMatrixInput(scope)
                 });
                 return;
             }
 
-            // 3) Кнопка «Очистить»
             const resetBtn = e.target.closest('[data-eigen-reset]');
             if (resetBtn) {
                 e.preventDefault();
@@ -1057,16 +1037,13 @@
                 if (mi) mi.clear();
                 clearRendered(scope);
                 _cacheClear();
-                const ph = scope.querySelector(
-                    '[data-eigen-placeholder], [data-calc-placeholder]'
-                );
+                const ph = findPlaceholder();
                 if (ph) ph.hidden = false;
                 updateRunButtonState(scope);
                 ML.emit('eigen:reset', {});
                 return;
             }
 
-            // 4) Пресет с бэкендом
             const presetBtn = e.target.closest('[data-eigen-preset]');
             if (presetBtn) {
                 e.preventDefault();
@@ -1074,7 +1051,6 @@
                 return;
             }
 
-            // 5) Инлайн-пример из шаблона
             const exampleBtn = e.target.closest('[data-eigen-example]');
             if (exampleBtn) {
                 e.preventDefault();
@@ -1093,7 +1069,6 @@
     function mount(root) {
         root = root || document;
 
-        // Делегирование — всегда
         initDelegated();
 
         if (_mounted) return true;
@@ -1101,9 +1076,6 @@
         const runBtn = findRunBtn(root);
         if (!runBtn) return false;
 
-        /* Ждём, пока matrix.js создаст редакторы.
-           Пока ML.matrixInputs пуст — пробуем ещё раз через 50мс,
-           максимум 40 попыток (2 секунды). */
         const ready = ML.matrixInputs
             && Object.keys(ML.matrixInputs).length > 0;
 
@@ -1140,7 +1112,6 @@
         }
         if (ML.on) ML.on('matrix:change', updateDebounced);
 
-        // Начальное состояние табов
         const initialBtn = section.querySelector('[data-eigen-op].is-active')
             || section.querySelector('[data-eigen-op]');
         if (initialBtn && initialBtn.dataset.eigenOp) {
@@ -1181,12 +1152,9 @@
         cleanupMissingIcons(document);
         initDelegated();
 
-        /* Пытаемся смонтировать сразу. Если matrix.js ещё не отработал —
-           mount() сам себя перезапустит по таймеру. */
         if (document.querySelector('[data-eigen-run]')) {
             mount(document);
         } else {
-            /* DOM мог быть ещё не готов — ждём. */
             if (document.readyState === 'loading') {
                 document.addEventListener('DOMContentLoaded', function () {
                     if (document.querySelector('[data-eigen-run]')) {

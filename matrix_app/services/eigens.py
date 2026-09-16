@@ -8,8 +8,6 @@
       подпространства (собственные векторы) и геометрическую кратность;
     • информацию о диагонализируемости.
 
-Все результаты — точные (SymPy), с LaTeX-представлением.
-
 Производительность:
     • compute_cached()  — основной вход для API. Кэширует EigenResult по
                           хэшу матрицы + var_name, чтобы три эндпоинта
@@ -45,11 +43,8 @@ logger = logging.getLogger("matrix_app.services.eigens")
 # Лимиты
 # =============================================================================
 
-# До какого размера считаем точно (SymPy).
-SYMBOLIC_LIMIT = 5
-
-# До какого размера считаем численно (NumPy).
-NUMERIC_LIMIT = 20
+SYMBOLIC_LIMIT = 5     # до этого размера — точный SymPy
+NUMERIC_LIMIT = 20     # до этого размера — численный NumPy
 
 
 # =============================================================================
@@ -58,7 +53,6 @@ NUMERIC_LIMIT = 20
 
 @dataclass
 class EigenItem:
-    """Информация об одном собственном значении."""
     value: sp.Expr
     value_latex: str
     algebraic_multiplicity: int
@@ -71,7 +65,6 @@ class EigenItem:
 
 @dataclass
 class EigenResult:
-    """Полный результат спектрального анализа."""
     matrix: sp.Matrix
     char_poly: sp.Expr
     char_poly_latex: str
@@ -100,13 +93,6 @@ def compute(
     compute_eigenvectors: bool = True,
     compute_equations: bool = False,
 ) -> EigenResult:
-    """Полный спектральный анализ квадратной матрицы.
-
-    Автоматически выбирает точный (SymPy) или численный (NumPy) путь:
-        • n <= SYMBOLIC_LIMIT и матрица без символов → точный расчёт;
-        • n >  SYMBOLIC_LIMIT и матрица без символов → численный расчёт;
-        • матрица с символами и n > SYMBOLIC_LIMIT → ValidationError.
-    """
     if matrix is None:
         raise ValidationError("Матрица не задана.", code="empty")
 
@@ -349,7 +335,6 @@ def _compute_numeric(
         if compute_eigenvectors and raw_vecs is not None:
             for idx in indices:
                 v = raw_vecs[:, idx]
-                # Нормируем по первой ненулевой компоненте.
                 pivot = next(
                     (k for k, x in enumerate(v) if abs(x) > 1e-10),
                     0,
@@ -383,24 +368,28 @@ def _compute_numeric(
             )
         )
 
-    # char_poly через np.poly (только для числовой матрицы).
+    # --- char_poly через np.poly --------------------------------------------
+    # np.poly(arr) возвращает коэффициенты (возможно, комплексные).
+    # Приводим каждый к SymPy-выражению через _complex_to_sympy — так
+    # не теряется мнимая часть и не возникает ComplexWarning.
     coeffs = np.poly(arr)
     poly = sp.Integer(0)
     for i, c in enumerate(coeffs):
         power = len(coeffs) - 1 - i
         try:
-            poly += sp.Float(c).round(10) * lam ** power
+            poly += _complex_to_sympy(c) * lam ** power
         except Exception:
-            poly += sp.Float(float(c)).round(10) * lam ** power
+            poly += sp.Float(0.0) * lam ** power
     poly = sp.expand(poly)
 
+    # --- след и определитель -------------------------------------------------
     try:
-        trace_check = sp.Float(float(np.trace(arr))).round(8)
+        trace_check = _complex_to_sympy(np.trace(arr))
     except Exception:
         trace_check = sp.Integer(0)
 
     try:
-        det_check = sp.Float(float(np.linalg.det(arr))).round(8)
+        det_check = _complex_to_sympy(np.linalg.det(arr))
     except Exception:
         det_check = sp.Integer(0)
 
@@ -479,8 +468,15 @@ def _complex_to_sympy(z: complex) -> sp.Expr:
     Если действительная часть ~0, возвращаем чисто мнимое.
     Иначе — полное a + bi.
     """
-    re = float(z.real)
-    im = float(z.imag)
+    try:
+        re = float(z.real)
+        im = float(z.imag)
+    except (AttributeError, TypeError, ValueError):
+        # На случай, если пришло не complex, а обычное число.
+        try:
+            return sp.Float(round(float(z), 8))
+        except Exception:
+            return sp.Integer(0)
 
     if abs(im) < 1e-10:
         return sp.Float(round(re, 8))
@@ -502,7 +498,6 @@ def _build_nullspace_equations(
     n: int,
     var_name: str,
 ) -> list[str]:
-    """Уравнения (A − λI)v = 0 для конкретного λ."""
     equations: list[str] = []
     v_syms = sp.symbols(f"v1:{n + 1}")
 
@@ -588,7 +583,6 @@ def compute_cached(
     compute_eigenvectors: bool = True,
     compute_equations: bool = False,
 ) -> EigenResult:
-    """Обёртка над compute() с кэшем по (hash, var_name, flags)."""
     key = _cache_key(matrix, var_name, compute_eigenvectors, compute_equations)
 
     cached = _CACHE_BY_KEY.get(key)
