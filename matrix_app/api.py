@@ -225,11 +225,11 @@ def _parse_vector(payload: dict[str, Any], key: str = "vector_b") -> sp.Matrix:
 #   spectral:
 #       требует символьных собственных значений — 6×6 максимум.
 
-_MAX_SIZE_SYMBOLIC_EIGEN = 5     # char_poly, eigenvalues, eigenvectors, diagonalize
-_MAX_SIZE_PROPERTIES_EIGEN = 5   # properties с with_eigenvalues=True
+_MAX_SIZE_SYMBOLIC_EIGEN = 10     # char_poly, eigenvalues, eigenvectors, diagonalize
+_MAX_SIZE_PROPERTIES_EIGEN = 10   # properties с with_eigenvalues=True
 _MAX_SIZE_PROPERTIES = 10        # properties с with_eigenvalues=False
 _MAX_SIZE_DECOMP = 10            # lu, qr, cholesky
-_MAX_SIZE_SPECTRAL = 6           # spectral
+_MAX_SIZE_SPECTRAL = 10           # spectral
 
 
 def _check_size(
@@ -1190,7 +1190,6 @@ def matrix_eigenvalues(request: HttpRequest) -> JsonResponse:
     """
     payload = _get_payload(request)
     a = _get_matrix(payload, "matrix")
-    _check_size(a, _MAX_SIZE_SYMBOLIC_EIGEN, "Собственные значения")
 
     # Лёгкий путь: только λ и p(λ), без nullspace.
     er = compute_cached(a, compute_eigenvectors=False)
@@ -1245,7 +1244,6 @@ def matrix_eigenvectors(request: HttpRequest) -> JsonResponse:
     """
     payload = _get_payload(request)
     a = _get_matrix(payload, "matrix")
-    _check_size(a, _MAX_SIZE_SYMBOLIC_EIGEN, "Собственные векторы")
 
     er = compute_cached(a, compute_eigenvectors=True)
 
@@ -1293,7 +1291,6 @@ def matrix_char_poly(request: HttpRequest) -> JsonResponse:
     """
     payload = _get_payload(request)
     a = _get_matrix(payload, "matrix")
-    _check_size(a, _MAX_SIZE_SYMBOLIC_EIGEN, "Характеристический многочлен")
 
     er = compute_cached(a, compute_eigenvectors=False)
 
@@ -1336,7 +1333,6 @@ def matrix_eigen_full(request: HttpRequest) -> JsonResponse:
     """
     payload = _get_payload(request)
     a = _get_matrix(payload, "matrix")
-    _check_size(a, _MAX_SIZE_SYMBOLIC_EIGEN, "Полный спектральный анализ")
 
     er = compute_cached(a, compute_eigenvectors=True)
 

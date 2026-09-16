@@ -1,8 +1,7 @@
 /* =============================================================================
    MatrixLab — eigen.js
    =============================================================================
-   Страница /eigen/ — спектр матрицы: собственные значения и векторы,
-   характеристический многочлен, полный спектральный анализ.
+   Страница /eigen/ — спектр матрицы.
 
    Публичный API:
        ML.eigen.mount(root)
@@ -15,12 +14,9 @@
        ML.eigen.clear(root)
        ML.eigen.render(root, payload, opts)
        ML.eigen.renderError(root, message, code)
-
-   ВАЖНО:
-       Раньше здесь вызывался ML.resultBlock.render(), который ищет секции
-       по [data-result-section] / [data-result-output]. На этой странице
-       своя разметка [data-eigen-*] — рендер уходил «в никуда», и блок
-       результата оставался пустым. Теперь всё рисуется в свои селекторы.
+       ML.eigen.loadPreset(slug, btn)
+       ML.eigen.loadExample(json, btn)
+       ML.eigen.clearCache()
 
    Зависимости: main.js, matrix.js, steps.js (для ML.mathjax).
    ============================================================================= */
@@ -94,23 +90,18 @@
 
     function isArr(v) { return Array.isArray(v); }
 
-    function isObj(v) {
-        return v !== null && typeof v === 'object' && !Array.isArray(v);
-    }
-
-    function esc(v) {
-        return ML.escapeHtml(v === null || v === undefined ? '' : String(v));
-    }
-
     function isEmptyMatrix(m) {
         return ML.validators.isEmptyMatrix(m);
     }
 
+    /* Возвращает экземпляр MatrixInput, если matrix.js уже его создал.
+       Если нет — null. Не пытаемся создать руками. */
     function findMatrixInput(root) {
         const scope = root || document;
         const grid = scope.querySelector('[data-matrix-input]');
         if (!grid) return null;
-        return ML.matrixInputs[grid.id] || null;
+        if (!grid.id) return null;
+        return (ML.matrixInputs && ML.matrixInputs[grid.id]) || null;
     }
 
     function findResultBlock(root) {
@@ -129,13 +120,13 @@
         return scope.querySelector('[data-eigen-reset]');
     }
 
-    function closeModalIfAny(btn) {
-        const modal = btn && btn.closest('.modal');
-        if (modal && ML.modal) {
-            setTimeout(function () {
-                ML.modal.close('#' + modal.id);
-            }, 200);
-        }
+    function findPageRoot(el) {
+        if (!el) return document;
+        return el.closest('.matrix-input-card')
+            || el.closest('.eigen-layout')
+            || el.closest('[data-eigen-root]')
+            || el.closest('section')
+            || document;
     }
 
     function cleanupMissingIcons(scope) {
@@ -171,11 +162,7 @@
     }
 
     // =========================================================================
-    // 3. ФРОНТОВЫЙ КЭШ РЕЗУЛЬТАТОВ
-    // -------------------------------------------------------------------------
-    // Если пользователь переключает вкладки «Собственные значения» →
-    // «Собственные векторы» → «Характеристический многочлен» на одной и
-    // той же матрице — второй и третий клик не делают сетевых запросов.
+    // 3. ФРОНТОВЫЙ КЭШ
     // =========================================================================
 
     const _resultCache = new Map();
@@ -224,7 +211,6 @@
     }
 
     function getOperation() { return currentOp; }
-
     function listOperations() { return Object.keys(OPS); }
 
     // =========================================================================
@@ -260,10 +246,12 @@
 
         const mi = findMatrixInput(scope);
         if (!mi) {
-            runBtn.disabled = true;
+            /* Редактор ещё не создан — оставляем кнопку кликабельной,
+               чтобы клик ушёл в runOperation и там показал тост. */
+            runBtn.disabled = false;
             runBtn.title = tr('eigen.editorNotFound',
                 'Редактор матрицы не найден');
-            runBtn.setAttribute('aria-disabled', 'true');
+            runBtn.setAttribute('aria-disabled', 'false');
             return;
         }
 
@@ -345,7 +333,6 @@
         const errorMsg = block.querySelector('[data-eigen-error-message]');
         if (errorMsg) errorMsg.textContent = '';
 
-        // Возвращаем task-секцию
         const taskSection = block.querySelector('.result-section--task');
         if (taskSection) taskSection.hidden = false;
     }
@@ -357,7 +344,6 @@
 
         block.hidden = false;
 
-        // Прячем все result-section, оставляем только ошибку
         block.querySelectorAll('.result-section').forEach(function (s) {
             s.hidden = true;
         });
@@ -380,26 +366,18 @@
         ML.emit('eigen:render-error', { message: message, code: code });
     }
 
-    /**
-     * Собрать HTML для одного собственного значения.
-     * Ожидаемые поля в item:
-     *   value           — строка
-     *   latex           — LaTeX
-     *   algebraic_multiplicity
-     *   geometric_multiplicity
-     */
     function buildEigenValueItem(item) {
-        const valueLatex = item.latex || esc(item.value || '');
+        const valueLatex = item.latex || ML.escapeHtml(item.value || '');
         const alg = item.algebraic_multiplicity;
         const geo = item.geometric_multiplicity;
 
         let mults = '<span>'
-            + esc(tr('eigen.algMult', 'алг. кратность'))
-            + ': <b>' + esc(alg) + '</b></span>';
+            + ML.escapeHtml(tr('eigen.algMult', 'алг. кратность'))
+            + ': <b>' + ML.escapeHtml(alg) + '</b></span>';
         if (geo !== undefined && geo !== null) {
             mults += '<span>'
-                + esc(tr('eigen.geoMult', 'геом. кратность'))
-                + ': <b>' + esc(geo) + '</b></span>';
+                + ML.escapeHtml(tr('eigen.geoMult', 'геом. кратность'))
+                + ': <b>' + ML.escapeHtml(geo) + '</b></span>';
         }
 
         return ''
@@ -408,18 +386,15 @@
             +     valueLatex + '$$</span>'
             +   '<span class="eigen-value-detail">'
             +     '<span class="eigen-value-detail-title">'
-            +       esc(tr('eigen.eigenvalue', 'Собственное значение'))
+            +       ML.escapeHtml(tr('eigen.eigenvalue', 'Собственное значение'))
             +     '</span>'
             +     '<span class="eigen-value-detail-sub">' + mults + '</span>'
             +   '</span>'
             + '</div>';
     }
 
-    /**
-     * Собрать HTML для одного собственного вектора (группа).
-     */
     function buildEigenVectorItem(item) {
-        const valueLatex = item.value_latex || esc(item.value || '');
+        const valueLatex = item.value_latex || ML.escapeHtml(item.value || '');
         const basis = isArr(item.eigenvectors_latex)
             ? item.eigenvectors_latex
             : [];
@@ -434,19 +409,23 @@
                 + '</div>';
         } else {
             basisHtml = '<p class="eigen-vector-empty">'
-                + esc(tr('eigen.noVectors',
+                + ML.escapeHtml(tr('eigen.noVectors',
                     'Собственные векторы не найдены.'))
                 + '</p>';
         }
 
         let mults = '';
         if (item.algebraic_multiplicity !== undefined) {
-            mults = '<span>' + esc(tr('eigen.algMult', 'алг. кратность'))
-                + ': <b>' + esc(item.algebraic_multiplicity) + '</b></span>';
+            mults = '<span>'
+                + ML.escapeHtml(tr('eigen.algMult', 'алг. кратность'))
+                + ': <b>' + ML.escapeHtml(item.algebraic_multiplicity)
+                + '</b></span>';
         }
         if (item.geometric_multiplicity !== undefined) {
-            mults += '<span>' + esc(tr('eigen.geoMult', 'геом. кратность'))
-                + ': <b>' + esc(item.geometric_multiplicity) + '</b></span>';
+            mults += '<span>'
+                + ML.escapeHtml(tr('eigen.geoMult', 'геом. кратность'))
+                + ': <b>' + ML.escapeHtml(item.geometric_multiplicity)
+                + '</b></span>';
         }
 
         return ''
@@ -460,14 +439,6 @@
             + '</div>';
     }
 
-    /**
-     * Основной рендер успешного ответа.
-     *
-     * payload — то, что вернул ML.api.post() или runComposite().
-     * options.op — текущая операция ('eigenvalues' | 'eigenvectors'
-     *              | 'char_poly' | 'full'), чтобы понимать, какие секции
-     *              показывать.
-     */
     function renderResult(root, payload, options) {
         options = options || {};
         const scope = root || document;
@@ -480,11 +451,9 @@
 
         block.hidden = false;
 
-        // Всегда показываем секцию «Задание».
         const taskSection = block.querySelector('.result-section--task');
         if (taskSection) taskSection.hidden = false;
 
-        // Прицельно скрываем остальные — включим по мере надобности.
         const charpolySection = block.querySelector('[data-eigen-charpoly]');
         const valuesSection = block.querySelector('[data-eigen-values]');
         const vectorsSection = block.querySelector('[data-eigen-vectors]');
@@ -495,14 +464,13 @@
         if (vectorsSection) vectorsSection.hidden = true;
         if (diagSection) diagSection.hidden = true;
 
-        // --- Ошибку прячем (если была)
         const error = block.querySelector('[data-eigen-error]');
         if (error) error.hidden = true;
 
-        // --- Задание
         const taskText = block.querySelector('[data-eigen-task-text]');
         if (taskText) {
-            taskText.textContent = options.taskText || opInfo(op).taskText || '';
+            taskText.textContent = options.taskText
+                || opInfo(op).taskText || '';
         }
         const taskFormula = block.querySelector('[data-eigen-task-formula]');
         if (taskFormula) {
@@ -510,7 +478,7 @@
             taskFormula.innerHTML = latex ? ('$$' + latex + '$$') : '';
         }
 
-        // --- 1. Характеристический многочлен (всегда, если есть)
+        // Характеристический многочлен
         const charpolyBody = block.querySelector('[data-eigen-charpoly-body]');
         if (charpolyBody && (extra.char_poly_latex || extra.factored_latex)) {
             let html = '';
@@ -535,7 +503,7 @@
             }
         }
 
-        // --- 2. Собственные значения (для eigenvalues, full)
+        // Собственные значения
         const valuesBody = block.querySelector('[data-eigen-values-body]');
         const traceEl = block.querySelector('[data-eigen-trace]');
         const detEl = block.querySelector('[data-eigen-det]');
@@ -562,7 +530,7 @@
             }
         }
 
-        // --- 3. Собственные векторы (для eigenvectors, full)
+        // Собственные векторы
         const vectorsBody = block.querySelector('[data-eigen-vectors-body]');
         const showVectors = (op === 'eigenvectors' || op === 'full')
             && eigenvalues.length > 0
@@ -575,7 +543,7 @@
             if (vectorsSection) vectorsSection.hidden = false;
         }
 
-        // --- 4. Диагонализируемость (если пришло)
+        // Диагонализируемость
         const diagBody = block.querySelector('[data-eigen-diag-body]');
         if (diagBody && extra.is_diagonalizable !== undefined) {
             const yes = !!extra.is_diagonalizable;
@@ -591,22 +559,21 @@
                 + '<div class="eigen-diag-head">'
                 +   '<span class="eigen-diag-icon">'
                 +     (yes ? '✓' : '!') + '</span>'
-                +   '<span>' + esc(yes
+                +   '<span>' + ML.escapeHtml(yes
                     ? tr('eigen.diagYesTitle', 'Диагонализируема')
                     : tr('eigen.diagNoTitle', 'Не диагонализируема'))
                 +   '</span>'
                 + '</div>'
-                + '<p class="eigen-diag-text">' + esc(reason) + '</p>';
+                + '<p class="eigen-diag-text">'
+                +   ML.escapeHtml(reason) + '</p>';
 
             if (diagSection) diagSection.hidden = false;
         }
 
-        // --- MathJax
         if (ML.mathjax && typeof ML.mathjax.typeset === 'function') {
             ML.mathjax.typeset(block);
         }
 
-        // --- Скролл
         try {
             block.scrollIntoView({ behavior: 'smooth', block: 'start' });
         } catch (e) { /* noop */ }
@@ -616,7 +583,12 @@
     // 8. ЗАПУСК ОПЕРАЦИИ
     // =========================================================================
 
+    let _isRunning = false;
+
     async function runOperation(op, ctx) {
+        if (_isRunning) return null;
+        _isRunning = true;
+
         ctx = ctx || {};
         const scope = ctx.root || document;
         const resultBlock = ctx.resultBlock || findResultBlock(scope);
@@ -632,17 +604,18 @@
                 tr('eigen.editorNotFound',
                     'Редактор матрицы не найден.')
             );
+            _isRunning = false;
             return null;
         }
 
         const info = opInfo(op);
 
-        // --- Проверки
         if (isEmptyMatrix(mi.read())) {
             ML.toast.warning(
                 tr('eigen.emptyMatrix', 'Пустая матрица'),
                 tr('eigen.fillMatrix', 'Заполните матрицу.')
             );
+            _isRunning = false;
             return null;
         }
         if (mi.hasInvalid && mi.hasInvalid()) {
@@ -650,10 +623,10 @@
                 tr('eigen.invalidInput', 'Некорректный ввод'),
                 tr('eigen.fixCells', 'Исправьте подсвеченные ячейки.')
             );
+            _isRunning = false;
             return null;
         }
 
-        // --- AutoSquare
         if (info.autoSquare && mi.rows !== mi.cols) {
             const n = Math.max(mi.rows, mi.cols);
             mi.setSize(n, n, { preserve: true });
@@ -670,19 +643,21 @@
                     + '» ' + tr('eigen.needSquareHint2',
                         'требуется матрица n × n.')
             );
+            _isRunning = false;
             return null;
         }
 
-        // --- Валидация через ядро
-        const validation = ML.validateMatrixFor(op, { a: mi });
-        if (!validation.ok) {
-            ML.toast.warning(validation.message, validation.hint || '');
-            return null;
+        if (ML.validateMatrixFor) {
+            const validation = ML.validateMatrixFor(op, { a: mi });
+            if (validation && !validation.ok) {
+                ML.toast.warning(validation.message, validation.hint || '');
+                _isRunning = false;
+                return null;
+            }
         }
 
         const matrix = mi.read();
 
-        // --- Кэш: мгновенное переключение вкладок на той же матрице
         const cached = _cacheGet(op, matrix);
         if (cached) {
             renderResult(scope, cached, {
@@ -695,13 +670,13 @@
                 tr('common.ok', 'Готово'),
                 info.label + ' ' + tr('eigen.fromCache', '(из кэша)')
             );
+            _isRunning = false;
             return cached;
         }
 
         const payload = { matrix: matrix, show_steps: true };
         const snapshot = JSON.parse(JSON.stringify(payload));
 
-        // --- Loading + skeleton
         ML.loader.show(
             tr('common.computing', 'Анализируем спектр…')
         );
@@ -728,13 +703,11 @@
             if (info.composite) {
                 response = await runComposite(op, snapshot);
             } else {
-                // 90 секунд — спектр может считаться долго
                 response = await ML.api.post(info.url, payload, {
-                    timeout: 90000
+                    timeout: 500000
                 });
             }
 
-            // --- success: false
             if (response && response.success === false) {
                 const backendMsg = response.error
                     || response.message
@@ -747,7 +720,6 @@
                 );
             }
 
-            // --- Рендер
             renderResult(scope, response, {
                 op: op,
                 taskText: info.taskText,
@@ -755,23 +727,22 @@
             });
             if (placeholder) placeholder.hidden = true;
 
-            // --- В кэш
             _cachePut(op, matrix, response);
 
-            // --- Toast
             ML.toast.success(
                 tr('common.ok', 'Готово'),
                 info.label + ' ' + tr('eigen.done', 'выполнено.')
             );
 
-            // --- История
-            ML.history.push({
-                op: op,
-                label: info.label,
-                matrix: snapshot.matrix,
-                result: response,
-                size: mi.rows + '×' + mi.cols
-            });
+            if (ML.history && ML.history.push) {
+                ML.history.push({
+                    op: op,
+                    label: info.label,
+                    matrix: snapshot.matrix,
+                    result: response,
+                    size: mi.rows + '×' + mi.cols
+                });
+            }
 
             ML.emit('eigen:done', {
                 op: op,
@@ -790,6 +761,7 @@
             return null;
         } finally {
             ML.loader.hide();
+            _isRunning = false;
         }
     }
 
@@ -801,16 +773,11 @@
 
     // =========================================================================
     // 9. СОСТАВНАЯ ОПЕРАЦИЯ 'full'
-    // -------------------------------------------------------------------------
-    // Пытаемся получить всё одним запросом, если бэк поддерживает
-    // /api/matrix/eigen-full/. Если нет — фолбэк на два параллельных
-    // запроса (старое поведение).
     // =========================================================================
 
     const EIGEN_FULL_URL = '/api/matrix/eigen-full/';
 
     async function runComposite(op, snapshot) {
-        // --- Пытаемся единым запросом
         try {
             const unified = await ML.api.post(EIGEN_FULL_URL, snapshot, {
                 timeout: 120000
@@ -819,15 +786,11 @@
                 return unified;
             }
         } catch (err) {
-            // 404 — значит, эндпоинта нет. Идём фолбэком.
-            // Любую другую ошибку тоже считаем поводом для фолбэка,
-            // но залогируем.
             if (err && err.status && err.status !== 404) {
                 console.warn('[eigen] eigen-full failed, fallback:', err);
             }
         }
 
-        // --- Фолбэк: два параллельных запроса
         const [eigRes, vecRes] = await Promise.allSettled([
             ML.api.post(OPS.eigenvalues.url, snapshot, { timeout: 90000 }),
             ML.api.post(OPS.eigenvectors.url, snapshot, { timeout: 90000 })
@@ -840,11 +803,10 @@
             const firstError = eigRes.status === 'rejected'
                 ? eigRes.reason
                 : vecRes.reason;
-            const err = firstError instanceof Error
+            throw (firstError instanceof Error
                 ? firstError
                 : new Error(tr('eigen.compositeFailed',
-                    'Не удалось получить данные спектра.'));
-            throw err;
+                    'Не удалось получить данные спектра.')));
         }
 
         if (!eigResp || !vecResp) {
@@ -870,12 +832,9 @@
             );
         }
 
-        // --- Собственные значения — берём из eigenvalues,
-        //     дополняем векторами из eigenvectors, если есть.
         const eigList = isArr(safeEig.result) ? safeEig.result : [];
         const vecList = isArr(safeVec.result) ? safeVec.result : [];
 
-        // Индексируем вектора по λ-latex, чтобы сшить.
         const vecByLambda = {};
         vecList.forEach(function (v) {
             if (v && v.value_latex) vecByLambda[v.value_latex] = v;
@@ -886,7 +845,6 @@
             return Object.assign({}, e, extra);
         });
 
-        // Если eigenvalues пуст, но eigenvectors что-то вернул — берём его.
         const result = merged.length ? merged : vecList;
 
         const mergedSteps = []
@@ -916,106 +874,273 @@
     }
 
     // =========================================================================
-    // 10. ПРИМЕРЫ
+    // 10. ПРЕСЕТЫ
     // =========================================================================
 
-    function initExamples() {
-        document.addEventListener('click', async function (e) {
-            const btn = e.target.closest(
-                '[data-load-example], [data-load-eigen]'
+    async function loadPreset(slug, btn) {
+        if (!slug) return null;
+
+        const scope = findPageRoot(btn) || document;
+        const mi = findMatrixInput(scope) || findMatrixInput(document);
+
+        if (!mi) {
+            ML.toast.error(
+                tr('eigen.editorNotFound', 'Редактор не найден'),
+                ''
             );
-            if (!btn) return;
+            return null;
+        }
 
-            const slug = btn.dataset.loadExample
-                || btn.dataset.loadEigen;
-            if (!slug) return;
+        const op = (btn && btn.dataset.presetOp) || null;
+        const autorun = !btn || btn.dataset.presetAutorun !== '0';
 
-            const mi = findMatrixInput(btn.closest('section'))
-                || findMatrixInput(document);
+        ML.loader.show(
+            tr('eigen.loadingExample', 'Загружаем пример…')
+        );
 
-            ML.loader.show(
-                tr('eigen.loadingExample', 'Загружаем пример…')
+        try {
+            const resp = await ML.api.post(
+                '/api/example/' + slug + '/', {}
+            );
+            const data = (resp && resp.result) || {};
+            const matrix = data.matrix;
+
+            if (!isArr(matrix) || !matrix.length) {
+                ML.toast.warning(
+                    tr('eigen.exampleEmpty', 'Пример пустой'),
+                    slug
+                );
+                return null;
+            }
+
+            mi.setSize(
+                matrix.length,
+                matrix[0].length,
+                { preserve: false }
+            );
+            mi.write(matrix);
+
+            _cacheClear();
+
+            if (op && OPS[op]) {
+                setOperation(op, scope);
+            }
+
+            ML.toast.success(
+                tr('eigen.exampleLoaded', 'Пример загружен'),
+                data.title || slug
             );
 
-            try {
-                const resp = await ML.api.post(
-                    '/api/example/' + slug + '/', {}
-                );
-                const data = (resp && resp.result) || {};
+            ML.emit('eigen:example-loaded', {
+                slug: slug,
+                op: op,
+                autorun: autorun
+            });
 
-                if (data.matrix && mi) {
-                    mi.setSize(
-                        data.matrix.length,
-                        data.matrix[0].length,
-                        { preserve: false }
-                    );
-                    mi.write(data.matrix);
-                    _cacheClear();   // пример — новая матрица
-                }
-                if (data.op && OPS[data.op]) {
-                    setOperation(data.op, document);
-                }
+            if (autorun) {
+                await runOperation(op || currentOp, {
+                    root: scope,
+                    mi: mi
+                });
+            }
 
-                closeModalIfAny(btn);
-                ML.toast.success(
-                    tr('eigen.exampleLoaded', 'Пример загружен'),
-                    data.title || slug
-                );
+            return data;
+        } catch (err) {
+            ML.toast.error(
+                tr('eigen.exampleFailed', 'Не удалось загрузить'),
+                err.message
+            );
+            return null;
+        } finally {
+            ML.loader.hide();
+        }
+    }
 
-                ML.emit('eigen:example-loaded', { slug: slug });
-            } catch (err) {
-                ML.toast.error(
-                    tr('eigen.exampleFailed', 'Не удалось загрузить'),
-                    err.message
+    /* Инлайн-пример: JSON прямо в data-eigen-example. */
+    async function loadExample(rawJson, btn) {
+        let data;
+        try {
+            data = typeof rawJson === 'string'
+                ? JSON.parse(rawJson)
+                : rawJson;
+        } catch (e) {
+            console.error('[eigen] Некорректный JSON примера:', e);
+            return null;
+        }
+
+        if (!data || !isArr(data.matrix)) return null;
+
+        const scope = findPageRoot(btn) || document;
+        const mi = findMatrixInput(scope) || findMatrixInput(document);
+
+        if (!mi) {
+            ML.toast.error(
+                tr('eigen.editorNotFound', 'Редактор не найден'),
+                ''
+            );
+            return null;
+        }
+
+        const op = data.op || null;
+        const autorun = data.autorun !== false;
+
+        mi.setSize(
+            data.matrix.length,
+            data.matrix[0].length,
+            { preserve: false }
+        );
+        mi.write(data.matrix);
+
+        _cacheClear();
+
+        if (op && OPS[op]) {
+            setOperation(op, scope);
+        }
+
+        ML.toast.success(
+            tr('eigen.exampleLoaded', 'Пример загружен'),
+            data.title || ''
+        );
+
+        if (autorun) {
+            await runOperation(op || currentOp, {
+                root: scope,
+                mi: mi
+            });
+        }
+
+        return data;
+    }
+
+    // =========================================================================
+    // 11. ДЕЛЕГИРОВАННЫЕ ОБРАБОТЧИКИ (все клики)
+    // =========================================================================
+
+    let _delegated = false;
+
+    function initDelegated() {
+        if (_delegated) return;
+        _delegated = true;
+
+        document.addEventListener('click', function (e) {
+            // 1) Табы операций
+            const opBtn = e.target.closest('[data-eigen-op]');
+            if (opBtn) {
+                e.preventDefault();
+                const scope = findPageRoot(opBtn);
+                setOperation(opBtn.dataset.eigenOp, scope);
+                return;
+            }
+
+            // 2) Кнопка «Найти спектр»
+            const runBtn = e.target.closest('[data-eigen-run]');
+            if (runBtn) {
+                e.preventDefault();
+                const scope = findPageRoot(runBtn);
+                runOperation(currentOp, {
+                    root: scope,
+                    resultBlock: findResultBlock(scope),
+                    placeholder: scope.querySelector(
+                        '[data-eigen-placeholder], [data-calc-placeholder]'
+                    ),
+                    mi: findMatrixInput(scope)
+                });
+                return;
+            }
+
+            // 3) Кнопка «Очистить»
+            const resetBtn = e.target.closest('[data-eigen-reset]');
+            if (resetBtn) {
+                e.preventDefault();
+                const scope = findPageRoot(resetBtn);
+                const mi = findMatrixInput(scope);
+                if (mi) mi.clear();
+                clearRendered(scope);
+                _cacheClear();
+                const ph = scope.querySelector(
+                    '[data-eigen-placeholder], [data-calc-placeholder]'
                 );
-            } finally {
-                ML.loader.hide();
+                if (ph) ph.hidden = false;
+                updateRunButtonState(scope);
+                ML.emit('eigen:reset', {});
+                return;
+            }
+
+            // 4) Пресет с бэкендом
+            const presetBtn = e.target.closest('[data-eigen-preset]');
+            if (presetBtn) {
+                e.preventDefault();
+                loadPreset(presetBtn.dataset.eigenPreset, presetBtn);
+                return;
+            }
+
+            // 5) Инлайн-пример из шаблона
+            const exampleBtn = e.target.closest('[data-eigen-example]');
+            if (exampleBtn) {
+                e.preventDefault();
+                loadExample(exampleBtn.dataset.eigenExample, exampleBtn);
+                return;
             }
         });
     }
 
     // =========================================================================
-    // 11. МОНТИРОВАНИЕ
+    // 12. МОНТИРОВАНИЕ
     // =========================================================================
+
+    let _mounted = false;
 
     function mount(root) {
         root = root || document;
+
+        // Делегирование — всегда
+        initDelegated();
+
+        if (_mounted) return true;
+
         const runBtn = findRunBtn(root);
         if (!runBtn) return false;
 
-        const section = runBtn.closest('section') || document;
-        const resultBlock = findResultBlock(section);
-        const resetBtn = findResetBtn(section);
-        const placeholder = section.querySelector(
-            '[data-eigen-placeholder], [data-calc-placeholder]'
-        );
+        /* Ждём, пока matrix.js создаст редакторы.
+           Пока ML.matrixInputs пуст — пробуем ещё раз через 50мс,
+           максимум 40 попыток (2 секунды). */
+        const ready = ML.matrixInputs
+            && Object.keys(ML.matrixInputs).length > 0;
 
+        if (!ready) {
+            if (!mount._tries) mount._tries = 0;
+            mount._tries++;
+            if (mount._tries > 40) {
+                console.warn('[eigen] matrix.js так и не создал редакторы — ' +
+                    'проверьте порядок подключения скриптов ' +
+                    '(matrix.js должен идти до eigen.js).');
+                return false;
+            }
+            setTimeout(function () { mount(root); }, 50);
+            return false;
+        }
+
+        _mounted = true;
+
+        const section = findPageRoot(runBtn);
         const mi = findMatrixInput(section);
 
         cleanupMissingIcons(document);
 
-        // --- Debounce
         const updateDebounced = ML.debounce(function () {
             updateRunButtonState(section);
         }, 80);
 
-        if (mi) {
+        if (mi && mi.el && mi.el.addEventListener) {
             mi.el.addEventListener('matrix:change', function () {
                 autoResizeForCurrent(section);
                 updateDebounced();
-                _cacheClear();   // матрица изменилась — кэш невалиден
+                _cacheClear();
             });
         }
-        ML.on('matrix:change', updateDebounced);
+        if (ML.on) ML.on('matrix:change', updateDebounced);
 
-        // --- Переключение операций
-        ML.$$('[data-eigen-op]', section).forEach(function (btn) {
-            btn.addEventListener('click', function () {
-                setOperation(btn.dataset.eigenOp, section);
-            });
-        });
-
-        // --- Начальная операция
+        // Начальное состояние табов
         const initialBtn = section.querySelector('[data-eigen-op].is-active')
             || section.querySelector('[data-eigen-op]');
         if (initialBtn && initialBtn.dataset.eigenOp) {
@@ -1023,30 +1148,6 @@
         }
         setOperation(currentOp, section);
 
-        // --- Запуск
-        runBtn.addEventListener('click', function () {
-            runOperation(currentOp, {
-                root: section,
-                resultBlock: resultBlock,
-                placeholder: placeholder,
-                mi: mi
-            });
-        });
-
-        // --- Сброс
-        if (resetBtn) {
-            resetBtn.addEventListener('click', function () {
-                if (mi) mi.clear();
-                clearRendered(section);
-                _cacheClear();
-                if (placeholder) placeholder.hidden = false;
-                updateRunButtonState(section);
-
-                ML.emit('eigen:reset', {});
-            });
-        }
-
-        // --- Публичный API
         ML.eigen = ML.eigen || {};
         ML.eigen.mount = mount;
         ML.eigen.run = run;
@@ -1060,13 +1161,15 @@
         ML.eigen.render = renderResult;
         ML.eigen.renderError = renderError;
         ML.eigen.clearCache = _cacheClear;
+        ML.eigen.loadPreset = loadPreset;
+        ML.eigen.loadExample = loadExample;
 
         ML.emit('eigen:ready', {});
         return true;
     }
 
     // =========================================================================
-    // 12. ИНИЦИАЛИЗАЦИЯ
+    // 13. ИНИЦИАЛИЗАЦИЯ
     // =========================================================================
 
     let _initialized = false;
@@ -1075,19 +1178,23 @@
         if (_initialized) return;
         _initialized = true;
 
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', function () {
-                cleanupMissingIcons(document);
-            });
-        } else {
-            cleanupMissingIcons(document);
-        }
+        cleanupMissingIcons(document);
+        initDelegated();
 
+        /* Пытаемся смонтировать сразу. Если matrix.js ещё не отработал —
+           mount() сам себя перезапустит по таймеру. */
         if (document.querySelector('[data-eigen-run]')) {
             mount(document);
+        } else {
+            /* DOM мог быть ещё не готов — ждём. */
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', function () {
+                    if (document.querySelector('[data-eigen-run]')) {
+                        mount(document);
+                    }
+                });
+            }
         }
-
-        initExamples();
 
         ML.emit('eigen:module-ready', {});
     }
